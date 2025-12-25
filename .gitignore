@@ -1,0 +1,10 @@
+node_modules
+.DS_Store
+dist
+.netlify
+.svelte-kit
+package
+.env
+.env.*
+!.env.example
+*.log

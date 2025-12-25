@@ -1,0 +1,14 @@
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="192" height="192" fill="#0a0e27"/>
+  <circle cx="96" cy="96" r="75" fill="url(#gradient)" opacity="0.1"/>
+  <path d="M96 48L72 96L96 144L120 96L96 48Z" fill="#00D9FF" opacity="0.8"/>
+  <path d="M72 96L96 72L120 96L96 120L72 96Z" fill="#FF006E" opacity="0.6"/>
+  <circle cx="96" cy="96" r="8" fill="#8B5CF6"/>
+  <defs>
+    <radialGradient id="gradient">
+      <stop offset="0%" stop-color="#00D9FF"/>
+      <stop offset="50%" stop-color="#FF006E"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </radialGradient>
+  </defs>
+</svg>
