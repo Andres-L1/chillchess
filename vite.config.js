@@ -29,8 +29,18 @@ export default defineConfig({
                 ]
             },
             workbox: {
-                globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2}']
+                globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2,wasm}']
             }
         })
-    ]
+    ],
+    assetsInclude: ['**/*.wasm'],
+    optimizeDeps: {
+        exclude: ['h3-js'],
+        esbuildOptions: {
+            target: 'esnext'
+        }
+    },
+    build: {
+        target: 'esnext'
+    }
 });
