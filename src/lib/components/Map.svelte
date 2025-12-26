@@ -130,6 +130,8 @@
     });
 
     function initializeHexGrid() {
+        console.log("[ChillChess] Initializing hex grid...");
+
         // Add source for hexagons
         map.addSource("hexagons", {
             type: "geojson",
@@ -138,6 +140,7 @@
                 features: [],
             },
         });
+        console.log("[ChillChess] Hexagon source added");
 
         // Add fill layer (for color/opacity)
         map.addLayer({
@@ -164,6 +167,7 @@
                 ],
             },
         });
+        console.log("[ChillChess] Hexagon fill layer added");
 
         // Add line layer (for neon borders)
         map.addLayer({
@@ -176,6 +180,7 @@
                 "line-opacity": 0.3,
             },
         });
+        console.log("[ChillChess] Hexagon line layer added");
 
         // Add hover effect
         let hoveredStateId: string | number | null = null;
@@ -243,11 +248,22 @@
             }
         });
 
+        console.log("[ChillChess] Calling initial updateHexGrid...");
         updateHexGrid();
     }
 
     function updateHexGrid() {
-        if (!map) return;
+        if (!map) {
+            console.warn(
+                "[ChillChess] updateHexGrid called but map is not initialized",
+            );
+            return;
+        }
+
+        const zoom = map.getZoom();
+        console.log(
+            `[ChillChess] Updating hex grid at zoom level: ${zoom.toFixed(2)}`,
+        );
 
         const bounds = map.getBounds();
         const ne = bounds.getNorthEast();
@@ -269,9 +285,15 @@
         // Use polygonToCells instead of polyfill (polyfill is deprecated/legacy name in v4)
         const hexagons = h3.polygonToCells(viewportPolygonLatLng, H3_RES, true);
 
+        console.log(
+            `[ChillChess] Generated ${hexagons.length} hexagons for current viewport`,
+        );
+
         // Limit number of hexagons to render to avoid performance issues
         if (hexagons.length > 1500) {
-            console.warn("Too many hexagons, zoom in to see grid");
+            console.warn(
+                `[ChillChess] Too many hexagons (${hexagons.length}), zoom in to see grid (need zoom > 13)`,
+            );
             const emptyGeoJson: GeoJSON.FeatureCollection = {
                 type: "FeatureCollection",
                 features: [],
@@ -317,16 +339,26 @@
             features: features as any,
         };
 
+        console.log(
+            `[ChillChess] Setting ${features.length} hexagon features on map`,
+        );
+
         if (map.getSource("hexagons")) {
             (map.getSource("hexagons") as maplibregl.GeoJSONSource).setData(
                 geoJson,
             );
+        } else {
+            console.error("[ChillChess] Hexagons source not found!");
         }
     }
 
     async function loadTerritories() {
+        console.log("[ChillChess] Loading territories from Firebase...");
         const allTerritories = await getAllTerritories();
         territories = new Map(allTerritories.map((t) => [t.h3Index, t]));
+        console.log(
+            `[ChillChess] Loaded ${territories.size} claimed territories`,
+        );
         updateHexGrid(); // Refresh map with ownership colors
     }
 

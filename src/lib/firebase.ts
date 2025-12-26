@@ -20,13 +20,18 @@ let auth: any = null;
 let db: any = null;
 
 if (firebaseConfig.apiKey) {
+    console.log('[ChillChess] Firebase config detected, initializing...');
     try {
         app = initializeApp(firebaseConfig);
         auth = getAuth(app);
         db = getFirestore(app);
+        console.log('[ChillChess] Firebase initialized successfully ✅');
+        console.log('[ChillChess] Project ID:', firebaseConfig.projectId);
     } catch (error) {
-        console.warn('Firebase initialization failed:', error);
+        console.error('[ChillChess] Firebase initialization failed:', error);
     }
+} else {
+    console.error('[ChillChess] Firebase API key not found in environment variables');
 }
 
 export { app, auth, db };
@@ -36,14 +41,23 @@ export const user = writable<User | null>(null);
 
 // Auto sign-in anonymously
 if (auth) {
+    console.log('[ChillChess] Setting up auth state listener...');
     onAuthStateChanged(auth, (firebaseUser) => {
         if (firebaseUser) {
+            console.log('[ChillChess] User authenticated:', firebaseUser.uid);
             user.set(firebaseUser);
         } else {
+            console.log('[ChillChess] No user authenticated, signing in anonymously...');
             // Sign in anonymously if not logged in
-            signInAnonymously(auth).catch((error) => {
-                console.error('Anonymous sign-in failed:', error);
-            });
+            signInAnonymously(auth)
+                .then(() => {
+                    console.log('[ChillChess] Anonymous sign-in successful ✅');
+                })
+                .catch((error) => {
+                    console.error('[ChillChess] Anonymous sign-in failed:', error);
+                    console.error('[ChillChess] Error code:', error.code);
+                    console.error('[ChillChess] Error message:', error.message);
+                });
         }
     });
 }
