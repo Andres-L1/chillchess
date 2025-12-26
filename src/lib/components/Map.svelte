@@ -157,12 +157,12 @@
                 "fill-opacity": [
                     "case",
                     ["boolean", ["feature-state", "hover"], false],
-                    0.3,
+                    0.5, // Hover state more visible
                     [
                         "case",
                         ["has", "owned"],
-                        0.4, // Owned territories more visible
-                        0.05, // Unclaimed barely visible
+                        0.6, // Owned territories highly visible
+                        0.2, // Unclaimed hexagons visible but subtle
                     ],
                 ],
             },
@@ -177,7 +177,7 @@
             paint: {
                 "line-color": "#00D9FF",
                 "line-width": 2,
-                "line-opacity": 0.3,
+                "line-opacity": 0.8, // Make borders clearly visible
             },
         });
         console.log("[ChillChess] Hexagon line layer added");
