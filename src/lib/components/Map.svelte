@@ -1,7 +1,9 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import maplibregl from "maplibre-gl";
-    import { PUBLIC_MAPTILER_API_KEY } from "$env/static/public";
+    import { env } from "$env/dynamic/public";
+
+    const PUBLIC_MAPTILER_API_KEY = env.PUBLIC_MAPTILER_API_KEY;
 
     let mapContainer: HTMLDivElement;
     let map: maplibregl.Map;
