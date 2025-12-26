@@ -1,7 +1,11 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { onMount, onDestroy } from "svelte";
     import maplibregl from "maplibre-gl";
     import { env } from "$env/dynamic/public";
+    import * as h3 from "h3-js";
+    // @ts-ignore
+    import * as turf from "@turf/turf";
+    import ConquestModal from "./ConquestModal.svelte";
 
     const PUBLIC_MAPTILER_API_KEY = env.PUBLIC_MAPTILER_API_KEY;
 
@@ -10,6 +14,15 @@
     let userMarker: maplibregl.Marker | null = null;
     let locationError = "";
     let isLoadingLocation = true;
+    let userLocation: [number, number] | null = null;
+
+    // Modal State
+    let showModal = false;
+    let selectedHex = "";
+    let selectedDistance = 0;
+
+    // H3 Configuration
+    const H3_RES = 9; // Hexagon resolution (approx 2 blocks size)
 
     onMount(() => {
         // Initialize map
@@ -24,11 +37,22 @@
         // Add navigation controls
         map.addControl(new maplibregl.NavigationControl(), "top-right");
 
+        // Map load event
+        map.on("load", () => {
+            initializeHexGrid();
+        });
+
+        // Update grid on move
+        map.on("moveend", () => {
+            updateHexGrid();
+        });
+
         // Request geolocation
         if ("geolocation" in navigator) {
-            navigator.geolocation.watchPosition(
+            const watchId = navigator.geolocation.watchPosition(
                 (position) => {
                     const { latitude, longitude } = position.coords;
+                    userLocation = [longitude, latitude];
                     isLoadingLocation = false;
 
                     // Update or create user marker
@@ -80,6 +104,10 @@
                     timeout: 5000,
                 },
             );
+
+            return () => {
+                navigator.geolocation.clearWatch(watchId);
+            };
         } else {
             isLoadingLocation = false;
             locationError = "Geolocation is not supported by your browser.";
@@ -89,6 +117,186 @@
             map?.remove();
         };
     });
+
+    function initializeHexGrid() {
+        // Add source for hexagons
+        map.addSource("hexagons", {
+            type: "geojson",
+            data: {
+                type: "FeatureCollection",
+                features: [],
+            },
+        });
+
+        // Add fill layer (for color/opacity)
+        map.addLayer({
+            id: "hexagons-fill",
+            type: "fill",
+            source: "hexagons",
+            paint: {
+                "fill-color": "#00D9FF", // Base cyan
+                "fill-opacity": [
+                    "case",
+                    ["boolean", ["feature-state", "hover"], false],
+                    0.2,
+                    0.05,
+                ],
+            },
+        });
+
+        // Add line layer (for neon borders)
+        map.addLayer({
+            id: "hexagons-line",
+            type: "line",
+            source: "hexagons",
+            paint: {
+                "line-color": "#00D9FF",
+                "line-width": 2,
+                "line-opacity": 0.3,
+            },
+        });
+
+        // Add hover effect
+        let hoveredStateId: string | number | null = null;
+        map.on("mousemove", "hexagons-fill", (e) => {
+            if (e.features && e.features.length > 0) {
+                if (hoveredStateId) {
+                    map.setFeatureState(
+                        { source: "hexagons", id: hoveredStateId },
+                        { hover: false },
+                    );
+                }
+                hoveredStateId = e.features[0].id!;
+                map.setFeatureState(
+                    { source: "hexagons", id: hoveredStateId },
+                    { hover: true },
+                );
+                map.getCanvas().style.cursor = "pointer";
+            }
+        });
+
+        map.on("mouseleave", "hexagons-fill", () => {
+            if (hoveredStateId) {
+                map.setFeatureState(
+                    { source: "hexagons", id: hoveredStateId },
+                    { hover: false },
+                );
+            }
+            hoveredStateId = null;
+            map.getCanvas().style.cursor = "";
+        });
+
+        // Click handler for conquest
+        map.on("click", "hexagons-fill", (e) => {
+            if (e.features && e.features.length > 0) {
+                const feature = e.features[0];
+                const h3Index = feature.properties.h3Index;
+
+                // Get hexagon center for distance calculation
+                const hexCenter = h3.cellToLatLng(h3Index); // returns [lat, lng]
+
+                if (userLocation) {
+                    // Turf uses [lng, lat]
+                    const from = turf.point(userLocation);
+                    const to = turf.point([hexCenter[1], hexCenter[0]]);
+                    const distance =
+                        turf.distance(from, to, { units: "kilometers" }) * 1000; // convert to meters
+
+                    console.log(
+                        `Distance to hex ${h3Index}: ${Math.round(distance)}m`,
+                    );
+
+                    if (distance < 150) {
+                        // 150m range
+                        selectedHex = h3Index;
+                        selectedDistance = distance;
+                        showModal = true;
+                    } else {
+                        alert(
+                            `Too far to conquer! You are ${Math.round(distance)}m away. Get closer (<150m).`,
+                        );
+                    }
+                } else {
+                    alert("Waiting for GPS location...");
+                }
+            }
+        });
+
+        updateHexGrid();
+    }
+
+    function updateHexGrid() {
+        if (!map) return;
+
+        const bounds = map.getBounds();
+        const ne = bounds.getNorthEast();
+        const sw = bounds.getSouthWest();
+
+        // Get polygon for current viewport
+        const viewportPolygon = [
+            [sw.lng, sw.lat],
+            [ne.lng, sw.lat],
+            [ne.lng, ne.lat],
+            [sw.lng, ne.lat],
+            [sw.lng, sw.lat],
+        ];
+
+        // Generate hexagons covering the viewport
+        // h3.polygonToCells requires [lat, lng] pairs
+        const viewportPolygonLatLng = viewportPolygon.map((c) => [c[1], c[0]]);
+
+        // Use polygonToCells instead of polyfill (polyfill is deprecated/legacy name in v4)
+        const hexagons = h3.polygonToCells(viewportPolygonLatLng, H3_RES, true);
+
+        // Limit number of hexagons to render to avoid performance issues
+        if (hexagons.length > 1500) {
+            console.warn("Too many hexagons, zoom in to see grid");
+            const emptyGeoJson: GeoJSON.FeatureCollection = {
+                type: "FeatureCollection",
+                features: [],
+            };
+            (map.getSource("hexagons") as maplibregl.GeoJSONSource).setData(
+                emptyGeoJson,
+            );
+            return;
+        }
+
+        // Convert to GeoJSON features
+        const features = hexagons.map((h3Index) => {
+            const boundary = h3.cellToBoundary(h3Index, true); // true for GeoJSON conformant (lng, lat)
+            // Close the loop
+            boundary.push(boundary[0]);
+
+            return {
+                type: "Feature",
+                properties: {
+                    h3Index: h3Index,
+                },
+                id: h3Index, // Important for feature-state
+                geometry: {
+                    type: "Polygon",
+                    coordinates: [boundary],
+                },
+            };
+        });
+
+        const geoJson: GeoJSON.FeatureCollection = {
+            type: "FeatureCollection",
+            features: features as any,
+        };
+
+        if (map.getSource("hexagons")) {
+            (map.getSource("hexagons") as maplibregl.GeoJSONSource).setData(
+                geoJson,
+            );
+        }
+    }
+
+    function handleConquer() {
+        console.log("Conquering", selectedHex);
+        showModal = false;
+        // TODO: Start chess game
+    }
 </script>
 
 <div class="map-wrapper">
@@ -122,6 +330,14 @@
         </h1>
         <p class="text-xs opacity-70 mt-1">Territory Wars</p>
     </div>
+
+    <ConquestModal
+        isOpen={showModal}
+        h3Index={selectedHex}
+        distance={selectedDistance}
+        on:close={() => (showModal = false)}
+        on:conquer={handleConquer}
+    />
 </div>
 
 <style>
@@ -134,6 +350,7 @@
     .map-container {
         width: 100%;
         height: 100%;
+        background-color: #0a0e27; /* Fallback color */
     }
 
     .overlay {
@@ -146,12 +363,20 @@
         align-items: center;
         justify-content: center;
         z-index: 1000;
+        pointer-events: none; /* Allow clicking through if overlaid partially */
+    }
+
+    .overlay > * {
+        pointer-events: auto;
     }
 
     .loading,
     .error {
         text-align: center;
         padding: 2rem;
+        background: rgba(10, 14, 39, 0.8);
+        border-radius: 1rem;
+        border: 1px solid rgba(139, 92, 246, 0.3);
     }
 
     .spinner {
