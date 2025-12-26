@@ -214,12 +214,23 @@
 
         // Click handler for conquest
         map.on("click", "hexagons-fill", (e) => {
+            console.log(
+                "[ChillChess] Hexagon clicked!",
+                e.features?.length || 0,
+                "features",
+            );
+
             if (e.features && e.features.length > 0) {
                 const feature = e.features[0];
                 const h3Index = feature.properties.h3Index;
 
+                console.log("[ChillChess] Clicked hex:", h3Index);
+
                 // Get hexagon center for distance calculation
                 const hexCenter = h3.cellToLatLng(h3Index); // returns [lat, lng]
+
+                console.log("[ChillChess] Hex center:", hexCenter);
+                console.log("[ChillChess] User location:", userLocation);
 
                 if (userLocation) {
                     // Turf uses [lng, lat]
@@ -229,20 +240,25 @@
                         turf.distance(from, to, { units: "kilometers" }) * 1000; // convert to meters
 
                     console.log(
-                        `Distance to hex ${h3Index}: ${Math.round(distance)}m`,
+                        `[ChillChess] Distance to hex ${h3Index}: ${Math.round(distance)}m`,
                     );
 
-                    if (distance < 150) {
-                        // 150m range
+                    // TEMPORARY: Increased range to 5000m for testing
+                    if (distance < 5000) {
                         selectedHex = h3Index;
                         selectedDistance = distance;
                         showModal = true;
-                    } else {
-                        alert(
-                            `Too far to conquer! You are ${Math.round(distance)}m away. Get closer (<150m).`,
+                        console.log(
+                            "[ChillChess] Opening conquest modal for hex:",
+                            h3Index,
                         );
+                    } else {
+                        const message = `Too far to conquer! You are ${Math.round(distance)}m away. Get closer (<5000m for testing).`;
+                        console.log("[ChillChess]", message);
+                        alert(message);
                     }
                 } else {
+                    console.log("[ChillChess] No user location available yet");
                     alert("Waiting for GPS location...");
                 }
             }
