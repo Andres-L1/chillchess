@@ -6,6 +6,13 @@
     // @ts-ignore
     import * as turf from "@turf/turf";
     import ConquestModal from "./ConquestModal.svelte";
+    import {
+        user,
+        claimTerritory,
+        getTerritory,
+        getAllTerritories,
+        type Territory,
+    } from "$lib/firebase";
 
     const PUBLIC_MAPTILER_API_KEY = env.PUBLIC_MAPTILER_API_KEY;
 
@@ -20,6 +27,9 @@
     let showModal = false;
     let selectedHex = "";
     let selectedDistance = 0;
+
+    // Territories from Firebase
+    let territories: Map<string, Territory> = new Map();
 
     // H3 Configuration
     const H3_RES = 9; // Hexagon resolution (approx 2 blocks size)
@@ -38,8 +48,9 @@
         map.addControl(new maplibregl.NavigationControl(), "top-right");
 
         // Map load event
-        map.on("load", () => {
+        map.on("load", async () => {
             initializeHexGrid();
+            await loadTerritories(); // Load owned territories from Firebase
         });
 
         // Update grid on move
@@ -134,12 +145,22 @@
             type: "fill",
             source: "hexagons",
             paint: {
-                "fill-color": "#00D9FF", // Base cyan
+                "fill-color": [
+                    "case",
+                    ["has", "owned"], // If hex has 'owned' property
+                    ["get", "color"], // Use the territory's color
+                    "#00D9FF", // Otherwise default cyan
+                ],
                 "fill-opacity": [
                     "case",
                     ["boolean", ["feature-state", "hover"], false],
-                    0.2,
-                    0.05,
+                    0.3,
+                    [
+                        "case",
+                        ["has", "owned"],
+                        0.4, // Owned territories more visible
+                        0.05, // Unclaimed barely visible
+                    ],
                 ],
             },
         });
@@ -267,10 +288,21 @@
             // Close the loop
             boundary.push(boundary[0]);
 
+            // Check if this hex is owned
+            const territory = territories.get(h3Index);
+
             return {
                 type: "Feature",
                 properties: {
                     h3Index: h3Index,
+                    ...(territory
+                        ? {
+                              owned: true,
+                              color: territory.color,
+                              ownerId: territory.ownerId,
+                              ownerName: territory.ownerName,
+                          }
+                        : {}),
                 },
                 id: h3Index, // Important for feature-state
                 geometry: {
@@ -292,10 +324,38 @@
         }
     }
 
-    function handleConquer() {
+    async function loadTerritories() {
+        const allTerritories = await getAllTerritories();
+        territories = new Map(allTerritories.map((t) => [t.h3Index, t]));
+        updateHexGrid(); // Refresh map with ownership colors
+    }
+
+    async function handleConquer() {
+        if (!$user) {
+            alert("You must be signed in to conquer territories");
+            showModal = false;
+            return;
+        }
+
         console.log("Conquering", selectedHex);
+
+        // Save to Firebase
+        const success = await claimTerritory(
+            selectedHex,
+            $user.uid,
+            $user.displayName || `Player ${$user.uid.slice(0, 6)}`,
+        );
+
+        if (success) {
+            // Reload territories to update map
+            await loadTerritories();
+            alert("Territory conquered! 🎉");
+        } else {
+            alert("Failed to conquer territory. Check Firebase configuration.");
+        }
+
         showModal = false;
-        // TODO: Start chess game
+        // TODO: Start chess game before conquest
     }
 </script>
 

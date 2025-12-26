@@ -73,34 +73,83 @@ Visit http://localhost:5173
 
 ## 🗺️ Roadmap
 
+### Phase 1: Project Setup ✅
+- SvelteKit + TypeScript configuration
+- Tailwind CSS integration
+- PWA manifest and service worker
+
 ### Phase 2: Map Integration ✅
 - MapLibre GL with dark theme
 - Geolocation API
 - User position tracking
 
-### Phase 3: Hexagon Territory System (Coming Soon)
+### Phase 3 & 4: Hexagon Territory System ✅
 - h3-js hexagonal grid overlay
 - Click interaction for nearby hexagons
 - Distance verification with turf.js
-- Territory ownership data model
+- Territory ownership visualization
+- Firebase integration ready
 
-### Phase 4: Chess Integration
+### Phase 5: Chess Integration (Next)
 - Chess board component
 - chess.js game logic
 - stockfish.js AI opponent
 - Territory conquest on win
 
-### Phase 5: Firebase Backend
-- User authentication
-- Territory persistence
+### Phase 6: Firebase Complete Setup (Optional)
+- Enhanced user authentication
 - Leaderboards
 - Multiplayer features
 
-### Phase 6: PWA Deployment
+### Phase 7: Production PWA Deployment ✅
 - Netlify hosting
 - Custom domain (chillchess.app)
-- "Add to Home Screen" functionality
+- \"Add to Home Screen\" functionality
 - Offline support
+
+## 🔥 Firebase Configuration
+
+To enable territory persistence:
+
+1. **Create a Firebase project** at https://console.firebase.google.com/
+
+2. **Enable Firestore Database**:
+   - Go to Firestore Database → Create database
+   - Start in **test mode** (for development)
+   - Choose your region
+
+3. **Get your Firebase config**:
+   - Project Settings → General → Your apps
+   - Click "Web" (</>) to add a web app
+   - Copy the `firebaseConfig` object values
+
+4. **Add to your `.env`**:
+```env
+PUBLIC_FIREBASE_API_KEY=AIzaSy...
+PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789
+PUBLIC_FIREBASE_APP_ID=1:123456:web:abc123
+```
+
+5. **Enable Anonymous Auth** (for easy onboarding):
+   - Authentication → Sign-in method → Anonymous → Enable
+
+6. **(Production) Set security rules** in Firestore:
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /territories/{territoryId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}
+```
+
+The app will work without Firebase (hexagons render fine), but conquests won't persist.
 
 ## 🔧 Development Notes
 
