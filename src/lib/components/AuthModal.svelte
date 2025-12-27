@@ -68,21 +68,22 @@
 
 {#if show}
     <div class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <!-- Backdrop -->
-        <div
-            class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        <!-- Backdrop (Accessible Button) -->
+        <button
+            class="absolute inset-0 w-full h-full bg-black/60 backdrop-blur-sm cursor-default focus:outline-none"
             on:click={close}
-        ></div>
+            aria-label="Cerrar modal"
+        ></button>
 
         <!-- Modal -->
         <div
-            class="relative w-full max-w-md bg-[#1a1a1a]/90 border border-white/10 rounded-2xl shadow-2xl overflow-hidden glass-panel p-8 text-white"
+            class="relative w-full max-w-md bg-[#1a1a1a]/90 border border-white/10 rounded-2xl shadow-2xl overflow-hidden glass-panel p-8 text-white pointer-events-auto z-10"
         >
             <!-- Close Button -->
             <button
                 on:click={close}
-                class="absolute top-4 right-4 text-white/50 hover:text-white transition-colors"
-                >✕</button
+                class="absolute top-4 right-4 text-white/50 hover:text-white transition-colors p-1"
+                aria-label="Cerrar">✕</button
             >
 
             <h2 class="text-2xl font-bold font-poppins mb-2 text-center">
@@ -97,10 +98,12 @@
             <form on:submit|preventDefault={handleSubmit} class="space-y-4">
                 <div class="space-y-1">
                     <label
+                        for="email"
                         class="text-xs font-semibold uppercase tracking-wider text-white/40 ml-1"
                         >Email</label
                     >
                     <input
+                        id="email"
                         type="email"
                         bind:value={email}
                         placeholder="tu@email.com"
@@ -111,10 +114,12 @@
 
                 <div class="space-y-1">
                     <label
+                        for="password"
                         class="text-xs font-semibold uppercase tracking-wider text-white/40 ml-1"
                         >Contraseña</label
                     >
                     <input
+                        id="password"
                         type="password"
                         bind:value={password}
                         placeholder="••••••••"
