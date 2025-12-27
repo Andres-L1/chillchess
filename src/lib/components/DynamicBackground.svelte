@@ -1,15 +1,26 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import { audioStore } from "$lib/audio/store";
+
+    // Background images for each vibe
+    const BACKGROUNDS = {
+        noir: "/assets/images/backgrounds/lofi-study.png",
+        library: "/assets/images/backgrounds/library.png",
+        zen: "/assets/images/backgrounds/zen-garden.png",
+    };
 
     // Simple rain particle generation
     let raindrops: { left: number; delay: number; duration: number }[] = [];
 
+    $: currentBg = BACKGROUNDS[$audioStore.activeVibe] || BACKGROUNDS.noir;
+    $: showRain = $audioStore.currentAmbience === "rain";
+
     onMount(() => {
         // Generate rain drops
         raindrops = Array.from({ length: 100 }, () => ({
-            left: Math.random() * 100, // %
-            delay: Math.random() * 2, // s
-            duration: 0.5 + Math.random() * 0.5, // s
+            left: Math.random() * 100,
+            delay: Math.random() * 2,
+            duration: 0.5 + Math.random() * 0.5,
         }));
     });
 </script>
@@ -17,19 +28,23 @@
 <div class="fixed inset-0 -z-10 overflow-hidden bg-black">
     <!-- Ken Burns Background -->
     <div
-        class="absolute inset-0 bg-cover bg-center animate-ken-burns opacity-60"
-        style="background-image: url('/assets/images/backgrounds/lofi-study.png');"
+        class="absolute inset-0 bg-cover bg-center animate-ken-burns opacity-60 transition-all duration-1000"
+        style="background-image: url('{currentBg}');"
     ></div>
 
-    <!-- Rain Overlay -->
-    <div class="absolute inset-0 pointer-events-none opacity-40">
-        {#each raindrops as drop}
-            <div
-                class="absolute top-[-10px] w-[1px] h-[15px] bg-white/50 animate-rain"
-                style="left: {drop.left}%; animation-delay: {drop.delay}s; animation-duration: {drop.duration}s;"
-            ></div>
-        {/each}
-    </div>
+    <!-- Rain Overlay (only for Noir vibe) -->
+    {#if showRain}
+        <div
+            class="absolute inset-0 pointer-events-none opacity-40 transition-opacity duration-500"
+        >
+            {#each raindrops as drop}
+                <div
+                    class="absolute top-[-10px] w-[1px] h-[15px] bg-white/50 animate-rain"
+                    style="left: {drop.left}%; animation-delay: {drop.delay}s; animation-duration: {drop.duration}s;"
+                ></div>
+            {/each}
+        </div>
+    {/if}
 
     <!-- Vignette & Tint -->
     <div

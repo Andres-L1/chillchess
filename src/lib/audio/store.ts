@@ -1,12 +1,17 @@
 import { writable } from 'svelte/store';
 
+export type AmbienceType = 'rain' | 'library' | 'garden' | 'none';
+export type MusicType = 'lofi' | 'jazz' | 'piano' | 'flute' | 'none';
+export type VibePreset = 'noir' | 'library' | 'zen' | 'custom';
+
 export interface AudioState {
-    musicVolume: number; // 0.0 to 1.0
-    ambienceVolume: number; // 0.0 to 1.0
+    musicVolume: number;
+    ambienceVolume: number;
     isMuted: boolean;
-    currentAmbience: 'rain' | 'library' | 'none';
-    currentMusic: 'lofi' | 'jazz' | 'piano' | 'none';
-    isPlaying: boolean; // Master playing state (unlocked by user)
+    currentAmbience: AmbienceType;
+    currentMusic: MusicType;
+    isPlaying: boolean;
+    activeVibe: VibePreset;
 }
 
 const initialState: AudioState = {
@@ -15,17 +20,18 @@ const initialState: AudioState = {
     isMuted: false,
     currentAmbience: 'rain',
     currentMusic: 'lofi',
-    isPlaying: false
+    isPlaying: false,
+    activeVibe: 'noir'
 };
 
 export const audioStore = writable<AudioState>(initialState);
 
 export function setMusicVolume(val: number) {
-    audioStore.update(s => ({ ...s, musicVolume: val }));
+    audioStore.update(s => ({ ...s, musicVolume: val, activeVibe: 'custom' }));
 }
 
 export function setAmbienceVolume(val: number) {
-    audioStore.update(s => ({ ...s, ambienceVolume: val }));
+    audioStore.update(s => ({ ...s, ambienceVolume: val, activeVibe: 'custom' }));
 }
 
 export function toggleMute() {
@@ -34,4 +40,41 @@ export function toggleMute() {
 
 export function unlockAudio() {
     audioStore.update(s => ({ ...s, isPlaying: true }));
+}
+
+// Vibe Presets
+export function setVibe(vibe: VibePreset) {
+    audioStore.update(s => {
+        switch (vibe) {
+            case 'noir':
+                return {
+                    ...s,
+                    currentAmbience: 'rain',
+                    currentMusic: 'jazz',
+                    musicVolume: 0.4,
+                    ambienceVolume: 0.6,
+                    activeVibe: 'noir'
+                };
+            case 'library':
+                return {
+                    ...s,
+                    currentAmbience: 'library',
+                    currentMusic: 'piano',
+                    musicVolume: 0.3,
+                    ambienceVolume: 0.5,
+                    activeVibe: 'library'
+                };
+            case 'zen':
+                return {
+                    ...s,
+                    currentAmbience: 'garden',
+                    currentMusic: 'flute',
+                    musicVolume: 0.35,
+                    ambienceVolume: 0.7,
+                    activeVibe: 'zen'
+                };
+            default:
+                return s;
+        }
+    });
 }

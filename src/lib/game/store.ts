@@ -11,14 +11,13 @@ export interface GameState {
     isPlaying: boolean;
     currentGame: GameMetadata;
     lastMove: Move | null;
+    isLoadingGame: boolean;
 }
 
 // --- Internal Chess Logic ---
 
-// We keep a separate chess instance for logic. 
-// We will clone it for the "display" state to avoid mutation issues.
 let chess = new Chess();
-let moves: string[] = []; // Stores the move queue for the current PGN
+let moves: string[] = [];
 
 // --- Store ---
 
@@ -28,7 +27,8 @@ const initialState: GameState = {
     currentMoveIndex: -1,
     isPlaying: false,
     currentGame: GAMES[0],
-    lastMove: null
+    lastMove: null,
+    isLoadingGame: false
 };
 
 export const gameStore = writable<GameState>(initialState);
@@ -36,19 +36,51 @@ export const gameStore = writable<GameState>(initialState);
 // --- Actions ---
 
 let timer: any = null;
-const MOVE_INTERVAL_MS = 3000; // 3 seconds per move ("Chill" pace)
+const MOVE_INTERVAL_MS = 3000;
+
+export async function loadRandomLichessGame() {
+    gameStore.update(s => ({ ...s, isLoadingGame: true }));
+
+    try {
+        // Lichess API: Get random game from top players
+        const response = await fetch('https://lichess.org/api/games/user/DrNykterstein?max=1&rated=true&perfType=blitz&opening=true&clocks=false&evals=false&pgnInJson=true', {
+            headers: { 'Accept': 'application/x-ndjson' }
+        });
+
+        const text = await response.text();
+        const lines = text.trim().split('\n');
+        const gameData = JSON.parse(lines[0]);
+
+        const gameMeta: GameMetadata = {
+            id: gameData.id,
+            white: gameData.players.white.user.name,
+            black: gameData.players.black.user.name,
+            date: new Date(gameData.createdAt).getFullYear().toString(),
+            event: `Lichess ${gameData.speed} • ${gameData.perf}`,
+            win: gameData.winner === 'white' ? 'white' : gameData.winner === 'black' ? 'black' : 'draw',
+            description: `${gameData.opening?.name || 'Classic Opening'}`,
+            pgn: gameData.pgn
+        };
+
+        loadGame(gameMeta);
+    } catch (error) {
+        console.error('Failed to load Lichess game:', error);
+        // Fallback to local games
+        loadGame(GAMES[Math.floor(Math.random() * GAMES.length)]);
+    } finally {
+        gameStore.update(s => ({ ...s, isLoadingGame: false }));
+    }
+}
 
 export function loadGame(gameMeta: GameMetadata) {
     stopAutoPlay();
     chess = new Chess();
 
-    // Load PGN to validate and extract moves
     try {
         chess.loadPgn(gameMeta.pgn);
-        const history = chess.history(); // San 'e4', 'Nf6', ...
-        moves = history; // Store all moves
+        const history = chess.history();
+        moves = history;
 
-        // Reset board to start
         chess.reset();
 
         gameStore.set({
@@ -57,12 +89,10 @@ export function loadGame(gameMeta: GameMetadata) {
             currentMoveIndex: -1,
             isPlaying: false,
             currentGame: gameMeta,
-            lastMove: null
+            lastMove: null,
+            isLoadingGame: false
         });
 
-        // Start playing automatically? Maybe wait for user action or play immediately.
-        // Spec says "Al entrar, se carga... Ritmo configurable".
-        // Let's start playing automatically after a short delay.
         startAutoPlay();
 
     } catch (e) {
@@ -73,23 +103,15 @@ export function loadGame(gameMeta: GameMetadata) {
 export function nextMove() {
     const currentState = get(gameStore);
     if (currentState.currentMoveIndex >= moves.length - 1) {
-        // Game Over - Loop or Stop? Spec says "bucle infinito".
-        // Let's restart the game.
-        resetGamePosition();
+        // Load new random game from Lichess
+        loadRandomLichessGame();
         return;
     }
 
     const nextIndex = currentState.currentMoveIndex + 1;
     const moveSan = moves[nextIndex];
 
-    // Apply move to our internal logic
     const move = chess.move(moveSan);
-    // Note: chess.move modifies the internal state of 'chess' instance.
-    // However, since we reset it for the "visual" replay, we need to be careful.
-    // Actually, 'chess' instance above holds the Start position? No.
-    // When we loaded PGN, 'chess' was at the end. 
-    // Then we did chess.reset(). So 'chess' is at start.
-    // So calling chess.move() advances it correctly.
 
     if (move) {
         gameStore.update(state => ({
@@ -103,11 +125,9 @@ export function nextMove() {
 }
 
 export function prevMove() {
-    // Undo logic
     const currentState = get(gameStore);
     if (currentState.currentMoveIndex < 0) return;
 
-    // chess.undo() updates the internal state back one step
     const move = chess.undo();
 
     if (move) {
@@ -117,7 +137,7 @@ export function prevMove() {
                 ...state,
                 fen: chess.fen(),
                 currentMoveIndex: state.currentMoveIndex - 1,
-                lastMove: null, // Hard to know previous move without complex logic, null is fine for now
+                lastMove: null,
                 history: newHistory
             };
         });
@@ -158,5 +178,5 @@ function stopAutoPlay() {
     gameStore.update(s => ({ ...s, isPlaying: false }));
 }
 
-// Initialize with the first game
-loadGame(GAMES[0]);
+// Initialize with random Lichess game
+loadRandomLichessGame();

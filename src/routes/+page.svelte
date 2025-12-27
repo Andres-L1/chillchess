@@ -7,13 +7,15 @@
         toggleAutoPlay,
         nextMove,
         prevMove,
-        resetGamePosition,
+        loadRandomLichessGame,
     } from "$lib/game/store";
     import {
         audioStore,
         setMusicVolume,
         setAmbienceVolume,
         unlockAudio,
+        setVibe,
+        type VibePreset,
     } from "$lib/audio/store";
     import StartOverlay from "$lib/components/StartOverlay.svelte";
     import AudioPlayer from "$lib/components/AudioPlayer.svelte";
@@ -22,14 +24,16 @@
     import { Input } from "cm-chessboard/src/cm-chessboard/Chessboard.js";
 
     let boardContainer: HTMLElement;
-    let board: any; // cm-chessboard instance
+    let board: any;
     let showOverlay = true;
 
     function handleEnter() {
         showOverlay = false;
         unlockAudio();
-        // Also ensure game play starts if it wasn't already
-        // toggleAutoPlay(); // actually store logic usually handles it or it's controlled manually
+    }
+
+    function handleVibeChange(vibe: VibePreset) {
+        setVibe(vibe);
     }
 
     // Reactive statement to update board when store FEN changes
@@ -38,13 +42,11 @@
     }
 
     onMount(async () => {
-        // Dynamic import with direct path
         // @ts-ignore
         const { Chessboard, BORDER_TYPE } = (await import(
             "cm-chessboard/src/cm-chessboard/Chessboard.js"
         )) as any;
 
-        // Initialize board
         board = new Chessboard(boardContainer, {
             position: $gameStore.fen,
             style: {
@@ -94,28 +96,71 @@
         </h1>
     </div>
 
-    <!-- Sidebar Controls (Collapsible) -->
+    <!-- Sidebar Controls -->
     <div
         class="w-full md:w-80 glass border-l border-surface-500/30 p-6 flex flex-col gap-6 backdrop-blur-xl z-20"
     >
         <!-- Game Info -->
         <div class="text-center space-y-2">
-            <h2 class="h2 font-bold text-primary-500">
-                {$gameStore.currentGame.event}
-            </h2>
-            <div class="flex flex-col gap-1">
-                <p class="text-sm font-semibold">
-                    {$gameStore.currentGame.white}
+            {#if $gameStore.isLoadingGame}
+                <div class="animate-pulse">
+                    <p class="text-sm opacity-70">Loading new game...</p>
+                </div>
+            {:else}
+                <h2 class="h2 font-bold text-primary-500">
+                    {$gameStore.currentGame.event}
+                </h2>
+                <div class="flex flex-col gap-1">
+                    <p class="text-sm font-semibold">
+                        {$gameStore.currentGame.white}
+                    </p>
+                    <p class="text-xs opacity-50">vs</p>
+                    <p class="text-sm font-semibold">
+                        {$gameStore.currentGame.black}
+                    </p>
+                </div>
+                <p class="text-xs opacity-50 mt-2">
+                    {$gameStore.currentGame.date} • {$gameStore.currentGame
+                        .description}
                 </p>
-                <p class="text-xs opacity-50">vs</p>
-                <p class="text-sm font-semibold">
-                    {$gameStore.currentGame.black}
-                </p>
-            </div>
-            <p class="text-xs opacity-50 mt-2">
-                {$gameStore.currentGame.date} • {$gameStore.currentGame
-                    .description}
+            {/if}
+        </div>
+
+        <hr class="opacity-20" />
+
+        <!-- Vibe Selector -->
+        <div class="space-y-3">
+            <p
+                class="text-xs font-semibold opacity-70 uppercase tracking-wider"
+            >
+                Atmosphere
             </p>
+            <div class="grid grid-cols-3 gap-2">
+                <button
+                    on:click={() => handleVibeChange("noir")}
+                    class="btn btn-sm {$audioStore.activeVibe === 'noir'
+                        ? 'variant-filled-primary'
+                        : 'variant-soft-surface'} transition-all"
+                >
+                    🌧️ Noir
+                </button>
+                <button
+                    on:click={() => handleVibeChange("library")}
+                    class="btn btn-sm {$audioStore.activeVibe === 'library'
+                        ? 'variant-filled-primary'
+                        : 'variant-soft-surface'} transition-all"
+                >
+                    📚 Library
+                </button>
+                <button
+                    on:click={() => handleVibeChange("zen")}
+                    class="btn btn-sm {$audioStore.activeVibe === 'zen'
+                        ? 'variant-filled-primary'
+                        : 'variant-soft-surface'} transition-all"
+                >
+                    🌸 Zen
+                </button>
+            </div>
         </div>
 
         <hr class="opacity-20" />
@@ -151,12 +196,21 @@
             </button>
         </div>
 
-        <!-- Volume / Vibe Controls -->
+        <!-- New Game Button -->
+        <button
+            on:click={loadRandomLichessGame}
+            class="btn variant-ghost-surface text-sm"
+            disabled={$gameStore.isLoadingGame}
+        >
+            🔄 New Random Game
+        </button>
+
+        <!-- Volume Controls -->
         <div class="space-y-6 mt-auto">
             <!-- Ambience Control -->
             <div class="space-y-2">
                 <div class="flex justify-between text-sm">
-                    <span>🌧️ Ambience (Rain)</span>
+                    <span>🌧️ Ambience</span>
                     <span class="opacity-50"
                         >{Math.round($audioStore.ambienceVolume * 100)}%</span
                     >
@@ -176,7 +230,7 @@
             <!-- Music Control -->
             <div class="space-y-2">
                 <div class="flex justify-between text-sm">
-                    <span>🎵 Lo-Fi Music</span>
+                    <span>🎵 Music</span>
                     <span class="opacity-50"
                         >{Math.round($audioStore.musicVolume * 100)}%</span
                     >
