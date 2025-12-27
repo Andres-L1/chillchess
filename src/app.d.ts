@@ -10,4 +10,14 @@ declare global {
     }
 }
 
+declare module 'cm-chessboard/src/cm-chessboard/Chessboard.js' {
+    export class Chessboard {
+        constructor(element: HTMLElement, config?: any);
+        destroy(): void;
+        // add more if strictly needed, otherwise any covers usage
+    }
+    export const BORDER_TYPE: any;
+    export const Input: any;
+}
+
 export { };
