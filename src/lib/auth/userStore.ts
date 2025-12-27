@@ -16,15 +16,22 @@ const initialState: UserState = {
 
 export const userStore = writable<UserState>(initialState);
 
-// Listener global de Firebase Auth
-onAuthStateChanged(auth, (user) => {
-    userStore.set({
-        user: user,
-        loading: false,
-        isLoggedIn: !!user
+// Listener global de Firebase Auth (Solo en cliente y si auth existe)
+if (typeof window !== 'undefined' && auth) {
+    onAuthStateChanged(auth, (user) => {
+        userStore.set({
+            user: user,
+            loading: false,
+            isLoggedIn: !!user
+        });
     });
-});
+} else {
+    // Si estamos en server o no hay auth, paramos loading
+    userStore.update(s => ({ ...s, loading: false }));
+}
 
 export const logout = async () => {
-    await signOut(auth);
+    if (auth) {
+        await signOut(auth);
+    }
 };
