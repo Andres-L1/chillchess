@@ -1,9 +1,13 @@
 <script lang="ts">
     import { audioStore, setVibe, type VibePreset } from "$lib/audio/store";
     import AuthModal from "$lib/components/AuthModal.svelte";
+    import PaywallModal from "$lib/components/PaywallModal.svelte";
     import { userStore, logout } from "$lib/auth/userStore";
+    import { userSubscription } from "$lib/subscription/userSubscription";
 
     let showAuthModal = false;
+    let showPaywall = false;
+    let blockedFeature: "vibe" | "games" = "vibe";
 
     const RELEASES = [
         {
@@ -36,6 +40,12 @@
     ];
 
     function enterSanctuary(vibeId: string) {
+        // Check access before allowing entry
+        if (!$userSubscription.canAccessVibe(vibeId)) {
+            blockedFeature = "vibe";
+            showPaywall = true;
+            return;
+        }
         setVibe(vibeId as VibePreset);
     }
 
@@ -45,6 +55,11 @@
 </script>
 
 <AuthModal show={showAuthModal} on:close={() => (showAuthModal = false)} />
+<PaywallModal
+    show={showPaywall}
+    {blockedFeature}
+    on:close={() => (showPaywall = false)}
+/>
 
 <!-- Changed Background to Midnight Blue and allowed scrolling -->
 <div
@@ -185,6 +200,28 @@
                         >
                             {release.tag}
                         </div>
+
+                        <!-- Lock Overlay for Blocked Vibes -->
+                        {#if !$userSubscription.canAccessVibe(release.id)}
+                            <div
+                                class="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center z-20 transition-opacity"
+                            >
+                                <div
+                                    class="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mb-4"
+                                >
+                                    <span class="text-3xl">🔒</span>
+                                </div>
+                                <button
+                                    on:click|preventDefault|stopPropagation={() => {
+                                        blockedFeature = "vibe";
+                                        showPaywall = true;
+                                    }}
+                                    class="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold rounded-full hover:shadow-lg hover:shadow-orange-500/30 transition-all text-sm"
+                                >
+                                    Desbloquear
+                                </button>
+                            </div>
+                        {/if}
                     </div>
 
                     <!-- Meta Info -->
