@@ -25,7 +25,7 @@
 </script>
 
 <!-- App Shell -->
-<div class="h-full w-full overflow-hidden relative" data-theme="chillhop-warm">
+<div class="h-full w-full overflow-hidden relative">
     <!-- Dynamic Background Layer -->
     <DynamicBackground />
 
