@@ -16,12 +16,16 @@
     storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 
     // Fonts
-    import "@fontsource/cinzel";
-    import "@fontsource/inter";
+    import "@fontsource/poppins/300.css";
+    import "@fontsource/poppins/400.css";
+    import "@fontsource/poppins/600.css";
+    import "@fontsource/poppins/700.css";
+    import "@fontsource/inter/300.css";
+    import "@fontsource/inter/400.css";
 </script>
 
 <!-- App Shell -->
-<div class="h-full w-full overflow-hidden relative">
+<div class="h-full w-full overflow-hidden relative" data-theme="chillhop-warm">
     <!-- Dynamic Background Layer -->
     <DynamicBackground />
 
@@ -34,8 +38,10 @@
 <style>
     :global(body) {
         font-family: "Inter", sans-serif;
+        font-weight: 300;
     }
     :global(h1, h2, h3, h4, h5, h6) {
-        font-family: "Cinzel", serif;
+        font-family: "Poppins", sans-serif;
+        font-weight: 600;
     }
 </style>
