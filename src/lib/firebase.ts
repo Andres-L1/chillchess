@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth, setPersistence, browserLocalPersistence, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, setPersistence, browserLocalPersistence, OAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -12,13 +12,28 @@ const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const googleProvider = new GoogleAuthProvider();
+// Initialize Firebase safely
+let app;
+let auth;
+let db;
+let discordProvider;
 
-// Set persistence to local (keeps user logged in across refreshes)
-setPersistence(auth, browserLocalPersistence).catch((error) => {
-    console.error("Firebase Persistence Error:", error);
-});
+try {
+    app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+    auth = getAuth(app);
+    db = getFirestore(app);
+
+    // Configurar Auth de Discord
+    discordProvider = new OAuthProvider('discord.com');
+    discordProvider.addScope('identify');
+
+    // Set persistence
+    setPersistence(auth, browserLocalPersistence).catch((error) => {
+        console.warn("Auth Persistence Error:", error);
+    });
+
+} catch (e) {
+    console.error("Error initializing Firebase (Check .env variables):", e);
+}
+
+export { auth, db, discordProvider };
