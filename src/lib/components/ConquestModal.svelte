@@ -21,7 +21,9 @@
     <div
         class="modal-backdrop"
         transition:fade={{ duration: 200 }}
-        on:click={close}
+        on:click={(e) => {
+            if (e.target === e.currentTarget) close();
+        }}
         on:keydown={(e) => e.key === "Escape" && close()}
         role="button"
         tabindex="0"
@@ -29,7 +31,6 @@
         <div
             class="modal-content glass"
             transition:fly={{ y: 50, duration: 300 }}
-            on:click|stopPropagation
             role="dialog"
             aria-modal="true"
         >
