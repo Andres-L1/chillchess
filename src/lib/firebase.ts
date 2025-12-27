@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { type Auth, getAuth, setPersistence, browserLocalPersistence, OAuthProvider } from "firebase/auth";
+import { type Auth, getAuth, setPersistence, browserLocalPersistence, GoogleAuthProvider } from "firebase/auth";
 import { type Firestore, getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -17,16 +17,15 @@ const firebaseConfig = {
 let app;
 let auth: Auth;
 let db: Firestore;
-let discordProvider: OAuthProvider;
+let googleProvider: GoogleAuthProvider;
 
 try {
     app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
     auth = getAuth(app);
     db = getFirestore(app);
 
-    // Configurar Auth de Discord
-    discordProvider = new OAuthProvider('discord.com');
-    discordProvider.addScope('identify');
+    // Configurar Auth de Google
+    googleProvider = new GoogleAuthProvider();
 
     // Set persistence
     setPersistence(auth, browserLocalPersistence).catch((error) => {
@@ -37,4 +36,4 @@ try {
     console.error("Error initializing Firebase (Check .env variables):", e);
 }
 
-export { auth, db, discordProvider };
+export { auth, db, googleProvider };
