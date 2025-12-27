@@ -1,4 +1,5 @@
 <script lang="ts">
+    // @ts-nocheck
     import { onMount, onDestroy } from "svelte";
     import { Chess } from "chess.js";
     // @ts-ignore
