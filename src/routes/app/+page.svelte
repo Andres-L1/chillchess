@@ -70,7 +70,7 @@
 
 <!-- Layout Principal: 3 Columnas (Info - Tablero - Controles) para Desktop, Stacked para Móvil -->
 <div
-    class="h-full w-full relative flex flex-col md:flex-row items-center justify-between p-4 md:p-8 gap-6 transition-opacity duration-700"
+    class="h-full w-full relative flex flex-col md:flex-row items-center justify-between p-4 md:p-8 gap-4 md:gap-6 transition-opacity duration-700 overflow-y-auto md:overflow-hidden"
     class:opacity-0={showOverlay}
 >
     <!-- 1. LEFT: Game Info (Minimalist) -->
@@ -87,7 +87,7 @@
 
             <div class="space-y-1">
                 <h2
-                    class="text-2xl font-poppins font-bold text-white leading-tight"
+                    class="text-xl md:text-2xl font-poppins font-bold text-white leading-tight"
                 >
                     {$gameStore.currentGame.event}
                 </h2>
@@ -141,7 +141,7 @@
             >
                 <span>📚</span>
                 <span class="text-[0.65rem] uppercase tracking-wider"
-                    >Library</span
+                    >Biblioteca</span
                 >
             </button>
             <button
@@ -157,7 +157,7 @@
 
     <!-- 2. CENTER: The Board (HERO) -->
     <div
-        class="flex-1 h-full max-h-[85vh] aspect-square flex items-center justify-center order-1 md:order-2 z-10 w-full"
+        class="flex-1 h-full w-full max-h-[50vh] md:max-h-[85vh] aspect-square flex items-center justify-center order-1 md:order-2 z-10"
     >
         <div
             class="relative w-full h-full max-w-[85vh] shadow-2xl rounded-sm overflow-hidden border-4 border-[#302E2B]"
@@ -171,7 +171,7 @@
 
     <!-- 3. RIGHT: Controls (Modern Player Style) -->
     <div
-        class="w-full md:w-80 flex flex-col justify-end gap-6 order-3 pointer-events-auto h-full"
+        class="w-full md:w-80 flex flex-col justify-end gap-6 order-3 pointer-events-auto h-auto md:h-full pb-8 md:pb-0"
     >
         <!-- Logo Top Right (Desktop Only) -->
         <div class="hidden md:flex flex-col items-end mb-auto pt-4 opacity-50">
@@ -179,7 +179,7 @@
                 ChillChess
             </h1>
             <span class="text-xs uppercase tracking-[0.2em]"
-                >Visual Sanctuary</span
+                >Santuario Visual</span
             >
         </div>
 
@@ -218,7 +218,7 @@
                 class="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 text-sm font-medium transition-all flex items-center justify-center gap-2"
             >
                 <span>🔄</span>
-                {$gameStore.isLoadingGame ? "Loading..." : "Random Game"}
+                {$gameStore.isLoadingGame ? "Cargando..." : "Partida Aleatoria"}
             </button>
 
             <!-- Audio Mixers (Clean) -->
@@ -227,7 +227,7 @@
                     <div
                         class="flex justify-between text-xs text-white/40 group-hover:text-white/70 transition-colors"
                     >
-                        <span>Ambience</span>
+                        <span>Ambiente</span>
                         <span
                             >{Math.round(
                                 $audioStore.ambienceVolume * 100,
@@ -248,7 +248,7 @@
                     <div
                         class="flex justify-between text-xs text-white/40 group-hover:text-white/70 transition-colors"
                     >
-                        <span>Music</span>
+                        <span>Música</span>
                         <span>{Math.round($audioStore.musicVolume * 100)}%</span
                         >
                     </div>
