@@ -53,9 +53,18 @@
             >
         </div>
         <div class="flex gap-6 text-sm font-medium text-[#666]">
-            <a href="#" class="hover:text-black transition-colors">Releases</a>
-            <a href="#" class="hover:text-black transition-colors">Artists</a>
-            <a href="#" class="hover:text-black transition-colors">Merch</a>
+            <a
+                href="javascript:void(0)"
+                class="hover:text-black transition-colors">Releases</a
+            >
+            <a
+                href="javascript:void(0)"
+                class="hover:text-black transition-colors">Artists</a
+            >
+            <a
+                href="javascript:void(0)"
+                class="hover:text-black transition-colors">Merch</a
+            >
         </div>
         <a
             href="/app"
@@ -165,17 +174,17 @@
             </div>
             <div class="flex gap-6">
                 <a
-                    href="#"
+                    href="javascript:void(0)"
                     class="text-white/60 hover:text-white transition-colors"
                     >Instagram</a
                 >
                 <a
-                    href="#"
+                    href="javascript:void(0)"
                     class="text-white/60 hover:text-white transition-colors"
                     >Twitter</a
                 >
                 <a
-                    href="#"
+                    href="javascript:void(0)"
                     class="text-white/60 hover:text-white transition-colors"
                     >Discord</a
                 >
