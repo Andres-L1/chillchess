@@ -1,0 +1,12 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="256" height="256" rx="60" fill="#1a1a1a"/>
+  <!-- Headphones Band -->
+  <path d="M78 100 C78 60, 178 60, 178 100" stroke="white" stroke-width="12" stroke-linecap="round"/>
+  <!-- Chess Knight Silhouette -->
+  <path d="M160 80 L140 60 H110 L90 90 V130 L70 150 V190 H180 V160 L160 140 V80 Z" fill="white"/>
+  <!-- Headphones Earcups -->
+  <rect x="68" y="90" width="20" height="40" rx="10" fill="white"/>
+  <rect x="168" y="90" width="20" height="40" rx="10" fill="white"/>
+  <!-- Details to make it look like a knight -->
+  <path d="M140 90 L110 120" stroke="#1a1a1a" stroke-width="8" stroke-linecap="round"/>
+</svg>
