@@ -10,6 +10,16 @@
         "sourceMap": true,
         "strict": true,
         "moduleResolution": "bundler"
-    }
-    // Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
+    },
+    "include": [
+        "src/**/*.d.ts",
+        "src/**/*.ts",
+        "src/**/*.js",
+        "src/**/*.svelte",
+        ".svelte-kit/types/**/*.d.ts"
+    ],
+    "exclude": [
+        "node_modules/*",
+        ".svelte-kit/*"
+    ]
 }
