@@ -1,6 +1,7 @@
 <script lang="ts">
     // @ts-nocheck
     import { onMount, onDestroy } from "svelte";
+    import { fade } from "svelte/transition";
     import {
         gameStore,
         toggleAutoPlay,
@@ -8,18 +9,31 @@
         prevMove,
         resetGamePosition,
     } from "$lib/game/store";
+    import {
+        audioStore,
+        setMusicVolume,
+        setAmbienceVolume,
+        unlockAudio,
+    } from "$lib/audio/store";
+    import StartOverlay from "$lib/components/StartOverlay.svelte";
+    import AudioPlayer from "$lib/components/AudioPlayer.svelte";
+
     // @ts-ignore
     import { Input } from "cm-chessboard/src/cm-chessboard/Chessboard.js";
 
     let boardContainer: HTMLElement;
     let board: any; // cm-chessboard instance
+    let showOverlay = true;
+
+    function handleEnter() {
+        showOverlay = false;
+        unlockAudio();
+        // Also ensure game play starts if it wasn't already
+        // toggleAutoPlay(); // actually store logic usually handles it or it's controlled manually
+    }
 
     // Reactive statement to update board when store FEN changes
     $: if (board && $gameStore.fen) {
-        // Stop any previous animation? cm-chessboard handles it.
-        // We use 'true' for animation.
-        // Check if we are resetting (move index -1) to avoid backward animation if needed,
-        // but setPosition handles it intelligently usually.
         board.setPosition($gameStore.fen, true);
     }
 
@@ -51,7 +65,16 @@
     });
 </script>
 
-<div class="h-full flex flex-col md:flex-row">
+{#if showOverlay}
+    <StartOverlay on:start={handleEnter} />
+{/if}
+
+<AudioPlayer />
+
+<div
+    class="h-full flex flex-col md:flex-row transition-opacity duration-1000"
+    class:opacity-50={showOverlay}
+>
     <!-- Main Stage: Board -->
     <div class="flex-1 flex items-center justify-center p-4 relative">
         <div
@@ -129,17 +152,46 @@
         </div>
 
         <!-- Volume / Vibe Controls -->
-        <div class="space-y-4 mt-auto">
-            <div class="flex justify-between text-sm">
-                <span>Rainy Cafe</span>
-                <span class="opacity-50">Coming Phase 3</span>
+        <div class="space-y-6 mt-auto">
+            <!-- Ambience Control -->
+            <div class="space-y-2">
+                <div class="flex justify-between text-sm">
+                    <span>🌧️ Ambience (Rain)</span>
+                    <span class="opacity-50"
+                        >{Math.round($audioStore.ambienceVolume * 100)}%</span
+                    >
+                </div>
+                <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={$audioStore.ambienceVolume}
+                    on:input={(e) =>
+                        setAmbienceVolume(e.currentTarget.valueAsNumber)}
+                    class="w-full h-1 bg-surface-600 rounded-lg appearance-none cursor-pointer"
+                />
             </div>
-            <input
-                type="range"
-                value="50"
-                class="w-full h-1 bg-surface-600 rounded-lg appearance-none cursor-not-allowed opacity-50"
-                disabled
-            />
+
+            <!-- Music Control -->
+            <div class="space-y-2">
+                <div class="flex justify-between text-sm">
+                    <span>🎵 Lo-Fi Music</span>
+                    <span class="opacity-50"
+                        >{Math.round($audioStore.musicVolume * 100)}%</span
+                    >
+                </div>
+                <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={$audioStore.musicVolume}
+                    on:input={(e) =>
+                        setMusicVolume(e.currentTarget.valueAsNumber)}
+                    class="w-full h-1 bg-surface-600 rounded-lg appearance-none cursor-pointer"
+                />
+            </div>
         </div>
     </div>
 </div>
