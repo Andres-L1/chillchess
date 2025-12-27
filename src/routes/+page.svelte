@@ -1,25 +1,11 @@
 <script lang="ts">
     // @ts-nocheck
     import { onMount, onDestroy } from "svelte";
-    import { fade } from "svelte/transition";
-    import {
-        gameStore,
-        toggleAutoPlay,
-        nextMove,
-        prevMove,
-        loadRandomLichessGame,
-    } from "$lib/game/store";
-    import {
-        audioStore,
-        setMusicVolume,
-        setAmbienceVolume,
-        unlockAudio,
-        setVibe,
-        type VibePreset,
-    } from "$lib/audio/store";
+    import { gameStore, toggleAutoPlay, nextMove, prevMove, loadRandomLichessGame } from "$lib/game/store";
+    import { audioStore, setMusicVolume, setAmbienceVolume, unlockAudio, setVibe, type VibePreset } from "$lib/audio/store";
     import StartOverlay from "$lib/components/StartOverlay.svelte";
     import AudioPlayer from "$lib/components/AudioPlayer.svelte";
-
+    
     // @ts-ignore
     import { Input } from "cm-chessboard/src/cm-chessboard/Chessboard.js";
 
@@ -32,29 +18,24 @@
         unlockAudio();
     }
 
-    function handleVibeChange(vibe: VibePreset) {
-        setVibe(vibe);
-    }
-
     $: if (board && $gameStore.fen) {
         board.setPosition($gameStore.fen, true);
     }
 
     onMount(async () => {
         // @ts-ignore
-        const { Chessboard, BORDER_TYPE } = (await import(
-            "cm-chessboard/src/cm-chessboard/Chessboard.js"
-        )) as any;
+        const { Chessboard, BORDER_TYPE } = await import("cm-chessboard/src/cm-chessboard/Chessboard.js") as any;
 
         board = new Chessboard(boardContainer, {
             position: $gameStore.fen,
             style: {
-                cssClass: "default",
-                showCoordinates: true,
+                // High Contrast Colors (Lichess/Chess.com standard style)
+                cssClass: "default", 
+                showCoordinates: true, 
                 borderType: BORDER_TYPE.none,
             },
             responsive: true,
-            animationDuration: 400,
+            animationDuration: 300,
             sprite: {
                 url: "/assets/images/chessboard-sprite-staunton.svg",
             },
@@ -72,310 +53,137 @@
 
 <AudioPlayer />
 
-<div
-    class="h-full flex flex-col md:flex-row transition-opacity duration-1000"
-    class:opacity-50={showOverlay}
->
-    <!-- Main Stage: Board -->
-    <div class="flex-1 flex items-center justify-center p-12 relative">
-        <!-- Premium Board Container -->
-        <div class="relative w-full max-w-[min(75vh,85vw)] aspect-square">
-            <!-- Warm Glow -->
-            <div
-                class="absolute inset-0 bg-gradient-to-br from-primary-400/30 via-secondary-400/20 to-tertiary-400/30 blur-3xl -z-10 scale-110 animate-pulse"
-            ></div>
+<!-- Layout Principal: 3 Columnas (Info - Tablero - Controles) para Desktop, Stacked para Móvil -->
+<div class="h-full w-full relative flex flex-col md:flex-row items-center justify-between p-4 md:p-8 gap-6 transition-opacity duration-700" class:opacity-0={showOverlay}>
+    
+    <!-- 1. LEFT: Game Info (Minimalist) -->
+    <div class="w-full md:w-80 flex flex-col gap-4 order-2 md:order-1 pointer-events-none md:pointer-events-auto">
+        <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
+             <!-- Status Indicator -->
+            <div class="absolute top-0 left-0 w-1 h-full bg-primary-500 transition-all duration-500" class:opacity-100={$gameStore.isPlaying} class:opacity-30={!$gameStore.isPlaying}></div>
 
-            <!-- Board Frame with Wood Texture -->
-            <div
-                class="glass-strong p-6 rounded-3xl shadow-2xl glow-warm h-full relative overflow-hidden"
-            >
-                <!-- Subtle wood grain overlay -->
-                <div
-                    class="absolute inset-0 opacity-5 pointer-events-none"
-                    style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;100&quot; height=&quot;100&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cfilter id=&quot;noise&quot;%3E%3CfeTurbulence type=&quot;fractalNoise&quot; baseFrequency=&quot;0.9&quot; numOctaves=&quot;4&quot; /%3E%3C/filter%3E%3Crect width=&quot;100&quot; height=&quot;100&quot; filter=&quot;url(%23noise)&quot; opacity=&quot;0.5&quot;/%3E%3C/svg%3E');"
-                ></div>
-
-                <div
-                    bind:this={boardContainer}
-                    class="w-full h-full board-container rounded-2xl overflow-hidden shadow-inner"
-                ></div>
+            <div class="space-y-1">
+                <h2 class="text-2xl font-poppins font-bold text-white leading-tight">{$gameStore.currentGame.event}</h2>
+                <p class="text-sm text-white/60">{$gameStore.currentGame.date} • {$gameStore.currentGame.description}</p>
+            </div>
+            
+            <div class="mt-6 flex flex-col gap-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-2 h-2 rounded-full bg-white"></div>
+                        <span class="text-lg font-medium text-white/90">{$gameStore.currentGame.white}</span>
+                    </div>
+                </div>
+                <div class="w-full h-px bg-white/10"></div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-2 h-2 rounded-full bg-black border border-white/20"></div>
+                        <span class="text-lg font-medium text-white/90">{$gameStore.currentGame.black}</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Floating Title - Softer -->
-        <div class="absolute top-12 left-12">
-            <h1
-                class="text-6xl font-bold font-poppins bg-clip-text text-transparent bg-gradient-to-r from-primary-300 via-secondary-300 to-primary-400 drop-shadow-2xl"
-            >
-                ChillChess
-            </h1>
-            <p
-                class="text-base text-tertiary-200 mt-2 font-light tracking-widest"
-            >
-                visual sanctuary
-            </p>
+        <!-- Vibe Mini-Selector -->
+        <div class="glass-panel p-2 rounded-xl flex justify-between items-center pointer-events-auto">
+            <button on:click={() => setVibe('noir')} class="flex-1 py-2 rounded-lg text-sm hover:bg-white/10 transition-colors flex flex-col items-center gap-1 opacity-70 hover:opacity-100" class:opacity-100={$audioStore.activeVibe === 'noir'} class:bg-white-10={$audioStore.activeVibe === 'noir'}>
+                <span>🌧️</span>
+                <span class="text-[0.65rem] uppercase tracking-wider">Noir</span>
+            </button>
+            <button on:click={() => setVibe('library')} class="flex-1 py-2 rounded-lg text-sm hover:bg-white/10 transition-colors flex flex-col items-center gap-1 opacity-70 hover:opacity-100" class:opacity-100={$audioStore.activeVibe === 'library'}>
+                <span>📚</span>
+                <span class="text-[0.65rem] uppercase tracking-wider">Library</span>
+            </button>
+            <button on:click={() => setVibe('zen')} class="flex-1 py-2 rounded-lg text-sm hover:bg-white/10 transition-colors flex flex-col items-center gap-1 opacity-70 hover:opacity-100" class:opacity-100={$audioStore.activeVibe === 'zen'}>
+                <span>🌸</span>
+                <span class="text-[0.65rem] uppercase tracking-wider">Zen</span>
+            </button>
         </div>
     </div>
 
-    <!-- Cozy Sidebar -->
-    <div
-        class="w-full md:w-[420px] glass-strong border-l border-primary-400/10 p-10 flex flex-col gap-8 backdrop-blur-2xl z-20 shadow-2xl"
-    >
-        <!-- Game Info Card - Warm & Cozy -->
-        <div
-            class="glass p-8 rounded-3xl space-y-4 border border-primary-400/15 glow-soft"
-        >
-            {#if $gameStore.isLoadingGame}
-                <div class="animate-pulse space-y-3">
-                    <div
-                        class="h-5 bg-tertiary-700/30 rounded-2xl w-3/4 loading-shimmer"
-                    ></div>
-                    <div
-                        class="h-4 bg-tertiary-700/30 rounded-2xl w-1/2 loading-shimmer"
-                    ></div>
-                </div>
-            {:else}
-                <div class="space-y-3">
-                    <div class="flex items-start justify-between gap-3">
-                        <h2
-                            class="text-xl font-semibold text-primary-300 font-poppins leading-tight"
-                        >
-                            {$gameStore.currentGame.event}
-                        </h2>
-                        <span
-                            class="text-xs px-3 py-1.5 bg-primary-500/20 text-primary-200 rounded-full whitespace-nowrap"
-                            >{$gameStore.currentGame.date}</span
-                        >
-                    </div>
-                    <p class="text-sm text-tertiary-300 font-light">
-                        {$gameStore.currentGame.description}
-                    </p>
-                </div>
+    <!-- 2. CENTER: The Board (HERO) -->
+    <div class="flex-1 h-full max-h-[85vh] aspect-square flex items-center justify-center order-1 md:order-2 z-10 w-full">
+        <div class="relative w-full h-full max-w-[85vh] shadow-2xl rounded-sm overflow-hidden border-4 border-[#302E2B]">
+            <div bind:this={boardContainer} class="w-full h-full board-container"></div>
+        </div>
+    </div>
 
-                <div
-                    class="flex items-center justify-between pt-4 border-t border-tertiary-700/30"
-                >
-                    <div class="text-center flex-1">
-                        <p
-                            class="text-xs text-tertiary-400 mb-1.5 uppercase tracking-wide"
-                        >
-                            White
-                        </p>
-                        <p class="text-base font-medium text-tertiary-100">
-                            {$gameStore.currentGame.white}
-                        </p>
-                    </div>
-                    <div class="text-primary-400 text-2xl px-4">⚔️</div>
-                    <div class="text-center flex-1">
-                        <p
-                            class="text-xs text-tertiary-400 mb-1.5 uppercase tracking-wide"
-                        >
-                            Black
-                        </p>
-                        <p class="text-base font-medium text-tertiary-100">
-                            {$gameStore.currentGame.black}
-                        </p>
-                    </div>
-                </div>
-            {/if}
+    <!-- 3. RIGHT: Controls (Modern Player Style) -->
+    <div class="w-full md:w-80 flex flex-col justify-end gap-6 order-3 pointer-events-auto h-full">
+        
+        <!-- Logo Top Right (Desktop Only) -->
+        <div class="hidden md:flex flex-col items-end mb-auto pt-4 opacity-50">
+            <h1 class="text-3xl font-poppins font-bold tracking-tight">ChillChess</h1>
+            <span class="text-xs uppercase tracking-[0.2em]">Visual Sanctuary</span>
         </div>
 
-        <!-- Atmosphere Selector - Softer -->
-        <div class="space-y-4">
-            <div class="flex items-center justify-between px-1">
-                <p
-                    class="text-sm font-medium text-primary-300 uppercase tracking-widest"
-                >
-                    Atmosphere
-                </p>
-                <span class="text-xs text-tertiary-400 capitalize"
-                    >{$audioStore.activeVibe}</span
-                >
-            </div>
-            <div class="grid grid-cols-3 gap-3">
-                <button
-                    on:click={() => handleVibeChange("noir")}
-                    class="btn-premium px-5 py-5 rounded-2xl text-sm font-medium transition-all {$audioStore.activeVibe ===
-                    'noir'
-                        ? 'bg-gradient-to-br from-primary-500 to-secondary-500 text-white shadow-xl glow-warm'
-                        : 'glass hover:glass-strong text-tertiary-300'}"
-                >
-                    <div class="text-3xl mb-2">🌧️</div>
-                    <div class="text-xs font-light">Noir</div>
-                </button>
-                <button
-                    on:click={() => handleVibeChange("library")}
-                    class="btn-premium px-5 py-5 rounded-2xl text-sm font-medium transition-all {$audioStore.activeVibe ===
-                    'library'
-                        ? 'bg-gradient-to-br from-primary-500 to-secondary-500 text-white shadow-xl glow-warm'
-                        : 'glass hover:glass-strong text-tertiary-300'}"
-                >
-                    <div class="text-3xl mb-2">📚</div>
-                    <div class="text-xs font-light">Library</div>
-                </button>
-                <button
-                    on:click={() => handleVibeChange("zen")}
-                    class="btn-premium px-5 py-5 rounded-2xl text-sm font-medium transition-all {$audioStore.activeVibe ===
-                    'zen'
-                        ? 'bg-gradient-to-br from-primary-500 to-secondary-500 text-white shadow-xl glow-warm'
-                        : 'glass hover:glass-strong text-tertiary-300'}"
-                >
-                    <div class="text-3xl mb-2">🌸</div>
-                    <div class="text-xs font-light">Zen</div>
-                </button>
-            </div>
-        </div>
-
-        <!-- Playback Controls - Larger & Softer -->
-        <div class="space-y-4">
-            <p
-                class="text-sm font-medium text-primary-300 uppercase tracking-widest px-1"
-            >
-                Playback
-            </p>
-            <div class="flex justify-center items-center gap-4">
-                <button
-                    on:click={prevMove}
-                    class="btn-premium w-14 h-14 rounded-2xl glass hover:glass-strong flex items-center justify-center text-2xl transition-all hover:scale-110 active:scale-95 text-tertiary-200"
-                    title="Previous Move"
-                >
-                    ⏮️
-                </button>
-
-                <button
-                    on:click={toggleAutoPlay}
-                    class="btn-premium w-20 h-20 rounded-3xl bg-gradient-to-br from-primary-500 to-secondary-500 hover:from-primary-400 hover:to-secondary-400 flex items-center justify-center text-3xl shadow-2xl transition-all hover:scale-110 active:scale-95 {$gameStore.isPlaying
-                        ? 'animate-breathe'
-                        : ''}"
-                    title={$gameStore.isPlaying ? "Pause" : "Play"}
-                >
+        <!-- Main Controls Panel -->
+        <div class="glass-panel p-6 rounded-2xl flex flex-col gap-6">
+            <!-- Playback -->
+            <div class="flex items-center justify-center gap-6">
+                <button on:click={prevMove} class="p-3 text-2xl text-white/50 hover:text-white transition-colors hover:scale-110 active:scale-95">⏮️</button>
+                
+                <button on:click={toggleAutoPlay} class="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center text-2xl shadow-lg hover:scale-105 active:scale-95 transition-all">
                     {#if $gameStore.isPlaying}
                         ⏸️
                     {:else}
                         ▶️
                     {/if}
                 </button>
-
-                <button
-                    on:click={nextMove}
-                    class="btn-premium w-14 h-14 rounded-2xl glass hover:glass-strong flex items-center justify-center text-2xl transition-all hover:scale-110 active:scale-95 text-tertiary-200"
-                    title="Next Move"
-                >
-                    ⏭️
-                </button>
-            </div>
-        </div>
-
-        <!-- New Game Button -->
-        <button
-            on:click={loadRandomLichessGame}
-            disabled={$gameStore.isLoadingGame}
-            class="btn-premium w-full py-4 rounded-2xl glass hover:glass-strong text-base font-light text-tertiary-200 hover:text-primary-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-            <span class="mr-2 text-xl">🔄</span>
-            {$gameStore.isLoadingGame
-                ? "Loading new game..."
-                : "New Random Game"}
-        </button>
-
-        <!-- Volume Controls - Softer -->
-        <div class="space-y-6 mt-auto pt-6 border-t border-tertiary-700/20">
-            <!-- Ambience -->
-            <div class="space-y-3">
-                <div class="flex items-center justify-between text-sm px-1">
-                    <span
-                        class="text-tertiary-300 flex items-center gap-2 font-light"
-                    >
-                        <span class="text-xl">🌧️</span>
-                        Ambience
-                    </span>
-                    <span
-                        class="text-primary-400 font-mono text-sm tabular-nums"
-                        >{Math.round($audioStore.ambienceVolume * 100)}%</span
-                    >
-                </div>
-                <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    value={$audioStore.ambienceVolume}
-                    on:input={(e) =>
-                        setAmbienceVolume(e.currentTarget.valueAsNumber)}
-                    class="w-full"
-                />
+                
+                <button on:click={nextMove} class="p-3 text-2xl text-white/50 hover:text-white transition-colors hover:scale-110 active:scale-95">⏭️</button>
             </div>
 
-            <!-- Music -->
-            <div class="space-y-3">
-                <div class="flex items-center justify-between text-sm px-1">
-                    <span
-                        class="text-tertiary-300 flex items-center gap-2 font-light"
-                    >
-                        <span class="text-xl">🎵</span>
-                        Music
-                    </span>
-                    <span
-                        class="text-primary-400 font-mono text-sm tabular-nums"
-                        >{Math.round($audioStore.musicVolume * 100)}%</span
-                    >
+            <!-- New Game -->
+            <button on:click={loadRandomLichessGame} disabled={$gameStore.isLoadingGame} class="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 text-sm font-medium transition-all flex items-center justify-center gap-2">
+                <span>🔄</span>
+                {$gameStore.isLoadingGame ? 'Loading...' : 'Random Game'}
+            </button>
+
+            <!-- Audio Mixers (Clean) -->
+            <div class="space-y-4 pt-4 border-t border-white/5">
+                <div class="space-y-2 group">
+                    <div class="flex justify-between text-xs text-white/40 group-hover:text-white/70 transition-colors">
+                        <span>Ambience</span>
+                        <span>{Math.round($audioStore.ambienceVolume * 100)}%</span>
+                    </div>
+                    <input type="range" min="0" max="1" step="0.01" value={$audioStore.ambienceVolume} on:input={(e) => setAmbienceVolume(e.currentTarget.valueAsNumber)} />
                 </div>
-                <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    value={$audioStore.musicVolume}
-                    on:input={(e) =>
-                        setMusicVolume(e.currentTarget.valueAsNumber)}
-                    class="w-full"
-                />
+                <div class="space-y-2 group">
+                    <div class="flex justify-between text-xs text-white/40 group-hover:text-white/70 transition-colors">
+                        <span>Music</span>
+                        <span>{Math.round($audioStore.musicVolume * 100)}%</span>
+                    </div>
+                    <input type="range" min="0" max="1" step="0.01" value={$audioStore.musicVolume} on:input={(e) => setMusicVolume(e.currentTarget.valueAsNumber)} />
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <style>
-    /* Warm, Visible Chess Board */
+    /* CSS Puro para el tablero - Colores Lichess Standard (Warm) */
     :global(.board-container) {
-        /* Light squares - Warm cream */
-        --light-square-color: #f5e6d3;
-        /* Dark squares - Warm chocolate brown (VISIBLE!) */
-        --dark-square-color: #8b6f47;
-
-        /* Piece colors with better contrast */
-        --piece-color-white: #ffffff;
-        --piece-color-black: #2a1f1a;
-
-        /* Warm highlight colors */
-        --highlight-color: rgba(255, 158, 109, 0.5);
-        --selected-color: rgba(255, 107, 157, 0.4);
+        background-color: #302E2B; /* Deep background to prevent gaps showing white */
+    }
+    
+    /* Squares */
+    :global(.board-container .board .square.white) {
+        background-color: #EAD8C0 !important; /* Cream warm */
+    }
+    :global(.board-container .board .square.black) {
+        background-color: #A77B56 !important; /* Warm light brown */
     }
 
-    /* Subtle wood texture on squares */
-    :global(.board-container .square) {
-        position: relative;
-    }
-
+    /* Remove previous noisy texture if any remains */
     :global(.board-container .square::before) {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background-image: repeating-linear-gradient(
-            90deg,
-            transparent,
-            transparent 3px,
-            rgba(139, 99, 71, 0.03) 3px,
-            rgba(139, 99, 71, 0.03) 6px
-        );
-        pointer-events: none;
+        display: none !important;
     }
 
-    /* Coordinates styling */
+    /* Notation */
     :global(.board-container .coordinates) {
-        color: #d4b896;
-        font-size: 0.7rem;
-        font-weight: 300;
-        opacity: 0.6;
+        fill: #A77B56; /* Match dark square for internal, or contrast for external. cm-chessboard usually handles this but we can force styles if needed */
+        font-weight: 500;
+        font-family: 'Poppins', sans-serif;
     }
 </style>
