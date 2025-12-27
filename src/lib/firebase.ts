@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth, setPersistence, browserLocalPersistence, OAuthProvider } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { type Auth, getAuth, setPersistence, browserLocalPersistence, OAuthProvider } from "firebase/auth";
+import { type Firestore, getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -14,9 +14,9 @@ const firebaseConfig = {
 
 // Initialize Firebase safely
 let app;
-let auth;
-let db;
-let discordProvider;
+let auth: Auth;
+let db: Firestore;
+let discordProvider: OAuthProvider;
 
 try {
     app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
