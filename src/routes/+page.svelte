@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount, onDestroy } from "svelte";
     import { Chess } from "chess.js";
+    // @ts-ignore
     import { Input } from "cm-chessboard/src/cm-chessboard/Chessboard.js";
 
     let boardContainer: HTMLElement;
@@ -9,9 +10,10 @@
 
     onMount(async () => {
         // Dynamic import with direct path to bypass resolution issues
-        const { Chessboard, BORDER_TYPE } = await import(
+        // @ts-ignore
+        const { Chessboard, BORDER_TYPE } = (await import(
             "cm-chessboard/src/cm-chessboard/Chessboard.js"
-        );
+        )) as any;
 
         // Initialize board
         board = new Chessboard(boardContainer, {
