@@ -5,43 +5,22 @@
     import { userStore, logout } from "$lib/auth/userStore";
     import { userSubscription } from "$lib/subscription/userSubscription";
 
+    import { ALBUMS } from "$lib/data/albums";
+
     let showAuthModal = false;
     let showPaywall = false;
     let blockedFeature: "vibe" | "games" = "vibe";
 
-    const RELEASES = [
-        {
-            id: "noir",
-            title: "Ciudad Noir",
-            artist: "Originales ChillChess",
-            cover: "/assets/images/covers/noir.png",
-            tag: "Popular",
-            price: "Gratis",
-            description: "Lluvia cyberpunk para concentración profunda.",
-        },
-        {
-            id: "library",
-            title: "Biblioteca Gran Maestro",
-            artist: "Colección Clásica",
-            cover: "/assets/images/covers/library.png",
-            tag: "Nuevo",
-            price: "Gratis",
-            description: "Chimenea acogedora y libros antiguos.",
-        },
-        {
-            id: "zen",
-            title: "Jardín Zen",
-            artist: "Flujo Oriental",
-            cover: "/assets/images/covers/zen.png",
-            tag: "Relax",
-            price: "Gratis",
-            description: "Sonidos de naturaleza y flauta suave.",
-        },
-    ];
-
     function enterSanctuary(vibeId: string) {
-        // Check access before allowing entry
-        if (!$userSubscription.canAccessVibe(vibeId)) {
+        // If it's a paid vibe, check access
+        // Note: For albums without explicit vibeId (like ASAP), we assume free or handled elsewhere for now
+        // or we check if user is Pro for any custom album.
+        // For now, let's keep it simple: Only check blocked vibes from tiers.
+
+        // Find if this ID corresponds to a VibePreset
+        const isVibeBlocked = !$userSubscription.canAccessVibe(vibeId);
+
+        if (isVibeBlocked) {
             blockedFeature = "vibe";
             showPaywall = true;
             return;
@@ -168,7 +147,7 @@
         <div
             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10"
         >
-            {#each RELEASES as release}
+            {#each ALBUMS as release}
                 <div class="group relative flex flex-col gap-4">
                     <!-- Album Cover Card -->
                     <div
@@ -187,7 +166,10 @@
                         >
                             <a
                                 href="/app"
-                                on:click={() => enterSanctuary(release.id)}
+                                on:click={() =>
+                                    enterSanctuary(
+                                        release.vibeId || release.id,
+                                    )}
                                 class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-2xl shadow-xl hover:scale-110 active:scale-95 transition-transform text-black pl-1"
                             >
                                 ▶
@@ -202,7 +184,7 @@
                         </div>
 
                         <!-- Lock Overlay for Blocked Vibes -->
-                        {#if !$userSubscription.canAccessVibe(release.id)}
+                        {#if release.vibeId && !$userSubscription.canAccessVibe(release.vibeId)}
                             <div
                                 class="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center z-20 transition-opacity"
                             >
