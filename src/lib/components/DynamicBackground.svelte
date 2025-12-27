@@ -12,7 +12,10 @@
     // Simple rain particle generation
     let raindrops: { left: number; delay: number; duration: number }[] = [];
 
-    $: currentBg = BACKGROUNDS[$audioStore.activeVibe] || BACKGROUNDS.noir;
+    $: currentBg =
+        $audioStore.activeVibe === "custom"
+            ? BACKGROUNDS.noir
+            : BACKGROUNDS[$audioStore.activeVibe];
     $: showRain = $audioStore.currentAmbience === "rain";
 
     onMount(() => {
