@@ -53,7 +53,12 @@
     <nav
         class="flex flex-col md:flex-row justify-between items-center px-4 md:px-8 py-6 max-w-7xl mx-auto gap-4"
     >
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-3">
+            <img
+                src="/favicon.svg"
+                alt="ChillChess Logo"
+                class="w-10 h-10 hover:rotate-12 transition-transform duration-300 drop-shadow-sm"
+            />
             <span
                 class="text-2xl font-bold tracking-tight text-[#2D2D2D] hover:scale-105 transition-transform cursor-default"
                 >ChillChess</span
