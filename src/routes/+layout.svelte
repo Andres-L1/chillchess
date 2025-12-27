@@ -25,12 +25,12 @@
 </script>
 
 <!-- App Shell -->
-<div class="h-full w-full overflow-hidden relative">
+<div class="min-h-screen w-full relative">
     <!-- Dynamic Background Layer -->
     <DynamicBackground />
 
     <!-- Content -->
-    <div class="relative z-10 h-full">
+    <div class="relative z-10">
         <slot />
     </div>
 </div>
