@@ -1,12 +1,25 @@
-<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="256" height="256" rx="60" fill="#1a1a1a"/>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Dynamic Background (Optional via CSS, but hardcoded dark blue for standalone view) -->
+  <rect width="512" height="512" rx="100" fill="#0A192F"/> 
+  
+  <!-- Pawn Base -->
+  <path d="M128 430 H384 C390 430 400 440 400 450 V460 C400 470 390 480 384 480 H128 C122 480 112 470 112 460 V450 C112 440 122 430 128 430 Z" fill="#FDF6E3"/>
+  
+  <!-- Pawn Body -->
+  <path d="M170 380 C170 380 190 320 200 240 H312 C322 320 342 380 342 380 C360 400 370 410 380 410 H132 C142 410 152 400 170 380 Z" fill="#FDF6E3"/>
+  
+  <!-- Pawn Collar -->
+  <ellipse cx="256" cy="220" rx="70" ry="20" fill="#FDF6E3"/>
+  
+  <!-- Pawn Head -->
+  <circle cx="256" cy="140" r="60" fill="#FDF6E3"/>
+  
   <!-- Headphones Band -->
-  <path d="M78 100 C78 60, 178 60, 178 100" stroke="white" stroke-width="12" stroke-linecap="round"/>
-  <!-- Chess Knight Silhouette -->
-  <path d="M160 80 L140 60 H110 L90 90 V130 L70 150 V190 H180 V160 L160 140 V80 Z" fill="white"/>
-  <!-- Headphones Earcups -->
-  <rect x="68" y="90" width="20" height="40" rx="10" fill="white"/>
-  <rect x="168" y="90" width="20" height="40" rx="10" fill="white"/>
-  <!-- Details to make it look like a knight -->
-  <path d="M140 90 L110 120" stroke="#1a1a1a" stroke-width="8" stroke-linecap="round"/>
+  <path d="M166 140 C166 90 206 50 256 50 C306 50 346 90 346 140" stroke="#FDF6E3" stroke-width="25" stroke-linecap="round"/>
+  
+  <!-- Left Earcup -->
+  <rect x="146" y="110" width="30" height="70" rx="10" fill="#FDF6E3"/>
+  
+  <!-- Right Earcup -->
+  <rect x="336" y="110" width="30" height="70" rx="10" fill="#FDF6E3"/>
 </svg>
