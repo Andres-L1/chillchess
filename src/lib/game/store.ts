@@ -38,25 +38,40 @@ export const gameStore = writable<GameState>(initialState);
 let timer: any = null;
 const MOVE_INTERVAL_MS = 3000;
 
+const TOP_PLAYERS = ['DrNykterstein', 'Hikaru', 'Alireza2003', 'FabianoCaruana', 'LevonAronian', 'DingLiren2023', 'NepoChess'];
+
 export async function loadRandomLichessGame() {
     gameStore.update(s => ({ ...s, isLoadingGame: true }));
 
     try {
-        // Lichess API: Get random game from top players
-        const response = await fetch('https://lichess.org/api/games/user/DrNykterstein?max=1&rated=true&perfType=blitz&opening=true&clocks=false&evals=false&pgnInJson=true', {
+        // 1. Pick a random top player
+        const player = TOP_PLAYERS[Math.floor(Math.random() * TOP_PLAYERS.length)];
+
+        // 2. Add randomness to fetching (last 50 games roughly)
+        // Lichess API doesn't support easy random offset, so we fetch last 10 and pick one locally
+        const response = await fetch(`https://lichess.org/api/games/user/${player}?max=10&rated=true&perfType=blitz,rapid&opening=true&pgnInJson=true`, {
             headers: { 'Accept': 'application/x-ndjson' }
         });
 
         const text = await response.text();
-        const lines = text.trim().split('\n');
-        const gameData = JSON.parse(lines[0]);
+        const lines = text.trim().split('\n').filter(line => line.length > 0);
+
+        if (lines.length === 0) throw new Error("No games found");
+
+        // 3. Pick a random game from the batch
+        const randomLine = lines[Math.floor(Math.random() * lines.length)];
+        const gameData = JSON.parse(randomLine);
+
+        // Safely extract names with fallbacks
+        const whiteName = gameData.players?.white?.user?.name || gameData.players?.white?.name || 'Unknown';
+        const blackName = gameData.players?.black?.user?.name || gameData.players?.black?.name || 'Unknown';
 
         const gameMeta: GameMetadata = {
             id: gameData.id,
-            white: gameData.players.white.user.name,
-            black: gameData.players.black.user.name,
+            white: whiteName,
+            black: blackName,
             date: new Date(gameData.createdAt).getFullYear().toString(),
-            event: `Lichess ${gameData.speed} • ${gameData.perf}`,
+            event: `Lichess ${gameData.speed || 'Blitz'} • ${gameData.perf || 'Rated'}`,
             win: gameData.winner === 'white' ? 'white' : gameData.winner === 'black' ? 'black' : 'draw',
             description: `${gameData.opening?.name || 'Classic Opening'}`,
             pgn: gameData.pgn
