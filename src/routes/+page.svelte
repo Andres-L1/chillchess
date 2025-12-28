@@ -91,6 +91,10 @@
                 <a href="/app" class="hover:text-primary-400 transition-colors"
                     >Ambiente</a
                 >
+                <a
+                    href="/patches"
+                    class="hover:text-primary-400 transition-colors">Parches</a
+                >
                 <!-- Pricing CTA -->
                 <a
                     href="/pricing"
@@ -238,6 +242,13 @@
                             class="py-3 px-4 hover:bg-white/5 rounded-lg transition-colors text-slate-300 hover:text-white"
                         >
                             Ambiente
+                        </a>
+                        <a
+                            href="/patches"
+                            on:click={() => (mobileMenuOpen = false)}
+                            class="py-3 px-4 hover:bg-white/5 rounded-lg transition-colors text-slate-300 hover:text-white"
+                        >
+                            📜 Notas del Parche
                         </a>
                         <!-- Mobile Pricing -->
                         <a
