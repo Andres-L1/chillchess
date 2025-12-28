@@ -260,78 +260,141 @@
                     <!-- Customization (PRO) -->
                     {#if isPro}
                         <div
-                            class="bg-gradient-to-br from-purple-900/20 to-pink-900/20 rounded-2xl border border-purple-500/30 p-6"
+                            class="bg-gradient-to-br from-purple-900/10 to-blue-900/10 rounded-2xl border border-purple-500/20 p-6 relative overflow-hidden group"
                         >
-                            <div class="flex items-center gap-2 mb-4">
-                                <span class="text-xl">✨</span>
-                                <h2 class="text-xl font-bold">
-                                    Personalización Pro
-                                </h2>
+                            <!-- Background decoration -->
+                            <div
+                                class="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl group-hover:bg-purple-500/20 transition-all duration-700"
+                            ></div>
+
+                            <div
+                                class="flex items-center gap-3 mb-6 relative z-10"
+                            >
+                                <span class="text-2xl">🎨</span>
+                                <div>
+                                    <h2 class="text-xl font-bold text-white">
+                                        Personalización Pro
+                                    </h2>
+                                    <p class="text-xs text-purple-300">
+                                        Diseña tu identidad única
+                                    </p>
+                                </div>
                             </div>
 
-                            <div class="space-y-4">
+                            <div class="space-y-6 relative z-10">
+                                <!-- Banner URL -->
                                 <div>
                                     <label
                                         for="banner-url"
-                                        class="block text-sm font-medium mb-2"
-                                        >Banner URL</label
+                                        class="block text-sm font-medium mb-2 text-slate-300"
+                                        >Banner de Fondo (URL)</label
                                     >
                                     <input
                                         id="banner-url"
                                         type="url"
                                         bind:value={bannerUrl}
-                                        placeholder="https://example.com/banner.jpg"
-                                        class="w-full bg-[#0B1120] border border-white/10 rounded-lg px-4 py-2 focus:border-purple-500 focus:outline-none"
+                                        placeholder="https://imgur.com/..."
+                                        class="w-full bg-[#0B1120]/50 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-purple-500 focus:ring-1 focus:ring-purple-500 focus:outline-none transition-all"
                                     />
-                                </div>
-
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label
-                                            for="theme-color"
-                                            class="block text-sm font-medium mb-2"
-                                            >Color Primario</label
-                                        >
-                                        <input
-                                            id="theme-color"
-                                            type="color"
-                                            bind:value={themeColor}
-                                            class="w-full h-10 rounded-lg cursor-pointer"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label
-                                            for="accent-color"
-                                            class="block text-sm font-medium mb-2"
-                                            >Color Acento</label
-                                        >
-                                        <input
-                                            id="accent-color"
-                                            type="color"
-                                            bind:value={accentColor}
-                                            class="w-full h-10 rounded-lg cursor-pointer"
-                                        />
-                                    </div>
-                                </div>
-
-                                <!-- Quick color presets -->
-                                <div>
-                                    <p class="text-xs text-slate-400 mb-2">
-                                        Presets:
+                                    <p class="text-[10px] text-slate-500 mt-1">
+                                        Recomendado: 1200x400px o similar.
                                     </p>
-                                    <div class="flex flex-wrap gap-2">
-                                        {#each DEFAULT_THEME_COLORS as preset}
+                                </div>
+
+                                <!-- Theme Presets -->
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium mb-3 text-slate-300"
+                                        >Temas Predefinidos</label
+                                    >
+                                    <div
+                                        class="grid grid-cols-2 sm:grid-cols-4 gap-3"
+                                    >
+                                        <!-- Themes Loop -->
+                                        {#each [{ name: "Chill Original", p: "#9333EA", a: "#A855F7" }, { name: "Ocean Vibes", p: "#0ea5e9", a: "#38bdf8" }, { name: "Sunset Lo-fi", p: "#f59e0b", a: "#fbbf24" }, { name: "Forest Rain", p: "#10b981", a: "#34d399" }, { name: "Cherry", p: "#ec4899", a: "#f472b6" }, { name: "Cyberpunk", p: "#f43f5e", a: "#22d3ee" }, { name: "Royal Gold", p: "#d97706", a: "#fcd34d" }, { name: "Noir", p: "#334155", a: "#94a3b8" }] as theme}
                                             <button
                                                 on:click={() => {
-                                                    themeColor = preset.primary;
-                                                    accentColor = preset.accent;
+                                                    themeColor = theme.p;
+                                                    accentColor = theme.a;
                                                 }}
-                                                class="px-3 py-1 rounded-full text-xs font-medium hover:scale-105 transition-transform"
-                                                style="background: linear-gradient(135deg, {preset.primary}, {preset.accent})"
+                                                class="flex flex-col items-center gap-2 p-2 rounded-xl border border-white/5 hover:bg-white/5 transition-all group/btn"
                                             >
-                                                {preset.name}
+                                                <div
+                                                    class="w-full h-8 rounded-lg shadow-sm transition-transform group-hover/btn:scale-105"
+                                                    style="background: linear-gradient(135deg, {theme.p}, {theme.a})"
+                                                ></div>
+                                                <span
+                                                    class="text-[10px] font-medium text-slate-400 group-hover/btn:text-white"
+                                                    >{theme.name}</span
+                                                >
                                             </button>
                                         {/each}
+                                    </div>
+                                </div>
+
+                                <!-- Custom Colors -->
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium mb-3 text-slate-300"
+                                        >Colores Personalizados</label
+                                    >
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <!-- Primary Color -->
+                                        <div class="space-y-2">
+                                            <div
+                                                class="flex justify-between text-xs text-slate-400"
+                                            >
+                                                <span
+                                                    >Primario (Botones/Bordes)</span
+                                                >
+                                                <span class="font-mono"
+                                                    >{themeColor}</span
+                                                >
+                                            </div>
+                                            <div
+                                                class="flex items-center gap-3 bg-[#0B1120]/50 p-2 rounded-xl border border-white/10"
+                                            >
+                                                <input
+                                                    type="color"
+                                                    bind:value={themeColor}
+                                                    class="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-none p-0"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    bind:value={themeColor}
+                                                    class="bg-transparent text-sm w-full focus:outline-none uppercase font-mono text-white"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <!-- Accent Color -->
+                                        <div class="space-y-2">
+                                            <div
+                                                class="flex justify-between text-xs text-slate-400"
+                                            >
+                                                <span
+                                                    >Acento
+                                                    (Gradientes/Detalles)</span
+                                                >
+                                                <span class="font-mono"
+                                                    >{accentColor}</span
+                                                >
+                                            </div>
+                                            <div
+                                                class="flex items-center gap-3 bg-[#0B1120]/50 p-2 rounded-xl border border-white/10"
+                                            >
+                                                <input
+                                                    type="color"
+                                                    bind:value={accentColor}
+                                                    class="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-none p-0"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    bind:value={accentColor}
+                                                    class="bg-transparent text-sm w-full focus:outline-none uppercase font-mono text-white"
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
