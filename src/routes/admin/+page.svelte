@@ -59,61 +59,6 @@
     // Edit State
     let editingAlbum: Album | null = null;
 
-    async function generateMusic() {
-        if (!aiPrompt.trim()) {
-            alert("Por favor escribe un prompt para la música.");
-            return;
-        }
-
-        isGenerating = true;
-
-        try {
-            const functions = getFunctions();
-            const generateAudioFn = httpsCallable(functions, "generateAudio");
-
-            // Llamada real a la Cloud Function
-            // Nota: Esto requiere que tengas configurado el token de HF en el backend
-            // firebase functions:config:set hf.key="TOKEN"
-            const result: any = await generateAudioFn({
-                prompt: aiPrompt,
-                duration: aiDuration,
-            });
-
-            if (result.data.success) {
-                const newTrack = {
-                    id: Date.now().toString(),
-                    title: `AI: ${aiPrompt.slice(0, 20)}...`,
-                    date: new Date().toLocaleDateString(),
-                    duration: aiDuration,
-                    // Crear Data URI para reproducir directamente
-                    url: `data:${result.data.format};base64,${result.data.audioBase64}`,
-                    status: "ready",
-                };
-
-                generatedTracks = [newTrack, ...generatedTracks];
-                alert("Música generada con éxito! 🎹");
-            }
-        } catch (error: any) {
-            console.error("AI Generation Error:", error);
-            alert(
-                `Error generando audio: ${error.message || "Error desconocido"}. \n\nAsegúrate de haber configurado tu TOKEN de Hugging Face en el backend.`,
-            );
-
-            // Fallback para demo visual si falla (opcional, para no bloquear al usuario completamente en dev)
-            const fallbackTrack = {
-                id: Date.now().toString(),
-                title: `Demo Track (Error Fallback) - ${aiPrompt.slice(0, 10)}...`,
-                date: new Date().toLocaleDateString(),
-                duration: aiDuration,
-                url: "#",
-                status: "error",
-            };
-            generatedTracks = [fallbackTrack, ...generatedTracks];
-        } finally {
-            isGenerating = false;
-        }
-    }
-
     let editingAlbumId: string | null = null;
 
     // --- SYNC/MIGRATION LOGIC ---
