@@ -364,22 +364,32 @@
                             >
                                 <div>
                                     <label
-                                        for="link-platform"
-                                        class="block text-xs mb-1"
+                                        class="block text-xs mb-2 font-medium text-slate-400"
                                         >Plataforma</label
                                     >
-                                    <select
-                                        id="link-platform"
-                                        bind:value={newLinkPlatform}
-                                        class="w-full bg-[#1a1a1a] border border-white/10 rounded px-3 py-2 text-sm"
+                                    <div
+                                        class="grid grid-cols-2 sm:grid-cols-3 gap-2"
                                     >
                                         {#each SOCIAL_PLATFORMS as platform}
-                                            <option value={platform.id}>
-                                                {platform.icon}
-                                                {platform.label}
-                                            </option>
+                                            <button
+                                                type="button"
+                                                on:click={() =>
+                                                    (newLinkPlatform =
+                                                        platform.id)}
+                                                class="flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-all text-left {newLinkPlatform ===
+                                                platform.id
+                                                    ? 'bg-blue-500/10 border-blue-500 text-white shadow-lg shadow-blue-900/20'
+                                                    : 'bg-[#1a1a1a] border-white/5 text-slate-400 hover:bg-[#252525] hover:border-white/10'}"
+                                            >
+                                                <span class="text-lg"
+                                                    >{platform.icon}</span
+                                                >
+                                                <span class="truncate"
+                                                    >{platform.label}</span
+                                                >
+                                            </button>
                                         {/each}
-                                    </select>
+                                    </div>
                                 </div>
                                 <div>
                                     <label
