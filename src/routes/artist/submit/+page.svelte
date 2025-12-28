@@ -21,6 +21,7 @@
     // Form Data
     let releaseTitle = "";
     let genre = "Lo-fi Hip Hop";
+    let customGenre = "";
     let coverFile: File | null = null;
     let coverPreview: string | null = null;
 
@@ -45,6 +46,7 @@
         if (input.files && input.files[0]) {
             const file = input.files[0];
             if (file.size > 5 * 1024 * 1024) {
+                // 5MB limit
                 alert("La portada no puede superar los 5MB");
                 return;
             }
@@ -91,12 +93,19 @@
     }
 
     function canProceedToStep(step: number): boolean {
-        if (step === 2)
-            return (
-                releaseTitle.trim() !== "" && genre !== "" && coverFile !== null
-            );
-        if (step === 3) return tracks.every((t) => t.title && t.file);
-        return true;
+        if (step === 2) {
+            // Para avanzar AL paso 2, solo necesitamos título y género
+            const hasValidGenre =
+                genre !== "Otra" ||
+                (genre === "Otra" && customGenre.trim() !== "");
+            return releaseTitle.trim() !== "" && hasValidGenre;
+        }
+        if (step === 3) {
+            // Para avanzar AL paso 3, necesitamos la portada
+            return coverFile !== null;
+        }
+        // Para enviar (desde paso 3), necesitamos todos los tracks
+        return tracks.every((t) => t.title && t.file);
     }
 
     async function submitRelease() {
@@ -157,7 +166,7 @@
                 artistName: $userStore.user?.displayName || "Unknown Artist",
                 artistEmail: $userStore.user?.email,
                 releaseTitle,
-                genre,
+                genre: genre === "Otra" ? customGenre : genre,
                 coverUrl,
                 tracks: processedTracks,
                 status: "pending",
@@ -347,12 +356,35 @@
                             >
                                 <option>Lo-fi Hip Hop</option>
                                 <option>Jazz Hop</option>
+                                <option>Chillhop</option>
                                 <option>Ambient</option>
                                 <option>Chillout</option>
+                                <option>Downtempo</option>
                                 <option>Piano Solo</option>
                                 <option>Synthwave</option>
+                                <option>Vaporwave</option>
+                                <option>Study Beats</option>
+                                <option>Instrumental Hip Hop</option>
+                                <option>Trip Hop</option>
+                                <option>Otra</option>
                             </select>
                         </div>
+
+                        {#if genre === "Otra"}
+                            <div class="md:col-span-2 animate-fade-in">
+                                <span
+                                    class="block text-sm font-medium mb-2 text-slate-300"
+                                >
+                                    Especifica el género
+                                </span>
+                                <input
+                                    type="text"
+                                    bind:value={customGenre}
+                                    placeholder="Ej. Jazzy Lo-fi, Neo-Soul..."
+                                    class="w-full bg-[#0B1120] border border-blue-500/30 rounded-xl px-4 py-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                />
+                            </div>
+                        {/if}
                     </div>
 
                     <button
