@@ -364,10 +364,11 @@
                                 class="bg-[#0B1120] rounded-lg p-4 mb-4 space-y-3"
                             >
                                 <div>
-                                    <label
+                                    <p
                                         class="block text-xs mb-2 font-medium text-slate-400 uppercase"
-                                        >Plataforma</label
                                     >
+                                        Plataforma
+                                    </p>
                                     <div
                                         class="grid grid-cols-2 sm:grid-cols-3 gap-2"
                                     >

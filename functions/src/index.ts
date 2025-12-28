@@ -10,7 +10,6 @@ admin.initializeApp();
 export const rateLimitArtistProfile = functions.firestore
     .document('artistProfiles/{profileId}')
     .onWrite(async (change, context) => {
-        const profileId = context.params.profileId;
         const userId = context.auth?.uid;
 
         // Skip si es delete o no está autenticado
@@ -27,7 +26,7 @@ export const rateLimitArtistProfile = functions.firestore
         const oneDayAgo = now - (24 * 60 * 60 * 1000);
 
         try {
-            await admin.firestore().runTransaction(async (transaction) => {
+            const resultCount = await admin.firestore().runTransaction(async (transaction: admin.firestore.Transaction) => {
                 const doc = await transaction.get(rateLimitRef);
 
                 let count = 0;
@@ -61,9 +60,11 @@ export const rateLimitArtistProfile = functions.firestore
                     userId,
                     lastUpdate: now
                 });
+
+                return count;
             });
 
-            functions.logger.info(`Rate limit check passed for user ${userId}, count: ${count}`);
+            functions.logger.info(`Rate limit check passed for user ${userId}, count: ${resultCount}`);
             return null;
 
         } catch (error) {
@@ -71,6 +72,8 @@ export const rateLimitArtistProfile = functions.firestore
 
             // Si se excedió el límite, revertir el cambio
             if (error instanceof functions.https.HttpsError) {
+                // Borrar el documento creado si excedió el límite y era una creación nueva,
+                // o revertir si era update (esto es más complejo, por ahora delete es drástico pero efectivo para spam)
                 await change.after.ref.delete();
                 throw error;
             }
@@ -86,7 +89,7 @@ export const rateLimitArtistProfile = functions.firestore
 export const cleanupRateLimits = functions.pubsub
     .schedule('0 0 * * *')
     .timeZone('Europe/Madrid')
-    .onRun(async (context) => {
+    .onRun(async (_context) => {
         const threeDaysAgo = Date.now() - (3 * 24 * 60 * 60 * 1000);
 
         const batch = admin.firestore().batch();
@@ -109,13 +112,12 @@ export const cleanupRateLimits = functions.pubsub
  * Validación adicional server-side
  * Se ejecuta antes de que Firestore Rules permita la escritura
  */
-export const validateArtistProfile = functions.https.onCall(async (data, context) => {
+export const validateArtistProfile = functions.https.onCall(async (data: any, context) => {
     // Verificar autenticación
     if (!context.auth) {
         throw new functions.https.HttpsError('unauthenticated', 'Debes estar autenticado');
     }
 
-    const userId = context.auth.uid;
     const profileData = data.profile;
 
     // Validaciones
