@@ -311,26 +311,26 @@
             <div
                 class="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-bold uppercase tracking-widest text-[#FFB347] mb-4 hover:bg-white/10 transition-colors cursor-default"
             >
-                ✨ La Nueva Era del Ajedrez
+                ✨ Música • Ambiente • Vibes
             </div>
 
             <h1
                 class="text-5xl md:text-8xl font-bold text-white tracking-tighter leading-none"
             >
-                Tu Zona <br />
+                Encuentra <br />
                 <span
-                    class="text-transparent bg-clip-text bg-gradient-to-r from-[#FF7B3D] via-[#FFB347] to-[#FF7B3D] bg-[200%_auto] animate-gradient"
-                    >De Flujo</span
+                    class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400 bg-[200%_auto] animate-gradient"
+                    >Tu Calma</span
                 >
             </h1>
 
             <p
                 class="text-lg md:text-2xl text-slate-300 max-w-2xl mx-auto font-light leading-relaxed"
             >
-                Juega ajedrez, estudia o relájate con nuestras atmósferas <strong
-                    class="text-white font-medium">Lo-Fi Premium</strong
+                Una colección exclusiva de música <strong
+                    class="text-white font-medium">Lo-Fi, Jazz y Ambient</strong
                 >.
-                <br class="hidden md:block" /> Sin distracciones. Solo tú y tu mente.
+                <br class="hidden md:block" /> Diseñada para acompañarte, sin distraerte.
             </p>
         </div>
 
@@ -378,10 +378,12 @@
                 >
                     🎵
                 </div>
-                <h3 class="text-xl font-bold text-white mb-2">Beats Curados</h3>
+                <h3 class="text-xl font-bold text-white mb-2">
+                    Selección Premium
+                </h3>
                 <p class="text-slate-400 leading-relaxed">
-                    Una colección exclusiva de Lo-Fi, Jazz y Ambient diseñada
-                    científicamente para mantenerte enfocado.
+                    Álbumes curados manualmente para garantizar la máxima
+                    calidad y una vibra coherente.
                 </p>
             </div>
 
@@ -392,12 +394,12 @@
                 <div
                     class="w-12 h-12 bg-orange-500/20 rounded-2xl flex items-center justify-center text-2xl mb-4 text-orange-400"
                 >
-                    ♟️
+                    ⚡
                 </div>
-                <h3 class="text-xl font-bold text-white mb-2">Ajedrez Zen</h3>
+                <h3 class="text-xl font-bold text-white mb-2">Sin Pausas</h3>
                 <p class="text-slate-400 leading-relaxed">
-                    Sin relojes estresantes ni toxicidad. Juega contra amigos o
-                    IA en un entorno visualmente calmado.
+                    Disfruta de una experiencia continua, ideal para largas
+                    sesiones de estudio o descanso.
                 </p>
             </div>
 
@@ -410,7 +412,9 @@
                 >
                     🌌
                 </div>
-                <h3 class="text-xl font-bold text-white mb-2">Atmósferas</h3>
+                <h3 class="text-xl font-bold text-white mb-2">
+                    Visuales Inmersivos
+                </h3>
                 <p class="text-slate-400 leading-relaxed">
                     Desbloquea fondos dinámicos y sets de piezas premium que
                     transforman tu experiencia visual.
