@@ -345,7 +345,7 @@
             class="absolute inset-0 z-[60] bg-black/80 backdrop-blur-xl animate-fade-in flex flex-col p-4 md:p-8 overflow-hidden"
         >
             <div class="flex justify-between items-center mb-8 shrink-0">
-                <h2 class="text-3xl font-bold text-white">Biblioteca</h2>
+                <h2 class="text-3xl font-bold text-slate-100">Biblioteca</h2>
                 <div
                     class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end"
                 >
@@ -430,7 +430,7 @@
             <div class="max-w-4xl mx-auto w-full h-full flex flex-col">
                 <div class="flex justify-between items-center mb-8 shrink-0">
                     <div>
-                        <h2 class="text-3xl font-bold text-white mb-1">
+                        <h2 class="text-3xl font-bold text-slate-100 mb-1">
                             Vibe Studio
                         </h2>
                         <p class="text-slate-400 text-sm">

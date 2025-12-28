@@ -468,7 +468,7 @@
                                     class="text-2xl font-bold {proposal.votes >
                                     20
                                         ? 'text-blue-400'
-                                        : 'text-white'}">{proposal.votes}</span
+                                        : 'text-slate-100'}">{proposal.votes}</span
                                 >
                                 <button
                                     on:click={() => vote(proposal.id, "down")}
@@ -495,7 +495,7 @@
                                     >
                                     <div class="flex-1 min-w-0">
                                         <h3
-                                            class="text-xl font-bold text-white mb-1"
+                                            class="text-xl font-bold text-slate-100 mb-1"
                                         >
                                             {proposal.title}
                                         </h3>

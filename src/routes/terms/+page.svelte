@@ -6,7 +6,7 @@
             >← Volver al inicio</a
         >
 
-        <h1 class="text-3xl md:text-4xl font-bold text-white mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-slate-100 mb-8">
             Términos de Servicio
         </h1>
 
@@ -17,7 +17,7 @@
                 <strong>Última actualización: 27 de diciembre de 2025</strong>
             </p>
 
-            <h2 class="text-xl font-bold text-white mt-8 mb-4">
+            <h2 class="text-xl font-bold text-slate-100 mt-8 mb-4">
                 1. Aceptación de los Términos
             </h2>
             <p>
@@ -26,7 +26,7 @@
                 no uses nuestra aplicación.
             </p>
 
-            <h2 class="text-xl font-bold text-white mt-8 mb-4">
+            <h2 class="text-xl font-bold text-slate-100 mt-8 mb-4">
                 2. Uso Aceptable
             </h2>
             <p>
@@ -47,7 +47,7 @@
                 <li>Intentos de vulnerar la seguridad de la plataforma.</li>
             </ul>
 
-            <h2 class="text-xl font-bold text-white mt-8 mb-4">
+            <h2 class="text-xl font-bold text-slate-100 mt-8 mb-4">
                 3. Suscripciones y Pagos
             </h2>
             <p>
@@ -58,7 +58,7 @@
                 ley lo exija.
             </p>
 
-            <h2 class="text-xl font-bold text-white mt-8 mb-4">
+            <h2 class="text-xl font-bold text-slate-100 mt-8 mb-4">
                 4. Propiedad Intelectual
             </h2>
             <p>
@@ -67,7 +67,7 @@
                 permitida la reproducción sin autorización.
             </p>
 
-            <h2 class="text-xl font-bold text-white mt-8 mb-4">
+            <h2 class="text-xl font-bold text-slate-100 mt-8 mb-4">
                 5. Limitación de Responsabilidad
             </h2>
             <p>

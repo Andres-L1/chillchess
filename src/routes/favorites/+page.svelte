@@ -173,7 +173,7 @@
                 class="text-center py-20 bg-white/5 rounded-3xl border border-white/5 border-dashed"
             >
                 <div class="text-6xl mb-6 opacity-20">💔</div>
-                <h2 class="text-2xl font-bold text-white mb-2">
+                <h2 class="text-2xl font-bold text-slate-100 mb-2">
                     Aún no tienes favoritos
                 </h2>
                 <p class="text-slate-400 mb-8 max-w-md mx-auto">

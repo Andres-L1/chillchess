@@ -131,7 +131,7 @@
             >
                 ← Volver al inicio
             </a>
-            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4 mt-4">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-100 mb-4 mt-4">
                 Hoja de Ruta 2025-2026
             </h1>
             <p class="text-lg text-slate-400 max-w-2xl mx-auto">
@@ -174,7 +174,7 @@
                                     <span class="text-2xl"
                                         >{getCategoryIcon(item.category)}</span
                                     >
-                                    <h3 class="text-xl font-bold text-white">
+                                    <h3 class="text-xl font-bold text-slate-100">
                                         {item.title}
                                     </h3>
                                 </div>

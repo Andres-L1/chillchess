@@ -33,7 +33,7 @@
         >
             <h3 class="text-xl font-bold text-slate-300 mb-2">Plan Gratuito</h3>
             <div class="mb-6">
-                <span class="text-4xl font-bold text-white">€0</span>
+                <span class="text-4xl font-bold text-slate-100">€0</span>
                 <span class="text-slate-500">/siempre</span>
             </div>
             <p class="text-slate-400 text-sm mb-8 min-h-[40px]">

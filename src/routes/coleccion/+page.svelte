@@ -364,7 +364,7 @@
             <div class="p-6 border-b border-white/10">
                 <div class="flex items-start justify-between gap-4 mb-4">
                     <div class="flex-1">
-                        <h2 class="text-2xl font-bold text-white mb-1">
+                        <h2 class="text-2xl font-bold text-slate-100 mb-1">
                             {selectedAlbum.title}
                         </h2>
                         <p class="text-slate-400">

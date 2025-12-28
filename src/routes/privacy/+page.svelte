@@ -6,7 +6,7 @@
             >← Volver al inicio</a
         >
 
-        <h1 class="text-3xl md:text-4xl font-bold text-white mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-slate-100 mb-8">
             Política de Privacidad
         </h1>
 
@@ -23,7 +23,7 @@
                 recopilamos y usamos tu información.
             </p>
 
-            <h2 class="text-xl font-bold text-white mt-8 mb-4">
+            <h2 class="text-xl font-bold text-slate-100 mt-8 mb-4">
                 1. Información que recopilamos
             </h2>
             <p>
@@ -40,7 +40,7 @@
                 </li>
             </ul>
 
-            <h2 class="text-xl font-bold text-white mt-8 mb-4">
+            <h2 class="text-xl font-bold text-slate-100 mt-8 mb-4">
                 2. Uso de la información
             </h2>
             <p>Usamos tus datos exclusivamente para:</p>
@@ -56,7 +56,7 @@
                 >
             </p>
 
-            <h2 class="text-xl font-bold text-white mt-8 mb-4">3. Seguridad</h2>
+            <h2 class="text-xl font-bold text-slate-100 mt-8 mb-4">3. Seguridad</h2>
             <p>
                 Implementamos medidas de seguridad robustas, incluyendo
                 autenticación segura a través de Google Firebase y reglas
@@ -64,7 +64,7 @@
                 modificar tus datos personales.
             </p>
 
-            <h2 class="text-xl font-bold text-white mt-8 mb-4">4. Contacto</h2>
+            <h2 class="text-xl font-bold text-slate-100 mt-8 mb-4">4. Contacto</h2>
             <p>
                 Si tienes preguntas sobre esta política, únete a nuestra
                 comunidad en

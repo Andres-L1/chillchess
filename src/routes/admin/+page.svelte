@@ -773,7 +773,7 @@
             <header
                 class="sticky top-0 z-30 bg-[#0B1120]/80 backdrop-blur-xl border-b border-white/5 px-8 py-4 flex justify-between items-center"
             >
-                <h2 class="text-xl font-bold text-white capitalize">
+                <h2 class="text-xl font-bold text-slate-100 capitalize">
                     {activeTab === "music" ? "Gestión de Contenido" : activeTab}
                 </h2>
                 <div class="flex items-center gap-4">
@@ -797,7 +797,7 @@
                                 >
                                     Biblioteca Musical
                                 </div>
-                                <div class="text-3xl font-bold text-white">
+                                <div class="text-3xl font-bold text-slate-100">
                                     {albums.length}
                                 </div>
                                 <div class="text-slate-500 text-xs mt-1">
@@ -812,7 +812,7 @@
                                 >
                                     Categorías Activas
                                 </div>
-                                <div class="text-3xl font-bold text-white">
+                                <div class="text-3xl font-bold text-slate-100">
                                     {categories.filter((c) => c !== "all")
                                         .length}
                                 </div>
@@ -828,7 +828,7 @@
                                 >
                                     Usuarios Registrados
                                 </div>
-                                <div class="text-3xl font-bold text-white">
+                                <div class="text-3xl font-bold text-slate-100">
                                     {realUsers.length > 0
                                         ? realUsers.length
                                         : "..."}
@@ -846,7 +846,7 @@
                                 >
                                     Propuestas Pendientes
                                 </div>
-                                <div class="text-3xl font-bold text-white">
+                                <div class="text-3xl font-bold text-slate-100">
                                     {proposals.filter(
                                         (p) => p.status === "pending",
                                     ).length}
@@ -885,7 +885,7 @@
                             class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
                         >
                             <div>
-                                <h2 class="text-2xl font-bold text-white">
+                                <h2 class="text-2xl font-bold text-slate-100">
                                     Usuarios ({realUsers.length})
                                 </h2>
                                 <p class="text-slate-400 text-sm">
@@ -1098,7 +1098,7 @@
                         <!-- Header & Filters -->
                         <div class="flex justify-between items-center">
                             <div>
-                                <h2 class="text-2xl font-bold text-white mb-1">
+                                <h2 class="text-2xl font-bold text-slate-100 mb-1">
                                     Propuestas ({proposals.length})
                                 </h2>
                                 <p class="text-slate-400 text-sm">
@@ -1130,7 +1130,7 @@
                                 class="text-center py-12 bg-white/5 rounded-2xl border border-white/5"
                             >
                                 <span class="text-4xl block mb-4">📭</span>
-                                <h3 class="text-xl font-bold text-white mb-2">
+                                <h3 class="text-xl font-bold text-slate-100 mb-2">
                                     No hay propuestas
                                 </h3>
                                 <p class="text-slate-400">
@@ -1151,7 +1151,7 @@
                                                 class="text-xl font-bold {proposal.votes >
                                                 10
                                                     ? 'text-blue-400'
-                                                    : 'text-white'}"
+                                                    : 'text-slate-100'}"
                                             >
                                                 {proposal.votes}
                                             </span>
@@ -1405,7 +1405,7 @@
                                         </div>
                                     {/if}
                                     <h2
-                                        class="text-2xl font-bold mb-6 text-white"
+                                        class="text-2xl font-bold mb-6 text-slate-100"
                                     >
                                         {editingAlbumId
                                             ? "Editar Contenido"

@@ -118,7 +118,7 @@
                     </div>
 
                     <h2
-                        class="text-2xl font-bold text-white mb-4 group-hover:text-primary-400 transition-colors"
+                        class="text-2xl font-bold text-slate-100 mb-4 group-hover:text-primary-400 transition-colors"
                     >
                         {patch.title}
                     </h2>

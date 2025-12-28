@@ -100,7 +100,7 @@
                         <div
                             class="flex items-baseline gap-4 mb-6 border-b border-white/5 pb-2"
                         >
-                            <h2 class="text-2xl font-bold text-white/90">
+                            <h2 class="text-2xl font-bold text-slate-100/90">
                                 {artist}
                             </h2>
                             <span

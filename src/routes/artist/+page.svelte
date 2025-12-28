@@ -285,7 +285,7 @@
                             >
                                 <span class="text-2xl">🎨</span>
                                 <div>
-                                    <h2 class="text-xl font-bold text-white">
+                                    <h2 class="text-xl font-bold text-slate-100">
                                         Personalización Pro
                                     </h2>
                                     <p class="text-xs text-purple-300">

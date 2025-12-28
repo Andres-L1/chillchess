@@ -440,7 +440,7 @@
             </div>
 
             <h1
-                class="text-4xl md:text-7xl font-bold text-white tracking-tighter leading-tight"
+                class="text-4xl md:text-7xl font-bold text-slate-100 tracking-tighter leading-tight"
             >
                 Encuentra Tu Calma <br />
                 <span
@@ -500,7 +500,7 @@
                 >
                     🎵
                 </div>
-                <h3 class="text-xl font-bold text-white mb-2">
+                <h3 class="text-xl font-bold text-slate-100 mb-2">
                     Selección Premium
                 </h3>
                 <p class="text-slate-400 leading-relaxed">
@@ -518,7 +518,9 @@
                 >
                     ⚡
                 </div>
-                <h3 class="text-xl font-bold text-white mb-2">Sin Pausas</h3>
+                <h3 class="text-xl font-bold text-slate-100 mb-2">
+                    Sin Pausas
+                </h3>
                 <p class="text-slate-400 leading-relaxed">
                     Disfruta de una experiencia continua, ideal para largas
                     sesiones de estudio o descanso.
@@ -534,7 +536,7 @@
                 >
                     🌌
                 </div>
-                <h3 class="text-xl font-bold text-white mb-2">
+                <h3 class="text-xl font-bold text-slate-100 mb-2">
                     Visuales Inmersivos
                 </h3>
                 <p class="text-slate-400 leading-relaxed">
@@ -550,7 +552,7 @@
         <div
             class="bg-gradient-to-br from-blue-600/10 to-purple-600/10 border border-white/10 rounded-3xl p-12"
         >
-            <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-slate-100 mb-4">
                 Explora Nuestra Colección
             </h2>
             <p class="text-slate-400 mb-8 max-w-xl mx-auto">
