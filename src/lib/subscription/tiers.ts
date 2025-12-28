@@ -39,7 +39,7 @@ export const TIERS: Record<SubscriptionTier, TierConfig> = {
             '🎨 Fondos y Ambientes Exclusivos',
             '⛔ Experiencia Sin Interrupciones',
             '👀 Modo Inmersivo (Ocultar UI)',
-            '🗳️ Votar en el Roadmap',
+            '💡 Proponer & Votar Features',
             '⭐ Insignia de Fundador',
         ],
         maxGamesDaily: Infinity,

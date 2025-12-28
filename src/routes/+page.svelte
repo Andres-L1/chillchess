@@ -439,15 +439,12 @@
                 </a>
             {/if}
 
-            <button
-                on:click={() =>
-                    document
-                        .getElementById("coleccion")
-                        ?.scrollIntoView({ behavior: "smooth" })}
-                class="px-10 py-4 bg-white/5 border border-white/10 text-white font-medium text-lg rounded-full hover:bg-white/10 hover:border-white/20 transition-all w-full sm:w-auto backdrop-blur-sm"
+            <a
+                href="/coleccion"
+                class="px-10 py-4 bg-white/5 border border-white/10 text-white font-medium text-lg rounded-full hover:bg-white/10 hover:border-white/20 transition-all w-full sm:w-auto backdrop-blur-sm inline-block text-center"
             >
                 Explorar Música
-            </button>
+            </a>
         </div>
     </header>
 
@@ -508,118 +505,26 @@
         </div>
     </section>
 
-    <!-- New Releases Grid -->
-    <main id="coleccion" class="px-4 md:px-8 pb-48 max-w-7xl mx-auto">
+    <!-- CTA to Collection -->
+    <section class="max-w-7xl mx-auto px-4 md:px-8 pb-48 text-center">
         <div
-            class="flex justify-between items-end mb-8 border-b border-white/10 pb-4"
+            class="bg-gradient-to-br from-blue-600/10 to-purple-600/10 border border-white/10 rounded-3xl p-12"
         >
-            <h2 class="text-xl md:text-3xl font-bold text-white">Colección</h2>
-            <button
-                class="text-xs font-semibold text-slate-400 border border-white/20 px-5 py-2.5 rounded-full hover:bg-white hover:text-black hover:border-white transition-all hover:shadow-sm cursor-pointer"
-                >VER TODO</button
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                Explora Nuestra Colección
+            </h2>
+            <p class="text-slate-400 mb-8 max-w-xl mx-auto">
+                Descubre álbumes curados de lo-fi, jazz y música ambient
+                perfecta para concentrarte.
+            </p>
+            <a
+                href="/coleccion"
+                class="inline-block px-8 py-4 bg-white text-black font-bold rounded-full hover:scale-105 transition-all shadow-lg hover:shadow-white/20"
             >
+                Ver Toda la Música
+            </a>
         </div>
-
-        <div
-            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 mb-16"
-        >
-            {#each $audioStore.availableAlbums as release}
-                <div class="group relative flex flex-col gap-3">
-                    <!-- Album Cover Card -->
-                    <div
-                        class="relative aspect-square rounded-xl overflow-hidden shadow-lg shadow-black/20 hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-500 group-hover:-translate-y-1 cursor-pointer bg-[#1e293b] ring-1 ring-white/5 group-hover:ring-white/10"
-                    >
-                        <img
-                            src={release.cover}
-                            alt={release.title}
-                            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100"
-                            loading="lazy"
-                        />
-
-                        <!-- Overlay on Hover -->
-                        <div
-                            class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]"
-                        >
-                            <a
-                                href="/album/{release.id}"
-                                class="w-14 h-14 bg-white rounded-full flex items-center justify-center text-xl shadow-xl hover:scale-110 active:scale-95 transition-transform text-black pl-1"
-                            >
-                                ▶
-                            </a>
-                        </div>
-
-                        <!-- Tag -->
-                        {#if release.tag}
-                            <div
-                                class="absolute top-3 right-3 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-white border border-white/10"
-                            >
-                                {release.tag}
-                            </div>
-                        {/if}
-
-                        <!-- Lock Overlay -->
-                        {#if release.vibeId && !$userSubscription.canAccessVibe(release.vibeId)}
-                            <div
-                                class="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center z-20 transition-opacity p-4 text-center"
-                            >
-                                <div
-                                    class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mb-2 border border-white/10"
-                                >
-                                    <span class="text-xl">🔒</span>
-                                </div>
-                                <span
-                                    class="text-xs font-bold text-white uppercase tracking-wider mb-2"
-                                    >Premium</span
-                                >
-                                <button
-                                    on:click|preventDefault|stopPropagation={() => {
-                                        blockedFeature = "vibe";
-                                        showPaywall = true;
-                                    }}
-                                    class="text-[10px] bg-white text-black px-3 py-1.5 rounded-full font-bold hover:bg-slate-200 transition-colors"
-                                >
-                                    DESBLOQUEAR
-                                </button>
-                            </div>
-                        {/if}
-                    </div>
-
-                    <!-- Album Info -->
-                    <div class="space-y-0.5">
-                        <h3
-                            class="text-sm font-bold text-white group-hover:text-blue-400 transition-colors truncate"
-                        >
-                            {release.title}
-                        </h3>
-                        <p class="text-xs text-slate-400 truncate">
-                            {release.artist}
-                        </p>
-                    </div>
-                </div>
-            {/each}
-
-            <!-- Coming Soon Placeholder -->
-            <div
-                class="group relative flex flex-col gap-4 opacity-40 hover:opacity-60 transition-all"
-            >
-                <div
-                    class="relative aspect-square rounded-2xl overflow-hidden bg-white/5 flex items-center justify-center border-2 border-dashed border-white/20 group-hover:border-white/40 transition-colors"
-                >
-                    <div class="text-center space-y-2">
-                        <span class="text-4xl block opacity-50">☕</span>
-                        <span
-                            class="text-slate-400 font-bold uppercase tracking-widest text-xs block"
-                            >Próximamente</span
-                        >
-                    </div>
-                </div>
-                <div class="space-y-1 px-1">
-                    <h3 class="font-bold text-xl text-white/50">Lo-Fi Café</h3>
-                    <p class="text-sm text-slate-600">Originales ChillChess</p>
-                </div>
-            </div>
-        </div>
-    </main>
+    </section>
 
     <!-- Footer -->
     <footer class="bg-[#050914] text-white py-16 mt-12 border-t border-white/5">

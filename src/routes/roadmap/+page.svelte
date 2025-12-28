@@ -224,8 +224,10 @@
                 <div>
                     <h4 class="font-bold text-white mb-2">¿Tienes ideas?</h4>
                     <p class="text-sm text-slate-300 leading-relaxed">
-                        Este roadmap evoluciona con vuestro feedback. Comparte
-                        tus sugerencias en nuestro
+                        Los usuarios <span class="text-blue-400 font-semibold"
+                            >Pro pueden proponer nuevas features</span
+                        >
+                        y votar las de otros miembros en nuestro
                         <a
                             href="https://discord.gg/G7SrFtJHnr"
                             target="_blank"
