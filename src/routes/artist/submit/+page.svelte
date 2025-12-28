@@ -5,10 +5,18 @@
     import { db, storage } from "$lib/firebase";
     import { collection, addDoc, serverTimestamp } from "firebase/firestore";
     import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+    import { userSubscription } from "$lib/subscription/userSubscription";
+    import PaywallModal from "$lib/components/PaywallModal.svelte";
 
     let loading = false;
     let uploading = false;
     let uploadProgress = 0;
+    let showPaywall = false;
+
+    // Check PRO status
+    $: isPro =
+        $userSubscription.tier === "pro" ||
+        $userSubscription.tier === "premium";
 
     // Form Data
     let releaseTitle = "";
@@ -177,190 +185,270 @@
     }
 </script>
 
-<div class="min-h-screen bg-[#0B1120] text-white font-poppins p-4 md:p-8">
-    <div class="max-w-2xl mx-auto">
-        <!-- Header -->
-        <a
-            href="/artist"
-            class="text-slate-400 hover:text-white mb-6 inline-flex items-center gap-2 text-sm"
+{#if !isPro}
+    <!-- PRO LOCK SCREEN -->
+    <div
+        class="min-h-screen bg-[#0B1120] text-white font-poppins p-4 flex items-center justify-center"
+    >
+        <div
+            class="text-center max-w-md bg-[#1a1a1a] p-8 rounded-2xl border border-white/10 shadow-2xl"
         >
-            <span>←</span> Volver al perfil
-        </a>
-
-        <h1 class="text-3xl font-bold mb-2">Enviar Música</h1>
-        <p class="text-slate-400 mb-8 text-sm">
-            Sube tus mejores temas para que sean incluidos en ChillChess.
-            Asegúrate de poseer el 100% de los derechos.
-        </p>
-        // Disclaimer
-
-        <div class="space-y-8">
-            <!-- Global Info -->
             <div
-                class="bg-[#1a1a1a] rounded-2xl border border-white/10 p-6 space-y-4"
+                class="w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-6 shadow-lg shadow-purple-500/20"
             >
-                <h2 class="text-lg font-bold border-b border-white/5 pb-2">
-                    Información del Lanzamiento
-                </h2>
+                🔒
+            </div>
+            <h1 class="text-2xl font-bold mb-2">Acceso Reservado</h1>
+            <p class="text-slate-400 mb-6">
+                El envío de música para A&R es una función exclusiva para
+                nuestros miembros <span class="text-purple-400 font-bold"
+                    >PRO</span
+                >.
+            </p>
+            <div class="space-y-3">
+                <button
+                    on:click={() => (showPaywall = true)}
+                    class="w-full py-3 bg-white text-black font-bold rounded-xl hover:scale-105 transition-transform"
+                >
+                    Desbloquear Acceso
+                </button>
+                <a
+                    href="/artist"
+                    class="block text-sm text-slate-500 hover:text-white"
+                    >Volver al Perfil</a
+                >
+            </div>
+        </div>
+        <PaywallModal
+            show={showPaywall}
+            on:close={() => (showPaywall = false)}
+        />
+    </div>
+{:else}
+    <!-- SUBMISSION FORM (PRO ONLY) -->
+    <div class="min-h-screen bg-[#0B1120] text-white font-poppins p-4 md:p-8">
+        <div class="max-w-2xl mx-auto">
+            <!-- Header -->
+            <a
+                href="/artist"
+                class="text-slate-400 hover:text-white mb-6 inline-flex items-center gap-2 text-sm"
+            >
+                <span>←</span> Volver al perfil
+            </a>
 
-                <div>
-                    <label class="block text-sm font-medium mb-1 text-slate-300"
-                        >Título del Álbum / Single</label
-                    >
-                    <input
-                        type="text"
-                        bind:value={releaseTitle}
-                        placeholder="Ej. Midnight Thoughts"
-                        class="w-full bg-[#0B1120] border border-white/10 rounded-lg px-4 py-2 focus:border-blue-500 focus:outline-none"
-                    />
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium mb-1 text-slate-300"
-                        >Género Principal</label
-                    >
-                    <select
-                        bind:value={genre}
-                        class="w-full bg-[#0B1120] border border-white/10 rounded-lg px-4 py-2 focus:border-blue-500 focus:outline-none"
-                    >
-                        <option>Lo-fi Hip Hop</option>
-                        <option>Jazz Hop</option>
-                        <option>Ambient</option>
-                        <option>Chillout</option>
-                        <option>Piano Solo</option>
-                        <option>Synthwave</option>
-                    </select>
-                </div>
-
-                <!-- Cover Upload -->
-                <div>
-                    <label class="block text-sm font-medium mb-2 text-slate-300"
-                        >Portada (Cuadrada, min 1000px)</label
-                    >
-                    <div class="flex items-start gap-4">
-                        <div
-                            class="w-24 h-24 bg-[#0B1120] rounded-lg border border-dashed border-white/20 flex items-center justify-center overflow-hidden flex-shrink-0 relative group"
-                        >
-                            {#if coverPreview}
-                                <img
-                                    src={coverPreview}
-                                    alt="Preview"
-                                    class="w-full h-full object-cover"
-                                />
-                                <div
-                                    class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                >
-                                    <span class="text-xs">Cambiar</span>
-                                </div>
-                            {:else}
-                                <span class="text-2xl text-slate-600">🖼️</span>
-                            {/if}
-                            <input
-                                type="file"
-                                accept="image/*"
-                                class="absolute inset-0 opacity-0 cursor-pointer"
-                                on:change={handleCoverSelect}
-                            />
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-xs text-slate-500 mb-2">
-                                JPG o PNG, máx 5MB.
-                            </p>
-                            <button
-                                class="text-sm text-blue-400 hover:text-blue-300 font-medium"
-                                on:click={triggerFileInput}
-                            >
-                                Seleccionar archivo...
-                            </button>
-                        </div>
-                    </div>
-                </div>
+            <div class="flex items-center justify-between mb-2">
+                <h1 class="text-3xl font-bold">Enviar Música</h1>
+                <span
+                    class="bg-purple-500/10 text-purple-400 px-3 py-1 rounded-full text-xs font-bold border border-purple-500/20"
+                    >PRO FEATURE</span
+                >
             </div>
 
-            <!-- Tracks -->
             <div
-                class="bg-[#1a1a1a] rounded-2xl border border-white/10 p-6 space-y-4"
+                class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 mb-8"
             >
-                <div
-                    class="flex justify-between items-center border-b border-white/5 pb-2"
+                <h3 class="text-sm font-bold text-blue-400 mb-1">
+                    📢 Información Importante
+                </h3>
+                <ul
+                    class="text-xs text-slate-300 space-y-1 list-disc list-inside"
                 >
-                    <h2 class="text-lg font-bold">Listado de Canciones</h2>
-                    <button
-                        on:click={addTrack}
-                        class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full transition-colors"
-                    >
-                        + Añadir Pista
-                    </button>
-                </div>
+                    <li>
+                        Debes poseer el 100% de los derechos de autor de la
+                        obra.
+                    </li>
+                    <li>
+                        <span class="text-white font-medium"
+                            >El envío NO garantiza la publicación.</span
+                        > Nuestro equipo de curadores seleccionará solo lo que mejor
+                        encaje con la vibe de ChillChess.
+                    </li>
+                    <li>
+                        Si tu música es seleccionada, recibirás la verificación
+                        y aparecerá en el feed global.
+                    </li>
+                </ul>
+            </div>
 
-                {#each tracks as track, i (track.id)}
-                    <div
-                        class="bg-[#0B1120] p-4 rounded-xl border border-white/5 relative group animate-fade-in"
-                    >
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- File Input -->
-                            <div>
-                                <label
-                                    class="block text-xs font-medium mb-1 text-slate-400"
-                                    >Archivo MP3</label
-                                >
+            <div class="space-y-8">
+                <!-- Global Info -->
+                <div
+                    class="bg-[#1a1a1a] rounded-2xl border border-white/10 p-6 space-y-4"
+                >
+                    <h2 class="text-lg font-bold border-b border-white/5 pb-2">
+                        Información del Lanzamiento
+                    </h2>
+
+                    <div>
+                        <h3
+                            class="block text-sm font-medium mb-1 text-slate-300"
+                        >
+                            Título del Álbum / Single
+                        </h3>
+                        <input
+                            type="text"
+                            bind:value={releaseTitle}
+                            placeholder="Ej. Midnight Thoughts"
+                            class="w-full bg-[#0B1120] border border-white/10 rounded-lg px-4 py-2 focus:border-blue-500 focus:outline-none"
+                        />
+                    </div>
+
+                    <div>
+                        <h3
+                            class="block text-sm font-medium mb-1 text-slate-300"
+                        >
+                            Género Principal
+                        </h3>
+                        <select
+                            bind:value={genre}
+                            class="w-full bg-[#0B1120] border border-white/10 rounded-lg px-4 py-2 focus:border-blue-500 focus:outline-none"
+                        >
+                            <option>Lo-fi Hip Hop</option>
+                            <option>Jazz Hop</option>
+                            <option>Ambient</option>
+                            <option>Chillout</option>
+                            <option>Piano Solo</option>
+                            <option>Synthwave</option>
+                        </select>
+                    </div>
+
+                    <!-- Cover Upload -->
+                    <div>
+                        <h3
+                            class="block text-sm font-medium mb-2 text-slate-300"
+                        >
+                            Portada (Cuadrada, min 1000px)
+                        </h3>
+                        <div class="flex items-start gap-4">
+                            <div
+                                class="w-24 h-24 bg-[#0B1120] rounded-lg border border-dashed border-white/20 flex items-center justify-center overflow-hidden flex-shrink-0 relative group"
+                            >
+                                {#if coverPreview}
+                                    <img
+                                        src={coverPreview}
+                                        alt="Preview"
+                                        class="w-full h-full object-cover"
+                                    />
+                                    <div
+                                        class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                        <span class="text-xs">Cambiar</span>
+                                    </div>
+                                {:else}
+                                    <span class="text-2xl text-slate-600"
+                                        >🖼️</span
+                                    >
+                                {/if}
                                 <input
                                     type="file"
-                                    accept=".mp3,audio/mpeg"
-                                    class="block w-full text-xs text-slate-400
-                                    file:mr-4 file:py-2 file:px-4
-                                    file:rounded-full file:border-0
-                                    file:text-xs file:font-semibold
-                                    file:bg-blue-500/10 file:text-blue-400
-                                    hover:file:bg-blue-500/20"
-                                    on:change={(e) => handleAudioSelect(e, i)}
+                                    accept="image/*"
+                                    class="absolute inset-0 opacity-0 cursor-pointer"
+                                    on:change={handleCoverSelect}
                                 />
                             </div>
-
-                            <!-- Title Input -->
-                            <div>
-                                <label
-                                    class="block text-xs font-medium mb-1 text-slate-400"
-                                    >Título de la Pista</label
+                            <div class="flex-1">
+                                <p class="text-xs text-slate-500 mb-2">
+                                    JPG o PNG, máx 5MB.
+                                </p>
+                                <button
+                                    class="text-sm text-blue-400 hover:text-blue-300 font-medium"
+                                    on:click={triggerFileInput}
                                 >
-                                <input
-                                    type="text"
-                                    bind:value={track.title}
-                                    placeholder="Nombre de la canción"
-                                    class="w-full bg-[#1a1a1a] border border-white/10 rounded px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
-                                />
+                                    Seleccionar archivo...
+                                </button>
                             </div>
                         </div>
-
-                        <!-- Remove Button -->
-                        {#if tracks.length > 1}
-                            <button
-                                on:click={() => removeTrack(i)}
-                                class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                                title="Eliminar pista"
-                            >
-                                ✕
-                            </button>
-                        {/if}
                     </div>
-                {/each}
-            </div>
+                </div>
 
-            <!-- Submit -->
-            <button
-                on:click={submitRelease}
-                disabled={uploading}
-                class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center gap-3"
-            >
-                {#if uploading}
+                <!-- Tracks -->
+                <div
+                    class="bg-[#1a1a1a] rounded-2xl border border-white/10 p-6 space-y-4"
+                >
                     <div
-                        class="animate-spin rounded-full h-5 w-5 border-2 border-white/20 border-t-white"
-                    ></div>
-                    <span>Subiendo {Math.round(uploadProgress)}%...</span>
-                {:else}
-                    <span>🚀 Enviar Lanzamiento</span>
-                {/if}
-            </button>
+                        class="flex justify-between items-center border-b border-white/5 pb-2"
+                    >
+                        <h2 class="text-lg font-bold">Listado de Canciones</h2>
+                        <button
+                            on:click={addTrack}
+                            class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full transition-colors"
+                        >
+                            + Añadir Pista
+                        </button>
+                    </div>
+
+                    {#each tracks as track, i (track.id)}
+                        <div
+                            class="bg-[#0B1120] p-4 rounded-xl border border-white/5 relative group animate-fade-in"
+                        >
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- File Input -->
+                                <div>
+                                    <h3
+                                        class="block text-xs font-medium mb-1 text-slate-400"
+                                    >
+                                        Archivo MP3
+                                    </h3>
+                                    <input
+                                        type="file"
+                                        accept=".mp3,audio/mpeg"
+                                        class="block w-full text-xs text-slate-400
+                                        file:mr-4 file:py-2 file:px-4
+                                        file:rounded-full file:border-0
+                                        file:text-xs file:font-semibold
+                                        file:bg-blue-500/10 file:text-blue-400
+                                        hover:file:bg-blue-500/20"
+                                        on:change={(e) =>
+                                            handleAudioSelect(e, i)}
+                                    />
+                                </div>
+
+                                <!-- Title Input -->
+                                <div>
+                                    <h3
+                                        class="block text-xs font-medium mb-1 text-slate-400"
+                                    >
+                                        Título de la Pista
+                                    </h3>
+                                    <input
+                                        type="text"
+                                        bind:value={track.title}
+                                        placeholder="Nombre de la canción"
+                                        class="w-full bg-[#1a1a1a] border border-white/10 rounded px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Remove Button -->
+                            {#if tracks.length > 1}
+                                <button
+                                    on:click={() => removeTrack(i)}
+                                    class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                                    title="Eliminar pista"
+                                >
+                                    ✕
+                                </button>
+                            {/if}
+                        </div>
+                    {/each}
+                </div>
+
+                <!-- Submit -->
+                <button
+                    on:click={submitRelease}
+                    disabled={uploading}
+                    class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg shadow-lg shadow-blue-900/20 transition-all flex items-center justify-center gap-3"
+                >
+                    {#if uploading}
+                        <div
+                            class="animate-spin rounded-full h-5 w-5 border-2 border-white/20 border-t-white"
+                        ></div>
+                        <span>Subiendo {Math.round(uploadProgress)}%...</span>
+                    {:else}
+                        <span>🚀 Enviar Lanzamiento</span>
+                    {/if}
+                </button>
+            </div>
         </div>
     </div>
-</div>
+{/if}
