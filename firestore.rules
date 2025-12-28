@@ -2,25 +2,29 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Users collection - cada usuario solo puede leer/escribir su propio documento
     match /users/{userId} {
+      // 1. Leer: Solo el dueño de la cuenta
       allow read: if request.auth != null && request.auth.uid == userId;
       
-      // Solo el usuario puede escribir, pero con restricciones
-      allow write: if request.auth != null 
-                   && request.auth.uid == userId
-                   && request.resource.data.uid == userId
-                   && request.resource.data.email == request.auth.token.email;
-      
-      // Prevenir que usuarios modifiquen su subscriptionTier manualmente
-      // (solo webhooks de Stripe pueden hacerlo via Admin SDK)
+      // 2. Crear: Solo el dueño, y debe inicializarse como 'free'
+      allow create: if request.auth != null 
+                    && request.auth.uid == userId
+                    && request.resource.data.uid == userId
+                    // Seguridad crucial: Al crear, el tier DEBE ser 'free' o no venir (default)
+                    && (
+                      !('subscriptionTier' in request.resource.data) || 
+                      request.resource.data.subscriptionTier == 'free'
+                    );
+
+      // 3. Actualizar: Solo el dueño, y NO puede tocar la suscripción ni isAdmin
       allow update: if request.auth != null 
                     && request.auth.uid == userId
-                    && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['subscriptionTier', 'subscriptionStatus', 'stripeCustomerId', 'stripeSubscriptionId']))
-                    || request.auth.token.admin == true; // Solo admin/backend
+                    // Seguridad crucial: NO se permite cambiar estos campos
+                    && !request.resource.data.diff(resource.data).affectedKeys()
+                        .hasAny(['subscriptionTier', 'subscriptionStatus', 'stripeCustomerId', 'stripeSubscriptionId', 'isAdmin']);
     }
     
-    // Bloquear todo lo demás
+    // Bloqueo por defecto para todo lo demás
     match /{document=**} {
       allow read, write: if false;
     }

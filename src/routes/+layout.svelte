@@ -12,6 +12,9 @@
     } from "@floating-ui/dom";
     import { storePopup } from "@skeletonlabs/skeleton";
     import DynamicBackground from "$lib/components/DynamicBackground.svelte";
+    import AudioPlayer from "$lib/components/AudioPlayer.svelte";
+    import BottomPlayer from "$lib/components/BottomPlayer.svelte";
+    import MusicToast from "$lib/components/MusicToast.svelte";
 
     storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 
@@ -33,6 +36,11 @@
     <div class="relative z-10">
         <slot />
     </div>
+
+    <!-- Global Audio & Interfaces -->
+    <AudioPlayer />
+    <BottomPlayer />
+    <MusicToast />
 </div>
 
 <style>

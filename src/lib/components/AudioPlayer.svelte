@@ -12,6 +12,12 @@
     let musicEl: HTMLAudioElement;
     let ambienceEl: HTMLAudioElement;
 
+    // Handle Seek Request
+    $: if (musicEl && $audioStore.seekRequest !== null) {
+        musicEl.currentTime = $audioStore.seekRequest;
+        audioStore.update((s) => ({ ...s, seekRequest: null }));
+    }
+
     // Reactively update volumes
     $: if (musicEl) {
         musicEl.volume = $audioStore.isMuted ? 0 : $audioStore.musicVolume;
@@ -85,13 +91,55 @@
     }
 
     function handleTrackEnd() {
-        console.log("Track ended, next...");
-        nextTrack();
+        console.log("Track ended");
+
+        // Handle repeat modes
+        const { repeatMode, currentTrackIndex, playlist } = $audioStore;
+
+        if (repeatMode === "one") {
+            // Repeat current track
+            if (musicEl) {
+                musicEl.currentTime = 0;
+                musicEl.play().catch(console.error);
+            }
+        } else if (repeatMode === "all") {
+            // Go to next track, loop back to start if at end
+            nextTrack();
+        } else {
+            // Normal mode: next track or stop at end
+            if (currentTrackIndex < playlist.length - 1) {
+                nextTrack();
+            } else {
+                // End of playlist
+                audioStore.update((s) => ({ ...s, isPlaying: false }));
+            }
+        }
+    }
+
+    function handleTimeUpdate() {
+        if (musicEl) {
+            audioStore.update((s) => ({
+                ...s,
+                currentTime: musicEl.currentTime,
+            }));
+        }
+    }
+
+    function handleDurationChange() {
+        if (musicEl) {
+            audioStore.update((s) => ({ ...s, duration: musicEl.duration }));
+        }
     }
 </script>
 
 <!-- Music Player (Playlist) -->
-<audio bind:this={musicEl} on:ended={handleTrackEnd} preload="auto"></audio>
+<audio
+    bind:this={musicEl}
+    on:ended={handleTrackEnd}
+    on:timeupdate={handleTimeUpdate}
+    on:durationchange={handleDurationChange}
+    preload="auto"
+></audio>
 
 <!-- Ambience Player (Loop) -->
 <audio bind:this={ambienceEl} loop preload="auto"></audio>

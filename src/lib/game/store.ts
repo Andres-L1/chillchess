@@ -1,6 +1,8 @@
 import { writable, get } from 'svelte/store';
 import { Chess, type Move } from 'chess.js';
 import { GAMES, type GameMetadata } from './pgns';
+import { logger } from '$lib/services/logger';
+import { playMoveSound } from '$lib/audio/sfx';
 
 // --- State Definitions ---
 
@@ -38,50 +40,69 @@ export const gameStore = writable<GameState>(initialState);
 let timer: any = null;
 const MOVE_INTERVAL_MS = 3000;
 
-const TOP_PLAYERS = ['DrNykterstein', 'Hikaru', 'Alireza2003', 'FabianoCaruana', 'LevonAronian', 'DingLiren2023', 'NepoChess'];
+// Top players with verified Lichess usernames
+const TOP_PLAYERS = ['DrNykterstein', 'Hikaru', 'Alireza2003', 'FabianoCaruana', 'LevonAronian', 'DanielNaroditsky', 'GothamChess'];
 
 export async function loadRandomLichessGame() {
     gameStore.update(s => ({ ...s, isLoadingGame: true }));
 
     try {
-        // 1. Pick a random top player
+        // Pick a random top player
         const player = TOP_PLAYERS[Math.floor(Math.random() * TOP_PLAYERS.length)];
 
-        // 2. Add randomness to fetching (last 50 games roughly)
-        // Lichess API doesn't support easy random offset, so we fetch last 10 and pick one locally
-        const response = await fetch(`https://lichess.org/api/games/user/${player}?max=10&rated=true&perfType=blitz,rapid&opening=true&pgnInJson=true`, {
-            headers: { 'Accept': 'application/x-ndjson' }
-        });
+        console.log(`Loading games from ${player}...`);
+
+        // Fetch recent rated games from Lichess API
+        // Using correct endpoint and parameters
+        const response = await fetch(
+            `https://lichess.org/api/games/user/${player}?max=15&rated=true&perfType=blitz,rapid,classical&pgnInJson=true&clocks=false&evals=false&opening=true`,
+            {
+                headers: {
+                    'Accept': 'application/x-ndjson'
+                }
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
         const text = await response.text();
         const lines = text.trim().split('\n').filter(line => line.length > 0);
 
-        if (lines.length === 0) throw new Error("No games found");
+        if (lines.length === 0) {
+            console.warn('No games found for player, using local games');
+            throw new Error("No games found");
+        }
 
-        // 3. Pick a random game from the batch
+        // Pick a random game from the fetched batch
         const randomLine = lines[Math.floor(Math.random() * lines.length)];
         const gameData = JSON.parse(randomLine);
 
-        // Safely extract names with fallbacks
-        const whiteName = gameData.players?.white?.user?.name || gameData.players?.white?.name || 'Unknown';
-        const blackName = gameData.players?.black?.user?.name || gameData.players?.black?.name || 'Unknown';
+        console.log(`Loaded game: ${gameData.id}`);
+
+        // Safely extract player names
+        const whiteName = gameData.players?.white?.user?.name || 'Unknown';
+        const blackName = gameData.players?.black?.user?.name || 'Unknown';
 
         const gameMeta: GameMetadata = {
             id: gameData.id,
             white: whiteName,
             black: blackName,
             date: new Date(gameData.createdAt).getFullYear().toString(),
-            event: `Lichess ${gameData.speed || 'Blitz'} • ${gameData.perf || 'Rated'}`,
+            event: `Lichess ${gameData.speed || 'Blitz'}`,
             win: gameData.winner === 'white' ? 'white' : gameData.winner === 'black' ? 'black' : 'draw',
-            description: `${gameData.opening?.name || 'Classic Opening'}`,
+            description: gameData.opening?.name || 'Classic Game',
             pgn: gameData.pgn
         };
 
         loadGame(gameMeta);
-    } catch (error) {
-        console.error('Failed to load Lichess game:', error);
-        // Fallback to local games
-        loadGame(GAMES[Math.floor(Math.random() * GAMES.length)]);
+    } catch (error: any) {
+        logger.error('Failed to load Lichess game', { error: error.message || error });
+        console.log('Falling back to local games database');
+        // Fallback to local games on any error
+        const randomGame = GAMES[Math.floor(Math.random() * GAMES.length)];
+        loadGame(randomGame);
     } finally {
         gameStore.update(s => ({ ...s, isLoadingGame: false }));
     }
@@ -136,6 +157,7 @@ export function nextMove() {
             lastMove: move,
             history: [...state.history, chess.fen()]
         }));
+        playMoveSound(move.flags.includes('c') || move.flags.includes('e'));
     }
 }
 

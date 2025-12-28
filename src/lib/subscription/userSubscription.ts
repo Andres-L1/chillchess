@@ -3,7 +3,7 @@ import { userStore } from '$lib/auth/userStore';
 import { doc, onSnapshot, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '$lib/firebase';
 import type { UserProfile, SubscriptionTier } from '$lib/types/subscription';
-import { SUBSCRIPTION_TIERS, canAccessVibe, canPlayGame } from './tiers';
+import { TIERS, canAccessVibe, checkGamesAccess } from './tiers';
 
 interface SubscriptionState {
     profile: UserProfile | null;
@@ -68,7 +68,7 @@ function createUserSubscriptionStore() {
                         loading: false,
                         tier: 'free',
                         canAccessVibe: (vibeId: string) => canAccessVibe('free', vibeId),
-                        canPlayGame: () => canPlayGame('free', 0),
+                        canPlayGame: () => checkGamesAccess('free', 0).canPlay,
                     });
                     return;
                 }
@@ -93,7 +93,7 @@ function createUserSubscriptionStore() {
                     loading: false,
                     tier,
                     canAccessVibe: (vibeId: string) => canAccessVibe(tier, vibeId),
-                    canPlayGame: () => canPlayGame(tier, profile.gamesPlayedToday),
+                    canPlayGame: () => checkGamesAccess(tier, profile.gamesPlayedToday).canPlay,
                 });
             },
             (error) => {

@@ -21,6 +21,15 @@ export interface AudioState {
 
     isPlaying: boolean;
     activeVibe: VibePreset;
+
+    // Playback state
+    duration: number;
+    currentTime: number;
+    seekRequest: number | null;
+
+    // Playback modes
+    repeatMode: 'off' | 'one' | 'all';
+    shuffle: boolean;
 }
 
 const initialState: AudioState = {
@@ -28,17 +37,45 @@ const initialState: AudioState = {
     ambienceVolume: 0.6,
     isMuted: false,
 
-    currentAmbience: 'none', // Por defecto silencio en menú
-    playlist: [], // Sin música en menú
+    currentAmbience: 'none',
+    playlist: [],
     currentTrackIndex: 0,
 
     isPlaying: false,
-    activeVibe: 'custom'
+    activeVibe: 'custom',
+
+    duration: 0,
+    currentTime: 0,
+    seekRequest: null,
+
+    repeatMode: 'off',
+    shuffle: false
 };
 
 export const audioStore = writable<AudioState>(initialState);
 
 // --- Actions ---
+
+export function toggleRepeat() {
+    audioStore.update(s => {
+        const modes: Array<'off' | 'one' | 'all'> = ['off', 'one', 'all'];
+        const currentIndex = modes.indexOf(s.repeatMode);
+        const nextMode = modes[(currentIndex + 1) % modes.length];
+        return { ...s, repeatMode: nextMode };
+    });
+}
+
+export function toggleShuffle() {
+    audioStore.update(s => ({ ...s, shuffle: !s.shuffle }));
+}
+
+export function seek(time: number) {
+    audioStore.update(s => ({ ...s, seekRequest: time }));
+}
+
+export function togglePlayback() {
+    audioStore.update(s => ({ ...s, isPlaying: !s.isPlaying }));
+}
 
 export function setMusicVolume(val: number) {
     audioStore.update(s => ({ ...s, musicVolume: val }));
@@ -50,6 +87,10 @@ export function setAmbienceVolume(val: number) {
 
 export function toggleMute() {
     audioStore.update(s => ({ ...s, isMuted: !s.isMuted }));
+}
+
+export function unlockAudio() {
+    audioStore.update(s => ({ ...s, isPlaying: true }));
 }
 
 export function playAlbum(albumId: string) {

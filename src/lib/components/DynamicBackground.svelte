@@ -13,6 +13,7 @@
 
     // Simple rain particle generation
     let raindrops: { left: number; delay: number; duration: number }[] = [];
+    let isMobile = false;
 
     $: currentBg =
         $audioStore.activeVibe === "custom"
@@ -24,8 +25,12 @@
     $: isApp = $page.url.pathname.startsWith("/app");
 
     onMount(() => {
-        // Generate rain drops
-        raindrops = Array.from({ length: 100 }, () => ({
+        // Detect mobile for performance optimization
+        isMobile = window.innerWidth < 768;
+
+        // Generate rain drops - fewer on mobile for better performance
+        const particleCount = isMobile ? 50 : 75;
+        raindrops = Array.from({ length: particleCount }, () => ({
             left: Math.random() * 100,
             delay: Math.random() * 2,
             duration: 0.5 + Math.random() * 0.5,
@@ -35,10 +40,10 @@
 
 {#if isApp}
     <div class="fixed inset-0 -z-10 overflow-hidden bg-black">
-        <!-- Ken Burns Background -->
+        <!-- Ken Burns Background - GPU accelerated -->
         <div
             class="absolute inset-0 bg-cover bg-center animate-ken-burns opacity-60 transition-all duration-1000"
-            style="background-image: url('{currentBg}');"
+            style="background-image: url('{currentBg}'); will-change: transform;"
         ></div>
 
         <!-- Rain Overlay (only for Noir vibe) -->
@@ -49,7 +54,7 @@
                 {#each raindrops as drop}
                     <div
                         class="absolute top-[-10px] w-[1px] h-[15px] bg-white/50 animate-rain"
-                        style="left: {drop.left}%; animation-delay: {drop.delay}s; animation-duration: {drop.duration}s;"
+                        style="left: {drop.left}%; animation-delay: {drop.delay}s; animation-duration: {drop.duration}s; will-change: transform;"
                     ></div>
                 {/each}
             </div>
@@ -80,6 +85,9 @@
 
     .animate-ken-burns {
         animation: ken-burns 60s ease-in-out infinite alternate;
+        /* GPU acceleration */
+        transform: translateZ(0);
+        backface-visibility: hidden;
     }
 
     @keyframes rain {
@@ -103,5 +111,8 @@
         animation-name: rain;
         animation-timing-function: linear;
         animation-iteration-count: infinite;
+        /* GPU acceleration */
+        transform: translateZ(0);
+        backface-visibility: hidden;
     }
 </style>

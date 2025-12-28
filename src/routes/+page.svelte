@@ -10,6 +10,7 @@
     let showAuthModal = false;
     let showPaywall = false;
     let blockedFeature: "vibe" | "games" = "vibe";
+    let mobileMenuOpen = false;
 
     function enterSanctuary(vibeId: string) {
         // If it's a paid vibe, check access
@@ -30,6 +31,7 @@
 
     function openAuth() {
         showAuthModal = true;
+        mobileMenuOpen = false;
     }
 </script>
 
@@ -46,9 +48,10 @@
 >
     <!-- Navbar Responsive -->
     <nav
-        class="flex flex-col md:flex-row justify-between items-center px-4 md:px-8 py-6 max-w-7xl mx-auto gap-4"
+        class="relative flex justify-between items-center px-4 md:px-8 py-6 max-w-7xl mx-auto"
     >
-        <div class="flex items-center gap-3">
+        <!-- Logo -->
+        <div class="flex items-center gap-3 z-20">
             <img
                 src="/favicon.svg"
                 alt="ChillChess Logo"
@@ -64,44 +67,216 @@
             >
         </div>
 
-        <!-- Mobile Links -->
+        <!-- Desktop Menu -->
         <div
-            class="flex gap-4 md:gap-6 text-sm font-medium text-slate-400 overflow-x-auto max-w-full px-2 items-center"
+            class="hidden md:flex gap-8 text-sm font-medium text-slate-400 items-center"
         >
-            <button
-                class="hover:text-white transition-colors whitespace-nowrap bg-transparent border-none cursor-pointer"
-                >Lanzamientos</button
-            >
-            <button
-                class="hover:text-white transition-colors whitespace-nowrap bg-transparent border-none cursor-pointer"
-                >Artistas</button
-            >
-            <button
-                class="hover:text-white transition-colors whitespace-nowrap bg-transparent border-none cursor-pointer"
-                >Tienda</button
+            <a href="/roadmap" class="hover:text-white transition-colors"
+                >Roadmap</a
             >
 
             {#if $userStore.isLoggedIn}
-                <button
-                    on:click={logout}
-                    class="ml-2 text-red-400 hover:text-red-300 whitespace-nowrap transition-colors bg-transparent border-none cursor-pointer"
-                    >Salir</button
+                <a href="/coleccion" class="hover:text-white transition-colors"
+                    >Colección</a
                 >
+                <a href="/app" class="hover:text-white transition-colors"
+                    >Ambiente</a
+                >
+            {/if}
+
+            {#if $userSubscription?.profile?.isAdmin}
+                <a
+                    href="/admin"
+                    class="hover:text-orange-400 transition-colors font-bold"
+                    >⚙️ Admin</a
+                >
+            {/if}
+
+            {#if $userStore.isLoggedIn}
+                <div
+                    class="flex items-center gap-3 ml-4 bg-white/5 px-3 py-1.5 rounded-full border border-white/10"
+                >
+                    <!-- User Avatar/Name -->
+                    <div
+                        class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white shadow-inner"
+                    >
+                        {$userStore.user?.displayName?.[0]?.toUpperCase() ||
+                            "U"}
+                    </div>
+
+                    <div class="flex flex-col items-start leading-none mr-2">
+                        <span
+                            class="text-xs font-bold text-white tracking-wide"
+                        >
+                            {$userStore.user?.displayName || "Usuario"}
+                        </span>
+                        <span
+                            class="text-[10px] uppercase font-bold text-slate-400"
+                        >
+                            {$userSubscription?.tier === "free"
+                                ? "Plan Gratuito"
+                                : $userSubscription?.tier}
+                        </span>
+                    </div>
+
+                    <button
+                        on:click={logout}
+                        class="text-xs text-red-400 hover:text-red-300 transition-colors ml-2 bg-transparent border-none cursor-pointer font-medium hover:bg-red-500/10 px-2 py-1 rounded"
+                        title="Cerrar Sessión"
+                    >
+                        ✕
+                    </button>
+                </div>
             {:else}
                 <button
                     on:click={openAuth}
-                    class="ml-2 hover:text-white whitespace-nowrap transition-colors bg-transparent border-none cursor-pointer"
+                    class="ml-2 hover:text-white whitespace-nowrap transition-colors bg-transparent border-none cursor-pointer font-medium"
                     >Acceso</button
                 >
             {/if}
         </div>
 
-        <a
-            href="/app"
-            class="px-8 py-3 bg-white text-black rounded-full text-sm font-bold tracking-wide hover:bg-slate-200 transition-all hover:scale-105 shadow-xl hover:shadow-2xl hover:shadow-white/20 active:scale-95 w-full md:w-auto text-center flex items-center justify-center gap-2"
+        <!-- Mobile Hamburger Button -->
+        <button
+            on:click={() => (mobileMenuOpen = !mobileMenuOpen)}
+            class="md:hidden z-20 text-white p-2 hover:bg-white/10 rounded-lg transition-colors"
+            aria-label="Menu"
         >
-            <span>✨</span> Entrar
-        </a>
+            {#if mobileMenuOpen}
+                <svg
+                    class="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                    />
+                </svg>
+            {:else}
+                <svg
+                    class="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 6h16M4 12h16M4 18h16"
+                    />
+                </svg>
+            {/if}
+        </button>
+
+        <!-- Mobile Menu Dropdown -->
+        {#if mobileMenuOpen}
+            <div
+                class="absolute top-full left-0 right-0 mt-2 mx-4 bg-[#1a1a1a]/98 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden md:hidden z-10"
+            >
+                <div class="flex flex-col p-4 gap-3">
+                    <a
+                        href="/roadmap"
+                        on:click={() => (mobileMenuOpen = false)}
+                        class="py-3 px-4 hover:bg-white/5 rounded-lg transition-colors text-slate-300 hover:text-white"
+                    >
+                        Roadmap
+                    </a>
+
+                    {#if $userStore.isLoggedIn}
+                        <a
+                            href="/coleccion"
+                            on:click={() => (mobileMenuOpen = false)}
+                            class="py-3 px-4 hover:bg-white/5 rounded-lg transition-colors text-slate-300 hover:text-white"
+                        >
+                            Colección
+                        </a>
+                        <a
+                            href="/app"
+                            on:click={() => (mobileMenuOpen = false)}
+                            class="py-3 px-4 hover:bg-white/5 rounded-lg transition-colors text-slate-300 hover:text-white"
+                        >
+                            Ambiente
+                        </a>
+                    {/if}
+
+                    <a
+                        href="https://discord.gg/G7SrFtJHnr"
+                        target="_blank"
+                        class="py-3 px-4 hover:bg-[#5865F2]/10 rounded-lg transition-colors text-slate-300 hover:text-[#5865F2] flex items-center gap-3 border-t border-white/5 mt-2"
+                    >
+                        <svg
+                            class="w-5 h-5"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.018.077.077 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.018.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.086 2.157 2.419 0 1.334-.956 2.419-2.157 2.419zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.086 2.157 2.419 0 1.334-.946 2.419-2.157 2.419z"
+                            />
+                        </svg>
+                        Soporte & Feedback
+                    </a>
+
+                    {#if $userSubscription?.profile?.isAdmin}
+                        <a
+                            href="/admin"
+                            on:click={() => (mobileMenuOpen = false)}
+                            class="py-3 px-4 hover:bg-white/5 rounded-lg transition-colors text-orange-400 font-bold"
+                        >
+                            ⚙️ Admin
+                        </a>
+                    {/if}
+
+                    <div class="border-t border-white/10 my-2"></div>
+
+                    {#if $userStore.isLoggedIn}
+                        <div class="py-3 px-4 bg-white/5 rounded-lg">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-sm font-bold text-white shadow-inner"
+                                >
+                                    {$userStore.user?.displayName?.[0]?.toUpperCase() ||
+                                        "U"}
+                                </div>
+                                <div class="flex flex-col leading-tight">
+                                    <span class="text-sm font-bold text-white">
+                                        {$userStore.user?.displayName ||
+                                            "Usuario"}
+                                    </span>
+                                    <span class="text-xs text-slate-400">
+                                        {$userSubscription?.tier === "free"
+                                            ? "Plan Gratuito"
+                                            : $userSubscription?.tier}
+                                    </span>
+                                </div>
+                            </div>
+                            <button
+                                on:click={() => {
+                                    logout();
+                                    mobileMenuOpen = false;
+                                }}
+                                class="w-full py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors"
+                            >
+                                Cerrar Sesión
+                            </button>
+                        </div>
+                    {:else}
+                        <button
+                            on:click={openAuth}
+                            class="py-3 px-4 bg-white text-black rounded-lg font-bold hover:bg-slate-200 transition-colors text-center"
+                        >
+                            Iniciar Sesión
+                        </button>
+                    {/if}
+                </div>
+            </div>
+        {/if}
+
+        <!-- CTA Button (visible on all sizes) -->
     </nav>
 
     <!-- Hero Section -->
@@ -128,12 +303,12 @@
             Atmósferas inmersivas diseñadas para estudiar, jugar y fluir. <br
                 class="hidden md:block"
             />
-            Ajedrez, música Lo-Fi y calma.
+            Estrategia, música Lo-Fi y calma.
         </p>
     </header>
 
     <!-- New Releases Grid -->
-    <main class="px-4 md:px-8 pb-32 max-w-7xl mx-auto">
+    <main id="coleccion" class="px-4 md:px-8 pb-48 max-w-7xl mx-auto">
         <div
             class="flex justify-between items-end mb-8 border-b border-white/10 pb-4"
         >
@@ -145,13 +320,13 @@
         </div>
 
         <div
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10"
+            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 mb-16"
         >
             {#each ALBUMS as release}
-                <div class="group relative flex flex-col gap-4">
+                <div class="group relative flex flex-col gap-3">
                     <!-- Album Cover Card -->
                     <div
-                        class="relative aspect-square rounded-2xl overflow-hidden shadow-lg shadow-black/20 hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2 cursor-pointer bg-[#1e293b]"
+                        class="relative aspect-square rounded-xl overflow-hidden shadow-lg shadow-black/20 hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-500 group-hover:-translate-y-1 cursor-pointer bg-[#1e293b] ring-1 ring-white/5 group-hover:ring-white/10"
                     >
                         <img
                             src={release.cover}
@@ -162,64 +337,61 @@
 
                         <!-- Overlay on Hover -->
                         <div
-                            class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]"
+                            class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]"
                         >
                             <a
-                                href="/app"
-                                on:click={() =>
-                                    enterSanctuary(
-                                        release.vibeId || release.id,
-                                    )}
-                                class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-2xl shadow-xl hover:scale-110 active:scale-95 transition-transform text-black pl-1"
+                                href="/album/{release.id}"
+                                class="w-14 h-14 bg-white rounded-full flex items-center justify-center text-xl shadow-xl hover:scale-110 active:scale-95 transition-transform text-black pl-1"
                             >
                                 ▶
                             </a>
                         </div>
 
                         <!-- Tag -->
-                        <div
-                            class="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-white border border-white/10"
-                        >
-                            {release.tag}
-                        </div>
+                        {#if release.tag}
+                            <div
+                                class="absolute top-3 right-3 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-white border border-white/10"
+                            >
+                                {release.tag}
+                            </div>
+                        {/if}
 
-                        <!-- Lock Overlay for Blocked Vibes -->
+                        <!-- Lock Overlay -->
                         {#if release.vibeId && !$userSubscription.canAccessVibe(release.vibeId)}
                             <div
-                                class="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center z-20 transition-opacity"
+                                class="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center z-20 transition-opacity p-4 text-center"
                             >
                                 <div
-                                    class="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mb-4"
+                                    class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mb-2 border border-white/10"
                                 >
-                                    <span class="text-3xl">🔒</span>
+                                    <span class="text-xl">🔒</span>
                                 </div>
+                                <span
+                                    class="text-xs font-bold text-white uppercase tracking-wider mb-2"
+                                    >Premium</span
+                                >
                                 <button
                                     on:click|preventDefault|stopPropagation={() => {
                                         blockedFeature = "vibe";
                                         showPaywall = true;
                                     }}
-                                    class="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold rounded-full hover:shadow-lg hover:shadow-orange-500/30 transition-all text-sm"
+                                    class="text-[10px] bg-white text-black px-3 py-1.5 rounded-full font-bold hover:bg-slate-200 transition-colors"
                                 >
-                                    Desbloquear
+                                    DESBLOQUEAR
                                 </button>
                             </div>
                         {/if}
                     </div>
 
-                    <!-- Meta Info -->
-                    <div class="space-y-1 px-1">
+                    <!-- Album Info -->
+                    <div class="space-y-0.5">
                         <h3
-                            class="font-bold text-xl text-white group-hover:text-[#FF7B3D] transition-colors leading-tight"
+                            class="text-sm font-bold text-white group-hover:text-blue-400 transition-colors truncate"
                         >
                             {release.title}
                         </h3>
-                        <p class="text-sm font-medium text-slate-400">
+                        <p class="text-xs text-slate-400 truncate">
                             {release.artist}
-                        </p>
-                        <p
-                            class="text-xs text-slate-500 mt-2 font-light line-clamp-2 leading-relaxed"
-                        >
-                            {release.description}
                         </p>
                     </div>
                 </div>
@@ -269,18 +441,35 @@
                 </p>
             </div>
             <div class="flex gap-8 text-sm font-medium">
-                <button
-                    class="text-slate-500 hover:text-white transition-colors bg-transparent border-none cursor-pointer"
-                    >Instagram</button
-                >
-                <button
-                    class="text-slate-500 hover:text-white transition-colors bg-transparent border-none cursor-pointer"
-                    >Twitter</button
-                >
-                <button
-                    class="text-slate-500 hover:text-white transition-colors bg-transparent border-none cursor-pointer"
-                    >Discord</button
-                >
+                <div class="flex gap-8 text-sm font-medium">
+                    <a
+                        href="/privacy"
+                        class="text-slate-500 hover:text-white transition-colors"
+                        >Privacidad</a
+                    >
+                    <a
+                        href="/terms"
+                        class="text-slate-500 hover:text-white transition-colors"
+                        >Términos</a
+                    >
+                    <a
+                        href="https://discord.gg/G7SrFtJHnr"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-slate-500 hover:text-[#5865F2] transition-colors flex items-center gap-2"
+                    >
+                        <svg
+                            class="w-4 h-4"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.018.077.077 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.018.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.086 2.157 2.419 0 1.334-.956 2.419-2.157 2.419zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.086 2.157 2.419 0 1.334-.946 2.419-2.157 2.419z"
+                            />
+                        </svg>
+                        Ayuda & Soporte
+                    </a>
+                </div>
             </div>
         </div>
     </footer>

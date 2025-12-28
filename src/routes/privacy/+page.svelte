@@ -1,0 +1,73 @@
+<div class="min-h-screen bg-[#0B1120] text-slate-200 font-poppins py-12 px-4">
+    <div class="max-w-3xl mx-auto space-y-8">
+        <a
+            href="/"
+            class="text-blue-400 hover:text-blue-300 text-sm mb-8 block transition-colors"
+            >← Volver al inicio</a
+        >
+
+        <h1 class="text-3xl md:text-4xl font-bold text-white mb-8">
+            Política de Privacidad
+        </h1>
+
+        <div
+            class="space-y-6 text-sm md:text-base leading-relaxed text-slate-300"
+        >
+            <p>
+                <strong>Última actualización: 27 de diciembre de 2025</strong>
+            </p>
+
+            <p>
+                En ChillChess, respetamos tu privacidad y nos comprometemos a
+                proteger tus datos personales. Esta política explica cómo
+                recopilamos y usamos tu información.
+            </p>
+
+            <h2 class="text-xl font-bold text-white mt-8 mb-4">
+                1. Información que recopilamos
+            </h2>
+            <p>
+                Solo recopilamos la información básica necesaria para
+                proporcionarte nuestro servicio:
+            </p>
+            <ul class="list-disc pl-5 mt-2 space-y-1">
+                <li>Correo electrónico (para tu cuenta).</li>
+                <li>Nombre de usuario (para mostrar en tu perfil).</li>
+                <li>Estado de suscripción (si adquieres un plan).</li>
+                <li>
+                    Estadísticas de juego (partidas jugadas, vibes favoritos).
+                </li>
+            </ul>
+
+            <h2 class="text-xl font-bold text-white mt-8 mb-4">
+                2. Uso de la información
+            </h2>
+            <p>Usamos tus datos exclusivamente para:</p>
+            <ul class="list-disc pl-5 mt-2 space-y-1">
+                <li>Gestionar tu acceso a la aplicación.</li>
+                <li>Sincronizar tu progreso entre dispositivos.</li>
+                <li>Procesar pagos (a través de Stripe) si te suscribes.</li>
+            </ul>
+            <p class="mt-2">
+                <strong
+                    >No vendemos ni compartimos tus datos con terceros para
+                    fines publicitarios.</strong
+                >
+            </p>
+
+            <h2 class="text-xl font-bold text-white mt-8 mb-4">3. Seguridad</h2>
+            <p>
+                Implementamos medidas de seguridad robustas, incluyendo
+                autenticación segura a través de Google Firebase y reglas
+                estrictas de base de datos para asegurar que solo tú puedes
+                modificar tus datos personales.
+            </p>
+
+            <h2 class="text-xl font-bold text-white mt-8 mb-4">4. Contacto</h2>
+            <p>
+                Si tienes preguntas sobre esta política, contáctanos en
+                soporte@chillchess.app.
+            </p>
+        </div>
+    </div>
+</div>

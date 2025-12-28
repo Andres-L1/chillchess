@@ -19,6 +19,9 @@ export interface UserProfile {
     lastGamePlayed: number; // Timestamp
     lastResetDate: string; // YYYY-MM-DD format
 
+    // Admin Access
+    isAdmin?: boolean;
+
     // Created/Updated
     createdAt: number; // Timestamp
     updatedAt: number; // Timestamp

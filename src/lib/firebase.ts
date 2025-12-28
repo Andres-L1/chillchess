@@ -17,7 +17,7 @@ const firebaseConfig = {
 let app;
 let auth: Auth;
 let db: Firestore;
-let googleProvider: GoogleAuthProvider;
+// Auth Provider Removed (Email/Pass only)
 
 try {
     app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
@@ -25,7 +25,7 @@ try {
     db = getFirestore(app);
 
     // Configurar Auth de Google
-    googleProvider = new GoogleAuthProvider();
+    // googleProvider = new GoogleAuthProvider();
 
     // Set persistence
     setPersistence(auth, browserLocalPersistence).catch((error) => {
@@ -36,4 +36,4 @@ try {
     console.error("Error initializing Firebase (Check .env variables):", e);
 }
 
-export { auth, db, googleProvider };
+export { auth, db };

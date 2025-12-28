@@ -1,56 +1,101 @@
-import type { SubscriptionTierConfig } from '$lib/types/subscription';
+import type { SubscriptionTier } from '$lib/types/subscription';
 
-export const SUBSCRIPTION_TIERS: Record<'free' | 'pro' | 'premium', SubscriptionTierConfig> = {
-    free: {
-        name: 'Gratis',
-        price: 0,
-        features: {
-            vibes: ['noir'], // Solo Ciudad Noir
-            gamesPerDay: 5,
-            aiAnalysis: false,
-            exclusiveThemes: false,
-            offlineMode: false,
-        },
-        color: 'slate',
-        description: 'Para probar ChillChess'
-    },
-    pro: {
-        name: 'Pro',
-        price: 4.99,
-        priceId: '', // TODO: Añadir Stripe Price ID cuando se cree
-        features: {
-            vibes: ['noir', 'library', 'zen'], // Todos los actuales
-            gamesPerDay: -1, // Ilimitado
-            aiAnalysis: false,
-            exclusiveThemes: false,
-            offlineMode: true,
-        },
-        color: 'orange',
-        description: 'Todos los ambientes, partidas infinitas'
-    },
-    premium: {
-        name: 'Premium',
-        price: 9.99,
-        priceId: '', // TODO: Añadir Stripe Price ID cuando se cree
-        features: {
-            vibes: ['noir', 'library', 'zen', 'lofi-cafe'], // Incluye futuros
-            gamesPerDay: -1,
-            aiAnalysis: true, // Análisis con Stockfish
-            exclusiveThemes: true, // Temas de tablero premium
-            offlineMode: true,
-        },
-        color: 'purple',
-        description: 'Todo incluido + análisis IA'
-    }
-} as const;
-
-// Helper para verificar acceso a un vibe
-export function canAccessVibe(tier: 'free' | 'pro' | 'premium', vibeId: string): boolean {
-    return SUBSCRIPTION_TIERS[tier].features.vibes.includes(vibeId);
+export interface TierConfig {
+    id: SubscriptionTier;
+    name: string;
+    price: string;
+    priceValue: number;
+    billing: string;
+    features: string[];
+    maxGamesDaily: number;
+    canAccessPremiumVibes: boolean;
 }
 
-// Helper para verificar si puede jugar
-export function canPlayGame(tier: 'free' | 'pro' | 'premium', gamesPlayedToday: number): boolean {
-    const limit = SUBSCRIPTION_TIERS[tier].features.gamesPerDay;
-    return limit === -1 || gamesPlayedToday < limit;
+export const TIERS: Record<SubscriptionTier, TierConfig> = {
+    free: {
+        id: 'free',
+        name: 'Free',
+        price: 'Gratis',
+        priceValue: 0,
+        billing: 'Para siempre',
+        features: [
+            '2 álbumes básicos',
+            'Audio estándar (128kbps)',
+            'Tablero clásico',
+            'Acceso al ambiente básico'
+        ],
+        maxGamesDaily: 0,
+        canAccessPremiumVibes: false
+    },
+    pro: {
+        id: 'pro',
+        name: 'Pro',
+        price: '€19.99',
+        priceValue: 19.99,
+        billing: 'anual',
+        features: [
+            '✨ Todos los álbumes ilimitados',
+            '❌ Sin anuncios',
+            '🎵 Audio de alta calidad',
+            '🎨 Tableros personalizables (próximamente)',
+            '🌧️ Fondos animados premium (próximamente)',
+            '📥 Descargas offline (próximamente)',
+            '🎯 Acceso anticipado (próximamente)',
+            '👑 Badge exclusivo (próximamente)',
+            '🗳️ Vota en la Roadmap (próximamente)'
+        ],
+        maxGamesDaily: Infinity,
+        canAccessPremiumVibes: true
+    },
+    premium: {
+        id: 'premium',
+        name: 'Premium',
+        price: '€19.99',
+        priceValue: 19.99,
+        billing: 'anual',
+        features: [
+            '✨ Todos los álbumes ilimitados',
+            '🎵 Audio HD (320kbps)',
+            '🎨 Tableros personalizables',
+            '🌧️ Fondos animados premium',
+            '📥 Descargas offline (próximamente)',
+            '🎯 Acceso anticipado a nuevos álbumes',
+            '❌ Sin anuncios',
+            '👑 Badge exclusivo',
+            '🗳️ Vota en la Roadmap'
+        ],
+        maxGamesDaily: Infinity,
+        canAccessPremiumVibes: true
+    }
+};
+
+// Helper: Check if user can access a specific vibe
+export function canAccessVibe(tier: SubscriptionTier, vibeId: string): boolean {
+    // Free users can only access basic vibes
+    const freeVibes = ['none', 'asap-forever'];
+
+    if (tier === 'free') {
+        return freeVibes.includes(vibeId);
+    }
+
+    // Pro users can access everything
+    return true;
+}
+
+// Helper: Check games remaining today
+export function checkGamesAccess(tier: SubscriptionTier, gamesPlayedToday: number): {
+    canPlay: boolean;
+    remaining: number;
+} {
+    const limit = TIERS[tier].maxGamesDaily;
+
+    if (limit === Infinity) {
+        return { canPlay: true, remaining: Infinity };
+    }
+
+    const remaining = Math.max(0, limit - gamesPlayedToday);
+    return {
+        canPlay: remaining > 0,
+        remaining
+    };
 }
