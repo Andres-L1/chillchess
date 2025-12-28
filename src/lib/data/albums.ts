@@ -61,8 +61,8 @@ export function getAlbumsByCategory(category: AlbumCategory): Album[] {
     return ALBUMS.filter(album => album.category === category);
 }
 
-export const CATEGORY_LABELS: Record<AlbumCategory, string> = {
-    musica: 'Música',
-    juegos: 'Juegos',
-    ambiente: 'Ambiente'
-};
+export const CATEGORY_LABELS = [
+    { id: 'musica' as AlbumCategory, label: 'Música' },
+    { id: 'juegos' as AlbumCategory, label: 'Gaming & Focus' },
+    { id: 'ambiente' as AlbumCategory, label: 'Ambiente' }
+];

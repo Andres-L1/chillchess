@@ -350,7 +350,7 @@
                     href="/app"
                     class="px-10 py-4 bg-white text-black font-bold text-lg rounded-full hover:scale-105 hover:shadow-[0_0_40px_-10px_rgba(255,255,255,0.5)] transition-all duration-300 w-full sm:w-auto"
                 >
-                    Ir al Tablero
+                    Ir a mi Espacio
                 </a>
             {/if}
 

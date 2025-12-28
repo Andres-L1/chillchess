@@ -421,9 +421,11 @@
 
     <!-- Vibe Studio Overlay -->
     {#if showVibeStudio}
-        <div
-            class="absolute inset-0 z-[70] bg-black/80 backdrop-blur-xl animate-fade-in flex flex-col p-4 md:p-8 overflow-hidden"
+        <button
+            class="absolute inset-0 z-[70] bg-black/80 backdrop-blur-xl animate-fade-in flex flex-col p-4 md:p-8 overflow-hidden text-left cursor-default w-full border-none outline-none appearance-none"
             on:click|self={() => (showVibeStudio = false)}
+            on:keydown={(e) => e.key === "Escape" && (showVibeStudio = false)}
+            tabindex="0"
         >
             <div class="max-w-4xl mx-auto w-full h-full flex flex-col">
                 <div class="flex justify-between items-center mb-8 shrink-0">
@@ -504,7 +506,7 @@
                     {/each}
                 </div>
             </div>
-        </div>
+        </button>
     {/if}
 
     <!-- Paywall Modal -->
