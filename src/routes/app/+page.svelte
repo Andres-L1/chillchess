@@ -5,12 +5,16 @@
     import { audioStore, unlockAudio, playAlbum } from "$lib/audio/store";
     import { CATEGORY_LABELS, type AlbumCategory } from "$lib/data/albums";
     import { userStore } from "$lib/auth/userStore";
+    import { userSubscription } from "$lib/subscription/userSubscription";
     import { playMoveSound } from "$lib/audio/sfx";
 
     import Visualizer from "$lib/components/Visualizer.svelte";
     import ChillBackground from "$lib/components/ChillBackground.svelte";
+    import PaywallModal from "$lib/components/PaywallModal.svelte";
 
     let showMusicExplorer = false;
+    let showVibeStudio = false;
+    let showPaywall = false;
     let isUserLoaded = false;
 
     // --- FOCUS TIMER LOGIC ---
@@ -146,16 +150,19 @@
                 <span class="text-sm font-medium">Salir</span>
             </a>
 
-            <div
-                class="flex items-center gap-2 bg-white/5 backdrop-blur-md rounded-full px-4 py-2 border border-white/10 shadow-lg"
+            <button
+                on:click={() => (showVibeStudio = !showVibeStudio)}
+                class="flex items-center gap-2 bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/10 hover:border-white/20 shadow-lg transition-all group"
             >
-                <div
-                    class="w-2 h-2 rounded-full bg-green-400 animate-pulse"
-                ></div>
-                <span class="text-xs text-slate-300 font-mono tracking-wider"
-                    >ZEN MODE</span
+                <span
+                    class="w-2 h-2 rounded-full bg-orange-400 group-hover:scale-125 transition-transform"
+                ></span>
+                <span
+                    class="text-xs font-bold text-slate-300 group-hover:text-white font-mono tracking-wider uppercase"
                 >
-            </div>
+                    Vibe Studio
+                </span>
+            </button>
 
             <button
                 on:click={toggleMusicExplorer}
@@ -411,6 +418,101 @@
             </div>
         </div>
     {/if}
+
+    <!-- Vibe Studio Overlay -->
+    {#if showVibeStudio}
+        <div
+            class="absolute inset-0 z-[70] bg-black/80 backdrop-blur-xl animate-fade-in flex flex-col p-4 md:p-8 overflow-hidden"
+            on:click|self={() => (showVibeStudio = false)}
+        >
+            <div class="max-w-4xl mx-auto w-full h-full flex flex-col">
+                <div class="flex justify-between items-center mb-8 shrink-0">
+                    <div>
+                        <h2 class="text-3xl font-bold text-white mb-1">
+                            Vibe Studio
+                        </h2>
+                        <p class="text-slate-400 text-sm">
+                            Personaliza tu atmósfera de concentración
+                        </p>
+                    </div>
+                    <button
+                        on:click={() => (showVibeStudio = false)}
+                        class="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors shrink-0"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                <div
+                    class="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto"
+                >
+                    <!-- Example Vibes (Hardcoded mainly for UI demo, should link to actual logic) -->
+                    {#each [{ id: "none", label: "Silencio Digital", icon: "🔇", desc: "Sin efectos de fondo", pro: false }, { id: "noir", label: "Lluvia Nocturna", icon: "🌧️", desc: "Sonido de lluvia suave y tonos oscuros", pro: false }, { id: "library", label: "Biblioteca", icon: "📚", desc: "Ambiente académico y texturas de papel", pro: false }, { id: "zen", label: "Jardín Zen", icon: "🎋", desc: "Naturaleza y sonidos de viento", pro: true }, { id: "space", label: "Cosmos", icon: "🌌", desc: "Frecuencias espaciales y vacío", pro: true }] as vibe}
+                        {@const isLocked =
+                            vibe.pro &&
+                            $userSubscription.tier !== "pro" &&
+                            $userSubscription.tier !== "premium"}
+                        <button
+                            on:click={() => {
+                                if (isLocked) {
+                                    showPaywall = true;
+                                } else {
+                                    // Logic to set vibe background
+                                    // For now just console log or minor implementation
+                                    console.log("Setting vibe:", vibe.id);
+                                    // Ideally call a store function here
+                                    showVibeStudio = false;
+                                }
+                            }}
+                            class="relative p-6 rounded-2xl border transition-all text-left flex items-start gap-4 group {isLocked
+                                ? 'bg-white/5 border-white/5 opacity-70 hover:opacity-100 cursor-not-allowed'
+                                : 'bg-[#1e293b]/50 border-white/10 hover:bg-[#1e293b] hover:border-orange-500/50 cursor-pointer'}"
+                        >
+                            <div
+                                class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl {isLocked
+                                    ? 'bg-white/5 grayscale'
+                                    : 'bg-white/10 group-hover:bg-orange-500/20'}"
+                            >
+                                {vibe.icon}
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h3 class="font-bold text-white text-lg">
+                                        {vibe.label}
+                                    </h3>
+                                    {#if isLocked}
+                                        <span
+                                            class="text-[10px] bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider border border-orange-500/20"
+                                            >PRO</span
+                                        >
+                                    {/if}
+                                </div>
+                                <p
+                                    class="text-sm text-slate-400 leading-relaxed"
+                                >
+                                    {vibe.desc}
+                                </p>
+                            </div>
+                            {#if isLocked}
+                                <div
+                                    class="absolute top-4 right-4 text-slate-500"
+                                >
+                                    🔒
+                                </div>
+                            {/if}
+                        </button>
+                    {/each}
+                </div>
+            </div>
+        </div>
+    {/if}
+
+    <!-- Paywall Modal -->
+    <PaywallModal
+        show={showPaywall}
+        blockedFeature="vibe"
+        on:close={() => (showPaywall = false)}
+    />
 </div>
 
 <style>

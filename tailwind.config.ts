@@ -44,6 +44,12 @@ export default {
                     800: '#72513b',
                     900: '#5e4332',
                 },
+                midnight: {
+                    900: '#050914', // Deepest (Footer)
+                    800: '#0B1120', // Main Background
+                    700: '#131b2e', // Cards / Panels
+                    600: '#1e293b', // Lighter Panels
+                },
             },
             fontFamily: {
                 poppins: ['Poppins', 'sans-serif'],

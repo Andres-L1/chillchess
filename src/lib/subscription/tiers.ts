@@ -9,6 +9,7 @@ export interface TierConfig {
     features: string[];
     maxGamesDaily: number;
     canAccessPremiumVibes: boolean;
+    canCustomizeBoard: boolean;
 }
 
 export const TIERS: Record<SubscriptionTier, TierConfig> = {
@@ -19,33 +20,32 @@ export const TIERS: Record<SubscriptionTier, TierConfig> = {
         priceValue: 0,
         billing: 'Para siempre',
         features: [
-            '2 álbumes básicos',
-            'Audio estándar (128kbps)',
-            'Tablero clásico',
-            'Acceso al ambiente básico'
+            '🎵 Acceso limitado a la colección',
+            '♟️ Tablero clásico básico',
+            '🌅 Vibes estáticos',
+            '⚡ Calidad de audio estándar',
         ],
-        maxGamesDaily: 0,
-        canAccessPremiumVibes: false
+        maxGamesDaily: 3,
+        canAccessPremiumVibes: false,
+        canCustomizeBoard: false,
     },
     pro: {
         id: 'pro',
         name: 'Pro',
-        price: '€19.99',
-        priceValue: 19.99,
-        billing: 'anual',
+        price: '€4.99',
+        priceValue: 4.99,
+        billing: 'mes',
         features: [
-            '✨ Todos los álbumes ilimitados',
-            '❌ Sin anuncios',
-            '🎵 Audio de alta calidad',
-            '🎨 Tableros personalizables (próximamente)',
-            '🌧️ Fondos animados premium (próximamente)',
-            '📥 Descargas offline (próximamente)',
-            '🎯 Acceso anticipado (próximamente)',
-            '👑 Badge exclusivo (próximamente)',
-            '🗳️ Vota en la Roadmap (próximamente)'
+            '✨ Música Ilimitada (Catálogo completo)',
+            '🎨 Personalización Total (Tableros, Piezas, Fondos)',
+            '⚡ Audio HD sin compresión',
+            '🌊 Vibes Dinámicos (Lluvia, Espacio, Café...)',
+            '🚫 Sin Anuncios',
+            '🏆 Acceso a Torneos Premium',
         ],
         maxGamesDaily: Infinity,
-        canAccessPremiumVibes: true
+        canAccessPremiumVibes: true,
+        canCustomizeBoard: true,
     },
     premium: {
         id: 'premium',
@@ -54,19 +54,15 @@ export const TIERS: Record<SubscriptionTier, TierConfig> = {
         priceValue: 19.99,
         billing: 'anual',
         features: [
-            '✨ Todos los álbumes ilimitados',
-            '🎵 Audio HD (320kbps)',
-            '🎨 Tableros personalizables',
-            '🌧️ Fondos animados premium',
-            '📥 Descargas offline (próximamente)',
-            '🎯 Acceso anticipado a nuevos álbumes',
-            '❌ Sin anuncios',
-            '👑 Badge exclusivo',
-            '🗳️ Vota en la Roadmap'
+            '✨ Todo lo de PRO',
+            '🎁 2 Meses Gratis (pago anual)',
+            '👑 Badge de Fundador',
+            '🎨 Personalización Total',
         ],
         maxGamesDaily: Infinity,
-        canAccessPremiumVibes: true
-    }
+        canAccessPremiumVibes: true,
+        canCustomizeBoard: true,
+    },
 };
 
 // Helper: Check if user can access a specific vibe
