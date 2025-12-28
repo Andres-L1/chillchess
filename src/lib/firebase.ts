@@ -32,7 +32,9 @@ try {
     }
 
     // Set persistence
-});
+    setPersistence(auth, browserLocalPersistence).catch((error) => {
+        console.warn("Auth Persistence Error:", error);
+    });
 
 } catch (e) {
     console.error("Error initializing Firebase (Check .env variables):", e);
