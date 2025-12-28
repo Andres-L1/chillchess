@@ -39,11 +39,12 @@
             title: "Lanzamiento Beta",
             type: "major",
             changes: [
-                "🎵 Reproductor de audio funcional con 1 álbum disponible.",
-                "🔐 Sistema de autenticación con Google.",
+                "🎵 Reproductor de audio funcional con música lo-fi y ambient.",
+                "🔐 Sistema de autenticación Firebase (email/contraseña).",
                 "💳 Página de planes (Free/Pro).",
                 "🎨 Fondos dinámicos básicos.",
                 "📱 Diseño responsive para móvil y desktop.",
+                "💡 Sistema de propuestas para usuarios Pro (votar y proponer features).",
             ],
         },
     ];

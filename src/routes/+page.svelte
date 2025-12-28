@@ -56,14 +56,14 @@
                 src="/logo-desktop.png"
                 alt="ChillChess Logo"
                 class="h-8 w-auto hidden md:block hover:scale-105 transition-transform duration-300"
-                style="mix-blend-mode: screen; filter: brightness(1.2);"
+                style="filter: invert(1) brightness(0.9);"
             />
             <!-- Mobile logo -->
             <img
                 src="/logo-mobile.png"
                 alt="ChillChess Logo"
                 class="h-8 w-auto md:hidden hover:scale-105 transition-transform duration-300"
-                style="mix-blend-mode: screen; filter: brightness(1.2);"
+                style="filter: invert(1) brightness(0.9);"
             />
             <span
                 class="text-xs uppercase bg-white/10 px-2 py-1 rounded-md text-slate-400"
@@ -567,7 +567,7 @@
                         src="/logo-desktop.png"
                         alt="Logo"
                         class="h-6 w-auto"
-                        style="mix-blend-mode: screen; filter: brightness(1.2);"
+                        style="filter: invert(1) brightness(0.9);"
                     />
                 </div>
                 <p class="text-sm text-slate-500">
