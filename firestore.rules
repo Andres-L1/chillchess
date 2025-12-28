@@ -2,6 +2,9 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    // ============================================
+    // USERS COLLECTION - Secure
+    // ============================================
     match /users/{userId} {
       // 1. Leer: Solo el dueño de la cuenta
       allow read: if request.auth != null && request.auth.uid == userId;
@@ -24,27 +27,59 @@ service cloud.firestore {
                         .hasAny(['subscriptionTier', 'subscriptionStatus', 'stripeCustomerId', 'stripeSubscriptionId', 'isAdmin']);
     }
     
-    // Artist Profiles
+    // ============================================
+    // ARTIST PROFILES - Con Validación Mejorada
+    // ============================================
     match /artistProfiles/{profileId} {
+      // Helper function para validar profile
+      function isValidProfile() {
+        let data = request.resource.data;
+        let hasValidName = data.artistName is string
+                          && data.artistName.size() >= 2
+                          && data.artistName.size() <= 50;
+        let hasValidBio = data.bio is string
+                         && data.bio.size() <= 200;
+        let hasValidLinks = data.socialLinks is list
+                           && data.socialLinks.size() <= 10;
+        let hasValidUserId = data.userId == profileId;
+        
+        // Validar campos opcionales solo si existen
+        let validAvatar = !('avatarUrl' in data) || (data.avatarUrl is string && data.avatarUrl.size() <= 500);
+        let validBanner = !('bannerUrl' in data) || (data.bannerUrl is string && data.bannerUrl.size() <= 500);
+        
+        // Solo permitir campos específicos
+        let allowedKeys = ['userId', 'artistName', 'bio', 'avatarUrl', 'bannerUrl', 
+                          'themeColor', 'accentColor', 'socialLinks', 'bannerStyle',
+                          'cardLayout', 'totalPlays', 'followerCount', 'createdAt', 'updatedAt'];
+        let hasOnlyAllowedKeys = data.keys().hasOnly(allowedKeys);
+        
+        return hasValidName && hasValidBio && hasValidLinks && hasValidUserId 
+               && validAvatar && validBanner && hasOnlyAllowedKeys;
+      }
+      
       // Public read for all profiles
       allow read: if true;
       
-      // Create/Update: Only the owner
+      // Create/Update: Only the owner with validation
       allow create, update: if request.auth != null 
                            && request.auth.uid == profileId
-                           && request.resource.data.userId == profileId;
+                           && isValidProfile();
       
       // Delete: Only the owner
       allow delete: if request.auth != null && request.auth.uid == profileId;
     }
     
-    // Albums - Public read, admin write (existing rule maintained)
+    // ============================================
+    // ALBUMS - Public read, NO client writes
+    // ============================================
     match /albums/{albumId} {
       allow read: if true;
-      // Write operations should be handled by admin only (via admin SDK or cloud functions)
+      allow write: if false; // Solo Admin SDK o Cloud Functions pueden escribir
     }
     
-    // Bloqueo por defecto para todo lo demás
+    // ============================================
+    // DEFAULT DENY - Seguridad por defecto
+    // ============================================
     match /{document=**} {
       allow read, write: if false;
     }
