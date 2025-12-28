@@ -67,31 +67,50 @@
 
         <!-- Desktop Menu -->
         <div
-            class="hidden md:flex gap-8 text-sm font-medium text-slate-400 items-center"
+            class="hidden md:flex gap-6 text-sm font-medium text-slate-400 items-center"
         >
-            <a href="/roadmap" class="hover:text-white transition-colors"
+            <a href="/roadmap" class="hover:text-primary-400 transition-colors"
                 >Roadmap</a
             >
 
             {#if $userStore.isLoggedIn}
-                <a href="/coleccion" class="hover:text-white transition-colors"
+                <a
+                    href="/coleccion"
+                    class="hover:text-primary-400 transition-colors"
                     >Colección</a
                 >
-                <a href="/artists" class="hover:text-white transition-colors"
-                    >Artistas</a
+                <a
+                    href="/artists"
+                    class="hover:text-primary-400 transition-colors">Artistas</a
                 >
-                <a href="/artist" class="hover:text-white transition-colors"
+                <a
+                    href="/artist"
+                    class="hover:text-primary-400 transition-colors"
                     >Mi Perfil</a
                 >
-                <a href="/app" class="hover:text-white transition-colors"
+                <a href="/app" class="hover:text-primary-400 transition-colors"
                     >Ambiente</a
+                >
+                <!-- Pricing CTA -->
+                {#if $userSubscription?.tier === "free"}
+                    <a
+                        href="/pricing"
+                        class="bg-primary-500 hover:bg-primary-600 text-white px-4 py-1.5 rounded-full font-bold transition-all shadow-lg shadow-primary-500/20 hover:scale-105 ml-2"
+                    >
+                        ⚡ Mejorar Plan
+                    </a>
+                {/if}
+            {:else}
+                <a
+                    href="/pricing"
+                    class="hover:text-primary-400 transition-colors">Planes</a
                 >
             {/if}
 
             {#if $userSubscription?.profile?.isAdmin}
                 <a
                     href="/admin"
-                    class="hover:text-orange-400 transition-colors font-bold"
+                    class="text-slate-300 hover:text-primary-400 transition-colors font-bold flex items-center gap-1 bg-white/5 px-2 py-1 rounded"
                     >⚙️ Admin</a
                 >
             {/if}
@@ -220,6 +239,14 @@
                         >
                             Ambiente
                         </a>
+                        <!-- Mobile Pricing -->
+                        <a
+                            href="/pricing"
+                            on:click={() => (mobileMenuOpen = false)}
+                            class="py-3 px-4 bg-primary-500/10 hover:bg-primary-500 text-primary-500 hover:text-white rounded-lg transition-colors font-bold flex items-center gap-2 mt-2"
+                        >
+                            ⚡ Planes & Upgrade
+                        </a>
                     {/if}
 
                     <a
@@ -283,6 +310,13 @@
                             </button>
                         </div>
                     {:else}
+                        <a
+                            href="/pricing"
+                            on:click={() => (mobileMenuOpen = false)}
+                            class="py-3 px-4 bg-primary-500/10 hover:bg-primary-500 text-primary-500 hover:text-white rounded-lg transition-colors font-bold text-center block mb-3"
+                        >
+                            Ver Planes
+                        </a>
                         <button
                             on:click={openAuth}
                             class="py-3 px-4 bg-white text-black rounded-lg font-bold hover:bg-slate-200 transition-colors text-center"
