@@ -24,6 +24,26 @@ service cloud.firestore {
                         .hasAny(['subscriptionTier', 'subscriptionStatus', 'stripeCustomerId', 'stripeSubscriptionId', 'isAdmin']);
     }
     
+    // Artist Profiles
+    match /artistProfiles/{profileId} {
+      // Public read for all profiles
+      allow read: if true;
+      
+      // Create/Update: Only the owner
+      allow create, update: if request.auth != null 
+                           && request.auth.uid == profileId
+                           && request.resource.data.userId == profileId;
+      
+      // Delete: Only the owner
+      allow delete: if request.auth != null && request.auth.uid == profileId;
+    }
+    
+    // Albums - Public read, admin write (existing rule maintained)
+    match /albums/{albumId} {
+      allow read: if true;
+      // Write operations should be handled by admin only (via admin SDK or cloud functions)
+    }
+    
     // Bloqueo por defecto para todo lo demás
     match /{document=**} {
       allow read, write: if false;
