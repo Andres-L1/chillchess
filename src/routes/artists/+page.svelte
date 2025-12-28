@@ -22,6 +22,29 @@
     class="min-h-screen bg-[#0B1120] text-white font-poppins pb-32 pt-24 px-4 md:px-12"
 >
     <div class="max-w-7xl mx-auto">
+        <!-- Back to Home Button -->
+        <div class="mb-6">
+            <a
+                href="/"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all hover:scale-105 active:scale-95"
+            >
+                <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                    />
+                </svg>
+                Volver al Inicio
+            </a>
+        </div>
+
         <header class="mb-8 flex items-center gap-4">
             <div
                 class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-2xl shadow-lg shadow-purple-900/50"
