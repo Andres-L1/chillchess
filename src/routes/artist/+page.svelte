@@ -80,14 +80,11 @@
 
         saving = true;
 
-        const profileData: ArtistProfile = {
+        // Construct object conditionally to avoid 'undefined' values which Firestore rejects
+        const baseData = {
             userId: $userStore.user.uid,
             artistName: artistName.trim(),
             bio: bio.trim(),
-            avatarUrl: avatarUrl.trim() || undefined,
-            bannerUrl: isPro ? bannerUrl.trim() || undefined : undefined,
-            themeColor: isPro ? themeColor : undefined,
-            accentColor: isPro ? accentColor : undefined,
             socialLinks: socialLinks,
             totalPlays: profile?.totalPlays || 0,
             followerCount: profile?.followerCount || 0,
@@ -95,12 +92,26 @@
             updatedAt: Date.now(),
         };
 
+        // Add optional fields only if they have values
+        const profileData: any = { ...baseData };
+
+        if (avatarUrl.trim()) {
+            profileData.avatarUrl = avatarUrl.trim();
+        }
+
+        if (isPro) {
+            if (bannerUrl.trim()) profileData.bannerUrl = bannerUrl.trim();
+            profileData.themeColor = themeColor;
+            profileData.accentColor = accentColor;
+        }
+
         try {
             await setDoc(
                 doc(db, "artistProfiles", $userStore.user.uid),
                 profileData,
+                { merge: true }, // Merge to be safe, though setDoc overwrites by default without it on new docs
             );
-            profile = profileData;
+            profile = profileData as ArtistProfile;
             alert("✅ Perfil guardado correctamente");
         } catch (error: any) {
             console.error("Error saving profile:", error);
