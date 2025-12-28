@@ -416,7 +416,7 @@
                     <img
                         src="/logo-desktop.png"
                         alt="Logo"
-                        class="h-8 w-auto"
+                        class="h-10 w-auto"
                     />
                     <div class="hidden md:block">
                         <h1 class="font-bold text-white text-lg leading-none">

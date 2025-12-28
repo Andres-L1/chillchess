@@ -55,7 +55,7 @@
             <img
                 src="/logo-desktop.png"
                 alt="ChillChess Logo"
-                class="h-8 w-auto hidden md:block hover:scale-105 transition-transform duration-300"
+                class="h-14 w-auto hidden md:block hover:scale-105 transition-transform duration-300"
             />
             <!-- Mobile logo (transparent background) -->
             <img
