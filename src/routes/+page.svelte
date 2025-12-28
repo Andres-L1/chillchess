@@ -51,14 +51,13 @@
     >
         <!-- Logo -->
         <div class="flex items-center gap-3 z-20">
-            <!-- Desktop logo (still inverted, will fix separately) -->
+            <!-- Desktop logo (transparent background) -->
             <img
                 src="/logo-desktop.png"
                 alt="ChillChess Logo"
                 class="h-8 w-auto hidden md:block hover:scale-105 transition-transform duration-300"
-                style="filter: invert(1) brightness(0.9);"
             />
-            <!-- Mobile logo (transparent background, no filter needed) -->
+            <!-- Mobile logo (transparent background) -->
             <img
                 src="/logo-mobile.png"
                 alt="ChillChess Logo"
@@ -566,7 +565,6 @@
                         src="/logo-desktop.png"
                         alt="Logo"
                         class="h-6 w-auto"
-                        style="filter: invert(1) brightness(0.9);"
                     />
                 </div>
                 <p class="text-sm text-slate-500">

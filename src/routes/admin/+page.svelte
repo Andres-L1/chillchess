@@ -417,7 +417,6 @@
                         src="/logo-desktop.png"
                         alt="Logo"
                         class="h-8 w-auto"
-                        style="filter: invert(1) brightness(0.9);"
                     />
                     <div class="hidden md:block">
                         <h1 class="font-bold text-white text-lg leading-none">
