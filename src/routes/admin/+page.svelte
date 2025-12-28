@@ -698,80 +698,93 @@
 
                 <!-- TAB: USERS -->
                 {#if activeTab === "users"}
-                    <div class="space-y-8 animate-fade-in">
+                    <div class="space-y-6 animate-fade-in">
                         <!-- Header -->
-                        <div class="flex justify-between items-center">
+                        <div
+                            class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4"
+                        >
                             <div>
                                 <h2 class="text-2xl font-bold text-white">
                                     Gestión de Usuarios
                                 </h2>
                                 <p class="text-slate-400 text-sm mt-1">
-                                    {realUsers.length} usuarios registrados
+                                    {realUsers.length}
+                                    {realUsers.length === 1
+                                        ? "usuario registrado"
+                                        : "usuarios registrados"}
                                 </p>
                             </div>
                             <button
                                 on:click={fetchRealUsers}
                                 disabled={usersLoading}
-                                class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg font-medium transition-colors disabled:opacity-50"
+                                class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2 justify-center"
                             >
-                                {usersLoading ? "Cargando..." : "🔄 Refrescar"}
+                                <span class="text-lg"
+                                    >{usersLoading ? "⏳" : "🔄"}</span
+                                >
+                                {usersLoading ? "Cargando..." : "Refrescar"}
                             </button>
                         </div>
 
-                        <!-- Users Table -->
-                        <div
-                            class="bg-[#1e293b]/50 rounded-2xl border border-white/5 overflow-hidden"
-                        >
-                            <div class="overflow-x-auto">
-                                <table class="w-full">
-                                    <thead class="bg-white/5">
-                                        <tr class="text-left">
-                                            <th
-                                                class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider"
-                                            >
-                                                Usuario
-                                            </th>
-                                            <th
-                                                class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider"
-                                            >
-                                                Email
-                                            </th>
-                                            <th
-                                                class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider"
-                                            >
-                                                Plan
-                                            </th>
-                                            <th
-                                                class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider"
-                                            >
-                                                Acciones
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-white/5">
-                                        {#if usersLoading}
-                                            <tr>
-                                                <td
-                                                    colspan="4"
-                                                    class="px-6 py-12 text-center text-slate-400"
+                        <!-- Loading State -->
+                        {#if usersLoading}
+                            <div
+                                class="flex flex-col items-center justify-center py-20"
+                            >
+                                <div
+                                    class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-white/20 border-t-white mb-4"
+                                ></div>
+                                <p class="text-slate-400">
+                                    Cargando usuarios...
+                                </p>
+                            </div>
+
+                            <!-- Empty State -->
+                        {:else if realUsers.length === 0}
+                            <div
+                                class="bg-[#1e293b]/50 rounded-2xl border border-white/5 p-12 text-center"
+                            >
+                                <div class="text-6xl mb-4 opacity-30">👥</div>
+                                <h3 class="text-xl font-bold text-white mb-2">
+                                    No hay usuarios aún
+                                </h3>
+                                <p class="text-slate-400">
+                                    Los usuarios registrados aparecerán aquí
+                                </p>
+                            </div>
+
+                            <!-- Desktop Table (hidden on mobile) -->
+                        {:else}
+                            <div
+                                class="hidden lg:block bg-[#1e293b]/50 rounded-2xl border border-white/5 overflow-hidden"
+                            >
+                                <div class="overflow-x-auto">
+                                    <table class="w-full">
+                                        <thead class="bg-white/5">
+                                            <tr class="text-left">
+                                                <th
+                                                    class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider"
                                                 >
-                                                    <div
-                                                        class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-white/20 border-t-white mb-2"
-                                                    ></div>
-                                                    <p>Cargando usuarios...</p>
-                                                </td>
-                                            </tr>
-                                        {:else if realUsers.length === 0}
-                                            <tr>
-                                                <td
-                                                    colspan="4"
-                                                    class="px-6 py-12 text-center text-slate-400"
+                                                    Usuario
+                                                </th>
+                                                <th
+                                                    class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider"
                                                 >
-                                                    No hay usuarios registrados
-                                                    aún
-                                                </td>
+                                                    Email
+                                                </th>
+                                                <th
+                                                    class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider"
+                                                >
+                                                    Plan
+                                                </th>
+                                                <th
+                                                    class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center"
+                                                >
+                                                    Acciones
+                                                </th>
                                             </tr>
-                                        {:else}
+                                        </thead>
+                                        <tbody class="divide-y divide-white/5">
                                             {#each realUsers as user}
                                                 {@const isPro =
                                                     user.subscriptionTier ===
@@ -789,21 +802,23 @@
                                                             class="flex items-center gap-3"
                                                         >
                                                             <div
-                                                                class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold"
+                                                                class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
                                                             >
                                                                 {(user.displayName ||
                                                                     user.email ||
                                                                     "U")[0].toUpperCase()}
                                                             </div>
-                                                            <div>
+                                                            <div
+                                                                class="min-w-0"
+                                                            >
                                                                 <div
-                                                                    class="text-white font-medium"
+                                                                    class="text-white font-medium truncate"
                                                                 >
                                                                     {user.displayName ||
                                                                         "Sin nombre"}
                                                                 </div>
                                                                 <div
-                                                                    class="text-xs text-slate-500"
+                                                                    class="text-xs text-slate-500 font-mono"
                                                                 >
                                                                     ID: {user.id.slice(
                                                                         0,
@@ -817,7 +832,7 @@
                                                     <!-- Email -->
                                                     <td class="px-6 py-4">
                                                         <div
-                                                            class="text-sm text-slate-300"
+                                                            class="text-sm text-slate-300 truncate max-w-xs"
                                                         >
                                                             {user.email ||
                                                                 "No especificado"}
@@ -828,13 +843,17 @@
                                                     <td class="px-6 py-4">
                                                         {#if isPro}
                                                             <span
-                                                                class="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full text-xs font-bold text-white"
+                                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full text-xs font-bold text-white shadow-lg shadow-purple-900/20"
                                                             >
-                                                                ✨ PRO
+                                                                <span
+                                                                    class="text-sm"
+                                                                    >✨</span
+                                                                >
+                                                                PRO
                                                             </span>
                                                         {:else}
                                                             <span
-                                                                class="inline-flex items-center gap-1 px-3 py-1 bg-slate-700 rounded-full text-xs font-medium text-slate-300"
+                                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-700 rounded-full text-xs font-medium text-slate-300"
                                                             >
                                                                 GRATUITO
                                                             </span>
@@ -842,29 +861,144 @@
                                                     </td>
 
                                                     <!-- Acciones -->
-                                                    <td class="px-6 py-4">
+                                                    <td
+                                                        class="px-6 py-4 text-center"
+                                                    >
                                                         <button
                                                             on:click={() =>
                                                                 toggleUserPlan(
                                                                     user.id,
                                                                     isPro,
                                                                 )}
-                                                            class="px-4 py-2 rounded-lg font-medium text-sm transition-all {isPro
-                                                                ? 'bg-red-600 hover:bg-red-500 text-white'
-                                                                : 'bg-green-600 hover:bg-green-500 text-white'}"
+                                                            class="px-4 py-2 rounded-lg font-medium text-xs transition-all shadow-lg {isPro
+                                                                ? 'bg-red-600 hover:bg-red-500 text-white shadow-red-900/20 hover:shadow-red-900/30'
+                                                                : 'bg-green-600 hover:bg-green-500 text-white shadow-green-900/20 hover:shadow-green-900/30'} transform active:scale-95"
                                                         >
                                                             {isPro
-                                                                ? "Quitar Pro"
-                                                                : "Dar Pro"}
+                                                                ? "❌ Quitar Pro"
+                                                                : "✅ Dar Pro"}
                                                         </button>
                                                     </td>
                                                 </tr>
                                             {/each}
-                                        {/if}
-                                    </tbody>
-                                </table>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                        </div>
+
+                            <!-- Mobile Cards (visible only on mobile) -->
+                            <div class="lg:hidden space-y-4">
+                                {#each realUsers as user}
+                                    {@const isPro =
+                                        user.subscriptionTier === "pro" ||
+                                        user.subscriptionTier === "premium" ||
+                                        user.tier === "pro" ||
+                                        user.tier === "premium"}
+                                    <div
+                                        class="bg-[#1e293b]/50 rounded-xl border border-white/5 p-4 hover:border-white/10 transition-all"
+                                    >
+                                        <!-- Header: Avatar + Name + Badge -->
+                                        <div
+                                            class="flex items-start gap-3 mb-4"
+                                        >
+                                            <div
+                                                class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold flex-shrink-0"
+                                            >
+                                                {(user.displayName ||
+                                                    user.email ||
+                                                    "U")[0].toUpperCase()}
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <div
+                                                    class="text-white font-medium truncate"
+                                                >
+                                                    {user.displayName ||
+                                                        "Sin nombre"}
+                                                </div>
+                                                <div
+                                                    class="text-xs text-slate-500 truncate"
+                                                >
+                                                    {user.email ||
+                                                        "No especificado"}
+                                                </div>
+                                                <div
+                                                    class="text-[10px] text-slate-600 font-mono mt-0.5"
+                                                >
+                                                    ID: {user.id.slice(
+                                                        0,
+                                                        12,
+                                                    )}...
+                                                </div>
+                                            </div>
+                                            {#if isPro}
+                                                <span
+                                                    class="inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full text-[10px] font-bold text-white shadow-lg shadow-purple-900/20 flex-shrink-0"
+                                                >
+                                                    ✨ PRO
+                                                </span>
+                                            {:else}
+                                                <span
+                                                    class="inline-flex items-center px-2.5 py-1 bg-slate-700 rounded-full text-[10px] font-medium text-slate-300 flex-shrink-0"
+                                                >
+                                                    FREE
+                                                </span>
+                                            {/if}
+                                        </div>
+
+                                        <!-- Action Button -->
+                                        <button
+                                            on:click={() =>
+                                                toggleUserPlan(user.id, isPro)}
+                                            class="w-full px-4 py-2.5 rounded-lg font-medium text-sm transition-all shadow-lg {isPro
+                                                ? 'bg-red-600 hover:bg-red-500 text-white shadow-red-900/20'
+                                                : 'bg-green-600 hover:bg-green-500 text-white shadow-green-900/20'} transform active:scale-95 flex items-center justify-center gap-2"
+                                        >
+                                            <span class="text-base"
+                                                >{isPro ? "❌" : "✅"}</span
+                                            >
+                                            {isPro ? "Quitar Pro" : "Dar Pro"}
+                                        </button>
+                                    </div>
+                                {/each}
+                            </div>
+
+                            <!-- Stats Footer -->
+                            <div class="grid grid-cols-2 gap-4 pt-4">
+                                <div
+                                    class="bg-[#1e293b]/30 rounded-lg p-4 border border-white/5"
+                                >
+                                    <div
+                                        class="text-xs text-slate-500 uppercase tracking-wider mb-1"
+                                    >
+                                        Total Usuarios
+                                    </div>
+                                    <div class="text-2xl font-bold text-white">
+                                        {realUsers.length}
+                                    </div>
+                                </div>
+                                <div
+                                    class="bg-[#1e293b]/30 rounded-lg p-4 border border-white/5"
+                                >
+                                    <div
+                                        class="text-xs text-slate-500 uppercase tracking-wider mb-1"
+                                    >
+                                        Usuarios Pro
+                                    </div>
+                                    <div
+                                        class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"
+                                    >
+                                        {realUsers.filter(
+                                            (u) =>
+                                                u.subscriptionTier === "pro" ||
+                                                u.subscriptionTier ===
+                                                    "premium" ||
+                                                u.tier === "pro" ||
+                                                u.tier === "premium",
+                                        ).length}
+                                    </div>
+                                </div>
+                            </div>
+                        {/if}
                     </div>
                 {/if}
 
