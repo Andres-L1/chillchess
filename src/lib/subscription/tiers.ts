@@ -32,9 +32,9 @@ export const TIERS: Record<SubscriptionTier, TierConfig> = {
     pro: {
         id: 'pro',
         name: 'Pro',
-        price: '€4.99',
-        priceValue: 4.99,
-        billing: 'mes',
+        price: '€19.99',
+        priceValue: 19.99,
+        billing: 'año',
         features: [
             '✨ Música Ilimitada (Catálogo completo)',
             '🎨 Personalización Total (Fondos y Estilos)',
@@ -52,11 +52,10 @@ export const TIERS: Record<SubscriptionTier, TierConfig> = {
         name: 'Premium',
         price: '€19.99',
         priceValue: 19.99,
-        billing: 'anual',
+        billing: 'año',
         features: [
             '✨ Todo lo de PRO',
-            '🎁 2 Meses Gratis (pago anual)',
-            '👑 Badge de Fundador',
+            '🎁 Badge de Fundador',
             '🎨 Personalización Total',
         ],
         maxGamesDaily: Infinity,

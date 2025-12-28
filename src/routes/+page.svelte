@@ -92,14 +92,14 @@
                     >Ambiente</a
                 >
                 <!-- Pricing CTA -->
-                {#if $userSubscription?.tier === "free"}
-                    <a
-                        href="/pricing"
-                        class="bg-primary-500 hover:bg-primary-600 text-white px-4 py-1.5 rounded-full font-bold transition-all shadow-lg shadow-primary-500/20 hover:scale-105 ml-2"
-                    >
-                        ⚡ Mejorar Plan
-                    </a>
-                {/if}
+                <a
+                    href="/pricing"
+                    class="bg-primary-500 hover:bg-primary-600 text-white px-4 py-1.5 rounded-full font-bold transition-all shadow-lg shadow-primary-500/20 hover:scale-105 ml-2"
+                >
+                    {$userSubscription?.tier === "free"
+                        ? "⚡ Mejorar Plan"
+                        : "⭐ Mi Plan"}
+                </a>
             {:else}
                 <a
                     href="/pricing"
