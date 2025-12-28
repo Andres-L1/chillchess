@@ -2,6 +2,7 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { type Auth, getAuth, setPersistence, browserLocalPersistence, GoogleAuthProvider } from "firebase/auth";
 import { type Firestore, getFirestore } from "firebase/firestore";
+import { getFunctions, connectFunctionsEmulator, type Functions } from "firebase/functions";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDkAPVdrwASXA-O5ajBU7T14qbKSfef5EI",
@@ -17,15 +18,18 @@ const firebaseConfig = {
 let app;
 let auth: Auth;
 let db: Firestore;
-// Auth Provider Removed (Email/Pass only)
+let functions: Functions;
 
 try {
     app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
     auth = getAuth(app);
     db = getFirestore(app);
+    functions = getFunctions(app);
 
-    // Configurar Auth de Google
-    // googleProvider = new GoogleAuthProvider();
+    // Conectar emuladores si estamos en local
+    if (typeof window !== 'undefined' && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
+        connectFunctionsEmulator(functions, "localhost", 5001);
+    }
 
     // Set persistence
     setPersistence(auth, browserLocalPersistence).catch((error) => {
@@ -36,4 +40,4 @@ try {
     console.error("Error initializing Firebase (Check .env variables):", e);
 }
 
-export { auth, db };
+export { auth, db, functions };

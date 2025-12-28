@@ -128,6 +128,20 @@
         const audio = new Audio(track.url);
         audio.play();
     }
+
+    function downloadTrack(track: any) {
+        if (!track.url || track.url === "#")
+            return alert("No hay audio disponible para descargar.");
+
+        const a = document.createElement("a");
+        a.href = track.url;
+        // Limpiar nombre
+        const safeName = track.title.replace(/[^a-z0-9]/gi, "_").toLowerCase();
+        a.download = `${safeName}_ai_gen.flac`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
     let editingAlbumId: string | null = null;
 
     // --- SYNC/MIGRATION LOGIC ---
@@ -815,8 +829,10 @@
                                                 >▶ Reproducir</button
                                             >
                                             <button
+                                                on:click={() =>
+                                                    downloadTrack(track)}
                                                 class="flex-1 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 rounded text-sm transition-colors"
-                                                >Publicar</button
+                                                >Descargar</button
                                             >
                                         </div>
                                     </div>
