@@ -10,7 +10,7 @@
     const patches: Patch[] = [
         {
             version: "v1.2",
-            date: "28 Dic 2024",
+            date: "28 Dic 2025",
             title: "Sistema de Favoritos",
             type: "minor",
             changes: [
@@ -23,7 +23,7 @@
         },
         {
             version: "v1.1",
-            date: "20 Dic 2024",
+            date: "24 Dic 2025",
             title: "Navegación Mejorada",
             type: "minor",
             changes: [
@@ -35,7 +35,7 @@
         },
         {
             version: "v1.0",
-            date: "15 Dic 2024",
+            date: "21 Dic 2025",
             title: "Lanzamiento Inicial",
             type: "major",
             changes: [

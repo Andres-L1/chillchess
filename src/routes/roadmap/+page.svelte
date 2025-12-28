@@ -14,7 +14,7 @@
             description:
                 "Guarda tus canciones preferidas y accede a ellas fácilmente desde 'Mis Favoritos'.",
             status: "done",
-            date: "Diciembre 2024",
+            date: "Diciembre 2025",
             category: "music",
         },
         {
@@ -22,7 +22,7 @@
             description:
                 "Menú reorganizado con dropdown de usuario y mejor experiencia en móvil.",
             status: "done",
-            date: "Diciembre 2024",
+            date: "Diciembre 2025",
             category: "tech",
         },
         {
@@ -30,7 +30,7 @@
             description:
                 "Interfaz completamente adaptada para móvil, tablet y desktop.",
             status: "done",
-            date: "Diciembre 2024",
+            date: "Diciembre 2025",
             category: "tech",
         },
 
@@ -40,7 +40,7 @@
             description:
                 "Incorporación de 3-5 álbumes nuevos de lo-fi, jazz y ambient.",
             status: "in-progress",
-            date: "Enero 2025",
+            date: "Enero 2026",
             category: "music",
         },
         {
@@ -48,7 +48,7 @@
             description:
                 "Añadir modo repetición, modo aleatorio y controles de velocidad.",
             status: "in-progress",
-            date: "Enero 2025",
+            date: "Enero 2026",
             category: "tech",
         },
 
@@ -58,7 +58,7 @@
             description:
                 "Crea tus propias listas de reproducción combinando canciones de diferentes álbumes.",
             status: "planned",
-            date: "Febrero 2025",
+            date: "Febrero 2026",
             category: "music",
         },
         {
@@ -66,7 +66,7 @@
             description:
                 "Descarga álbumes para escuchar sin conexión (solo usuarios Pro).",
             status: "planned",
-            date: "Marzo 2025",
+            date: "Marzo 2026",
             category: "tech",
         },
         {
@@ -74,7 +74,7 @@
             description:
                 "Estadísticas de escucha, historial y álbumes más reproducidos.",
             status: "planned",
-            date: "Marzo 2025",
+            date: "Marzo 2026",
             category: "tech",
         },
         {
@@ -82,7 +82,7 @@
             description:
                 "Elige entre modo oscuro estándar, midnight blue o amethyst.",
             status: "planned",
-            date: "Abril 2025",
+            date: "Abril 2026",
             category: "visual",
         },
     ];
@@ -110,7 +110,7 @@
 </script>
 
 <svelte:head>
-    <title>Roadmap 2025 | ChillChess</title>
+    <title>Roadmap 2025-2026 | ChillChess</title>
 </svelte:head>
 
 <div class="min-h-screen bg-[#0B1120] text-slate-200 font-poppins py-12 px-4">
@@ -124,7 +124,7 @@
                 ← Volver al inicio
             </a>
             <h1 class="text-4xl md:text-5xl font-bold text-white mb-4 mt-4">
-                Hoja de Ruta 2025
+                Hoja de Ruta 2025-2026
             </h1>
             <p class="text-lg text-slate-400 max-w-2xl mx-auto">
                 Lo que hemos construido y hacia dónde vamos. Sin promesas
