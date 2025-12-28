@@ -32,12 +32,21 @@ try {
     }
 
     // Set persistence
-    setPersistence(auth, browserLocalPersistence).catch((error) => {
-        console.warn("Auth Persistence Error:", error);
-    });
+});
 
 } catch (e) {
     console.error("Error initializing Firebase (Check .env variables):", e);
 }
 
-export { auth, db, functions };
+// Initializing Storage explicitly
+import { getStorage, type FirebaseStorage } from "firebase/storage";
+let storage: FirebaseStorage;
+try {
+    if (app) {
+        storage = getStorage(app);
+    }
+} catch (e) {
+    console.warn("Storage init failed:", e);
+}
+
+export { auth, db, functions, storage };

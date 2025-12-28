@@ -34,6 +34,7 @@
         deleteDoc,
         writeBatch,
         where,
+        serverTimestamp,
     } from "firebase/firestore";
     import { db } from "$lib/firebase";
 
@@ -44,8 +45,13 @@
 
     let showAddAlbum = false;
     let selectedCategory: AlbumCategory | "all" = "all";
-    let activeTab: "dashboard" | "music" | "users" | "proposals" | "logs" =
-        "dashboard";
+    let activeTab:
+        | "dashboard"
+        | "music"
+        | "users"
+        | "proposals"
+        | "submissions"
+        | "logs" = "dashboard";
     let syncingMusic = false;
 
     const categories: (AlbumCategory | "all")[] = [
@@ -275,10 +281,116 @@
         filteredUsers = temp;
     }
 
+    // --- MUSIC SUBMISSIONS LOGIC (A&R) ---
+    interface Submission {
+        id: string;
+        artistId: string;
+        artistName: string;
+        releaseTitle: string;
+        genre: string;
+        coverUrl: string;
+        status: "pending" | "approved" | "rejected";
+        submittedAt: any;
+        tracks: { title: string; url: string; duration: number }[];
+    }
+
+    let submissions: Submission[] = [];
+    let submissionsLoading = false;
+
+    async function fetchSubmissions() {
+        if (submissionsLoading) return;
+        submissionsLoading = true;
+        try {
+            const q = query(
+                collection(db, "musicSubmissions"),
+                orderBy("submittedAt", "desc"),
+                limit(50),
+            );
+            const snap = await getDocs(q);
+            submissions = snap.docs.map(
+                (d) => ({ id: d.id, ...d.data() }) as Submission,
+            );
+        } catch (e) {
+            console.error("Error fetching submissions:", e);
+        } finally {
+            submissionsLoading = false;
+        }
+    }
+
+    async function approveSubmission(submission: Submission) {
+        if (
+            !confirm(
+                `¿Aprobar lanzamiento "${submission.releaseTitle}" de ${submission.artistName}? Esto lo publicará en la app.`,
+            )
+        )
+            return;
+
+        try {
+            const batch = writeBatch(db);
+
+            // 1. Update Submission Status
+            const subRef = doc(db, "musicSubmissions", submission.id);
+            batch.update(subRef, { status: "approved" });
+
+            // 2. Verify Artist
+            const artistRef = doc(db, "artistProfiles", submission.artistId);
+            batch.update(artistRef, { isVerified: true }); // Ensure this field works in your schema
+
+            // 3. Publish Album to Main Collection
+            // Create a new album ID
+            const newAlbumRef = doc(collection(db, "albums"));
+            const newAlbumData = {
+                id: newAlbumRef.id,
+                title: submission.releaseTitle,
+                artist: submission.artistName,
+                cover: submission.coverUrl,
+                category: "musica", // Default category, could be mapped from genre
+                tags: [submission.genre.toLowerCase(), "new"],
+                tracks: submission.tracks.map((t, i) => ({
+                    id: i + 1,
+                    title: t.title,
+                    artist: submission.artistName,
+                    duration: t.duration || 180, // Fallback duration if not parsed
+                    src: t.url,
+                    cover: submission.coverUrl,
+                })),
+                createdAt: serverTimestamp(),
+            };
+            batch.set(newAlbumRef, newAlbumData);
+
+            await batch.commit();
+
+            // UI Update
+            submissions = submissions.map((s) =>
+                s.id === submission.id ? { ...s, status: "approved" } : s,
+            );
+            alert(`✅ Lanzamiento aprobado y artista verificado.`);
+        } catch (e: any) {
+            console.error(e);
+            alert("Error al aprobar: " + e.message);
+        }
+    }
+
+    async function rejectSubmission(id: string) {
+        if (!confirm("¿Rechazar este lanzamiento?")) return;
+        try {
+            await updateDoc(doc(db, "musicSubmissions", id), {
+                status: "rejected",
+            });
+            submissions = submissions.map((s) =>
+                s.id === id ? { ...s, status: "rejected" } : s,
+            );
+        } catch (e: any) {
+            alert("Error: " + e.message);
+        }
+    }
+
     // Trigger fetch on tab change
     $: if (activeTab === "users" && realUsers.length === 0) fetchRealUsers();
     $: if (activeTab === "proposals" && proposals.length === 0)
         fetchProposals();
+    $: if (activeTab === "submissions" && submissions.length === 0)
+        fetchSubmissions();
 
     async function toggleUserPlan(userId: string, currentPlanIsPro: boolean) {
         const action = currentPlanIsPro ? "QUITAR" : "DAR";
@@ -609,6 +721,19 @@
                     </button>
 
                     <button
+                        on:click={() => (activeTab = "submissions")}
+                        class="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all {activeTab ===
+                        'submissions'
+                            ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/20'
+                            : 'text-slate-400 hover:bg-white/5 hover:text-white'}"
+                    >
+                        <span class="text-xl">📫</span>
+                        <span class="hidden md:block font-medium text-sm"
+                            >Envíos</span
+                        >
+                    </button>
+
+                    <button
                         on:click={() => (activeTab = "logs")}
                         class="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all {activeTab ===
                         'logs'
@@ -638,6 +763,174 @@
         <main
             class="flex-1 overflow-y-auto h-screen relative bg-[#0B1120] pb-20"
         >
+            <!-- SUBMISSIONS TAB -->
+            {#if activeTab === "submissions"}
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold">
+                                Envíos de Música (A&R)
+                            </h2>
+                            <p class="text-slate-400">
+                                Revisa y aprueba nueva música de la comunidad.
+                            </p>
+                        </div>
+                        <button
+                            on:click={fetchSubmissions}
+                            class="p-2 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white"
+                            title="Recargar"
+                        >
+                            🔄
+                        </button>
+                    </div>
+
+                    {#if submissionsLoading && submissions.length === 0}
+                        <div class="text-center py-12">
+                            <div
+                                class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-white/20 border-t-white mb-2"
+                            ></div>
+                            <p class="text-slate-400">Cargando envíos...</p>
+                        </div>
+                    {:else if submissions.length === 0}
+                        <div
+                            class="bg-[#1a1a1a] rounded-xl border border-dashed border-white/10 p-12 text-center"
+                        >
+                            <p class="text-xl text-slate-400">
+                                No hay envíos pendientes.
+                            </p>
+                            <p class="text-sm text-slate-500 mt-2">
+                                ¡Todo el trabajo limpio! 🎉
+                            </p>
+                        </div>
+                    {:else}
+                        <div class="grid grid-cols-1 gap-6">
+                            {#each submissions as sub (sub.id)}
+                                <div
+                                    class="bg-[#1a1a1a] rounded-xl border border-white/10 overflow-hidden {sub.status !==
+                                    'pending'
+                                        ? 'opacity-50'
+                                        : ''}"
+                                >
+                                    <div
+                                        class="p-6 grid grid-cols-1 lg:grid-cols-4 gap-6"
+                                    >
+                                        <!-- Cover & Info -->
+                                        <div class="lg:col-span-1 space-y-4">
+                                            <img
+                                                src={sub.coverUrl}
+                                                alt={sub.releaseTitle}
+                                                class="w-full aspect-square rounded-lg object-cover shadow-lg"
+                                            />
+                                            <div>
+                                                <h3
+                                                    class="font-bold text-lg leading-tight"
+                                                >
+                                                    {sub.releaseTitle}
+                                                </h3>
+                                                <p
+                                                    class="text-purple-400 text-sm"
+                                                >
+                                                    {sub.artistName}
+                                                </p>
+                                                <div
+                                                    class="flex items-center gap-2 mt-2"
+                                                >
+                                                    <span
+                                                        class="text-xs bg-white/10 px-2 py-1 rounded"
+                                                        >{sub.genre}</span
+                                                    >
+                                                    <span
+                                                        class="text-xs text-slate-500"
+                                                    >
+                                                        {new Date(
+                                                            sub.submittedAt?.toMillis?.() ||
+                                                                Date.now(),
+                                                        ).toLocaleDateString()}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Tracks -->
+                                        <div class="lg:col-span-2 space-y-3">
+                                            <h4
+                                                class="text-xs font-bold text-slate-500 uppercase"
+                                            >
+                                                Pistas ({sub.tracks.length})
+                                            </h4>
+                                            {#each sub.tracks as track, i}
+                                                <div
+                                                    class="bg-[#0B1120] p-3 rounded-lg border border-white/5 flex items-center gap-3"
+                                                >
+                                                    <div
+                                                        class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-mono"
+                                                    >
+                                                        {i + 1}
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <div
+                                                            class="font-medium text-sm truncate"
+                                                        >
+                                                            {track.title}
+                                                        </div>
+                                                    </div>
+                                                    <audio
+                                                        controls
+                                                        src={track.url}
+                                                        class="h-8 w-32 md:w-48 opacity-80"
+                                                        preload="none"
+                                                    ></audio>
+                                                </div>
+                                            {/each}
+                                        </div>
+
+                                        <!-- Actions -->
+                                        <div
+                                            class="lg:col-span-1 flex flex-col justify-center gap-3 border-l border-white/5 pl-6"
+                                        >
+                                            {#if sub.status === "pending"}
+                                                <button
+                                                    on:click={() =>
+                                                        approveSubmission(sub)}
+                                                    class="w-full py-3 bg-green-600 hover:bg-green-500 rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-2"
+                                                >
+                                                    ✅ Aprobar & Publicar
+                                                </button>
+                                                <button
+                                                    on:click={() =>
+                                                        rejectSubmission(
+                                                            sub.id,
+                                                        )}
+                                                    class="w-full py-3 bg-red-600/20 hover:bg-red-600/30 text-red-500 rounded-lg font-bold text-sm transition-colors"
+                                                >
+                                                    ✕ Rechazar
+                                                </button>
+                                            {:else}
+                                                <div
+                                                    class="text-center p-4 bg-white/5 rounded-lg"
+                                                >
+                                                    <p
+                                                        class="font-bold {sub.status ===
+                                                        'approved'
+                                                            ? 'text-green-400'
+                                                            : 'text-red-400'} uppercase"
+                                                    >
+                                                        {sub.status ===
+                                                        "approved"
+                                                            ? "Aprobado"
+                                                            : "Rechazado"}
+                                                    </p>
+                                                </div>
+                                            {/if}
+                                        </div>
+                                    </div>
+                                </div>
+                            {/each}
+                        </div>
+                    {/if}
+                </div>
+            {/if}
+
             <!-- Top Bar -->
             <header
                 class="sticky top-0 z-30 bg-[#0B1120]/80 backdrop-blur-xl border-b border-white/5 px-8 py-4 flex justify-between items-center"
