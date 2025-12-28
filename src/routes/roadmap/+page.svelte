@@ -8,101 +8,82 @@
     }
 
     const roadmapItems: RoadmapItem[] = [
-        // Q1 2026
+        // Completados Recientes (Diciembre 2025)
         {
-            title: "Sistema de Tableros Personalizables",
+            title: "Modo Zen 2.0",
             description:
-                "Elige entre tableros de madera clásica, mármol, neón, cristal y más.",
-            status: "in-progress",
-            date: "Enero 2026",
-            category: "visual",
-        },
-        {
-            title: "Fondos Animados Premium",
-            description:
-                "Efectos de lluvia, nieve, partículas y nebulosas animadas de fondo.",
-            status: "in-progress",
-            date: "Enero 2026",
-            category: "visual",
-        },
-        {
-            title: "Audio HD (320kbps)",
-            description: "Calidad de audio profesional para suscriptores Pro.",
-            status: "planned",
-            date: "Febrero 2026",
+                "Nueva experiencia de enfoque con temporizador editable y cero distracciones.",
+            status: "done",
+            date: "Diciembre 2025",
             category: "tech",
         },
         {
-            title: "5 Nuevos Álbumes",
+            title: "Biblioteca de Artistas",
             description:
-                "Expansión de la colección: Lo-Fi, Synthwave, Jazz, Ambiente Natural.",
-            status: "planned",
-            date: "Febrero-Marzo 2026",
+                "Nueva sección para explorar la colección musical organizada por artistas.",
+            status: "done",
+            date: "Diciembre 2025",
             category: "music",
+        },
+        {
+            title: "Gestión Dinámica de Contenido",
+            description:
+                "Actualizaciones de música instantáneas sin necesidad de descargas de la app.",
+            status: "done",
+            date: "Diciembre 2025",
+            category: "tech",
+        },
+
+        // Q1 2026
+        {
+            title: "Audio HD (320kbps)",
+            description: "Calidad de audio cristalina para suscriptores Pro.",
+            status: "in-progress",
+            date: "Enero 2026",
+            category: "tech",
+        },
+        {
+            title: "Expansión Musical",
+            description:
+                "Lanzamiento de 5 nuevos álbumes: Jazz Glitch, Rain lo-fi y más.",
+            status: "in-progress",
+            date: "Enero-Febrero 2026",
+            category: "music",
+        },
+        {
+            title: "Fondos Dinámicos Interactivos",
+            description:
+                "Mejoras visuales con partículas reactivas al ratón y música.",
+            status: "planned",
+            date: "Marzo 2026",
+            category: "visual",
         },
 
         // Q2 2026
         {
-            title: "Editor de Temas Visuales",
-            description: "Crea tus propias combinaciones de colores y fondos.",
-            status: "planned",
-            date: "Abril 2026",
-            category: "visual",
-        },
-        {
-            title: "Progressive Web App (PWA)",
+            title: "App Móvil (iOS/Android)",
             description:
-                "Instala ChillChess como app en tu escritorio o móvil.",
+                "ChillChess nativo para llevar tu concentración a cualquier parte.",
             status: "planned",
             date: "Mayo 2026",
             category: "tech",
         },
         {
-            title: "Descargas Offline",
-            description: "Descarga álbumes para escuchar sin conexión (Pro).",
+            title: "Radio 24/7 Chillhop",
+            description: "Stream infinito de música generativa.",
             status: "planned",
             date: "Junio 2026",
-            category: "tech",
+            category: "music",
         },
 
-        // Q3-Q4 2026
+        // Q3 2026
         {
-            title: "Radio 24/7 Chillhop",
-            description: "Stream continuo de música chill seleccionada.",
-            status: "planned",
-            date: "Julio 2026",
-            category: "music",
-        },
-        {
-            title: "Ecualizador Personalizado",
-            description: "Ajusta graves, medios y agudos a tu gusto.",
+            title: "Comunidad & Sesiones Grupales",
+            description:
+                "Salas de estudio compartidas con sincronización musical.",
             status: "planned",
             date: "Agosto 2026",
-            category: "tech",
-        },
-        {
-            title: "Comunidad & Discord Integrado",
-            description:
-                "Comparte tus ambientes favoritos y conecta con otros usuarios.",
-            status: "planned",
-            date: "Septiembre 2026",
             category: "community",
-        },
-        {
-            title: "Álbum Colaborativo Indie",
-            description:
-                "Colaboración con artistas independientes para un álbum exclusivo.",
-            status: "planned",
-            date: "Noviembre 2026",
-            category: "music",
-        },
-        {
-            title: "Estadísticas de Escucha",
-            description:
-                "Descubre tus álbumes más reproducidos y horas de concentración.",
-            status: "planned",
-            date: "Diciembre 2026",
-            category: "tech",
         },
     ];
 

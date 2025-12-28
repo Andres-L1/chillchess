@@ -5,8 +5,6 @@
     import { userStore, logout } from "$lib/auth/userStore";
     import { userSubscription } from "$lib/subscription/userSubscription";
 
-    import { ALBUMS } from "$lib/data/albums";
-
     let showAuthModal = false;
     let showPaywall = false;
     let blockedFeature: "vibe" | "games" = "vibe";
@@ -78,6 +76,9 @@
             {#if $userStore.isLoggedIn}
                 <a href="/coleccion" class="hover:text-white transition-colors"
                     >Colección</a
+                >
+                <a href="/artists" class="hover:text-white transition-colors"
+                    >Artistas</a
                 >
                 <a href="/app" class="hover:text-white transition-colors"
                     >Ambiente</a
@@ -194,6 +195,13 @@
                             class="py-3 px-4 hover:bg-white/5 rounded-lg transition-colors text-slate-300 hover:text-white"
                         >
                             Colección
+                        </a>
+                        <a
+                            href="/artists"
+                            on:click={() => (mobileMenuOpen = false)}
+                            class="py-3 px-4 hover:bg-white/5 rounded-lg transition-colors text-slate-300 hover:text-white"
+                        >
+                            Artistas
                         </a>
                         <a
                             href="/app"
@@ -322,7 +330,7 @@
         <div
             class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 mb-16"
         >
-            {#each ALBUMS as release}
+            {#each $audioStore.availableAlbums as release}
                 <div class="group relative flex flex-col gap-3">
                     <!-- Album Cover Card -->
                     <div

@@ -25,6 +25,13 @@
     import "@fontsource/poppins/700.css";
     import "@fontsource/inter/300.css";
     import "@fontsource/inter/400.css";
+
+    import { onMount } from "svelte";
+    import { initAudioLibrary } from "$lib/audio/store";
+
+    onMount(() => {
+        initAudioLibrary();
+    });
 </script>
 
 <!-- App Shell -->

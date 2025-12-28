@@ -35,7 +35,8 @@
                 <li>Nombre de usuario (para mostrar en tu perfil).</li>
                 <li>Estado de suscripción (si adquieres un plan).</li>
                 <li>
-                    Estadísticas de juego (partidas jugadas, vibes favoritos).
+                    Estadísticas de uso (tiempo de concentración, álbumes
+                    escuchados, partidas jugadas).
                 </li>
             </ul>
 
@@ -65,8 +66,14 @@
 
             <h2 class="text-xl font-bold text-white mt-8 mb-4">4. Contacto</h2>
             <p>
-                Si tienes preguntas sobre esta política, contáctanos en
-                soporte@chillchess.app.
+                Si tienes preguntas sobre esta política, únete a nuestra
+                comunidad en
+                <a
+                    href="https://discord.gg/G7SrFtJHnr"
+                    target="_blank"
+                    class="text-blue-400 hover:text-blue-300 underline"
+                    >Discord</a
+                >.
             </p>
         </div>
     </div>

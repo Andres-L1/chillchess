@@ -1,5 +1,10 @@
 <script lang="ts">
-    import { audioStore, nextTrack } from "$lib/audio/store";
+    import {
+        audioStore,
+        nextTrack,
+        prevTrack,
+        togglePlayback,
+    } from "$lib/audio/store";
 
     // Ambience files (loops)
     const AMBIENCE_TRACKS = {
@@ -16,6 +21,70 @@
     $: if (musicEl && $audioStore.seekRequest !== null) {
         musicEl.currentTime = $audioStore.seekRequest;
         audioStore.update((s) => ({ ...s, seekRequest: null }));
+    }
+
+    // --- MEDIA SESSION API INTEGRATION (Background Play & Metadata) ---
+    $: updateMediaSession(
+        $audioStore.currentTrackIndex,
+        $audioStore.currentAlbumId,
+        $audioStore.playlist,
+    );
+
+    function updateMediaSession(
+        index: number,
+        albumId: string | undefined,
+        playlist: any[],
+    ) {
+        if (typeof navigator === "undefined" || !("mediaSession" in navigator))
+            return;
+
+        if (playlist.length === 0) {
+            navigator.mediaSession.metadata = null;
+            return;
+        }
+
+        const currentTrack = playlist[index];
+        // Encontrar info del álbum para la carátula
+        const currentAlbum = $audioStore.availableAlbums.find(
+            (a) => a.id === albumId,
+        );
+
+        if (currentTrack && currentAlbum) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: currentTrack.title,
+                artist: currentTrack.artist || currentAlbum.artist,
+                album: currentAlbum.title,
+                artwork: [
+                    {
+                        src: currentAlbum.cover,
+                        sizes: "512x512",
+                        type: "image/png",
+                    },
+                    {
+                        src: currentAlbum.cover,
+                        sizes: "512x512",
+                        type: "image/jpeg",
+                    },
+                ],
+            });
+
+            // Set Action Handlers
+            navigator.mediaSession.setActionHandler("play", () => {
+                if (!$audioStore.isPlaying) togglePlayback();
+            });
+            navigator.mediaSession.setActionHandler("pause", () => {
+                if ($audioStore.isPlaying) togglePlayback();
+            });
+            navigator.mediaSession.setActionHandler("previoustrack", () =>
+                prevTrack(),
+            );
+            navigator.mediaSession.setActionHandler("nexttrack", () =>
+                nextTrack(),
+            );
+            navigator.mediaSession.setActionHandler("stop", () => {
+                if ($audioStore.isPlaying) togglePlayback();
+            });
+        }
     }
 
     // Reactively update volumes
@@ -139,7 +208,9 @@
     on:timeupdate={handleTimeUpdate}
     on:durationchange={handleDurationChange}
     preload="auto"
+    crossorigin="anonymous"
 ></audio>
 
 <!-- Ambience Player (Loop) -->
-<audio bind:this={ambienceEl} loop preload="auto"></audio>
+<audio bind:this={ambienceEl} loop preload="auto" crossorigin="anonymous"
+></audio>

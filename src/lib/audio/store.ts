@@ -1,20 +1,25 @@
 import { writable } from 'svelte/store';
 import type { Track, Album } from '$lib/data/albums';
 import { ALBUMS } from '$lib/data/albums';
+import { db } from '$lib/firebase';
+import { collection, getDocs, query } from 'firebase/firestore';
 
 export type AmbienceType = 'rain' | 'library' | 'garden' | 'none';
-// MusicType ya no es un enum fijo, ahora depende del album
 export type VibePreset = 'noir' | 'library' | 'zen' | 'custom';
 
 export interface AudioState {
     musicVolume: number;
+    // Ambience
     ambienceVolume: number;
-    isMuted: boolean;
-
-    // Capa de Ambiente (Loop)
     currentAmbience: AmbienceType;
 
-    // Capa de Música (Playlist)
+    isMuted: boolean;
+
+    // Library (Dynamic)
+    availableAlbums: Album[];
+    isLoadingLibrary: boolean;
+
+    // Playback
     playlist: Track[];
     currentTrackIndex: number;
     currentAlbumId?: string;
@@ -22,12 +27,12 @@ export interface AudioState {
     isPlaying: boolean;
     activeVibe: VibePreset;
 
-    // Playback state
+    // Progress
     duration: number;
     currentTime: number;
     seekRequest: number | null;
 
-    // Playback modes
+    // Modes
     repeatMode: 'off' | 'one' | 'all';
     shuffle: boolean;
 }
@@ -35,9 +40,12 @@ export interface AudioState {
 const initialState: AudioState = {
     musicVolume: 0.4,
     ambienceVolume: 0.6,
+    currentAmbience: 'none',
     isMuted: false,
 
-    currentAmbience: 'none',
+    availableAlbums: [], // Starts empty, fills from DB
+    isLoadingLibrary: true,
+
     playlist: [],
     currentTrackIndex: 0,
 
@@ -53,6 +61,43 @@ const initialState: AudioState = {
 };
 
 export const audioStore = writable<AudioState>(initialState);
+
+// --- Initialization ---
+
+export async function initAudioLibrary() {
+    try {
+        // Try to fetch from Firestore
+        const q = query(collection(db, 'albums'));
+        const snapshot = await getDocs(q);
+
+        if (!snapshot.empty) {
+            const fetchedAlbums = snapshot.docs.map(doc => {
+                const data = doc.data() as Album;
+                // Ensure ID reflects doc ID if missing (though they should match)
+                return { ...data, id: doc.id };
+            });
+
+            console.log(`[AudioLibrary] Loaded ${fetchedAlbums.length} albums from Firestore.`);
+            audioStore.update(s => ({
+                ...s,
+                availableAlbums: fetchedAlbums,
+                isLoadingLibrary: false
+            }));
+            return;
+        }
+    } catch (e) {
+        console.error("[AudioLibrary] Connection error, using offline fallback:", e);
+    }
+
+    // Fallback to static data
+    console.log("[AudioLibrary] Using static fallback.");
+    audioStore.update(s => ({
+        ...s,
+        availableAlbums: ALBUMS,
+        isLoadingLibrary: false
+    }));
+}
+
 
 // --- Actions ---
 
@@ -94,24 +139,25 @@ export function unlockAudio() {
 }
 
 export function playAlbum(albumId: string) {
-    const album = ALBUMS.find(a => a.id === albumId);
-    if (!album) return;
+    audioStore.update(s => {
+        // Look in Dynamic Library first
+        const album = s.availableAlbums.find(a => a.id === albumId);
+        if (!album) return s;
 
-    audioStore.update(s => ({
-        ...s,
-        playlist: album.tracks,
-        currentTrackIndex: 0,
-        currentAlbumId: albumId,
-        isPlaying: true, // Auto-play
-        // Si el album tiene un vibe asociado, poner el ambiente de ese vibe
-        currentAmbience: getAmbienceForVibe(album.vibeId) || s.currentAmbience
-    }));
+        return {
+            ...s,
+            playlist: album.tracks,
+            currentTrackIndex: 0,
+            currentAlbumId: albumId,
+            isPlaying: true,
+            currentAmbience: getAmbienceForVibe(album.vibeId) || s.currentAmbience
+        };
+    });
 }
 
 export function nextTrack() {
     audioStore.update(s => {
         if (s.playlist.length === 0) return s;
-        // Loop playlist
         const nextIndex = (s.currentTrackIndex + 1) % s.playlist.length;
         return { ...s, currentTrackIndex: nextIndex };
     });
@@ -136,21 +182,28 @@ function getAmbienceForVibe(vibeId?: string): AmbienceType | null {
     }
 }
 
-// Retro-compatibilidad para setVibe (ahora carga un álbum si existe)
 export function setVibe(vibe: VibePreset) {
-    // Buscar si hay un album con ese vibe
-    const album = ALBUMS.find(a => a.vibeId === vibe);
-
-    if (album) {
-        playAlbum(album.id);
-    } else {
-        // Fallback básico si no hay album (solo ambiente)
-        audioStore.update(s => ({
-            ...s,
-            currentAmbience: getAmbienceForVibe(vibe) || 'none',
-            activeVibe: vibe,
-            playlist: [], // Vaciar playlist si es solo vibe ambiental
-            isPlaying: true
-        }));
-    }
+    audioStore.update(s => {
+        const album = s.availableAlbums.find(a => a.vibeId === vibe);
+        if (album) {
+            // Side-effect: dispatch playAlbum-like update
+            // Since we are inside update(), we return the new state directly
+            return {
+                ...s,
+                playlist: album.tracks,
+                currentTrackIndex: 0,
+                currentAlbumId: album.id,
+                isPlaying: true,
+                currentAmbience: getAmbienceForVibe(album.vibeId) || s.currentAmbience
+            };
+        } else {
+            return {
+                ...s,
+                currentAmbience: getAmbienceForVibe(vibe) || 'none',
+                activeVibe: vibe,
+                playlist: [],
+                isPlaying: true
+            };
+        }
+    });
 }

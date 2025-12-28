@@ -5,41 +5,26 @@
     import {
         gameStore,
         toggleAutoPlay,
-        nextMove,
-        prevMove,
-        loadRandomLichessGame,
+        loadRandomLocalGame,
     } from "$lib/game/store";
-    import {
-        audioStore,
-        unlockAudio,
-        setVibe,
-        playAlbum,
-    } from "$lib/audio/store";
-    import {
-        ALBUMS,
-        type Album,
-        CATEGORY_LABELS,
-        type AlbumCategory,
-    } from "$lib/data/albums";
+    import { audioStore, unlockAudio, playAlbum } from "$lib/audio/store";
+    import { CATEGORY_LABELS, type AlbumCategory } from "$lib/data/albums";
     import { userStore } from "$lib/auth/userStore";
     import { playMoveSound } from "$lib/audio/sfx";
 
-    import StartOverlay from "$lib/components/StartOverlay.svelte";
     import Visualizer from "$lib/components/Visualizer.svelte";
 
     let boardContainer: HTMLElement;
     let board: any;
-    let showOverlay = true;
     let showMusicExplorer = false;
     let isUserLoaded = false;
-    let audioContextUnlocked = false;
 
     // --- FOCUS TIMER LOGIC ---
     let timerRunning = false;
     let focusDuration = 25 * 60; // 25 min default
     let timeLeft = focusDuration;
     let timerInterval: any;
-    let timerMode: "focus" | "short" | "long" = "focus";
+    let timerMode: "focus" | "short" | "long" | "custom" = "focus";
 
     function formatTime(seconds: number) {
         const m = Math.floor(seconds / 60);
@@ -60,6 +45,8 @@
         if (timerRunning) {
             stopTimer();
         } else {
+            // Ensure audio is unlocked on first interaction
+            unlockAudio();
             startTimer();
         }
     }
@@ -83,19 +70,23 @@
 
     function resetTimer() {
         stopTimer();
+        // Reset to default of current mode
+        if (timerMode === "focus") focusDuration = 25 * 60;
+        if (timerMode === "short") focusDuration = 5 * 60;
+        if (timerMode === "long") focusDuration = 15 * 60;
+        // If custom, keep current focusDuration as base
         timeLeft = focusDuration;
     }
 
     function completeTimer() {
         stopTimer();
-        // Play nice sound 3 times
         playMoveSound(true);
         setTimeout(() => playMoveSound(true), 500);
         setTimeout(() => playMoveSound(true), 1000);
     }
 
     // Circular Progress
-    $: progressCircle = ((focusDuration - timeLeft) / focusDuration) * 283; // 283 is approx circumference of r=45
+    $: progressCircle = ((focusDuration - timeLeft) / focusDuration) * 283;
     // --- END TIMER ---
 
     // Auth Check Logic
@@ -105,14 +96,6 @@
         } else {
             isUserLoaded = true;
         }
-    }
-
-    function handleEnter() {
-        showOverlay = false;
-        audioContextUnlocked = true;
-        unlockAudio();
-        // Start passive auto-play for background ambience if desired
-        // We leave it manual or static for now to be less distracting
     }
 
     function toggleMusicExplorer() {
@@ -131,10 +114,14 @@
 
     // Auto-load categories
     let selectedCategory: AlbumCategory | "all" = "all";
+
+    // Dynamic Albums from Store
     $: filteredAlbums =
         selectedCategory === "all"
-            ? ALBUMS
-            : ALBUMS.filter((a) => a.category === selectedCategory);
+            ? $audioStore.availableAlbums
+            : $audioStore.availableAlbums.filter(
+                  (a) => a.category === selectedCategory,
+              );
 
     onMount(async () => {
         const { Chessboard, BORDER_TYPE } = (await import(
@@ -145,19 +132,18 @@
             position: $gameStore.fen,
             style: {
                 cssClass: "default",
-                showCoordinates: false, // Cleaner for background
+                showCoordinates: false,
                 borderType: BORDER_TYPE.none,
             },
             responsive: true,
-            animationDuration: 800, // Slow enjoyable movement
+            animationDuration: 800,
             sprite: {
-                url: "/assets/images/chessboard-sprite-staunton.svg", // Ensure this path is correct or default
+                url: "/assets/images/chessboard-sprite-staunton.svg",
             },
         });
 
-        // Auto load a random game for background if empty
         if ($gameStore.history.length === 0) {
-            loadRandomLichessGame();
+            loadRandomLocalGame();
         }
     });
 
@@ -167,13 +153,9 @@
     });
 </script>
 
-{#if showOverlay}
-    <StartOverlay on:start={handleEnter} />
-{/if}
-
 <!-- Main Container: Zen Studio -->
 <div
-    class="relative w-screen h-screen bg-[#0B1120] overflow-hidden flex flex-col text-white font-poppins selection:bg-purple-500/30"
+    class="relative w-screen h-[100dvh] bg-[#0B1120] overflow-hidden flex flex-col text-white font-poppins selection:bg-purple-500/30"
 >
     <!-- BACKGROUND LAYER (Blurred Chessboard) -->
     <div
@@ -193,14 +175,14 @@
     </div>
 
     <!-- UI LAYER -->
-    <div class="relative z-10 w-full h-full flex flex-col">
-        <!-- Navbar -->
+    <div class="relative z-10 w-full h-full flex flex-col overflow-hidden">
+        <!-- Navbar (Fixed height) -->
         <header
-            class="p-6 flex justify-between items-center animate-fade-in-down"
+            class="p-4 md:p-6 flex justify-between items-center animate-fade-in-down shrink-0"
         >
             <a
                 href="/"
-                class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-opacity z-50"
+                class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-opacity z-50 text-white"
             >
                 <span class="text-xl">←</span>
                 <span class="text-sm font-medium">Salir</span>
@@ -219,19 +201,21 @@
 
             <button
                 on:click={toggleMusicExplorer}
-                class="p-2 opacity-50 hover:opacity-100 transition-opacity z-50"
+                class="p-2 opacity-50 hover:opacity-100 transition-opacity z-50 text-white"
             >
                 <span class="text-xl">🎵</span>
             </button>
         </header>
 
-        <!-- CENTER: FOCUS TIMER -->
-        <main class="flex-1 flex flex-col items-center justify-center p-4">
-            <div class="relative group">
-                <!-- Circular Progress SVG -->
-                <!-- r=45, cx=50, cy=50, circumference ~283 -->
+        <!-- CENTER: FOCUS TIMER (Flexible space) -->
+        <main
+            class="flex-1 flex flex-col items-center justify-evenly p-4 min-h-0"
+        >
+            <!-- Timer Container -->
+            <div class="relative group flex items-center justify-center">
+                <!-- Circular Progress SVG (Responsive to Height & Width) -->
                 <svg
-                    class="w-72 h-72 md:w-96 md:h-96 transform -rotate-90 drop-shadow-2xl"
+                    class="w-auto h-auto max-w-[80vw] max-h-[40vh] md:max-h-[50vh] aspect-square transform -rotate-90 drop-shadow-2xl text-white"
                     viewBox="0 0 100 100"
                 >
                     <!-- Track -->
@@ -241,7 +225,7 @@
                         r="45"
                         fill="none"
                         stroke="currentColor"
-                        stroke-width="2"
+                        stroke-width="1.5"
                         class="text-white/5"
                     />
                     <!-- Indicator -->
@@ -251,84 +235,132 @@
                         r="45"
                         fill="none"
                         stroke="currentColor"
-                        stroke-width="2"
+                        stroke-width="1.5"
                         stroke-dasharray="283"
                         stroke-dashoffset={progressCircle}
                         stroke-linecap="round"
-                        class="text-white filter drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] transition-all duration-1000 ease-linear"
+                        class="text-white filter drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-1000 ease-linear"
+                        class:text-green-400={timerRunning}
                     />
                 </svg>
 
-                <!-- Time Display (Centered) -->
+                <!-- Time Display/Input (Centered) -->
                 <div
-                    class="absolute inset-0 flex flex-col items-center justify-center"
+                    class="absolute inset-0 flex flex-col items-center justify-center z-10"
                 >
-                    <div
-                        class="font-mono text-6xl md:text-8xl font-light tracking-tighter text-white drop-shadow-lg tabular-nums select-none"
-                    >
-                        {formatTime(timeLeft)}
-                    </div>
-                    <div
-                        class="text-slate-400 text-sm tracking-[0.2em] mt-2 uppercase opacity-60 font-medium"
-                    >
-                        {timerRunning ? "Enfocado" : "Listo"}
-                    </div>
+                    {#if !timerRunning}
+                        <div
+                            class="flex items-baseline justify-center relative group/input"
+                        >
+                            <input
+                                type="number"
+                                min="1"
+                                max="180"
+                                value={Math.floor(timeLeft / 60)}
+                                on:input={(e) => {
+                                    const val = parseInt(e.currentTarget.value);
+                                    if (val > 0 && val <= 180) {
+                                        timeLeft = val * 60;
+                                        focusDuration = timeLeft;
+                                        timerMode = "custom";
+                                    }
+                                }}
+                                class="font-mono text-5xl md:text-8xl font-light tracking-tighter text-white bg-transparent text-center w-[1.5em] focus:outline-none focus:border-b-2 focus:border-white/20 appearance-none m-0 p-0 selection:bg-white/20 hover:scale-105 transition-transform cursor-pointer"
+                            />
+                            <span
+                                class="text-2xl text-slate-500 font-medium absolute -right-6 top-2 md:top-8 md:-right-8 opacity-0 group-hover/input:opacity-100 transition-opacity"
+                                >m</span
+                            >
+                            <div
+                                class="absolute -bottom-6 text-xs text-slate-500 opacity-0 group-hover/input:opacity-100 transition-opacity whitespace-nowrap"
+                            >
+                                Click para editar
+                            </div>
+                        </div>
+                    {:else}
+                        <div
+                            class="font-mono text-5xl md:text-8xl font-light tracking-tighter text-white drop-shadow-lg tabular-nums select-none"
+                        >
+                            {formatTime(timeLeft)}
+                        </div>
+                        <div
+                            class="text-slate-400 text-sm tracking-[0.2em] mt-2 md:mt-4 uppercase opacity-60 font-medium animate-pulse"
+                        >
+                            ENFOQUE
+                        </div>
+                    {/if}
                 </div>
             </div>
 
-            <!-- Controls -->
+            <!-- Controls (Flexible positioning) -->
             <div
-                class="mt-12 flex flex-col items-center gap-6 animate-fade-in-up"
+                class="flex flex-col items-center gap-6 md:gap-8 animate-fade-in-up w-full max-w-md"
             >
                 <!-- Main Action -->
                 <button
                     on:click={toggleTimer}
-                    class="group relative px-10 py-4 bg-white text-black rounded-full font-bold tracking-widest hover:scale-105 transition-all shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:shadow-[0_0_40px_rgba(255,255,255,0.3)] active:scale-95 flex items-center gap-3 z-50"
+                    class="group relative px-8 py-4 md:px-10 md:py-5 bg-white text-black rounded-full font-bold tracking-[0.2em] hover:scale-105 transition-all shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:shadow-[0_0_50px_rgba(255,255,255,0.4)] active:scale-95 flex items-center gap-3 z-50 text-sm md:text-base border border-transparent hover:border-white/50 w-full md:w-auto justify-center"
                 >
                     {#if timerRunning}
-                        <span>⏸ PAUSAR</span>
+                        <span>PAUSAR</span>
                     {:else if timeLeft < focusDuration && timeLeft > 0}
-                        <span>▶ REANUDAR</span>
+                        <span>REANUDAR</span>
                     {:else}
-                        <span>▶ INICIAR</span>
+                        <span>INICIAR</span>
                     {/if}
                 </button>
 
                 <!-- Secondary Actions -->
-                <div class="flex items-center gap-4 z-50">
+                <div
+                    class="flex items-center justify-center gap-2 md:gap-3 z-50 bg-black/20 backdrop-blur-sm p-1.5 md:p-2 rounded-2xl border border-white/5 w-auto max-w-full overflow-x-auto no-scrollbar"
+                >
                     <button
                         on:click={() => setTimerMode("focus")}
-                        class="px-4 py-2 rounded-lg text-sm font-medium transition-all {timerMode ===
+                        class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-[10px] md:text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap {timerMode ===
                         'focus'
-                            ? 'bg-white/10 text-white border border-white/20'
-                            : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'}"
+                            ? 'bg-white text-black shadow-lg'
+                            : 'text-slate-500 hover:text-white hover:bg-white/5'}"
                     >
                         25m
                     </button>
                     <button
                         on:click={() => setTimerMode("short")}
-                        class="px-4 py-2 rounded-lg text-sm font-medium transition-all {timerMode ===
+                        class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-[10px] md:text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap {timerMode ===
                         'short'
-                            ? 'bg-white/10 text-white border border-white/20'
-                            : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'}"
+                            ? 'bg-white text-black shadow-lg'
+                            : 'text-slate-500 hover:text-white hover:bg-white/5'}"
                     >
                         5m
                     </button>
                     <button
                         on:click={() => setTimerMode("long")}
-                        class="px-4 py-2 rounded-lg text-sm font-medium transition-all {timerMode ===
+                        class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-[10px] md:text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap {timerMode ===
                         'long'
-                            ? 'bg-white/10 text-white border border-white/20'
+                            ? 'bg-white text-black shadow-lg'
                             : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'}"
                     >
                         15m
                     </button>
+
+                    <div class="w-px h-6 bg-white/10 mx-1 shrink-0"></div>
+
                     <button
                         on:click={resetTimer}
-                        class="p-2 text-slate-600 hover:text-red-400 transition-colors ml-2"
-                        title="Reset"
+                        class="p-2 text-slate-500 hover:text-red-400 transition-colors rounded-full hover:bg-red-500/10 shrink-0"
+                        title="Reiniciar"
                     >
-                        ↺
+                        <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            ><path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                            ></path></svg
+                        >
                     </button>
                 </div>
             </div>
@@ -336,7 +368,7 @@
 
         <!-- BOTTOM: VISUALIZER (Subtle) -->
         <div
-            class="h-24 w-full flex items-end justify-center pb-4 opacity-30 hover:opacity-100 transition-opacity"
+            class="h-24 w-full flex items-end justify-center pb-4 opacity-20 hover:opacity-100 transition-opacity"
         >
             <Visualizer />
         </div>
@@ -345,17 +377,21 @@
     <!-- Music Explorer Overlay -->
     {#if showMusicExplorer}
         <div
-            class="absolute inset-0 z-[60] bg-black/80 backdrop-blur-xl animate-fade-in flex flex-col p-8 overflow-hidden"
+            class="absolute inset-0 z-[60] bg-black/80 backdrop-blur-xl animate-fade-in flex flex-col p-4 md:p-8 overflow-hidden"
         >
             <div class="flex justify-between items-center mb-8 shrink-0">
                 <h2 class="text-3xl font-bold text-white">Biblioteca</h2>
-                <div class="flex items-center gap-4">
-                    <!-- Categories -->
-                    <div class="hidden md:flex gap-2">
+                <div
+                    class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end"
+                >
+                    <!-- Categories (Scrollable Layout) -->
+                    <div
+                        class="flex gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar max-w-[200px] md:max-w-none"
+                    >
                         {#each CATEGORY_LABELS as cat}
                             <button
                                 on:click={() => (selectedCategory = cat.id)}
-                                class="px-3 py-1 rounded-full text-xs font-medium transition-all {selectedCategory ===
+                                class="px-3 py-1 rounded-full text-xs font-medium transition-all whitespace-nowrap flex-shrink-0 {selectedCategory ===
                                 cat.id
                                     ? 'bg-white text-black'
                                     : 'bg-white/10 text-slate-400 hover:text-white'}"
@@ -367,7 +403,7 @@
 
                     <button
                         on:click={toggleMusicExplorer}
-                        class="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
+                        class="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors shrink-0"
                     >
                         ✕
                     </button>
@@ -375,7 +411,7 @@
             </div>
 
             <div
-                class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 overflow-y-auto pb-20"
+                class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 overflow-y-auto pb-24 md:pb-20"
             >
                 {#each filteredAlbums as album}
                     <button
@@ -418,6 +454,7 @@
         </div>
     {/if}
 </div>
+```
 
 <style>
     /* Custom utility like bg-radial-gradient */
@@ -428,5 +465,16 @@
             var(--tw-gradient-via),
             var(--tw-gradient-to)
         );
+    }
+
+    /* Remove input arrows */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    input[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
     }
 </style>

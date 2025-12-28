@@ -30,12 +30,20 @@
                 2. Uso Aceptable
             </h2>
             <p>
-                ChillChess es una plataforma para relajarse y jugar ajedrez. No
+                ChillChess es una plataforma de productividad, música lo-fi y
+                ajedrez diseñada para la concentración ("Zen Mode"). No
                 permitimos:
             </p>
             <ul class="list-disc pl-5 mt-2 space-y-1">
                 <li>Comportamiento abusivo o acoso a otros usuarios.</li>
-                <li>Uso de bots o trampas en partidas competitivas.</li>
+                <li>
+                    Distribución, descarga o "ripeo" no autorizado de la música
+                    exclusiva de la plataforma.
+                </li>
+                <li>
+                    Uso de bots o trampas en partidas competitivas o
+                    manipulación de estadísticas de concentración.
+                </li>
                 <li>Intentos de vulnerar la seguridad de la plataforma.</li>
             </ul>
 
