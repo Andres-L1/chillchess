@@ -25,6 +25,7 @@
         query,
         orderBy,
         limit,
+        startAfter,
         type DocumentData,
         doc,
         updateDoc,
@@ -32,6 +33,7 @@
         addDoc,
         deleteDoc,
         writeBatch,
+        where,
     } from "firebase/firestore";
     import { db } from "$lib/firebase";
 
@@ -55,7 +57,14 @@
 
     // Real Data State
     let realUsers: DocumentData[] = [];
+    let filteredUsers: DocumentData[] = [];
     let usersLoading = false;
+    let lastUserDoc: any = null; // Cursor for pagination
+    let hasMoreUsers = true;
+
+    // Filters
+    let userSearchQuery = "";
+    let userFilterStatus: "all" | "pro" | "free" = "all";
 
     // Proposals State
     interface Proposal {
@@ -184,39 +193,86 @@
     }
     // ---------------------------
 
-    async function fetchRealUsers() {
+    // --- USERS LOGIC ---
+    async function fetchRealUsers(loadMore = false) {
         if (usersLoading) return;
         usersLoading = true;
-        try {
-            // Fetch users (limite 100 para no explotar lectura en free tier)
-            const q = query(collection(db, "users"), limit(100));
-            const snapshot = await getDocs(q);
-            realUsers = snapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
 
-            systemLogs = [
-                {
-                    type: "success",
-                    msg: `Datos sincronizados: ${realUsers.length} usuarios recuperados.`,
-                    time: new Date().toLocaleTimeString("es-ES"),
-                },
-                ...systemLogs,
-            ];
+        try {
+            // Reset if not loading more
+            if (!loadMore) {
+                realUsers = [];
+                lastUserDoc = null;
+                hasMoreUsers = true;
+            }
+
+            let q;
+
+            if (loadMore && lastUserDoc) {
+                q = query(
+                    collection(db, "users"),
+                    // orderBy("createdAt", "desc"), // Requires index, let's stick to default order for now or simple limit
+                    limit(50),
+                    startAfter(lastUserDoc),
+                );
+            } else {
+                q = query(collection(db, "users"), limit(50));
+            }
+
+            const snapshot = await getDocs(q);
+
+            if (snapshot.empty) {
+                hasMoreUsers = false;
+            } else {
+                const newUsers = snapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
+
+                if (loadMore) {
+                    realUsers = [...realUsers, ...newUsers];
+                } else {
+                    realUsers = newUsers;
+                }
+
+                lastUserDoc = snapshot.docs[snapshot.docs.length - 1];
+
+                // Check if we reached the end (if less than limit returned)
+                if (snapshot.docs.length < 50) hasMoreUsers = false;
+            }
         } catch (e: any) {
-            console.error(e);
-            systemLogs = [
-                {
-                    type: "error",
-                    msg: `Error de conexión DB: ${e.message}`,
-                    time: new Date().toLocaleTimeString("es-ES"),
-                },
-                ...systemLogs,
-            ];
+            console.error("Error fetching users:", e);
+            alert("Error cargando usuarios: " + e.message);
         } finally {
             usersLoading = false;
         }
+    }
+
+    // Reactive filtering
+    $: {
+        let temp = realUsers;
+
+        // 1. Text Search
+        if (userSearchQuery.trim()) {
+            const q = userSearchQuery.toLowerCase();
+            temp = temp.filter(
+                (u) =>
+                    u.email?.toLowerCase().includes(q) ||
+                    u.displayName?.toLowerCase().includes(q),
+            );
+        }
+
+        // 2. Status Filter
+        if (userFilterStatus !== "all") {
+            temp = temp.filter((u) => {
+                const isPro =
+                    u.subscriptionTier === "pro" ||
+                    u.subscriptionTier === "premium";
+                return userFilterStatus === "pro" ? isPro : !isPro;
+            });
+        }
+
+        filteredUsers = temp;
     }
 
     // Trigger fetch on tab change
@@ -690,23 +746,57 @@
 
                 <!-- AI Studio Tab -->
 
-                <!-- TAB: USERS - Simple Version -->
+                <!-- TAB: USERS - Advanced Version -->
                 {#if activeTab === "users"}
                     <div class="animate-fade-in space-y-4">
-                        <!-- Header -->
-                        <div class="flex justify-between items-center">
-                            <h2 class="text-2xl font-bold text-white">
-                                Usuarios ({realUsers.length})
-                            </h2>
-                            <button
-                                on:click={fetchRealUsers}
-                                disabled={usersLoading}
-                                class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg font-medium text-sm transition-colors disabled:opacity-50"
+                        <!-- Header & Controls -->
+                        <div
+                            class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+                        >
+                            <div>
+                                <h2 class="text-2xl font-bold text-white">
+                                    Usuarios ({realUsers.length})
+                                </h2>
+                                <p class="text-slate-400 text-sm">
+                                    Gestiona permisos y accesos.
+                                </p>
+                            </div>
+
+                            <div
+                                class="flex flex-col md:flex-row gap-3 w-full md:w-auto"
                             >
-                                {usersLoading
-                                    ? "⏳ Cargando..."
-                                    : "🔄 Refrescar"}
-                            </button>
+                                <!-- Search -->
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        bind:value={userSearchQuery}
+                                        placeholder="Buscar usuario..."
+                                        class="pl-9 pr-4 py-2 bg-[#1e293b] border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500 w-full md:w-64"
+                                    />
+                                    <span
+                                        class="absolute left-3 top-2.5 text-slate-500 text-xs"
+                                        >🔍</span
+                                    >
+                                </div>
+
+                                <!-- Filter -->
+                                <select
+                                    bind:value={userFilterStatus}
+                                    class="px-3 py-2 bg-[#1e293b] border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500"
+                                >
+                                    <option value="all">Todos</option>
+                                    <option value="pro">Solo PRO</option>
+                                    <option value="free">Solo Free</option>
+                                </select>
+
+                                <button
+                                    on:click={() => fetchRealUsers(false)}
+                                    disabled={usersLoading}
+                                    class="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg font-medium text-sm transition-colors disabled:opacity-50 text-slate-300"
+                                >
+                                    🔄
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Table Container -->
@@ -719,19 +809,19 @@
                                     <thead class="bg-white/5">
                                         <tr class="text-left">
                                             <th
-                                                class="px-6 py-4 text-xs font-bold text-slate-400 uppercase"
+                                                class="px-6 py-3 text-xs font-bold text-slate-400 uppercase"
                                                 >Usuario</th
                                             >
                                             <th
-                                                class="px-6 py-4 text-xs font-bold text-slate-400 uppercase"
+                                                class="px-6 py-3 text-xs font-bold text-slate-400 uppercase"
                                                 >Email</th
                                             >
                                             <th
-                                                class="px-6 py-4 text-xs font-bold text-slate-400 uppercase"
+                                                class="px-6 py-3 text-xs font-bold text-slate-400 uppercase"
                                                 >Plan</th
                                             >
                                             <th
-                                                class="px-6 py-4 text-xs font-bold text-slate-400 uppercase text-center"
+                                                class="px-6 py-3 text-xs font-bold text-slate-400 uppercase text-right"
                                                 >Acción</th
                                             >
                                         </tr>
@@ -739,8 +829,8 @@
 
                                     <!-- Body -->
                                     <tbody class="divide-y divide-white/5">
-                                        {#if usersLoading}
-                                            <!-- Loading State -->
+                                        {#if usersLoading && realUsers.length === 0}
+                                            <!-- Loading Initial -->
                                             <tr>
                                                 <td
                                                     colspan="4"
@@ -754,41 +844,43 @@
                                                     </p>
                                                 </td>
                                             </tr>
-                                        {:else if realUsers.length === 0}
+                                        {:else if filteredUsers.length === 0}
                                             <!-- Empty State -->
                                             <tr>
                                                 <td
                                                     colspan="4"
                                                     class="px-6 py-12 text-center text-slate-400"
                                                 >
-                                                    No hay usuarios registrados
+                                                    {userSearchQuery
+                                                        ? "No se encontraron usuarios con ese filtro"
+                                                        : "No hay usuarios registrados"}
                                                 </td>
                                             </tr>
                                         {:else}
-                                            <!-- Users List -->
-                                            {#each realUsers as user}
+                                            <!-- Users List (Dense) -->
+                                            {#each filteredUsers as user}
                                                 {@const isPro =
                                                     user.subscriptionTier ===
                                                         "pro" ||
                                                     user.subscriptionTier ===
                                                         "premium"}
                                                 <tr
-                                                    class="hover:bg-white/5 transition-colors"
+                                                    class="hover:bg-white/5 transition-colors group"
                                                 >
                                                     <!-- Usuario: Avatar + Name -->
-                                                    <td class="px-6 py-4">
+                                                    <td class="px-6 py-2.5">
                                                         <div
                                                             class="flex items-center gap-3"
                                                         >
                                                             <div
-                                                                class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold flex-shrink-0"
+                                                                class="w-8 h-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 border border-white/10"
                                                             >
                                                                 {(user.displayName ||
                                                                     user.email ||
                                                                     "U")[0].toUpperCase()}
                                                             </div>
                                                             <span
-                                                                class="text-white font-medium"
+                                                                class="text-white font-medium text-sm"
                                                             >
                                                                 {user.displayName ||
                                                                     "Sin nombre"}
@@ -797,9 +889,9 @@
                                                     </td>
 
                                                     <!-- Email -->
-                                                    <td class="px-6 py-4">
+                                                    <td class="px-6 py-2.5">
                                                         <span
-                                                            class="text-slate-300 text-sm"
+                                                            class="text-slate-400 text-sm font-mono"
                                                         >
                                                             {user.email ||
                                                                 "No especificado"}
@@ -807,25 +899,25 @@
                                                     </td>
 
                                                     <!-- Plan Badge -->
-                                                    <td class="px-6 py-4">
+                                                    <td class="px-6 py-2.5">
                                                         {#if isPro}
                                                             <span
-                                                                class="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full text-xs font-bold text-white"
+                                                                class="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded text-[10px] font-bold text-purple-300"
                                                             >
                                                                 ✨ PRO
                                                             </span>
                                                         {:else}
                                                             <span
-                                                                class="inline-flex items-center px-3 py-1 bg-slate-700 rounded-full text-xs font-medium text-slate-300"
+                                                                class="inline-flex items-center px-2 py-0.5 bg-slate-700/50 border border-slate-600 rounded text-[10px] font-medium text-slate-400"
                                                             >
-                                                                GRATUITO
+                                                                FREE
                                                             </span>
                                                         {/if}
                                                     </td>
 
                                                     <!-- Action Button -->
                                                     <td
-                                                        class="px-6 py-4 text-center"
+                                                        class="px-6 py-2.5 text-right"
                                                     >
                                                         <button
                                                             on:click={() =>
@@ -833,13 +925,13 @@
                                                                     user.id,
                                                                     isPro,
                                                                 )}
-                                                            class="px-4 py-2 rounded-lg font-medium text-xs transition-all {isPro
-                                                                ? 'bg-red-600 hover:bg-red-500 text-white'
-                                                                : 'bg-green-600 hover:bg-green-500 text-white'}"
+                                                            class="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1 rounded text-xs font-bold border {isPro
+                                                                ? 'border-red-500/30 text-red-400 hover:bg-red-500/10'
+                                                                : 'border-green-500/30 text-green-400 hover:bg-green-500/10'}"
                                                         >
                                                             {isPro
-                                                                ? "❌ Quitar Pro"
-                                                                : "✅ Dar Pro"}
+                                                                ? "Quitar Pro"
+                                                                : "Dar Pro"}
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -848,6 +940,23 @@
                                     </tbody>
                                 </table>
                             </div>
+
+                            <!-- Load More / Pagination Footer -->
+                            {#if hasMoreUsers && !userSearchQuery}
+                                <div
+                                    class="p-4 border-t border-white/5 flex justify-center"
+                                >
+                                    <button
+                                        on:click={() => fetchRealUsers(true)}
+                                        disabled={usersLoading}
+                                        class="text-sm text-blue-400 hover:text-blue-300 font-medium disabled:opacity-50"
+                                    >
+                                        {usersLoading
+                                            ? "Cargando más..."
+                                            : "Cargar más usuarios ↓"}
+                                    </button>
+                                </div>
+                            {/if}
                         </div>
                     </div>
                 {/if}
