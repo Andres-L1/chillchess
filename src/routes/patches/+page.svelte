@@ -9,7 +9,7 @@
 
     const patches: Patch[] = [
         {
-            version: "v1.2",
+            version: "v0.3",
             date: "28 Dic 2025",
             title: "Sistema de Favoritos",
             type: "minor",
@@ -22,7 +22,7 @@
             ],
         },
         {
-            version: "v1.1",
+            version: "v0.2",
             date: "24 Dic 2025",
             title: "Navegación Mejorada",
             type: "minor",
@@ -34,9 +34,9 @@
             ],
         },
         {
-            version: "v1.0",
+            version: "v0.1",
             date: "21 Dic 2025",
-            title: "Lanzamiento Inicial",
+            title: "Lanzamiento Beta",
             type: "major",
             changes: [
                 "🎵 Reproductor de audio funcional con 1 álbum disponible.",

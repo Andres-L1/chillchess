@@ -36,6 +36,14 @@
 
         // En desarrollo (próximo mes)
         {
+            title: "Lanzamiento v1.0 Estable",
+            description:
+                "Primera versión estable con todas las funciones core probadas y pulidas.",
+            status: "in-progress",
+            date: "Enero 2026",
+            category: "tech",
+        },
+        {
             title: "Expansión del Catálogo Musical",
             description:
                 "Incorporación de 3-5 álbumes nuevos de lo-fi, jazz y ambient.",
