@@ -193,14 +193,14 @@
             class="text-center max-w-md bg-[#1a1a1a] p-8 rounded-2xl border border-white/10 shadow-2xl"
         >
             <div
-                class="w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-6 shadow-lg shadow-purple-500/20"
+                class="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-6 shadow-lg shadow-primary-500/20"
             >
                 🔒
             </div>
             <h1 class="text-2xl font-bold mb-2">Acceso Reservado</h1>
             <p class="text-slate-400 mb-6">
                 El envío de música para A&R es una función exclusiva para
-                nuestros miembros <span class="text-purple-400 font-bold"
+                nuestros miembros <span class="text-primary-400 font-bold"
                     >PRO</span
                 >.
             </p>
@@ -238,7 +238,7 @@
                         <span>←</span> Volver
                     </a>
                     <h1
-                        class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"
+                        class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent"
                     >
                         Enviar Música
                     </h1>
@@ -247,7 +247,7 @@
                     </p>
                 </div>
                 <span
-                    class="hidden md:block bg-purple-500/10 text-purple-400 px-4 py-2 rounded-xl text-sm font-bold border border-purple-500/20"
+                    class="hidden md:block bg-primary-500/10 text-primary-400 px-4 py-2 rounded-xl text-sm font-bold border border-primary-500/20"
                 >
                     ✨ PRO ONLY
                 </span>
@@ -263,9 +263,9 @@
                             <div
                                 class="w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all {currentStep ===
                                 step
-                                    ? 'bg-blue-500 text-white scale-110 shadow-lg shadow-blue-500/50'
+                                    ? 'bg-primary-500 text-white scale-110 shadow-lg shadow-primary-500/50'
                                     : currentStep > step
-                                      ? 'bg-green-500 text-white'
+                                      ? 'bg-primary-600 text-white'
                                       : 'bg-white/10 text-slate-500'}"
                             >
                                 {currentStep > step ? "✓" : step}
@@ -295,7 +295,7 @@
 
             <!-- Important Notice -->
             <div
-                class="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-xl p-4 mb-6 backdrop-blur-xl"
+                class="bg-gradient-to-r from-primary-500/10 to-primary-600/10 border border-primary-500/20 rounded-xl p-4 mb-6 backdrop-blur-xl"
             >
                 <div class="flex items-start gap-3">
                     <span class="text-2xl">📢</span>
@@ -381,7 +381,7 @@
                                     type="text"
                                     bind:value={customGenre}
                                     placeholder="Ej. Jazzy Lo-fi, Neo-Soul..."
-                                    class="w-full bg-[#0B1120] border border-blue-500/30 rounded-xl px-4 py-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                    class="w-full bg-[#0B1120] border border-primary-500/30 rounded-xl px-4 py-3 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all"
                                 />
                             </div>
                         {/if}
@@ -390,7 +390,7 @@
                     <button
                         on:click={() => (currentStep = 2)}
                         disabled={!canProceedToStep(2)}
-                        class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg transition-all shadow-lg shadow-blue-900/20"
+                        class="w-full py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg transition-all shadow-lg shadow-primary-900/20"
                     >
                         Continuar →
                     </button>
@@ -408,7 +408,7 @@
 
                     <div class="flex flex-col md:flex-row gap-6 items-start">
                         <div
-                            class="w-full md:w-64 aspect-square bg-[#0B1120] rounded-2xl border-2 border-dashed border-white/20 flex items-center justify-center overflow-hidden relative group cursor-pointer hover:border-blue-500/50 transition-all"
+                            class="w-full md:w-64 aspect-square bg-[#0B1120] rounded-2xl border-2 border-dashed border-white/20 flex items-center justify-center overflow-hidden relative group cursor-pointer hover:border-primary-500/50 transition-all"
                         >
                             {#if coverPreview}
                                 <img
@@ -461,7 +461,7 @@
                             </ul>
                             {#if coverPreview}
                                 <div
-                                    class="bg-green-500/10 border border-green-500/20 rounded-lg p-3 text-green-400 text-sm flex items-center gap-2"
+                                    class="bg-primary-500/10 border border-primary-500/20 rounded-lg p-3 text-primary-400 text-sm flex items-center gap-2"
                                 >
                                     <span>✓</span> Portada cargada correctamente
                                 </div>
@@ -479,7 +479,7 @@
                         <button
                             on:click={() => (currentStep = 3)}
                             disabled={!coverFile}
-                            class="flex-1 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg transition-all shadow-lg shadow-blue-900/20"
+                            class="flex-1 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg transition-all shadow-lg shadow-primary-900/20"
                         >
                             Continuar →
                         </button>
@@ -498,7 +498,7 @@
                         </h2>
                         <button
                             on:click={addTrack}
-                            class="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg text-sm font-bold transition-all flex items-center gap-2"
+                            class="px-4 py-2 bg-primary-500/20 hover:bg-primary-500/30 text-primary-400 rounded-lg text-sm font-bold transition-all flex items-center gap-2"
                         >
                             <span>+</span> Añadir
                         </button>
@@ -507,7 +507,7 @@
                     <div class="space-y-4">
                         {#each tracks as track, i (track.id)}
                             <div
-                                class="bg-[#0B1120] p-4 rounded-xl border border-white/5 relative group hover:border-blue-500/20 transition-all"
+                                class="bg-[#0B1120] p-4 rounded-xl border border-white/5 relative group hover:border-primary-500/20 transition-all"
                             >
                                 <div class="grid md:grid-cols-2 gap-4">
                                     <div>
@@ -528,8 +528,8 @@
                                                 file:mr-4 file:py-2 file:px-4
                                                 file:rounded-lg file:border-0
                                                 file:text-xs file:font-semibold
-                                                file:bg-blue-500/10 file:text-blue-400
-                                                hover:file:bg-blue-500/20 file:cursor-pointer file:transition-all"
+                                                file:bg-primary-500/10 file:text-primary-400
+                                                hover:file:bg-primary-500/20 file:cursor-pointer file:transition-all"
                                                 on:change={(e) =>
                                                     handleAudioSelect(e, i)}
                                             />
@@ -574,7 +574,7 @@
                         <button
                             on:click={submitRelease}
                             disabled={uploading || !canProceedToStep(3)}
-                            class="flex-1 py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg shadow-lg shadow-green-900/20 transition-all flex items-center justify-center gap-3"
+                            class="flex-1 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg shadow-lg shadow-primary-900/20 transition-all flex items-center justify-center gap-3"
                         >
                             {#if uploading}
                                 <div
