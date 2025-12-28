@@ -298,32 +298,126 @@
     </nav>
 
     <!-- Hero Section -->
+    <!-- Hero Section -->
     <header
-        class="px-4 md:px-8 py-12 md:py-24 max-w-7xl mx-auto text-center space-y-6 md:space-y-8 animate-fade-in relative"
+        class="relative px-4 md:px-8 py-20 md:py-32 max-w-7xl mx-auto text-center space-y-8 animate-fade-in overflow-hidden"
     >
         <!-- Background Glow Effect -->
         <div
-            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px] -z-10 pointer-events-none"
+            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-[120px] -z-10 pointer-events-none animate-pulse-slow"
         ></div>
 
-        <h1
-            class="text-4xl md:text-7xl font-bold text-white tracking-tighter leading-[1.1]"
-        >
-            Tu Espacio <br />
-            <span
-                class="text-transparent bg-clip-text bg-gradient-to-r from-[#FF7B3D] to-[#FFB347]"
-                >De Concentración</span
+        <div class="space-y-4 relative z-10">
+            <div
+                class="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-bold uppercase tracking-widest text-[#FFB347] mb-4 hover:bg-white/10 transition-colors cursor-default"
             >
-        </h1>
-        <p
-            class="text-base md:text-xl text-slate-400 max-w-2xl mx-auto font-light leading-relaxed"
+                ✨ La Nueva Era del Ajedrez
+            </div>
+
+            <h1
+                class="text-5xl md:text-8xl font-bold text-white tracking-tighter leading-none"
+            >
+                Tu Zona <br />
+                <span
+                    class="text-transparent bg-clip-text bg-gradient-to-r from-[#FF7B3D] via-[#FFB347] to-[#FF7B3D] bg-[200%_auto] animate-gradient"
+                    >De Flujo</span
+                >
+            </h1>
+
+            <p
+                class="text-lg md:text-2xl text-slate-300 max-w-2xl mx-auto font-light leading-relaxed"
+            >
+                Juega ajedrez, estudia o relájate con nuestras atmósferas <strong
+                    class="text-white font-medium">Lo-Fi Premium</strong
+                >.
+                <br class="hidden md:block" /> Sin distracciones. Solo tú y tu mente.
+            </p>
+        </div>
+
+        <!-- CTA Buttons -->
+        <div
+            class="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8 relative z-10"
         >
-            Atmósferas inmersivas diseñadas para estudiar, jugar y fluir. <br
-                class="hidden md:block"
-            />
-            Estrategia, música Lo-Fi y calma.
-        </p>
+            {#if !$userStore.isLoggedIn}
+                <button
+                    on:click={openAuth}
+                    class="px-10 py-4 bg-white text-black font-bold text-lg rounded-full hover:scale-105 hover:shadow-[0_0_40px_-10px_rgba(255,255,255,0.5)] transition-all duration-300 w-full sm:w-auto"
+                >
+                    Empezar Gratis
+                </button>
+            {:else}
+                <a
+                    href="/app"
+                    class="px-10 py-4 bg-white text-black font-bold text-lg rounded-full hover:scale-105 hover:shadow-[0_0_40px_-10px_rgba(255,255,255,0.5)] transition-all duration-300 w-full sm:w-auto"
+                >
+                    Ir al Tablero
+                </a>
+            {/if}
+
+            <button
+                on:click={() =>
+                    document
+                        .getElementById("coleccion")
+                        ?.scrollIntoView({ behavior: "smooth" })}
+                class="px-10 py-4 bg-white/5 border border-white/10 text-white font-medium text-lg rounded-full hover:bg-white/10 hover:border-white/20 transition-all w-full sm:w-auto backdrop-blur-sm"
+            >
+                Explorar Música
+            </button>
+        </div>
     </header>
+
+    <!-- Features Section -->
+    <section class="max-w-7xl mx-auto px-4 md:px-8 py-12 mb-20 relative z-10">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Feature 1 -->
+            <div
+                class="bg-[#131b2e]/60 backdrop-blur-xl p-8 rounded-3xl border border-white/5 hover:border-white/10 transition-all hover:-translate-y-1"
+            >
+                <div
+                    class="w-12 h-12 bg-purple-500/20 rounded-2xl flex items-center justify-center text-2xl mb-4 text-purple-400"
+                >
+                    🎵
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Beats Curados</h3>
+                <p class="text-slate-400 leading-relaxed">
+                    Una colección exclusiva de Lo-Fi, Jazz y Ambient diseñada
+                    científicamente para mantenerte enfocado.
+                </p>
+            </div>
+
+            <!-- Feature 2 -->
+            <div
+                class="bg-[#131b2e]/60 backdrop-blur-xl p-8 rounded-3xl border border-white/5 hover:border-white/10 transition-all hover:-translate-y-1"
+            >
+                <div
+                    class="w-12 h-12 bg-orange-500/20 rounded-2xl flex items-center justify-center text-2xl mb-4 text-orange-400"
+                >
+                    ♟️
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Ajedrez Zen</h3>
+                <p class="text-slate-400 leading-relaxed">
+                    Sin relojes estresantes ni toxicidad. Juega contra amigos o
+                    IA en un entorno visualmente calmado.
+                </p>
+            </div>
+
+            <!-- Feature 3 -->
+            <div
+                class="bg-[#131b2e]/60 backdrop-blur-xl p-8 rounded-3xl border border-white/5 hover:border-white/10 transition-all hover:-translate-y-1"
+            >
+                <div
+                    class="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center text-2xl mb-4 text-blue-400"
+                >
+                    🌌
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Atmósferas</h3>
+                <p class="text-slate-400 leading-relaxed">
+                    Desbloquea fondos dinámicos y sets de piezas premium que
+                    transforman tu experiencia visual.
+                </p>
+            </div>
+        </div>
+    </section>
 
     <!-- New Releases Grid -->
     <main id="coleccion" class="px-4 md:px-8 pb-48 max-w-7xl mx-auto">
