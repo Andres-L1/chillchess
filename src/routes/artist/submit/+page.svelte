@@ -387,9 +387,33 @@
                         {/if}
                     </div>
 
+                    <!-- Validation feedback -->
+                    {#if releaseTitle.trim() === ""}
+                        <div
+                            class="text-sm text-slate-400 flex items-center gap-2"
+                        >
+                            <span class="text-red-400">○</span> Ingresa un título
+                            para continuar
+                        </div>
+                    {:else if genre === "Otra" && customGenre.trim() === ""}
+                        <div
+                            class="text-sm text-slate-400 flex items-center gap-2"
+                        >
+                            <span class="text-red-400">○</span> Especifica el género
+                            personalizado
+                        </div>
+                    {:else}
+                        <div
+                            class="text-sm text-primary-400 flex items-center gap-2"
+                        >
+                            <span>✓</span> Listo para continuar
+                        </div>
+                    {/if}
+
                     <button
                         on:click={() => (currentStep = 2)}
-                        disabled={!canProceedToStep(2)}
+                        disabled={releaseTitle.trim() === "" ||
+                            (genre === "Otra" && customGenre.trim() === "")}
                         class="w-full py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg transition-all shadow-lg shadow-primary-900/20"
                     >
                         Continuar →
