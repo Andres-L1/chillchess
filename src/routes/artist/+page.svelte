@@ -184,13 +184,6 @@
             </div>
 
             <div class="flex items-center gap-3">
-                <a
-                    href="/artist/submit"
-                    class="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-lg text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-900/20"
-                >
-                    🎵 <span class="hidden sm:inline">Subir Música</span>
-                </a>
-
                 <button
                     on:click={() => (showPreview = !showPreview)}
                     class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"

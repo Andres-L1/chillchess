@@ -184,6 +184,15 @@
                                         >PRO</span
                                     >
                                 </a>
+                                <a
+                                    href="/artist/submit"
+                                    class="px-4 py-2 text-blue-300 hover:text-blue-200 hover:bg-blue-500/10 text-left flex items-center gap-2"
+                                >
+                                    🎵 Enviar Música <span
+                                        class="text-[10px] bg-blue-500/30 px-1.5 py-0.5 rounded font-bold"
+                                        >PRO</span
+                                    >
+                                </a>
                             {/if}
                             <div class="h-px bg-white/10 my-1"></div>
                             <button
@@ -367,6 +376,16 @@
                                 >
                                     💡 Propuestas <span
                                         class="text-[10px] bg-purple-500/30 px-1.5 py-0.5 rounded font-bold ml-auto"
+                                        >PRO</span
+                                    >
+                                </a>
+                                <a
+                                    href="/artist/submit"
+                                    class="flex items-center gap-3 mb-3 text-sm font-bold text-blue-300 hover:text-blue-200 px-1"
+                                    on:click={() => (mobileMenuOpen = false)}
+                                >
+                                    🎵 Enviar Música <span
+                                        class="text-[10px] bg-blue-500/30 px-1.5 py-0.5 rounded font-bold ml-auto"
                                         >PRO</span
                                     >
                                 </a>
