@@ -166,10 +166,9 @@
         try {
             const userRef = doc(db, "users", userId);
 
-            // Actualizamos varios campos para asegurar compatibilidad total
+            // Actualizamos solo subscriptionTier (el campo correcto)
             await updateDoc(userRef, {
-                plan: newStatus,
-                tier: newStatus,
+                subscriptionTier: newStatus,
                 subscriptionStatus: newStatus === "pro" ? "active" : "inactive",
                 updatedByAdmin: new Date(),
             });
@@ -188,8 +187,7 @@
                 if (u.id === userId) {
                     return {
                         ...u,
-                        plan: newStatus,
-                        tier: newStatus,
+                        subscriptionTier: newStatus,
                         subscriptionStatus:
                             newStatus === "pro" ? "active" : "inactive",
                     };
@@ -693,6 +691,180 @@
                                     Usa el formulario de arriba para crear tu
                                     primer track con IA.
                                 </p>
+                            </div>
+                        </div>
+                    </div>
+                {/if}
+
+                <!-- TAB: USERS -->
+                {#if activeTab === "users"}
+                    <div class="space-y-8 animate-fade-in">
+                        <!-- Header -->
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h2 class="text-2xl font-bold text-white">
+                                    Gestión de Usuarios
+                                </h2>
+                                <p class="text-slate-400 text-sm mt-1">
+                                    {realUsers.length} usuarios registrados
+                                </p>
+                            </div>
+                            <button
+                                on:click={fetchRealUsers}
+                                disabled={usersLoading}
+                                class="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg font-medium transition-colors disabled:opacity-50"
+                            >
+                                {usersLoading ? "Cargando..." : "🔄 Refrescar"}
+                            </button>
+                        </div>
+
+                        <!-- Users Table -->
+                        <div
+                            class="bg-[#1e293b]/50 rounded-2xl border border-white/5 overflow-hidden"
+                        >
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-white/5">
+                                        <tr class="text-left">
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider"
+                                            >
+                                                Usuario
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider"
+                                            >
+                                                Email
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider"
+                                            >
+                                                Plan
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider"
+                                            >
+                                                Acciones
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-white/5">
+                                        {#if usersLoading}
+                                            <tr>
+                                                <td
+                                                    colspan="4"
+                                                    class="px-6 py-12 text-center text-slate-400"
+                                                >
+                                                    <div
+                                                        class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-white/20 border-t-white mb-2"
+                                                    ></div>
+                                                    <p>Cargando usuarios...</p>
+                                                </td>
+                                            </tr>
+                                        {:else if realUsers.length === 0}
+                                            <tr>
+                                                <td
+                                                    colspan="4"
+                                                    class="px-6 py-12 text-center text-slate-400"
+                                                >
+                                                    No hay usuarios registrados
+                                                    aún
+                                                </td>
+                                            </tr>
+                                        {:else}
+                                            {#each realUsers as user}
+                                                <tr
+                                                    class="hover:bg-white/5 transition-colors"
+                                                >
+                                                    <!-- Usuario -->
+                                                    <td class="px-6 py-4">
+                                                        <div
+                                                            class="flex items-center gap-3"
+                                                        >
+                                                            <div
+                                                                class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold"
+                                                            >
+                                                                {(user.displayName ||
+                                                                    user.email ||
+                                                                    "U")[0].toUpperCase()}
+                                                            </div>
+                                                            <div>
+                                                                <div
+                                                                    class="text-white font-medium"
+                                                                >
+                                                                    {user.displayName ||
+                                                                        "Sin nombre"}
+                                                                </div>
+                                                                <div
+                                                                    class="text-xs text-slate-500"
+                                                                >
+                                                                    ID: {user.id.slice(
+                                                                        0,
+                                                                        8,
+                                                                    )}...
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+
+                                                    <!-- Email -->
+                                                    <td class="px-6 py-4">
+                                                        <div
+                                                            class="text-sm text-slate-300"
+                                                        >
+                                                            {user.email ||
+                                                                "No especificado"}
+                                                        </div>
+                                                    </td>
+
+                                                    <!-- Plan -->
+                                                    <td class="px-6 py-4">
+                                                        {#if user.subscriptionTier === "pro" || user.subscriptionTier === "premium" || user.tier === "pro" || user.tier === "premium"}
+                                                            <span
+                                                                class="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full text-xs font-bold text-white"
+                                                            >
+                                                                ✨ PRO
+                                                            </span>
+                                                        {:else}
+                                                            <span
+                                                                class="inline-flex items-center gap-1 px-3 py-1 bg-slate-700 rounded-full text-xs font-medium text-slate-300"
+                                                            >
+                                                                GRATUITO
+                                                            </span>
+                                                        {/if}
+                                                    </td>
+
+                                                    <!-- Acciones -->
+                                                    <td class="px-6 py-4">
+                                                        {@const isPro =
+                                                            user.subscriptionTier ===
+                                                                "pro" ||
+                                                            user.subscriptionTier ===
+                                                                "premium" ||
+                                                            user.tier ===
+                                                                "pro" ||
+                                                            user.tier ===
+                                                                "premium"}
+                                                        <button
+                                                            on:click={() =>
+                                                                toggleUserPlan(
+                                                                    user.id,
+                                                                    isPro,
+                                                                )}
+                                                            class="px-4 py-2 rounded-lg font-medium text-sm transition-all {isPro
+                                                                ? 'bg-red-600 hover:bg-red-500 text-white'
+                                                                : 'bg-green-600 hover:bg-green-500 text-white'}"
+                                                        >
+                                                            {isPro
+                                                                ? "Quitar Pro"
+                                                                : "Dar Pro"}
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            {/each}
+                                        {/if}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
