@@ -182,8 +182,12 @@ export const generateAudio = functions.runWith({ timeoutSeconds: 300 }).https.on
     // Para desarrollo rápido, usaremos fetch dinámico
     const fetch = (await import('node-fetch')).default;
 
-    // Usar variable de entorno si existe, sino placeholder (¡EL USUARIO DEBE PONER SU KEY!)
-    const HF_TOKEN = process.env.HF_API_TOKEN || "hf_xxxxxxxxxxxxxxxxxxxxxxxx";
+    // Usar variable de entorno (Local) o Firebase Config (Producción)
+    const HF_TOKEN = process.env.HF_API_TOKEN || functions.config().hf?.token;
+
+    if (!HF_TOKEN) {
+        throw new functions.https.HttpsError('failed-precondition', 'El token de Hugging Face no está configurado (HF_API_TOKEN).');
+    }
 
     try {
         const response = await fetch(
