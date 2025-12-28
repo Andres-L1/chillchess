@@ -9,6 +9,8 @@ interface SubscriptionState {
     profile: UserProfile | null;
     loading: boolean;
     tier: SubscriptionTier;
+    stripeCustomerId?: string;
+    stripeSubscriptionId?: string;
     canAccessVibe: (vibeId: string) => boolean;
     canPlayGame: () => boolean;
 }
@@ -17,6 +19,8 @@ const initialState: SubscriptionState = {
     profile: null,
     loading: true,
     tier: 'free',
+    stripeCustomerId: undefined,
+    stripeSubscriptionId: undefined,
     canAccessVibe: () => false,
     canPlayGame: () => false,
 };
@@ -67,6 +71,8 @@ function createUserSubscriptionStore() {
                         profile: newProfile,
                         loading: false,
                         tier: 'free',
+                        stripeCustomerId: undefined,
+                        stripeSubscriptionId: undefined,
                         canAccessVibe: (vibeId: string) => canAccessVibe('free', vibeId),
                         canPlayGame: () => checkGamesAccess('free', 0).canPlay,
                     });
@@ -92,6 +98,8 @@ function createUserSubscriptionStore() {
                     profile,
                     loading: false,
                     tier,
+                    stripeCustomerId: profile.stripeCustomerId,
+                    stripeSubscriptionId: profile.stripeSubscriptionId,
                     canAccessVibe: (vibeId: string) => canAccessVibe(tier, vibeId),
                     canPlayGame: () => checkGamesAccess(tier, profile.gamesPlayedToday).canPlay,
                 });
