@@ -22,7 +22,7 @@
     class="min-h-screen bg-[#0B1120] text-white font-poppins pb-32 pt-24 px-4 md:px-12"
 >
     <div class="max-w-7xl mx-auto">
-        <header class="mb-12 flex items-center gap-4">
+        <header class="mb-8 flex items-center gap-4">
             <div
                 class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-2xl shadow-lg shadow-purple-900/50"
             >
@@ -39,6 +39,21 @@
                 </p>
             </div>
         </header>
+
+        <!-- View Toggle (Albums / Artists) -->
+        <div class="flex items-center gap-6 mb-12 border-b border-white/10">
+            <a
+                href="/coleccion"
+                class="text-lg font-bold text-slate-400 hover:text-white transition-colors pb-4 px-2 hover:border-b-2 hover:border-white/10"
+            >
+                📀 Álbumes
+            </a>
+            <button
+                class="text-lg font-bold text-white border-b-2 border-primary-500 pb-4 px-2"
+            >
+                🎤 Artistas
+            </button>
+        </div>
 
         {#if $audioStore.isLoadingLibrary}
             <div class="flex items-center justify-center h-64">
