@@ -11,33 +11,19 @@
 
     const dispatch = createEventDispatcher();
 
-    // Favorites Logic (Local for MVP)
-    let favorites: string[] = [];
+    import {
+        favoritesStore,
+        toggleFavorite,
+        isFavorite,
+    } from "$lib/data/favorites";
+
     let showVolumeSlider = false;
     let isCollapsed = false;
 
-    onMount(() => {
-        try {
-            const stored = localStorage.getItem("chillchess_favorites");
-            if (stored) favorites = JSON.parse(stored);
-        } catch (e) {
-            console.error("Error referencing localStorage", e);
-        }
-    });
-
-    function toggleFavorite(trackId?: string) {
-        if (!trackId) return;
-
-        if (favorites.includes(trackId)) {
-            favorites = favorites.filter((id) => id !== trackId);
-        } else {
-            favorites = [...favorites, trackId];
-        }
-        localStorage.setItem("chillchess_favorites", JSON.stringify(favorites));
-    }
-
     $: currentTrack = $audioStore.playlist[$audioStore.currentTrackIndex];
-    $: isFavorite = currentTrack?.id && favorites.includes(currentTrack.id);
+    $: isTrackFavorite = currentTrack?.id
+        ? isFavorite(currentTrack.id, $favoritesStore)
+        : false;
 </script>
 
 {#if currentTrack}
@@ -64,8 +50,9 @@
                 <!-- Left: Track Info & Favorite -->
                 <TrackInfo
                     {currentTrack}
-                    {isFavorite}
-                    onFavoriteClick={() => toggleFavorite(currentTrack.id)}
+                    isFavorite={isTrackFavorite}
+                    onFavoriteClick={() =>
+                        currentTrack?.id && toggleFavorite(currentTrack.id)}
                     onShowTracks={() => dispatch("showTracks")}
                 />
 

@@ -1,14 +1,14 @@
 import { writable } from 'svelte/store';
-import { browser } from '$app/environment';
 
 // Store para guardar IDs de canciones favoritas
 // Persiste en localStorage para simplicidad
 
-const stored = browser ? JSON.parse(localStorage.getItem('chill_favorites') || '[]') : [];
+const isBrowser = typeof window !== 'undefined';
+const stored = isBrowser ? JSON.parse(localStorage.getItem('chill_favorites') || '[]') : [];
 
 export const favoritesStore = writable<string[]>(stored);
 
-if (browser) {
+if (isBrowser) {
     favoritesStore.subscribe((value) => {
         localStorage.setItem('chill_favorites', JSON.stringify(value));
     });
