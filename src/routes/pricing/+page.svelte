@@ -76,7 +76,7 @@
                 </div>
             </div>
             <p class="text-slate-300 text-sm mb-8 min-h-[40px]">
-                Música ilimitada, Vibes y personalización total.
+                Todo el catálogo desbloqueado y apoyo directo al creador.
             </p>
 
             <button
