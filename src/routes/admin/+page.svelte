@@ -413,10 +413,14 @@
         >
             <div>
                 <div class="p-6 flex items-center gap-3 mb-6">
-                    <img src="/favicon.svg" alt="Logo" class="w-8 h-8" />
+                    <img
+                        src="/logo-desktop.png"
+                        alt="Logo"
+                        class="h-8 w-auto"
+                    />
                     <div class="hidden md:block">
                         <h1 class="font-bold text-white text-lg leading-none">
-                            ChillChess
+                            Admin Panel
                         </h1>
                         <span
                             class="text-[10px] text-blue-400 font-bold uppercase tracking-wider"

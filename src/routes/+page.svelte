@@ -51,18 +51,21 @@
     >
         <!-- Logo -->
         <div class="flex items-center gap-3 z-20">
+            <!-- Desktop logo -->
             <img
-                src="/favicon.svg"
+                src="/logo-desktop.png"
                 alt="ChillChess Logo"
-                class="w-10 h-10 hover:rotate-12 transition-transform duration-300 drop-shadow-sm filter brightness-110"
+                class="h-8 w-auto hidden md:block hover:scale-105 transition-transform duration-300"
+            />
+            <!-- Mobile logo (waiting for mobile version) -->
+            <img
+                src="/logo-desktop.png"
+                alt="ChillChess Logo"
+                class="h-8 w-auto md:hidden hover:scale-105 transition-transform duration-300"
             />
             <span
-                class="text-2xl font-bold tracking-tight text-white hover:scale-105 transition-transform cursor-default"
-                >ChillChess</span
-            >
-            <span
                 class="text-xs uppercase bg-white/10 px-2 py-1 rounded-md text-slate-400"
-                >Beta v2.0</span
+                >Beta v0.3</span
             >
         </div>
 
@@ -559,11 +562,10 @@
                     class="flex items-center gap-2 justify-center md:justify-start opacity-80"
                 >
                     <img
-                        src="/favicon.svg"
+                        src="/logo-desktop.png"
                         alt="Logo"
-                        class="w-6 h-6 grayscale opacity-50"
+                        class="h-6 w-auto"
                     />
-                    <h4 class="font-bold text-xl">ChillChess</h4>
                 </div>
                 <p class="text-sm text-slate-500">
                     &copy; 2025 ChillChess. Todos los derechos reservados.
