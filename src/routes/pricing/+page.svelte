@@ -1,9 +1,111 @@
 <script lang="ts">
     import { TIERS } from "$lib/subscription/tiers";
     import { userStore } from "$lib/auth/userStore";
+    import { userSubscription } from "$lib/subscription/userSubscription";
     import AuthModal from "$lib/components/AuthModal.svelte";
+    import { goto } from "$app/navigation";
+    import { onMount } from "svelte";
 
     let showAuthModal = false;
+    let loading = false;
+    let successMessage = "";
+    let errorMessage = "";
+
+    onMount(() => {
+        // Check for success/cancel params
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("success")) {
+            successMessage = "¡Pago exitoso! Tu suscripción está activa.";
+            setTimeout(() => goto("/app"), 3000);
+        } else if (params.get("canceled")) {
+            errorMessage =
+                "Pago cancelado. Puedes intentarlo de nuevo cuando quieras.";
+        }
+    });
+
+    async function handleSubscribe(
+        plan: "pro" | "premium",
+        interval: "monthly" | "yearly",
+    ) {
+        if (!$userStore.user) {
+            showAuthModal = true;
+            return;
+        }
+
+        loading = true;
+        errorMessage = "";
+
+        try {
+            const response = await fetch("/api/stripe/create-checkout", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    plan,
+                    interval,
+                    userId: $userStore.user.uid,
+                    userEmail: $userStore.user.email,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.error || "Error creating checkout session",
+                );
+            }
+
+            // Redirect to Stripe checkout
+            if (data.url) {
+                window.location.href = data.url;
+            }
+        } catch (error: any) {
+            console.error("Error:", error);
+            errorMessage =
+                error.message ||
+                "Error al procesar el pago. Inténtalo de nuevo.";
+        } finally {
+            loading = false;
+        }
+    }
+
+    async function handleManageBilling() {
+        if (!$userStore.user) return;
+
+        const customerId = $userSubscription.stripeCustomerId;
+        if (!customerId) {
+            errorMessage = "No tienes una suscripción activa para gestionar.";
+            return;
+        }
+
+        loading = true;
+        try {
+            const response = await fetch("/api/stripe/create-portal", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ customerId }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Error accessing portal");
+            }
+
+            if (data.url) {
+                window.location.href = data.url;
+            }
+        } catch (error: any) {
+            console.error("Error:", error);
+            errorMessage = error.message || "Error al acceder al portal.";
+        } finally {
+            loading = false;
+        }
+    }
 </script>
 
 <AuthModal show={showAuthModal} on:close={() => (showAuthModal = false)} />
@@ -22,6 +124,36 @@
             Sin complicaciones.
         </p>
     </div>
+
+    <!-- Success/Error Messages -->
+    {#if successMessage}
+        <div
+            class="max-w-2xl mx-auto mb-8 p-4 bg-green-500/10 border border-green-500/30 rounded-xl text-green-400 text-center"
+        >
+            {successMessage}
+        </div>
+    {/if}
+
+    {#if errorMessage}
+        <div
+            class="max-w-2xl mx-auto mb-8 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-center"
+        >
+            {errorMessage}
+        </div>
+    {/if}
+
+    <!-- Manage Billing Button for Existing Subscribers -->
+    {#if $userStore.user && $userSubscription.tier !== "free"}
+        <div class="max-w-2xl mx-auto mb-8 text-center">
+            <button
+                on:click={handleManageBilling}
+                disabled={loading}
+                class="px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl font-medium transition-all disabled:opacity-50"
+            >
+                {loading ? "Cargando..." : "⚙️ Gestionar Suscripción"}
+            </button>
+        </div>
+    {/if}
 
     <!-- Pricing Grid (Centered 2 Columns) -->
     <div
@@ -80,10 +212,11 @@
             </p>
 
             <button
-                on:click={() => (showAuthModal = true)}
-                class="w-full py-4 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 hover:to-primary-500 text-white font-bold shadow-lg shadow-primary-900/30 hover:shadow-primary-900/50 hover:scale-[1.02] transition-all mb-8"
+                on:click={() => handleSubscribe("pro", "yearly")}
+                disabled={loading}
+                class="w-full py-4 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 hover:to-primary-500 text-white font-bold shadow-lg shadow-primary-900/30 hover:shadow-primary-900/50 hover:scale-[1.02] transition-all mb-8 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-                Obtener Anualidad
+                {loading ? "Procesando..." : "Obtener Anualidad"}
             </button>
 
             <ul class="space-y-4 text-sm text-white">
@@ -114,8 +247,27 @@
                     >
                 </summary>
                 <p class="mt-4 text-slate-400 leading-relaxed">
-                    Sí, absolutamente. Si cancelas, seguirás teniendo acceso Pro
-                    hasta que termine tu periodo de facturación actual.
+                    Sí, absolutamente. Puedes gestionar tu suscripción desde el
+                    portal de Stripe y cancelar en cualquier momento. Seguirás
+                    teniendo acceso Pro hasta que termine tu periodo de
+                    facturación actual.
+                </p>
+            </details>
+            <details class="bg-white/5 p-6 rounded-2xl cursor-pointer group">
+                <summary
+                    class="font-bold list-none flex justify-between items-center text-slate-200"
+                >
+                    ¿Cómo funciona el pago?
+                    <span
+                        class="text-primary-500 group-open:rotate-180 transition-transform"
+                        >▼</span
+                    >
+                </summary>
+                <p class="mt-4 text-slate-400 leading-relaxed">
+                    Usamos Stripe para procesar los pagos de forma segura. Tus
+                    datos de tarjeta nunca pasan por nuestros servidores. El
+                    pago anual se renueva automáticamente cada año, pero puedes
+                    cancelar cuando quieras.
                 </p>
             </details>
             <details class="bg-white/5 p-6 rounded-2xl cursor-pointer group">
