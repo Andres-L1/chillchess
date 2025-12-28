@@ -2,6 +2,7 @@
     import { onMount } from "svelte";
     import { userStore } from "$lib/auth/userStore";
     import { userSubscription } from "$lib/subscription/userSubscription";
+    // @ts-ignore - SvelteKit module alias
     import { goto } from "$app/navigation";
     import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
     import { db } from "$lib/firebase";
@@ -364,7 +365,7 @@
                             >
                                 <div>
                                     <label
-                                        class="block text-xs mb-2 font-medium text-slate-400"
+                                        class="block text-xs mb-2 font-medium text-slate-400 uppercase"
                                         >Plataforma</label
                                     >
                                     <div
