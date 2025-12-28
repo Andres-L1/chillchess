@@ -58,6 +58,41 @@
     let usersLoading = false;
 
     // Edit State
+    let editingAlbum: Album | null = null;
+
+    // AI Studio State
+    let isGenerating = false;
+    let aiPrompt = "";
+    let aiDuration = "180";
+    let generatedTracks: any[] = [];
+
+    async function generateMusic() {
+        if (!aiPrompt.trim()) {
+            alert("Por favor escribe un prompt para la música.");
+            return;
+        }
+
+        isGenerating = true;
+
+        // Simulamos delay de red/generación (3s)
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+
+        // Mock result
+        const newTrack = {
+            id: Date.now().toString(),
+            title: `AI Track - ${aiPrompt.slice(0, 20)}...`,
+            date: new Date().toLocaleDateString(),
+            duration: aiDuration,
+            url: "#", // Placeholder
+            status: "ready",
+        };
+
+        generatedTracks = [newTrack, ...generatedTracks];
+        isGenerating = false;
+
+        // En un futuro real, aquí se llamaría a la Cloud Function que conecta con Hugging Face
+        // const result = await functions.httpsCallable('generateAudio')({ prompt: aiPrompt, duration: aiDuration });
+    }
     let editingAlbumId: string | null = null;
 
     // --- SYNC/MIGRATION LOGIC ---
@@ -602,7 +637,7 @@
                             class="bg-gradient-to-r from-purple-900/40 to-blue-900/40 border border-white/10 rounded-2xl p-8 text-center relative overflow-hidden"
                         >
                             <div
-                                class="absolute inset-0 bg-[url('/assets/images/grid.svg')] opacity-10"
+                                class="absolute inset-0 bg-gradient-to-b from-purple-500/5 to-transparent pointer-events-none"
                             ></div>
                             <h2
                                 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-4 relative z-10"
@@ -630,6 +665,7 @@
                                 >
                                 <textarea
                                     id="ai-prompt"
+                                    bind:value={aiPrompt}
                                     class="w-full bg-[#0B1120] border border-white/10 rounded-lg p-4 text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all mb-4"
                                     rows="3"
                                     placeholder="Ej: A chill lo-fi hip hop beat with jazzy piano and soft rain sounds, 90 bpm, nostalgic atmosphere..."
@@ -646,6 +682,7 @@
                                         >
                                         <select
                                             id="ai-duration"
+                                            bind:value={aiDuration}
                                             class="bg-[#0B1120] border border-white/10 rounded px-2 py-1 text-sm text-white focus:border-purple-500 outline-none"
                                         >
                                             <option value="30"
@@ -655,7 +692,7 @@
                                             <option value="120"
                                                 >2 minutos</option
                                             >
-                                            <option value="180" selected
+                                            <option value="180"
                                                 >3 minutos</option
                                             >
                                         </select>
@@ -675,31 +712,79 @@
                                 </div>
 
                                 <button
-                                    class="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold rounded-lg shadow-lg shadow-purple-900/20 transition-all transform active:scale-95 flex items-center justify-center gap-2"
+                                    on:click={generateMusic}
+                                    disabled={isGenerating}
+                                    class="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold rounded-lg shadow-lg shadow-purple-900/20 transition-all transform active:scale-95 disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2"
                                 >
-                                    <span>✨</span> Generar Música
+                                    {#if isGenerating}
+                                        <div
+                                            class="animate-spin h-5 w-5 border-2 border-white/30 border-t-white rounded-full"
+                                        ></div>
+                                        <span>Generando...</span>
+                                    {:else}
+                                        <span>✨</span> Generar Música
+                                    {/if}
                                 </button>
                             </div>
                         </div>
 
-                        <!-- Generated Results (Mock) -->
+                        <!-- Generated Results -->
                         <h3 class="text-xl font-bold mt-12 mb-4 px-2">
                             Generaciones Recientes
                         </h3>
                         <div
                             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                         >
-                            <!-- Empty State -->
-                            <div
-                                class="col-span-full text-center py-12 border border-dashed border-white/10 rounded-2xl text-slate-500"
-                            >
-                                <div class="text-4xl mb-4 opacity-30">🎹</div>
-                                <p>No has generado música aún.</p>
-                                <p class="text-sm opacity-60">
-                                    Usa el formulario de arriba para crear tu
-                                    primer track con IA.
-                                </p>
-                            </div>
+                            {#if generatedTracks.length === 0}
+                                <!-- Empty State -->
+                                <div
+                                    class="col-span-full text-center py-12 border border-dashed border-white/10 rounded-2xl text-slate-500"
+                                >
+                                    <div class="text-4xl mb-4 opacity-30">
+                                        🎹
+                                    </div>
+                                    <p>No has generado música aún.</p>
+                                    <p class="text-sm opacity-60">
+                                        Usa el formulario de arriba para crear
+                                        tu primer track con IA.
+                                    </p>
+                                </div>
+                            {:else}
+                                {#each generatedTracks as track}
+                                    <div
+                                        class="bg-[#1e293b]/50 border border-white/10 rounded-xl p-4 animate-fade-in"
+                                    >
+                                        <div
+                                            class="flex justify-between items-start mb-2"
+                                        >
+                                            <div
+                                                class="font-bold text-white truncate pr-2"
+                                            >
+                                                {track.title}
+                                            </div>
+                                            <span
+                                                class="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded uppercase font-bold"
+                                                >Ready</span
+                                            >
+                                        </div>
+                                        <div
+                                            class="text-xs text-slate-400 mb-4"
+                                        >
+                                            {track.date} • {track.duration}s
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button
+                                                class="flex-1 py-2 bg-white/5 hover:bg-white/10 rounded text-sm text-white transition-colors"
+                                                >▶ Reproducir</button
+                                            >
+                                            <button
+                                                class="flex-1 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 rounded text-sm transition-colors"
+                                                >Publicar</button
+                                            >
+                                        </div>
+                                    </div>
+                                {/each}
+                            {/if}
                         </div>
                     </div>
                 {/if}
