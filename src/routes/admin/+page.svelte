@@ -42,7 +42,8 @@
 
     let showAddAlbum = false;
     let selectedCategory: AlbumCategory | "all" = "all";
-    let activeTab: "dashboard" | "music" | "users" | "logs" = "dashboard";
+    let activeTab: "dashboard" | "music" | "users" | "proposals" | "logs" =
+        "dashboard";
     let syncingMusic = false;
 
     const categories: (AlbumCategory | "all")[] = [
@@ -56,10 +57,79 @@
     let realUsers: DocumentData[] = [];
     let usersLoading = false;
 
+    // Proposals State
+    interface Proposal {
+        id: string;
+        title: string;
+        description: string;
+        author: string;
+        votes: number;
+        status: "pending" | "approved" | "rejected" | "implemented";
+        createdAt: any;
+        category: "album" | "feature" | "improvement";
+    }
+    let proposals: Proposal[] = [];
+    let proposalsLoading = false;
+    let selectedProposalStatus: "all" | "pending" | "approved" | "implemented" =
+        "all";
+
     // Edit State
     let editingAlbum: Album | null = null;
-
     let editingAlbumId: string | null = null;
+
+    // --- PROPOSALS LOGIC ---
+    async function fetchProposals() {
+        if (proposalsLoading) return;
+        proposalsLoading = true;
+        try {
+            const q = query(
+                collection(db, "proposals"),
+                orderBy("createdAt", "desc"),
+                limit(100),
+            );
+            const snapshot = await getDocs(q);
+            proposals = snapshot.docs.map(
+                (doc) =>
+                    ({
+                        id: doc.id,
+                        ...doc.data(),
+                    }) as Proposal,
+            );
+        } catch (e: any) {
+            console.error("Error fetching proposals:", e);
+            alert("Error cargando propuestas: " + e.message);
+        } finally {
+            proposalsLoading = false;
+        }
+    }
+
+    async function updateProposalStatus(
+        proposalId: string,
+        newStatus: Proposal["status"],
+    ) {
+        if (
+            !confirm(
+                `¿Cambiar estado de la propuesta a ${newStatus.toUpperCase()}?`,
+            )
+        )
+            return;
+
+        try {
+            await updateDoc(doc(db, "proposals", proposalId), {
+                status: newStatus,
+            });
+
+            // Optimistic update
+            proposals = proposals.map((p) =>
+                p.id === proposalId ? { ...p, status: newStatus } : p,
+            );
+
+            alert(`Propuesta actualizada a ${newStatus}`);
+        } catch (e: any) {
+            console.error("Error updating proposal:", e);
+            alert("Error: " + e.message);
+        }
+    }
 
     // --- SYNC/MIGRATION LOGIC ---
     async function syncAlbumsToFirestore() {
@@ -150,9 +220,9 @@
     }
 
     // Trigger fetch on tab change
-    $: if (activeTab === "users" || activeTab === "dashboard") {
-        if (realUsers.length === 0) fetchRealUsers();
-    }
+    $: if (activeTab === "users" && realUsers.length === 0) fetchRealUsers();
+    $: if (activeTab === "proposals" && proposals.length === 0)
+        fetchProposals();
 
     async function toggleUserPlan(userId: string, currentPlanIsPro: boolean) {
         const action = currentPlanIsPro ? "QUITAR" : "DAR";
@@ -470,6 +540,19 @@
                     </button>
 
                     <button
+                        on:click={() => (activeTab = "proposals")}
+                        class="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all {activeTab ===
+                        'proposals'
+                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
+                            : 'text-slate-400 hover:bg-white/5 hover:text-white'}"
+                    >
+                        <span class="text-xl">💡</span>
+                        <span class="hidden md:block font-medium text-sm"
+                            >Propuestas</span
+                        >
+                    </button>
+
+                    <button
                         on:click={() => (activeTab = "logs")}
                         class="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all {activeTab ===
                         'logs'
@@ -565,6 +648,24 @@
                                 </div>
                                 <div class="text-slate-500 text-xs mt-1">
                                     Conectados a Firebase
+                                </div>
+                            </div>
+                            <!-- Proposals KPI -->
+                            <div
+                                class="bg-[#1e293b]/50 p-6 rounded-2xl border border-white/5"
+                            >
+                                <div
+                                    class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2"
+                                >
+                                    Propuestas Pendientes
+                                </div>
+                                <div class="text-3xl font-bold text-white">
+                                    {proposals.filter(
+                                        (p) => p.status === "pending",
+                                    ).length}
+                                </div>
+                                <div class="text-slate-500 text-xs mt-1">
+                                    Requieren revisión
                                 </div>
                             </div>
                         </div>
@@ -748,6 +849,208 @@
                                 </table>
                             </div>
                         </div>
+                    </div>
+                {/if}
+
+                <!-- TAB: PROPOSALS -->
+                {#if activeTab === "proposals"}
+                    <div class="animate-fade-in space-y-6">
+                        <!-- Header & Filters -->
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h2 class="text-2xl font-bold text-white mb-1">
+                                    Propuestas ({proposals.length})
+                                </h2>
+                                <p class="text-slate-400 text-sm">
+                                    Gestiona y modera las ideas de la comunidad.
+                                </p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button
+                                    on:click={() => fetchProposals()}
+                                    class="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm text-slate-300"
+                                >
+                                    🔄 Refrescar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Proposals Feed -->
+                        {#if proposalsLoading}
+                            <div class="text-center py-12">
+                                <div
+                                    class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-white/20 border-t-white mb-2"
+                                ></div>
+                                <p class="text-slate-400">
+                                    Cargando propuestas...
+                                </p>
+                            </div>
+                        {:else if proposals.length === 0}
+                            <div
+                                class="text-center py-12 bg-white/5 rounded-2xl border border-white/5"
+                            >
+                                <span class="text-4xl block mb-4">📭</span>
+                                <h3 class="text-xl font-bold text-white mb-2">
+                                    No hay propuestas
+                                </h3>
+                                <p class="text-slate-400">
+                                    Aún no hay propuestas de la comunidad.
+                                </p>
+                            </div>
+                        {:else}
+                            <div class="grid gap-4">
+                                {#each proposals as proposal}
+                                    <div
+                                        class="bg-[#1e293b]/50 border border-white/5 p-6 rounded-xl flex flex-col md:flex-row gap-6"
+                                    >
+                                        <!-- Votes -->
+                                        <div
+                                            class="flex flex-col items-center justify-center min-w-[60px] bg-white/5 rounded-lg p-2 h-fit"
+                                        >
+                                            <span
+                                                class="text-xl font-bold {proposal.votes >
+                                                10
+                                                    ? 'text-blue-400'
+                                                    : 'text-white'}"
+                                            >
+                                                {proposal.votes}
+                                            </span>
+                                            <span
+                                                class="text-xs text-slate-500 uppercase"
+                                                >Votos</span
+                                            >
+                                        </div>
+
+                                        <!-- Content -->
+                                        <div class="flex-1">
+                                            <div
+                                                class="flex flex-wrap items-center gap-2 mb-2"
+                                            >
+                                                <span
+                                                    class="px-2 py-0.5 rounded text-[10px] font-bold uppercase
+                                                    {proposal.category ===
+                                                    'feature'
+                                                        ? 'bg-purple-500/20 text-purple-300'
+                                                        : proposal.category ===
+                                                            'album'
+                                                          ? 'bg-blue-500/20 text-blue-300'
+                                                          : 'bg-green-500/20 text-green-300'}"
+                                                >
+                                                    {proposal.category}
+                                                </span>
+                                                <span
+                                                    class="px-2 py-0.5 rounded text-[10px] font-bold uppercase border
+                                                    {proposal.status ===
+                                                    'pending'
+                                                        ? 'border-yellow-500/50 text-yellow-500'
+                                                        : proposal.status ===
+                                                            'approved'
+                                                          ? 'border-green-500/50 text-green-500'
+                                                          : proposal.status ===
+                                                              'implemented'
+                                                            ? 'border-blue-500/50 text-blue-500'
+                                                            : 'border-red-500/50 text-red-500'}"
+                                                >
+                                                    {proposal.status}
+                                                </span>
+                                                <span
+                                                    class="text-xs text-slate-500"
+                                                    >• {proposal.createdAt
+                                                        ?.toDate
+                                                        ? proposal.createdAt
+                                                              .toDate()
+                                                              .toLocaleDateString()
+                                                        : "Fecha desconocida"}</span
+                                                >
+                                            </div>
+
+                                            <h3
+                                                class="text-lg font-bold text-white mb-1"
+                                            >
+                                                {proposal.title}
+                                            </h3>
+                                            <p
+                                                class="text-slate-300 text-sm mb-3"
+                                            >
+                                                {proposal.description}
+                                            </p>
+
+                                            <div class="text-xs text-slate-500">
+                                                Por: <span
+                                                    class="text-slate-300"
+                                                    >{proposal.author}</span
+                                                >
+                                            </div>
+                                        </div>
+
+                                        <!-- Actions -->
+                                        <div
+                                            class="flex flex-row md:flex-col gap-2 justify-center md:items-end border-t md:border-t-0 md:border-l border-white/5 pt-4 md:pt-0 md:pl-6 mt-4 md:mt-0"
+                                        >
+                                            {#if proposal.status !== "approved" && proposal.status !== "implemented"}
+                                                <button
+                                                    on:click={() =>
+                                                        updateProposalStatus(
+                                                            proposal.id,
+                                                            "approved",
+                                                        )}
+                                                    class="px-3 py-1.5 bg-green-600/20 hover:bg-green-600/30 text-green-400 text-xs font-bold rounded-lg border border-green-600/30 flex items-center gap-2 w-full justify-center transition-all"
+                                                >
+                                                    ✓ Aprobar
+                                                </button>
+                                            {/if}
+
+                                            {#if proposal.status !== "rejected" && proposal.status !== "implemented"}
+                                                <button
+                                                    on:click={() =>
+                                                        updateProposalStatus(
+                                                            proposal.id,
+                                                            "rejected",
+                                                        )}
+                                                    class="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 text-red-400 text-xs font-bold rounded-lg border border-red-600/30 flex items-center gap-2 w-full justify-center transition-all"
+                                                >
+                                                    ✗ Rechazar
+                                                </button>
+                                            {/if}
+
+                                            {#if proposal.status === "approved"}
+                                                <button
+                                                    on:click={() =>
+                                                        updateProposalStatus(
+                                                            proposal.id,
+                                                            "implemented",
+                                                        )}
+                                                    class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg shadow-lg shadow-blue-900/50 flex items-center gap-2 w-full justify-center transition-all"
+                                                >
+                                                    🎉 Implementar
+                                                </button>
+                                            {/if}
+
+                                            <button
+                                                on:click={() => {
+                                                    if (
+                                                        confirm(
+                                                            "¿Eliminar permanentemente?",
+                                                        )
+                                                    )
+                                                        deleteDoc(
+                                                            doc(
+                                                                db,
+                                                                "proposals",
+                                                                proposal.id,
+                                                            ),
+                                                        );
+                                                    fetchProposals();
+                                                }}
+                                                class="px-3 py-1.5 hover:bg-white/10 text-slate-400 hover:text-white text-xs font-bold rounded-lg flex items-center gap-2 w-full justify-center transition-all"
+                                            >
+                                                🗑️ Borrar
+                                            </button>
+                                        </div>
+                                    </div>
+                                {/each}
+                            </div>
+                        {/if}
                     </div>
                 {/if}
 
