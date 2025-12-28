@@ -159,3 +159,71 @@ function isValidUrl(url: string): boolean {
         return false;
     }
 }
+
+/**
+ * Generar Audio con IA (Hugging Face Inference API)
+ * Modelo: facebook/musicgen-small
+ */
+export const generateAudio = functions.runWith({ timeoutSeconds: 300 }).https.onCall(async (data: any, context) => {
+    // 1. Verificar Auth
+    if (!context.auth) {
+        throw new functions.https.HttpsError('unauthenticated', 'Debes estar logueado.');
+    }
+
+    const { prompt, duration } = data;
+
+    // Validar input
+    if (!prompt) throw new functions.https.HttpsError('invalid-argument', 'El prompt es requerido');
+
+    // IMPORTANTE: Configurar tu token de Hugging Face aquí o en variables de entorno:
+    // firebase functions:config:set hf.key="TU_TOKEN"
+    // const HF_TOKEN = functions.config().hf?.key; 
+
+    // Para desarrollo rápido, usaremos fetch dinámico
+    const fetch = (await import('node-fetch')).default;
+
+    // Usar variable de entorno si existe, sino placeholder (¡EL USUARIO DEBE PONER SU KEY!)
+    const HF_TOKEN = process.env.HF_API_TOKEN || "hf_xxxxxxxxxxxxxxxxxxxxxxxx";
+
+    try {
+        const response = await fetch(
+            "https://api-inference.huggingface.co/models/facebook/musicgen-small",
+            {
+                headers: {
+                    Authorization: `Bearer ${HF_TOKEN}`,
+                    "Content-Type": "application/json",
+                },
+                method: "POST",
+                body: JSON.stringify({
+                    inputs: prompt,
+                    parameters: {
+                        duration: parseInt(duration) || 10 // Duración en segundos (limitado en free tier)
+                    }
+                }),
+            }
+        );
+
+        if (!response.ok) {
+            const err = await response.text();
+            console.error("HF Error:", err);
+            throw new Error(`Error de Hugging Face: ${response.statusText}`);
+        }
+
+        const result = await response.blob();
+        const buffer = await result.arrayBuffer();
+
+        // Convertir a Base64 para devolver al cliente (simple approach)
+        // En producción idealmente se subiría a Storage y devolvería URL
+        const base64Audio = Buffer.from(buffer).toString('base64');
+
+        return {
+            success: true,
+            audioBase64: base64Audio,
+            format: 'audio/flac' // MusicGen suele devolver FLAC o WAV
+        };
+
+    } catch (error: any) {
+        console.error("AI Gen Error:", error);
+        throw new functions.https.HttpsError('internal', error.message || 'Error generando audio');
+    }
+});

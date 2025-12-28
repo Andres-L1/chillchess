@@ -33,6 +33,7 @@
         deleteDoc,
         writeBatch,
     } from "firebase/firestore";
+    import { getFunctions, httpsCallable } from "firebase/functions";
     import { db } from "$lib/firebase";
 
     let loading = true;
@@ -74,24 +75,58 @@
 
         isGenerating = true;
 
-        // Simulamos delay de red/generación (3s)
-        await new Promise((resolve) => setTimeout(resolve, 3000));
+        try {
+            const functions = getFunctions();
+            const generateAudioFn = httpsCallable(functions, "generateAudio");
 
-        // Mock result
-        const newTrack = {
-            id: Date.now().toString(),
-            title: `AI Track - ${aiPrompt.slice(0, 20)}...`,
-            date: new Date().toLocaleDateString(),
-            duration: aiDuration,
-            url: "#", // Placeholder
-            status: "ready",
-        };
+            // Llamada real a la Cloud Function
+            // Nota: Esto requiere que tengas configurado el token de HF en el backend
+            // firebase functions:config:set hf.key="TOKEN"
+            const result: any = await generateAudioFn({
+                prompt: aiPrompt,
+                duration: aiDuration,
+            });
 
-        generatedTracks = [newTrack, ...generatedTracks];
-        isGenerating = false;
+            if (result.data.success) {
+                const newTrack = {
+                    id: Date.now().toString(),
+                    title: `AI: ${aiPrompt.slice(0, 20)}...`,
+                    date: new Date().toLocaleDateString(),
+                    duration: aiDuration,
+                    // Crear Data URI para reproducir directamente
+                    url: `data:${result.data.format};base64,${result.data.audioBase64}`,
+                    status: "ready",
+                };
 
-        // En un futuro real, aquí se llamaría a la Cloud Function que conecta con Hugging Face
-        // const result = await functions.httpsCallable('generateAudio')({ prompt: aiPrompt, duration: aiDuration });
+                generatedTracks = [newTrack, ...generatedTracks];
+                alert("Música generada con éxito! 🎹");
+            }
+        } catch (error: any) {
+            console.error("AI Generation Error:", error);
+            alert(
+                `Error generando audio: ${error.message || "Error desconocido"}. \n\nAsegúrate de haber configurado tu TOKEN de Hugging Face en el backend.`,
+            );
+
+            // Fallback para demo visual si falla (opcional, para no bloquear al usuario completamente en dev)
+            const fallbackTrack = {
+                id: Date.now().toString(),
+                title: `Demo Track (Error Fallback) - ${aiPrompt.slice(0, 10)}...`,
+                date: new Date().toLocaleDateString(),
+                duration: aiDuration,
+                url: "#",
+                status: "error",
+            };
+            generatedTracks = [fallbackTrack, ...generatedTracks];
+        } finally {
+            isGenerating = false;
+        }
+    }
+
+    function playGeneratedTrack(track: any) {
+        if (!track.url || track.url === "#")
+            return alert("No hay audio disponible para este track.");
+        const audio = new Audio(track.url);
+        audio.play();
     }
     let editingAlbumId: string | null = null;
 
@@ -774,6 +809,8 @@
                                         </div>
                                         <div class="flex gap-2">
                                             <button
+                                                on:click={() =>
+                                                    playGeneratedTrack(track)}
                                                 class="flex-1 py-2 bg-white/5 hover:bg-white/10 rounded text-sm text-white transition-colors"
                                                 >▶ Reproducir</button
                                             >
