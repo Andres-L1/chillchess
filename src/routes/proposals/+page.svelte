@@ -175,7 +175,7 @@
             case "rejected":
                 return "bg-red-500/20 text-red-300 border-red-500/30";
             case "implemented":
-                return "bg-blue-500/20 text-blue-300 border-blue-500/30";
+                return "bg-primary-500/20 text-primary-300 border-primary-500/30";
             default:
                 return "bg-slate-500/20 text-slate-300 border-slate-500/30";
         }
@@ -247,7 +247,7 @@
         <div class="mb-12">
             <div class="flex items-center gap-4 mb-4">
                 <div
-                    class="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-purple-900/50"
+                    class="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-primary-900/50"
                 >
                     💡
                 </div>
@@ -304,7 +304,7 @@
                         on:click={() => (sortBy = "votes")}
                         class="px-4 py-2 rounded-xl font-medium transition-all {sortBy ===
                         'votes'
-                            ? 'bg-blue-600 text-white'
+                            ? 'bg-primary-500 text-white'
                             : 'bg-white/5 text-slate-400 hover:bg-white/10'}"
                     >
                         🔥 Más Votadas
@@ -313,7 +313,7 @@
                         on:click={() => (sortBy = "recent")}
                         class="px-4 py-2 rounded-xl font-medium transition-all {sortBy ===
                         'recent'
-                            ? 'bg-blue-600 text-white'
+                            ? 'bg-primary-500 text-white'
                             : 'bg-white/5 text-slate-400 hover:bg-white/10'}"
                     >
                         🆕 Recientes
@@ -322,7 +322,7 @@
 
                 <button
                     on:click={() => (showNewProposal = !showNewProposal)}
-                    class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-full transition-all hover:scale-105 shadow-lg shadow-blue-900/30 w-full sm:w-auto"
+                    class="px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 text-white font-bold rounded-full transition-all hover:scale-105 shadow-lg shadow-primary-900/30 w-full sm:w-auto"
                 >
                     + Nueva Propuesta
                 </button>
@@ -349,7 +349,7 @@
                                     on:click={() => (newCategory = "album")}
                                     class="px-4 py-2 rounded-xl transition-all {newCategory ===
                                     'album'
-                                        ? 'bg-purple-600 text-white'
+                                        ? 'bg-primary-500 text-white'
                                         : 'bg-white/5 text-slate-400 hover:bg-white/10'}"
                                 >
                                     🎵 Álbum
@@ -358,7 +358,7 @@
                                     on:click={() => (newCategory = "feature")}
                                     class="px-4 py-2 rounded-xl transition-all {newCategory ===
                                     'feature'
-                                        ? 'bg-purple-600 text-white'
+                                        ? 'bg-primary-500 text-white'
                                         : 'bg-white/5 text-slate-400 hover:bg-white/10'}"
                                 >
                                     ⚡ Feature
@@ -368,7 +368,7 @@
                                         (newCategory = "improvement")}
                                     class="px-4 py-2 rounded-xl transition-all {newCategory ===
                                     'improvement'
-                                        ? 'bg-purple-600 text-white'
+                                        ? 'bg-primary-500 text-white'
                                         : 'bg-white/5 text-slate-400 hover:bg-white/10'}"
                                 >
                                     🔧 Mejora
@@ -387,7 +387,7 @@
                                 bind:value={newTitle}
                                 type="text"
                                 placeholder="Ej: Modo Pomodoro Integrado"
-                                class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none transition-colors"
+                                class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:border-primary-500 focus:outline-none transition-colors"
                                 maxlength="100"
                             />
                         </div>
@@ -402,7 +402,7 @@
                                 id="proposal-description"
                                 bind:value={newDescription}
                                 placeholder="Describe tu propuesta en detalle..."
-                                class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none transition-colors resize-none"
+                                class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:border-primary-500 focus:outline-none transition-colors resize-none"
                                 rows="4"
                                 maxlength="500"
                             ></textarea>
@@ -412,7 +412,7 @@
                             <button
                                 on:click={submitProposal}
                                 disabled={isSubmitting}
-                                class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                class="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-xl transition-all flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isSubmitting
                                     ? "Publicando..."

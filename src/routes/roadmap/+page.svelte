@@ -99,7 +99,7 @@
         if (status === "done")
             return "bg-green-500/20 text-green-300 border-green-500/30";
         if (status === "in-progress")
-            return "bg-blue-500/20 text-blue-300 border-blue-500/30";
+            return "bg-primary-500/20 text-primary-300 border-primary-500/30";
         return "bg-slate-500/20 text-slate-300 border-slate-500/30";
     }
 
@@ -144,7 +144,7 @@
         <div class="relative">
             <!-- Vertical Line -->
             <div
-                class="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 via-purple-500 to-transparent"
+                class="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary-400 via-primary-600 to-transparent"
             ></div>
 
             <div class="space-y-12">
@@ -156,7 +156,7 @@
                                     {item.status === 'done'
                                 ? 'bg-green-500'
                                 : item.status === 'in-progress'
-                                  ? 'bg-blue-500'
+                                  ? 'bg-primary-500'
                                   : 'bg-slate-500'}
                                     group-hover:scale-125 transition-transform"
                         ></div>
@@ -217,7 +217,7 @@
 
         <!-- Footer Note -->
         <div
-            class="mt-16 p-6 bg-blue-500/10 border border-blue-500/20 rounded-2xl"
+            class="mt-16 p-6 bg-primary-500/10 border border-primary-500/20 rounded-2xl"
         >
             <div class="flex items-start gap-4">
                 <span class="text-2xl">💡</span>

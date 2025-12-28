@@ -102,7 +102,7 @@
         >
             <div>
                 <h1
-                    class="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"
+                    class="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent"
                 >
                     Colección Musical
                 </h1>
@@ -167,7 +167,7 @@
                     on:click={() => (selectedCategory = "all")}
                     class="px-6 py-3 rounded-xl font-medium transition-all {selectedCategory ===
                     'all'
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/20'
+                        ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/20'
                         : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/10'}"
                 >
                     📚 Todas ({ALBUMS.length})
@@ -176,7 +176,7 @@
                     on:click={() => (selectedCategory = "musica")}
                     class="px-6 py-3 rounded-xl font-medium transition-all {selectedCategory ===
                     'musica'
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/20'
+                        ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/20'
                         : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/10'}"
                 >
                     🎵 Música ({ALBUMS.filter((a) => a.category === "musica")
@@ -186,7 +186,7 @@
                     on:click={() => (selectedCategory = "juegos")}
                     class="px-6 py-3 rounded-xl font-medium transition-all {selectedCategory ===
                     'juegos'
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/20'
+                        ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/20'
                         : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/10'}"
                 >
                     🎮 Juegos ({ALBUMS.filter((a) => a.category === "juegos")
@@ -196,7 +196,7 @@
                     on:click={() => (selectedCategory = "ambiente")}
                     class="px-6 py-3 rounded-xl font-medium transition-all {selectedCategory ===
                     'ambiente'
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/20'
+                        ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/20'
                         : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/10'}"
                 >
                     🌿 Ambiente ({ALBUMS.filter(
@@ -283,7 +283,7 @@
                                 </h3>
                                 {#if album.tag}
                                     <span
-                                        class="text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-300 font-bold shrink-0"
+                                        class="text-xs px-2 py-1 rounded-full bg-primary-500/20 text-primary-300 font-bold shrink-0"
                                     >
                                         {album.tag}
                                     </span>
@@ -449,7 +449,7 @@
                                 class="group flex items-center gap-3 rounded-xl p-3 transition-colors cursor-pointer {$audioStore.currentAlbumId ===
                                     selectedAlbum.id &&
                                 $audioStore.currentTrackIndex === index
-                                    ? 'bg-blue-500/20 border border-blue-500/30'
+                                    ? 'bg-primary-500/20 border border-primary-500/30'
                                     : 'bg-white/5 hover:bg-white/10 border border-transparent'}"
                             >
                                 <div
