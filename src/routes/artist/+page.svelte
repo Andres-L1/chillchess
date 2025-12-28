@@ -230,7 +230,7 @@
                                     type="text"
                                     bind:value={artistName}
                                     placeholder="Tu nombre artístico"
-                                    class="w-full bg-[#0B1120] border border-white/10 rounded-lg px-4 py-2 focus:border-purple-500 focus:outline-none"
+                                    class="w-full bg-[#0B1120]/50 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none transition-all"
                                 />
                             </div>
 
@@ -264,7 +264,7 @@
                                     type="url"
                                     bind:value={avatarUrl}
                                     placeholder="https://example.com/avatar.jpg"
-                                    class="w-full bg-[#0B1120] border border-white/10 rounded-lg px-4 py-2 focus:border-purple-500 focus:outline-none"
+                                    class="w-full bg-[#0B1120]/50 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none transition-all"
                                 />
                             </div>
                         </div>
@@ -273,11 +273,11 @@
                     <!-- Customization (PRO) -->
                     {#if isPro}
                         <div
-                            class="bg-gradient-to-br from-purple-900/10 to-blue-900/10 rounded-2xl border border-purple-500/20 p-6 relative overflow-hidden group"
+                            class="bg-gradient-to-br from-primary-900/10 to-primary-800/10 rounded-2xl border border-primary-500/20 p-6 relative overflow-hidden group"
                         >
                             <!-- Background decoration -->
                             <div
-                                class="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl group-hover:bg-purple-500/20 transition-all duration-700"
+                                class="absolute -top-10 -right-10 w-32 h-32 bg-primary-500/10 rounded-full blur-3xl group-hover:bg-primary-500/20 transition-all duration-700"
                             ></div>
 
                             <div
@@ -424,7 +424,7 @@
                             <h2 class="text-xl font-bold">Redes Sociales</h2>
                             <button
                                 on:click={() => (addingLink = !addingLink)}
-                                class="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-medium transition-colors"
+                                class="px-3 py-1 bg-primary-500 hover:bg-primary-600 rounded-lg text-sm font-medium transition-colors"
                             >
                                 {addingLink ? "Cancelar" : "+ Añadir"}
                             </button>
@@ -554,7 +554,7 @@
                     <button
                         on:click={saveProfile}
                         disabled={saving}
-                        class="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg shadow-lg transition-all"
+                        class="w-full py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg shadow-lg transition-all"
                     >
                         {saving ? "Guardando..." : "💾 Guardar Perfil"}
                     </button>

@@ -47,7 +47,7 @@
 
         <header class="mb-8 flex items-center gap-4">
             <div
-                class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-2xl shadow-lg shadow-purple-900/50"
+                class="w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center text-2xl shadow-lg shadow-primary-900/50"
             >
                 🎤
             </div>
@@ -81,7 +81,7 @@
         {#if $audioStore.isLoadingLibrary}
             <div class="flex items-center justify-center h-64">
                 <div
-                    class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"
+                    class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"
                 ></div>
             </div>
         {:else if artists.length === 0}
@@ -122,7 +122,7 @@
                                     class="group text-left"
                                 >
                                     <div
-                                        class="aspect-square rounded-2xl bg-slate-800 mb-4 overflow-hidden relative shadow-lg group-hover:shadow-purple-500/20 transition-all group-hover:-translate-y-1"
+                                        class="aspect-square rounded-2xl bg-slate-800 mb-4 overflow-hidden relative shadow-lg group-hover:shadow-primary-500/20 transition-all group-hover:-translate-y-1"
                                     >
                                         <img
                                             src={album.cover}
@@ -150,7 +150,7 @@
                                         </div>
                                     </div>
                                     <h3
-                                        class="font-bold text-sm md:text-base text-white/90 group-hover:text-purple-400 transition-colors truncate"
+                                        class="font-bold text-sm md:text-base text-white/90 group-hover:text-primary-400 transition-colors truncate"
                                     >
                                         {album.title}
                                     </h3>
