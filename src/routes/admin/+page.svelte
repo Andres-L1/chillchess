@@ -773,6 +773,13 @@
                                             </tr>
                                         {:else}
                                             {#each realUsers as user}
+                                                {@const isPro =
+                                                    user.subscriptionTier ===
+                                                        "pro" ||
+                                                    user.subscriptionTier ===
+                                                        "premium" ||
+                                                    user.tier === "pro" ||
+                                                    user.tier === "premium"}
                                                 <tr
                                                     class="hover:bg-white/5 transition-colors"
                                                 >
@@ -819,7 +826,7 @@
 
                                                     <!-- Plan -->
                                                     <td class="px-6 py-4">
-                                                        {#if user.subscriptionTier === "pro" || user.subscriptionTier === "premium" || user.tier === "pro" || user.tier === "premium"}
+                                                        {#if isPro}
                                                             <span
                                                                 class="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full text-xs font-bold text-white"
                                                             >
@@ -836,15 +843,6 @@
 
                                                     <!-- Acciones -->
                                                     <td class="px-6 py-4">
-                                                        {@const isPro =
-                                                            user.subscriptionTier ===
-                                                                "pro" ||
-                                                            user.subscriptionTier ===
-                                                                "premium" ||
-                                                            user.tier ===
-                                                                "pro" ||
-                                                            user.tier ===
-                                                                "premium"}
                                                         <button
                                                             on:click={() =>
                                                                 toggleUserPlan(
