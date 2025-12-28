@@ -12,6 +12,11 @@
         prevTrack,
     } from "$lib/audio/store";
     import { userSubscription } from "$lib/subscription/userSubscription";
+    import {
+        favoritesStore,
+        toggleFavorite,
+        isFavorite,
+    } from "$lib/data/favorites";
 
     const categoryLabelMap = CATEGORY_LABELS.reduce(
         (acc, curr) => {
@@ -446,12 +451,12 @@
                                 $audioStore.currentTrackIndex === index
                                     ? 'bg-blue-500/20 border border-blue-500/30'
                                     : 'bg-white/5 hover:bg-white/10 border border-transparent'}"
-                                on:click={() =>
-                                    selectedAlbum &&
-                                    toggleTrackPlay(selectedAlbum, index)}
                             >
                                 <div
                                     class="w-8 h-8 flex items-center justify-center shrink-0"
+                                    on:click={() =>
+                                        selectedAlbum &&
+                                        toggleTrackPlay(selectedAlbum, index)}
                                 >
                                     {#if $audioStore.currentAlbumId === selectedAlbum.id && $audioStore.currentTrackIndex === index && $audioStore.isPlaying}
                                         <!-- Playing Icon -->
@@ -486,7 +491,12 @@
                                     {/if}
                                 </div>
 
-                                <div class="flex-1 min-w-0">
+                                <div
+                                    class="flex-1 min-w-0"
+                                    on:click={() =>
+                                        selectedAlbum &&
+                                        toggleTrackPlay(selectedAlbum, index)}
+                                >
                                     <div
                                         class="font-medium text-white truncate {$audioStore.currentAlbumId ===
                                             selectedAlbum.id &&
@@ -502,6 +512,43 @@
                                         {track.artist}
                                     </div>
                                 </div>
+
+                                <!-- Like Button -->
+                                <button
+                                    on:click|stopPropagation={() =>
+                                        toggleFavorite(track.id || "")}
+                                    class="p-2 rounded-full transition-colors hover:bg-white/10 {isFavorite(
+                                        track.id || '',
+                                        $favoritesStore,
+                                    )
+                                        ? 'text-rose-500'
+                                        : 'text-slate-600 hover:text-rose-400'}"
+                                    title="Añadir a favoritos"
+                                >
+                                    {#if isFavorite(track.id || "", $favoritesStore)}
+                                        <svg
+                                            class="w-5 h-5"
+                                            fill="currentColor"
+                                            viewBox="0 0 24 24"
+                                            ><path
+                                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                                            /></svg
+                                        >
+                                    {:else}
+                                        <svg
+                                            class="w-5 h-5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="2"
+                                            ><path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                                            /></svg
+                                        >
+                                    {/if}
+                                </button>
                             </div>
                         {/each}
                     </div>

@@ -171,10 +171,10 @@
                                 👤 Mi Perfil
                             </a>
                             <a
-                                href="/coleccion"
+                                href="/favorites"
                                 class="px-4 py-2 text-slate-300 hover:text-white hover:bg-white/5 text-left flex items-center gap-2"
                             >
-                                🎵 Mi Música
+                                ❤️ Mis Favoritos
                             </a>
                             <div class="h-px bg-white/10 my-1"></div>
                             <button
@@ -342,6 +342,13 @@
                                         Configurar Perfil >
                                     </span>
                                 </div>
+                            </a>
+                            <a
+                                href="/favorites"
+                                class="flex items-center gap-3 mb-3 text-sm font-bold text-slate-300 hover:text-white px-1"
+                                on:click={() => (mobileMenuOpen = false)}
+                            >
+                                ❤️ Mis Favoritos
                             </a>
                             <button
                                 on:click={() => {

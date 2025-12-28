@@ -155,6 +155,16 @@ export function playAlbum(albumId: string) {
     });
 }
 
+export function playPlaylist(tracks: Track[]) {
+    audioStore.update(s => ({
+        ...s,
+        playlist: tracks,
+        currentTrackIndex: 0,
+        currentAlbumId: undefined, // Playlist personalizada
+        isPlaying: true
+    }));
+}
+
 export function nextTrack() {
     audioStore.update(s => {
         if (s.playlist.length === 0) return s;
