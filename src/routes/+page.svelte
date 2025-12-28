@@ -51,18 +51,13 @@
     >
         <!-- Logo -->
         <div class="flex items-center gap-3 z-20">
-            <!-- Desktop logo (transparent background) -->
+            <!-- Unified Logo for both Mobile and Desktop -->
             <img
                 src="/logo-desktop.png"
                 alt="ChillChess Logo"
-                class="h-14 w-auto hidden md:block hover:scale-105 transition-transform duration-300"
+                class="h-8 md:h-10 w-auto hover:scale-105 transition-transform duration-300"
             />
-            <!-- Mobile logo (transparent background) -->
-            <img
-                src="/logo-mobile.png"
-                alt="ChillChess Logo"
-                class="h-10 w-10 md:hidden hover:scale-105 transition-transform duration-300"
-            />
+
             <span
                 class="text-xs uppercase bg-white/10 px-2 py-1 rounded-md text-slate-400"
                 >Beta v0.3</span
