@@ -80,6 +80,9 @@
                 <a href="/artists" class="hover:text-white transition-colors"
                     >Artistas</a
                 >
+                <a href="/artist" class="hover:text-white transition-colors"
+                    >Mi Perfil</a
+                >
                 <a href="/app" class="hover:text-white transition-colors"
                     >Ambiente</a
                 >
@@ -202,6 +205,13 @@
                             class="py-3 px-4 hover:bg-white/5 rounded-lg transition-colors text-slate-300 hover:text-white"
                         >
                             Artistas
+                        </a>
+                        <a
+                            href="/artist"
+                            on:click={() => (mobileMenuOpen = false)}
+                            class="py-3 px-4 hover:bg-gradient-to-r hover:from-purple-900/20 hover:to-pink-900/20 rounded-lg transition-colors text-slate-300 hover:text-purple-300 border border-transparent hover:border-purple-500/30"
+                        >
+                            🎨 Mi Perfil de Artista
                         </a>
                         <a
                             href="/app"
