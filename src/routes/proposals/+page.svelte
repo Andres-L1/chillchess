@@ -1,61 +1,45 @@
 <script lang="ts">
     import { userStore } from "$lib/auth/userStore";
-    import { userSubscription } from "$lib/subscription/store";
-    import { onMount } from "svelte";
+    import { userSubscription } from "$lib/subscription/userSubscription";
+    import { db } from "$lib/firebase";
+    import {
+        collection,
+        addDoc,
+        updateDoc,
+        doc,
+        onSnapshot,
+        query,
+        orderBy,
+        increment,
+        arrayUnion,
+        arrayRemove,
+        Timestamp,
+    } from "firebase/firestore";
+    import { onMount, onDestroy } from "svelte";
 
-    // Mock data - En producción esto vendría de Firestore
     interface Proposal {
         id: string;
         title: string;
         description: string;
         author: string;
+        authorUid: string;
         votes: number;
+        votersUp: string[];
+        votersDown: string[];
         status: "pending" | "approved" | "rejected" | "implemented";
         createdAt: Date;
         category: "album" | "feature" | "improvement";
     }
 
-    let proposals: Proposal[] = [
-        {
-            id: "1",
-            title: "Álbum de Jazz Nórdico",
-            description:
-                "Me encantaría tener un álbum de jazz nórdico con influencias de artistas como Nils Frahm.",
-            author: "Usuario Pro",
-            votes: 24,
-            status: "pending",
-            createdAt: new Date("2025-12-27"),
-            category: "album",
-        },
-        {
-            id: "2",
-            title: "Modo Pomodoro Integrado",
-            description:
-                "Un temporizador Pomodoro (25min trabajo, 5min descanso) integrado directamente en la interfaz.",
-            author: "Estudiante Pro",
-            votes: 18,
-            status: "approved",
-            createdAt: new Date("2025-12-26"),
-            category: "feature",
-        },
-        {
-            id: "3",
-            title: "Playlist de Lluvia Ambient",
-            description:
-                "Canciones ambient con sonidos de lluvia de fondo para máxima concentración.",
-            author: "Desarrollador Pro",
-            votes: 32,
-            status: "pending",
-            createdAt: new Date("2025-12-25"),
-            category: "album",
-        },
-    ];
+    let proposals: Proposal[] = [];
+    let unsubscribe: (() => void) | null = null;
 
     let showNewProposal = false;
     let newTitle = "";
     let newDescription = "";
     let newCategory: "album" | "feature" | "improvement" = "feature";
     let sortBy: "votes" | "recent" = "votes";
+    let isSubmitting = false;
 
     $: sortedProposals = [...proposals].sort((a, b) => {
         if (sortBy === "votes") return b.votes - a.votes;
@@ -65,31 +49,123 @@
     $: isPro =
         $userSubscription.tier === "pro" ||
         $userSubscription.tier === "premium";
+    $: currentUserId = $userStore.user?.uid || "";
 
-    function vote(proposalId: string, delta: number) {
-        proposals = proposals.map((p) =>
-            p.id === proposalId ? { ...p, votes: p.votes + delta } : p,
-        );
+    onMount(() => {
+        // Subscribe to proposals collection
+        const proposalsRef = collection(db, "proposals");
+        const q = query(proposalsRef, orderBy("createdAt", "desc"));
+
+        unsubscribe = onSnapshot(q, (snapshot) => {
+            proposals = snapshot.docs.map((docSnap) => {
+                const data = docSnap.data();
+                return {
+                    id: docSnap.id,
+                    title: data.title,
+                    description: data.description,
+                    author: data.author,
+                    authorUid: data.authorUid,
+                    votes: data.votes || 0,
+                    votersUp: data.votersUp || [],
+                    votersDown: data.votersDown || [],
+                    status: data.status,
+                    createdAt: data.createdAt?.toDate() || new Date(),
+                    category: data.category,
+                } as Proposal;
+            });
+        });
+    });
+
+    onDestroy(() => {
+        if (unsubscribe) unsubscribe();
+    });
+
+    async function vote(proposalId: string, direction: "up" | "down") {
+        if (!currentUserId || !isPro) return;
+
+        const proposalRef = doc(db, "proposals", proposalId);
+        const proposal = proposals.find((p) => p.id === proposalId);
+        if (!proposal) return;
+
+        const hasVotedUp = proposal.votersUp.includes(currentUserId);
+        const hasVotedDown = proposal.votersDown.includes(currentUserId);
+
+        try {
+            if (direction === "up") {
+                if (hasVotedUp) {
+                    // Remove upvote
+                    await updateDoc(proposalRef, {
+                        votes: increment(-1),
+                        votersUp: arrayRemove(currentUserId),
+                    });
+                } else {
+                    // Add upvote (remove downvote if exists)
+                    const updates: any = {
+                        votes: increment(hasVotedDown ? 2 : 1),
+                        votersUp: arrayUnion(currentUserId),
+                    };
+                    if (hasVotedDown) {
+                        updates.votersDown = arrayRemove(currentUserId);
+                    }
+                    await updateDoc(proposalRef, updates);
+                }
+            } else {
+                if (hasVotedDown) {
+                    // Remove downvote
+                    await updateDoc(proposalRef, {
+                        votes: increment(1),
+                        votersDown: arrayRemove(currentUserId),
+                    });
+                } else {
+                    // Add downvote (remove upvote if exists)
+                    const updates: any = {
+                        votes: increment(hasVotedUp ? -2 : -1),
+                        votersDown: arrayUnion(currentUserId),
+                    };
+                    if (hasVotedUp) {
+                        updates.votersUp = arrayRemove(currentUserId);
+                    }
+                    await updateDoc(proposalRef, updates);
+                }
+            }
+        } catch (error) {
+            console.error("Error voting:", error);
+        }
     }
 
-    function submitProposal() {
-        if (!newTitle.trim() || !newDescription.trim()) return;
+    async function submitProposal() {
+        if (
+            !newTitle.trim() ||
+            !newDescription.trim() ||
+            !currentUserId ||
+            !isPro
+        )
+            return;
 
-        const proposal: Proposal = {
-            id: Date.now().toString(),
-            title: newTitle,
-            description: newDescription,
-            author: $userStore.user?.displayName || "Usuario Pro",
-            votes: 1,
-            status: "pending",
-            createdAt: new Date(),
-            category: newCategory,
-        };
+        isSubmitting = true;
 
-        proposals = [proposal, ...proposals];
-        newTitle = "";
-        newDescription = "";
-        showNewProposal = false;
+        try {
+            await addDoc(collection(db, "proposals"), {
+                title: newTitle.trim(),
+                description: newDescription.trim(),
+                author: $userStore.user?.displayName || "Usuario Pro",
+                authorUid: currentUserId,
+                votes: 1,
+                votersUp: [currentUserId],
+                votersDown: [],
+                status: "pending",
+                createdAt: Timestamp.now(),
+                category: newCategory,
+            });
+
+            newTitle = "";
+            newDescription = "";
+            showNewProposal = false;
+        } catch (error) {
+            console.error("Error creating proposal:", error);
+        } finally {
+            isSubmitting = false;
+        }
     }
 
     function getStatusColor(status: Proposal["status"]) {
@@ -127,6 +203,12 @@
             case "improvement":
                 return "🔧";
         }
+    }
+
+    function getUserVoteState(proposal: Proposal): "up" | "down" | null {
+        if (proposal.votersUp.includes(currentUserId)) return "up";
+        if (proposal.votersDown.includes(currentUserId)) return "down";
+        return null;
     }
 </script>
 
@@ -257,11 +339,12 @@
 
                     <div class="space-y-4">
                         <div>
-                            <label
+                            <p
                                 class="block text-sm font-medium text-slate-400 mb-2"
-                                >Categoría</label
                             >
-                            <div class="flex gap-3">
+                                Categoría
+                            </p>
+                            <div class="flex gap-3" role="group">
                                 <button
                                     on:click={() => (newCategory = "album")}
                                     class="px-4 py-2 rounded-xl transition-all {newCategory ===
@@ -295,10 +378,12 @@
 
                         <div>
                             <label
+                                for="proposal-title"
                                 class="block text-sm font-medium text-slate-400 mb-2"
                                 >Título</label
                             >
                             <input
+                                id="proposal-title"
                                 bind:value={newTitle}
                                 type="text"
                                 placeholder="Ej: Modo Pomodoro Integrado"
@@ -309,10 +394,12 @@
 
                         <div>
                             <label
+                                for="proposal-description"
                                 class="block text-sm font-medium text-slate-400 mb-2"
                                 >Descripción</label
                             >
                             <textarea
+                                id="proposal-description"
                                 bind:value={newDescription}
                                 placeholder="Describe tu propuesta en detalle..."
                                 class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none transition-colors resize-none"
@@ -324,9 +411,12 @@
                         <div class="flex gap-3">
                             <button
                                 on:click={submitProposal}
-                                class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all flex-1"
+                                disabled={isSubmitting}
+                                class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Publicar Propuesta
+                                {isSubmitting
+                                    ? "Publicando..."
+                                    : "Publicar Propuesta"}
                             </button>
                             <button
                                 on:click={() => (showNewProposal = false)}
@@ -341,7 +431,20 @@
 
             <!-- Proposals List -->
             <div class="space-y-4">
+                {#if proposals.length === 0}
+                    <div
+                        class="text-center py-20 bg-white/5 rounded-2xl border border-white/5"
+                    >
+                        <span class="text-4xl block mb-4">💡</span>
+                        <p class="text-slate-400">
+                            No hay propuestas aún. ¡Sé el primero en proponer
+                            algo!
+                        </p>
+                    </div>
+                {/if}
+
                 {#each sortedProposals as proposal}
+                    {@const userVote = getUserVoteState(proposal)}
                     <div
                         class="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/[0.07] hover:border-white/20 transition-all"
                     >
@@ -351,9 +454,13 @@
                                 class="flex md:flex-col items-center gap-2 md:gap-3"
                             >
                                 <button
-                                    on:click={() => vote(proposal.id, 1)}
-                                    class="w-10 h-10 rounded-lg bg-white/5 hover:bg-green-500/20 border border-white/10 hover:border-green-500/30 flex items-center justify-center transition-all active:scale-95"
+                                    on:click={() => vote(proposal.id, "up")}
+                                    class="w-10 h-10 rounded-lg border transition-all active:scale-95 {userVote ===
+                                    'up'
+                                        ? 'bg-green-500/30 border-green-500/50 text-green-400'
+                                        : 'bg-white/5 hover:bg-green-500/20 border-white/10 hover:border-green-500/30'}"
                                     title="Votar a favor"
+                                    aria-label="Votar a favor"
                                 >
                                     ▲
                                 </button>
@@ -364,9 +471,13 @@
                                         : 'text-white'}">{proposal.votes}</span
                                 >
                                 <button
-                                    on:click={() => vote(proposal.id, -1)}
-                                    class="w-10 h-10 rounded-lg bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-500/30 flex items-center justify-center transition-all active:scale-95"
+                                    on:click={() => vote(proposal.id, "down")}
+                                    class="w-10 h-10 rounded-lg border transition-all active:scale-95 {userVote ===
+                                    'down'
+                                        ? 'bg-red-500/30 border-red-500/50 text-red-400'
+                                        : 'bg-white/5 hover:bg-red-500/20 border-white/10 hover:border-red-500/30'}"
                                     title="Votar en contra"
+                                    aria-label="Votar en contra"
                                 >
                                     ▼
                                 </button>
