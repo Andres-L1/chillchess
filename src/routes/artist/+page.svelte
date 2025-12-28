@@ -206,10 +206,13 @@
 
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium mb-2"
+                                <label
+                                    for="artist-name"
+                                    class="block text-sm font-medium mb-2"
                                     >Nombre de Artista *</label
                                 >
                                 <input
+                                    id="artist-name"
                                     type="text"
                                     bind:value={artistName}
                                     placeholder="Tu nombre artístico"
@@ -218,10 +221,13 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium mb-2"
+                                <label
+                                    for="artist-bio"
+                                    class="block text-sm font-medium mb-2"
                                     >Bio</label
                                 >
                                 <textarea
+                                    id="artist-bio"
                                     bind:value={bio}
                                     placeholder="Cuéntanos sobre tu música..."
                                     rows="3"
@@ -234,10 +240,13 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium mb-2"
+                                <label
+                                    for="avatar-url"
+                                    class="block text-sm font-medium mb-2"
                                     >Avatar URL</label
                                 >
                                 <input
+                                    id="avatar-url"
                                     type="url"
                                     bind:value={avatarUrl}
                                     placeholder="https://example.com/avatar.jpg"
@@ -262,10 +271,12 @@
                             <div class="space-y-4">
                                 <div>
                                     <label
+                                        for="banner-url"
                                         class="block text-sm font-medium mb-2"
                                         >Banner URL</label
                                     >
                                     <input
+                                        id="banner-url"
                                         type="url"
                                         bind:value={bannerUrl}
                                         placeholder="https://example.com/banner.jpg"
@@ -276,10 +287,12 @@
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label
+                                            for="theme-color"
                                             class="block text-sm font-medium mb-2"
                                             >Color Primario</label
                                         >
                                         <input
+                                            id="theme-color"
                                             type="color"
                                             bind:value={themeColor}
                                             class="w-full h-10 rounded-lg cursor-pointer"
@@ -287,10 +300,12 @@
                                     </div>
                                     <div>
                                         <label
+                                            for="accent-color"
                                             class="block text-sm font-medium mb-2"
                                             >Color Acento</label
                                         >
                                         <input
+                                            id="accent-color"
                                             type="color"
                                             bind:value={accentColor}
                                             class="w-full h-10 rounded-lg cursor-pointer"
@@ -348,10 +363,13 @@
                                 class="bg-[#0B1120] rounded-lg p-4 mb-4 space-y-3"
                             >
                                 <div>
-                                    <label class="block text-xs mb-1"
+                                    <label
+                                        for="link-platform"
+                                        class="block text-xs mb-1"
                                         >Plataforma</label
                                     >
                                     <select
+                                        id="link-platform"
                                         bind:value={newLinkPlatform}
                                         class="w-full bg-[#1a1a1a] border border-white/10 rounded px-3 py-2 text-sm"
                                     >
@@ -364,10 +382,12 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-xs mb-1"
-                                        >URL *</label
+                                    <label
+                                        for="link-url"
+                                        class="block text-xs mb-1">URL *</label
                                     >
                                     <input
+                                        id="link-url"
                                         type="url"
                                         bind:value={newLinkUrl}
                                         placeholder="https://..."
@@ -375,10 +395,13 @@
                                     />
                                 </div>
                                 <div>
-                                    <label class="block text-xs mb-1"
+                                    <label
+                                        for="link-label"
+                                        class="block text-xs mb-1"
                                         >Label (opcional)</label
                                     >
                                     <input
+                                        id="link-label"
                                         type="text"
                                         bind:value={newLinkLabel}
                                         placeholder="Nombre personalizado"
