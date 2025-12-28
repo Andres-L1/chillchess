@@ -8,82 +8,82 @@
     }
 
     const roadmapItems: RoadmapItem[] = [
-        // Completados Recientes (Diciembre 2025)
+        // Completado
         {
-            title: "Modo Zen 2.0",
+            title: "Sistema de Favoritos",
             description:
-                "Nueva experiencia de enfoque con temporizador editable y cero distracciones.",
+                "Guarda tus canciones preferidas y accede a ellas fácilmente desde 'Mis Favoritos'.",
             status: "done",
-            date: "Diciembre 2025",
-            category: "tech",
-        },
-        {
-            title: "Biblioteca de Artistas",
-            description:
-                "Nueva sección para explorar la colección musical organizada por artistas.",
-            status: "done",
-            date: "Diciembre 2025",
+            date: "Diciembre 2024",
             category: "music",
         },
         {
-            title: "Gestión Dinámica de Contenido",
+            title: "Navegación Simplificada",
             description:
-                "Actualizaciones de música instantáneas sin necesidad de descargas de la app.",
+                "Menú reorganizado con dropdown de usuario y mejor experiencia en móvil.",
             status: "done",
-            date: "Diciembre 2025",
+            date: "Diciembre 2024",
+            category: "tech",
+        },
+        {
+            title: "Responsive Design",
+            description:
+                "Interfaz completamente adaptada para móvil, tablet y desktop.",
+            status: "done",
+            date: "Diciembre 2024",
             category: "tech",
         },
 
-        // Q1 2026
+        // En desarrollo (próximo mes)
         {
-            title: "Audio HD (320kbps)",
-            description: "Calidad de audio cristalina para suscriptores Pro.",
-            status: "in-progress",
-            date: "Enero 2026",
-            category: "tech",
-        },
-        {
-            title: "Expansión Musical",
+            title: "Expansión del Catálogo Musical",
             description:
-                "Lanzamiento de 5 nuevos álbumes: Jazz Glitch, Rain lo-fi y más.",
+                "Incorporación de 3-5 álbumes nuevos de lo-fi, jazz y ambient.",
             status: "in-progress",
-            date: "Enero-Febrero 2026",
+            date: "Enero 2025",
             category: "music",
         },
         {
-            title: "Fondos Dinámicos Interactivos",
+            title: "Mejoras del Reproductor",
             description:
-                "Mejoras visuales con partículas reactivas al ratón y música.",
+                "Añadir modo repetición, modo aleatorio y controles de velocidad.",
+            status: "in-progress",
+            date: "Enero 2025",
+            category: "tech",
+        },
+
+        // Planificado (próximos 3 meses)
+        {
+            title: "Playlists Personalizadas",
+            description:
+                "Crea tus propias listas de reproducción combinando canciones de diferentes álbumes.",
             status: "planned",
-            date: "Marzo 2026",
+            date: "Febrero 2025",
+            category: "music",
+        },
+        {
+            title: "Modo Offline",
+            description:
+                "Descarga álbumes para escuchar sin conexión (solo usuarios Pro).",
+            status: "planned",
+            date: "Marzo 2025",
+            category: "tech",
+        },
+        {
+            title: "Perfil de Usuario Mejorado",
+            description:
+                "Estadísticas de escucha, historial y álbumes más reproducidos.",
+            status: "planned",
+            date: "Marzo 2025",
+            category: "tech",
+        },
+        {
+            title: "Temas de Color",
+            description:
+                "Elige entre modo oscuro estándar, midnight blue o amethyst.",
+            status: "planned",
+            date: "Abril 2025",
             category: "visual",
-        },
-
-        // Q2 2026
-        {
-            title: "App Móvil (iOS/Android)",
-            description:
-                "ChillChess nativo para llevar tu concentración a cualquier parte.",
-            status: "planned",
-            date: "Mayo 2026",
-            category: "tech",
-        },
-        {
-            title: "Radio 24/7 Chillhop",
-            description: "Stream infinito de música generativa.",
-            status: "planned",
-            date: "Junio 2026",
-            category: "music",
-        },
-
-        // Q3 2026
-        {
-            title: "Comunidad & Sesiones Grupales",
-            description:
-                "Salas de estudio compartidas con sincronización musical.",
-            status: "planned",
-            date: "Agosto 2026",
-            category: "community",
         },
     ];
 
@@ -110,7 +110,7 @@
 </script>
 
 <svelte:head>
-    <title>Roadmap 2026 | ChillChess</title>
+    <title>Roadmap 2025 | ChillChess</title>
 </svelte:head>
 
 <div class="min-h-screen bg-[#0B1120] text-slate-200 font-poppins py-12 px-4">
@@ -124,12 +124,11 @@
                 ← Volver al inicio
             </a>
             <h1 class="text-4xl md:text-5xl font-bold text-white mb-4 mt-4">
-                Hoja de Ruta 2026
+                Hoja de Ruta 2025
             </h1>
             <p class="text-lg text-slate-400 max-w-2xl mx-auto">
-                Transparencia total. Estas son las funciones que estamos
-                construyendo para hacer de ChillChess la mejor plataforma de
-                concentración musical.
+                Lo que hemos construido y hacia dónde vamos. Sin promesas
+                vacías, solo progreso real.
             </p>
         </div>
 
@@ -217,11 +216,14 @@
                 <div>
                     <h4 class="font-bold text-white mb-2">¿Tienes ideas?</h4>
                     <p class="text-sm text-slate-300 leading-relaxed">
-                        Esta roadmap es flexible. Si tienes sugerencias de
-                        funciones o álbumes que te gustaría ver, los usuarios <span
-                            class="text-blue-400 font-semibold"
-                            >Pro pueden votar</span
-                        > en nuestro Discord.
+                        Este roadmap evoluciona con vuestro feedback. Comparte
+                        tus sugerencias en nuestro
+                        <a
+                            href="https://discord.gg/G7SrFtJHnr"
+                            target="_blank"
+                            class="text-blue-400 hover:text-blue-300 underline"
+                            >Discord</a
+                        >.
                     </p>
                 </div>
             </div>
