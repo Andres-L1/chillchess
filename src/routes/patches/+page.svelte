@@ -53,7 +53,7 @@
         if (type === "major")
             return "bg-primary-500 text-white shadow-lg shadow-primary-500/30 border-primary-400";
         if (type === "minor")
-            return "bg-blue-500/20 text-blue-300 border-blue-500/30";
+            return "bg-primary-500/20 text-primary-300 border-primary-500/30";
         return "bg-slate-500/20 text-slate-300 border-slate-500/30";
     }
 </script>

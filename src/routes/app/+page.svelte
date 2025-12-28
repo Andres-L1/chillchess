@@ -123,7 +123,7 @@
 
 <!-- Main Container: Zen Studio -->
 <div
-    class="relative w-screen h-[100dvh] bg-[#0B1120] overflow-hidden flex flex-col text-white font-poppins selection:bg-purple-500/30"
+    class="relative w-screen h-[100dvh] bg-[#0B1120] overflow-hidden flex flex-col text-white font-poppins selection:bg-primary-500/30"
 >
     <!-- BACKGROUND LAYER (Chill Lo-Fi Scene) -->
     <div
@@ -406,7 +406,7 @@
                             {/if}
                         </div>
                         <h3
-                            class="font-bold truncate text-white group-hover:text-purple-400 transition-colors"
+                            class="font-bold truncate text-white group-hover:text-primary-400 transition-colors"
                         >
                             {album.title}
                         </h3>

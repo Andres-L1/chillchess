@@ -128,7 +128,7 @@
 
                         <button
                             on:click={handlePlayAlbum}
-                            class="w-full py-4 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-500/30"
+                            class="w-full py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-primary-500/30"
                         >
                             {#if isPlaying && $audioStore.currentAlbumId === album.id}
                                 <svg
@@ -170,12 +170,12 @@
                             <button
                                 on:click={() => handlePlayTrack(index)}
                                 class="w-full group bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-all flex items-center gap-4 {isCurrentTrack
-                                    ? 'ring-2 ring-blue-500'
+                                    ? 'ring-2 ring-primary-500'
                                     : ''}"
                             >
                                 <!-- Play Button -->
                                 <div
-                                    class="w-10 h-10 rounded-full bg-white/10 group-hover:bg-blue-500 flex items-center justify-center transition-all shrink-0"
+                                    class="w-10 h-10 rounded-full bg-white/10 group-hover:bg-primary-500 flex items-center justify-center transition-all shrink-0"
                                 >
                                     {#if isCurrentTrack && isPlaying}
                                         <svg

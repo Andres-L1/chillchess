@@ -116,7 +116,7 @@
             case "warn":
                 return "text-amber-400 bg-amber-500/10 border-amber-500/20 shadow-[0_0_10px_rgba(251,191,36,0.2)]";
             default:
-                return "text-blue-400 bg-blue-500/10 border-blue-500/20 shadow-[0_0_10px_rgba(96,165,250,0.2)]";
+                return "text-primary-400 bg-primary-500/10 border-primary-500/20 shadow-[0_0_10px_rgba(255,123,61,0.2)]";
         }
     }
 
@@ -146,7 +146,7 @@
         >
             <div>
                 <h1
-                    class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-200 to-indigo-400 tracking-tight mb-2"
+                    class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-primary-200 to-primary-400 tracking-tight mb-2"
                 >
                     System Logs
                 </h1>
@@ -210,7 +210,7 @@
                     type="text"
                     bind:value={searchTerm}
                     placeholder="Buscar en logs..."
-                    class="block w-full pl-10 pr-3 py-2.5 border border-white/10 rounded-xl leading-5 bg-black/20 text-slate-300 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 sm:text-sm transition-all"
+                    class="block w-full pl-10 pr-3 py-2.5 border border-white/10 rounded-xl leading-5 bg-black/20 text-slate-300 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50 sm:text-sm transition-all"
                 />
             </div>
 
@@ -221,7 +221,7 @@
                         on:click={() => setFilter(level)}
                         class="px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all {filterLevel ===
                         level
-                            ? 'bg-indigo-500 text-white shadow-lg'
+                            ? 'bg-primary-500 text-white shadow-lg'
                             : 'text-slate-500 hover:text-slate-300'}"
                     >
                         {level}
@@ -240,10 +240,10 @@
                 >
                     <div class="flex flex-col items-center">
                         <div
-                            class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500 mb-4"
+                            class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary-500 mb-4"
                         ></div>
                         <span
-                            class="text-indigo-400 font-mono text-sm animate-pulse"
+                            class="text-primary-400 font-mono text-sm animate-pulse"
                             >Cargando datos...</span
                         >
                     </div>
