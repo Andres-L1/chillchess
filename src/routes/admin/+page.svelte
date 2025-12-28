@@ -154,35 +154,30 @@
     }
 
     async function toggleUserPlan(userId: string, currentPlanIsPro: boolean) {
+        const action = currentPlanIsPro ? "QUITAR" : "DAR";
+        const user = realUsers.find((u) => u.id === userId);
+        const userName = user?.displayName || user?.email || "este usuario";
+
         if (
             !confirm(
-                `¿Estás seguro de que quieres ${currentPlanIsPro ? "QUITAR" : "DAR"} permisos PRO a este usuario?`,
+                `¿Estás seguro de que quieres ${action} permisos PRO a ${userName}?`,
             )
-        )
+        ) {
             return;
+        }
 
         const newStatus = currentPlanIsPro ? "free" : "pro";
 
         try {
             const userRef = doc(db, "users", userId);
 
-            // Actualizamos solo subscriptionTier (el campo correcto)
             await updateDoc(userRef, {
                 subscriptionTier: newStatus,
                 subscriptionStatus: newStatus === "pro" ? "active" : "inactive",
-                updatedByAdmin: new Date(),
+                updatedByAdmin: new Date().toISOString(),
             });
 
-            systemLogs = [
-                {
-                    type: "success",
-                    msg: `Usuario ${userId} actualizado a ${newStatus.toUpperCase()}`,
-                    time: new Date().toLocaleTimeString("es-ES"),
-                },
-                ...systemLogs,
-            ];
-
-            // Recargar lista localmente
+            // Forzar actualización reactiva creando nuevo array
             realUsers = realUsers.map((u) => {
                 if (u.id === userId) {
                     return {
@@ -194,16 +189,29 @@
                 }
                 return u;
             });
-        } catch (e: any) {
+
             systemLogs = [
                 {
-                    type: "error",
-                    msg: `Error actualizando usuario: ${e.message}`,
+                    type: "success",
+                    msg: `✅ ${userName} actualizado a ${newStatus.toUpperCase()}`,
                     time: new Date().toLocaleTimeString("es-ES"),
                 },
                 ...systemLogs,
             ];
-            alert("Error: " + e.message);
+
+            alert(
+                `✅ Usuario actualizado a ${newStatus.toUpperCase()} correctamente`,
+            );
+        } catch (e: any) {
+            systemLogs = [
+                {
+                    type: "error",
+                    msg: `❌ Error actualizando usuario: ${e.message}`,
+                    time: new Date().toLocaleTimeString("es-ES"),
+                },
+                ...systemLogs,
+            ];
+            alert(`❌ Error: ${e.message}`);
         }
     }
 
