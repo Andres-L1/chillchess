@@ -12,6 +12,10 @@
 
     $: charactersLeft = maxlength ? maxlength - value.length : null;
     $: isNearLimit = maxlength && value.length > maxlength * 0.8;
+
+    function handleInput(e: Event) {
+        value = (e.target as HTMLTextAreaElement).value;
+    }
 </script>
 
 <div class="w-full">
@@ -32,17 +36,13 @@
         {maxlength}
         {rows}
         {disabled}
-        bind:value
-        on:input
+        {value}
+        on:input={handleInput}
         on:blur
         on:focus
-        class="w-full bg-[#0B1120] border rounded-lg px-4 py-2 focus:outline-none transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed"
-        class:border-white/10={!error}
-        class:focus:border-purple-500={!error}
-        class:border-red-500={error}
-        class:focus:border-red-500={error}
-        class:ring-1={error}
-        class:ring-red-500/50={error}
+        class="w-full bg-[#0B1120] border rounded-lg px-4 py-2 focus:outline-none transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed {error
+            ? 'border-red-500 focus:border-red-500 ring-1 ring-red-500'
+            : 'border-white/10 focus:border-purple-500'}"
     ></textarea>
 
     <div class="flex justify-between items-center mt-1">
