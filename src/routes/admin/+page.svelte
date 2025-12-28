@@ -724,7 +724,7 @@
                         on:click={() => (activeTab = "submissions")}
                         class="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all {activeTab ===
                         'submissions'
-                            ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/20'
+                            ? 'bg-primary-500 text-white shadow-lg shadow-primary-900/20'
                             : 'text-slate-400 hover:bg-white/5 hover:text-white'}"
                     >
                         <span class="text-xl">📫</span>
@@ -828,7 +828,7 @@
                                                     {sub.releaseTitle}
                                                 </h3>
                                                 <p
-                                                    class="text-purple-400 text-sm"
+                                                    class="text-primary-400 text-sm"
                                                 >
                                                     {sub.artistName}
                                                 </p>
