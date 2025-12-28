@@ -303,10 +303,11 @@
 
                                 <!-- Theme Presets -->
                                 <div>
-                                    <label
+                                    <h3
                                         class="block text-sm font-medium mb-3 text-slate-300"
-                                        >Temas Predefinidos</label
                                     >
+                                        Temas Predefinidos
+                                    </h3>
                                     <div
                                         class="grid grid-cols-2 sm:grid-cols-4 gap-3"
                                     >
@@ -334,10 +335,11 @@
 
                                 <!-- Custom Colors -->
                                 <div>
-                                    <label
+                                    <h3
                                         class="block text-sm font-medium mb-3 text-slate-300"
-                                        >Colores Personalizados</label
                                     >
+                                        Colores Personalizados
+                                    </h3>
                                     <div class="grid grid-cols-2 gap-4">
                                         <!-- Primary Color -->
                                         <div class="space-y-2">
@@ -427,11 +429,11 @@
                                 class="bg-[#0B1120] rounded-lg p-4 mb-4 space-y-3"
                             >
                                 <div>
-                                    <p
+                                    <h3
                                         class="block text-xs mb-2 font-medium text-slate-400 uppercase"
                                     >
                                         Plataforma
-                                    </p>
+                                    </h3>
                                     <div
                                         class="grid grid-cols-2 sm:grid-cols-3 gap-2"
                                     >
