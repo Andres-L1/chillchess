@@ -417,6 +417,7 @@
                         src="/logo-desktop.png"
                         alt="Logo"
                         class="h-8 w-auto"
+                        style="mix-blend-mode: screen; filter: brightness(1.2);"
                     />
                     <div class="hidden md:block">
                         <h1 class="font-bold text-white text-lg leading-none">
