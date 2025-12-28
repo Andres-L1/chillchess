@@ -13,6 +13,14 @@
     } from "$lib/audio/store";
     import { userSubscription } from "$lib/subscription/userSubscription";
 
+    const categoryLabelMap = CATEGORY_LABELS.reduce(
+        (acc, curr) => {
+            acc[curr.id] = curr.label;
+            return acc;
+        },
+        {} as Record<string, string>,
+    );
+
     let selectedCategory: AlbumCategory | "all" = "all";
     let selectedAlbum: Album | null = null;
 
@@ -119,6 +127,21 @@
             </a>
         </div>
 
+        <!-- View Toggle (Albums / Artists) -->
+        <div class="flex items-center gap-6 mb-12 border-b border-white/10">
+            <button
+                class="text-lg font-bold text-white border-b-2 border-primary-500 pb-4 px-2"
+            >
+                📀 Álbumes
+            </button>
+            <a
+                href="/artists"
+                class="text-lg font-bold text-slate-400 hover:text-white transition-colors pb-4 px-2 hover:border-b-2 hover:border-white/10"
+            >
+                🎤 Artistas
+            </a>
+        </div>
+
         <!-- Category Filters -->
         <div class="mb-12">
             <div class="flex items-center gap-3 mb-6">
@@ -208,7 +231,7 @@
                                 {:else}
                                     <span>🌿</span>
                                 {/if}
-                                {CATEGORY_LABELS[album.category]}
+                                {categoryLabelMap[album.category]}
                             </div>
 
                             <!-- Premium Badge -->
