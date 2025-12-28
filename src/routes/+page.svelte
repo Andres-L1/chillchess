@@ -640,6 +640,12 @@
                 <p class="text-sm text-slate-500">
                     &copy; 2025 ChillChess. Todos los derechos reservados.
                 </p>
+                <p class="text-xs text-slate-600 max-w-md">
+                    🎵 Nuestra música es de uso libre. Te pedimos por favor que
+                    nos menciones como
+                    <span class="text-slate-500 font-medium">ChillChess</span> al
+                    utilizarla.
+                </p>
             </div>
             <div class="flex gap-8 text-sm font-medium">
                 <div class="flex gap-8 text-sm font-medium">
