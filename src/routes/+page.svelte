@@ -315,12 +315,12 @@
             </div>
 
             <h1
-                class="text-5xl md:text-8xl font-bold text-white tracking-tighter leading-none"
+                class="text-4xl md:text-7xl font-bold text-white tracking-tighter leading-tight"
             >
-                Encuentra <br />
+                Encuentra Tu Calma <br />
                 <span
-                    class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400 bg-[200%_auto] animate-gradient"
-                    >Tu Calma</span
+                    class="text-transparent bg-clip-text bg-gradient-to-r from-[#FF7B3D] via-[#FFB347] to-[#FF7B3D] bg-[200%_auto] animate-gradient"
+                    >Encuentra Tu Estilo</span
                 >
             </h1>
 
