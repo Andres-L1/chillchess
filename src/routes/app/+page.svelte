@@ -2,20 +2,14 @@
     // @ts-nocheck
     import { onMount, onDestroy } from "svelte";
     import { goto } from "$app/navigation";
-    import {
-        gameStore,
-        toggleAutoPlay,
-        loadRandomLocalGame,
-    } from "$lib/game/store";
     import { audioStore, unlockAudio, playAlbum } from "$lib/audio/store";
     import { CATEGORY_LABELS, type AlbumCategory } from "$lib/data/albums";
     import { userStore } from "$lib/auth/userStore";
     import { playMoveSound } from "$lib/audio/sfx";
 
     import Visualizer from "$lib/components/Visualizer.svelte";
+    import ChillBackground from "$lib/components/ChillBackground.svelte";
 
-    let boardContainer: HTMLElement;
-    let board: any;
     let showMusicExplorer = false;
     let isUserLoaded = false;
 
@@ -107,11 +101,6 @@
         showMusicExplorer = false;
     }
 
-    // Sync board (if it exists)
-    $: if (board && $gameStore.fen) {
-        board.setPosition($gameStore.fen, true);
-    }
-
     // Auto-load categories
     let selectedCategory: AlbumCategory | "all" = "all";
 
@@ -123,32 +112,7 @@
                   (a) => a.category === selectedCategory,
               );
 
-    onMount(async () => {
-        const { Chessboard, BORDER_TYPE } = (await import(
-            "cm-chessboard/src/cm-chessboard/Chessboard.js"
-        )) as any;
-
-        board = new Chessboard(boardContainer, {
-            position: $gameStore.fen,
-            style: {
-                cssClass: "default",
-                showCoordinates: false,
-                borderType: BORDER_TYPE.none,
-            },
-            responsive: true,
-            animationDuration: 800,
-            sprite: {
-                url: "/assets/images/chessboard-sprite-staunton.svg",
-            },
-        });
-
-        if ($gameStore.history.length === 0) {
-            loadRandomLocalGame();
-        }
-    });
-
     onDestroy(() => {
-        if (board) board.destroy();
         stopTimer();
     });
 </script>
@@ -157,20 +121,14 @@
 <div
     class="relative w-screen h-[100dvh] bg-[#0B1120] overflow-hidden flex flex-col text-white font-poppins selection:bg-purple-500/30"
 >
-    <!-- BACKGROUND LAYER (Blurred Chessboard) -->
+    <!-- BACKGROUND LAYER (Chill Lo-Fi Scene) -->
     <div
         class="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden"
     >
+        <ChillBackground />
+        <!-- Vignette Overlay -->
         <div
-            bind:this={boardContainer}
-            class="w-full h-full opacity-30 transform scale-110 transition-all duration-1000 ease-in-out filter blur-sm brightness-75 grayscale-[0.3]"
-            class:blur-md={!timerRunning}
-            class:blur-lg={timerRunning}
-            class:scale-125={timerRunning}
-        ></div>
-        <!-- Vignette -->
-        <div
-            class="absolute inset-0 bg-radial-gradient from-transparent via-[#0B1120]/60 to-[#0B1120] pointer-events-none"
+            class="absolute inset-0 bg-radial-gradient from-transparent via-[#0B1120]/40 to-[#0B1120]/80 pointer-events-none"
         ></div>
     </div>
 
@@ -454,7 +412,6 @@
         </div>
     {/if}
 </div>
-```
 
 <style>
     /* Custom utility like bg-radial-gradient */
