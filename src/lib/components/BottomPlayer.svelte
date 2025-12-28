@@ -28,7 +28,13 @@
 
 {#if currentTrack}
     {#if isCollapsed}
-        <MiniPlayer {currentTrack} onExpand={() => (isCollapsed = false)} />
+        <MiniPlayer
+            {currentTrack}
+            onExpand={() => (isCollapsed = false)}
+            isFavorite={isTrackFavorite}
+            onFavoriteClick={() =>
+                currentTrack?.id && toggleFavorite(currentTrack.id)}
+        />
     {:else}
         <!-- FULL BAR -->
         <div

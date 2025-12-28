@@ -46,26 +46,30 @@
     <!-- Header -->
     <div class="max-w-4xl mx-auto mb-12">
         <div
-            class="flex items-end justify-between gap-6 mb-8 border-b border-white/10 pb-8"
+            class="flex flex-col sm:flex-row items-center sm:items-end justify-between gap-4 sm:gap-6 mb-8 border-b border-white/10 pb-8"
         >
-            <div class="flex items-center gap-6">
+            <div
+                class="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 w-full sm:w-auto"
+            >
                 <div
-                    class="w-32 h-32 rounded-3xl bg-gradient-to-br from-pink-500 to-rose-600 shadow-2xl flex items-center justify-center text-4xl shadow-rose-900/20"
+                    class="w-24 h-24 sm:w-32 sm:h-32 rounded-3xl bg-gradient-to-br from-pink-500 to-rose-600 shadow-2xl flex items-center justify-center text-3xl sm:text-4xl shadow-rose-900/20"
                 >
                     💖
                 </div>
-                <div>
+                <div class="text-center sm:text-left">
                     <h5
                         class="text-sm font-bold uppercase text-slate-400 tracking-wider mb-2"
                     >
                         Playlist Personal
                     </h5>
                     <h1
-                        class="text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-pink-200"
+                        class="text-3xl sm:text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-pink-200"
                     >
                         Mi Música
                     </h1>
-                    <p class="text-slate-400 mt-2 flex items-center gap-2">
+                    <p
+                        class="text-slate-400 mt-2 flex items-center gap-2 justify-center sm:justify-start"
+                    >
                         <span class="text-white font-bold"
                             >{favoriteTracks.length}</span
                         > canciones favoritas
@@ -76,10 +80,13 @@
             {#if favoriteTracks.length > 0}
                 <button
                     on:click={playAll}
-                    class="bg-rose-500 hover:bg-rose-600 text-white rounded-full p-4 shadow-lg shadow-rose-500/30 hover:scale-105 transition-all mb-2"
+                    class="bg-rose-500 hover:bg-rose-600 text-white rounded-full p-3 sm:p-4 shadow-lg shadow-rose-500/30 hover:scale-105 transition-all shrink-0"
+                    aria-label="Reproducir todo"
                 >
-                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"
-                        ><path d="M8 5v14l11-7z" /></svg
+                    <svg
+                        class="w-6 h-6 sm:w-8 sm:h-8"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg
                     >
                 </button>
             {/if}
@@ -90,8 +97,9 @@
             <div
                 class="bg-white/5 rounded-2xl border border-white/5 overflow-hidden"
             >
+                <!-- Table Header (hidden on mobile) -->
                 <div
-                    class="grid grid-cols-[auto_1fr_auto] gap-4 p-4 text-xs font-bold text-slate-500 border-b border-white/5 uppercase tracking-wider"
+                    class="hidden sm:grid grid-cols-[auto_1fr_auto] gap-4 p-4 text-xs font-bold text-slate-500 border-b border-white/5 uppercase tracking-wider"
                 >
                     <span class="w-8 text-center">#</span>
                     <span>Título</span>

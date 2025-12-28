@@ -34,8 +34,9 @@
 
     <button
         on:click={onFavoriteClick}
-        class="text-white/50 hover:text-rose-400 transition-colors p-2 hidden md:block"
+        class="text-white/50 hover:text-rose-400 transition-colors p-2 shrink-0"
         title="Añadir a favoritos"
+        aria-label="Añadir a favoritos"
     >
         {#if isFavorite}
             <svg class="w-5 h-5 text-rose-500 fill-current" viewBox="0 0 24 24"
