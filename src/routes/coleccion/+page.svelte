@@ -143,7 +143,16 @@
                 <div
                     class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-500/20 border border-primary-500/30 text-primary-400 text-xs font-bold uppercase tracking-wider backdrop-blur-md"
                 >
-                    <span>✨</span> Colección Oficial
+                    <svg
+                        class="w-4 h-4"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                    >
+                        <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                        />
+                    </svg>
+                    Colección Oficial
                 </div>
                 <h1 class="text-5xl md:text-7xl font-bold leading-tight">
                     Explora tu <br />
@@ -195,13 +204,39 @@
                 <button
                     class="px-6 py-2 rounded-lg bg-white/10 text-white shadow-sm font-bold text-sm transition-all"
                 >
-                    📀 Álbumes
+                    <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                        />
+                    </svg>
+                    Álbumes
                 </button>
                 <a
                     href="/artists"
                     class="px-6 py-2 rounded-lg text-slate-400 hover:text-white font-medium text-sm transition-all hover:bg-white/5"
                 >
-                    🎤 Artistas
+                    <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                        />
+                    </svg>
+                    Artistas
                 </a>
             </div>
 
@@ -225,7 +260,20 @@
                         ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/25'
                         : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/5'}"
                 >
-                    <span>🎵</span> Música
+                    <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                        />
+                    </svg>
+                    Música
                 </button>
                 <button
                     on:click={() => (selectedCategory = "juegos")}
@@ -234,7 +282,26 @@
                         ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/25'
                         : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/5'}"
                 >
-                    <span>🎮</span> Juegos
+                    <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                        />
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                    </svg>
+                    Juegos
                 </button>
                 <button
                     on:click={() => (selectedCategory = "ambiente")}
@@ -243,7 +310,20 @@
                         ? 'bg-green-500 text-white shadow-lg shadow-green-500/25'
                         : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/5'}"
                 >
-                    <span>🌿</span> Ambiente
+                    <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                    </svg>
+                    Ambiente
                 </button>
             </div>
         </div>
