@@ -1,11 +1,16 @@
 <script lang="ts">
     import { audioStore } from "$lib/audio/store";
+    import { getAlbumById } from "$lib/data/albums";
     import { fade } from "svelte/transition";
 
     export let currentTrack: any;
     export let onExpand: () => void;
     export let isFavorite: boolean = false;
     export let onFavoriteClick: () => void = () => {};
+
+    $: currentAlbum = $audioStore.currentAlbumId
+        ? getAlbumById($audioStore.currentAlbumId)
+        : null;
 </script>
 
 <div
@@ -18,17 +23,26 @@
     >
         <!-- Animated Icon -->
         <div
-            class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center relative shrink-0"
+            class="relative shrink-0 w-10 h-10 flex items-center justify-center"
         >
-            <div
-                class="absolute inset-0 rounded-full border border-white/20"
-                class:animate-spin-slow={$audioStore.isPlaying}
-            ></div>
-            {#if $audioStore.isPlaying}
-                <span class="text-xs">🔊</span>
+            {#if currentAlbum}
+                <img
+                    src={currentAlbum.cover}
+                    alt="Album Art"
+                    class="w-10 h-10 rounded-full object-cover border border-white/20"
+                    class:animate-spin-slow={$audioStore.isPlaying}
+                />
             {:else}
-                <span class="text-xs">⏸</span>
+                <div
+                    class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center border border-white/20"
+                    class:animate-spin-slow={$audioStore.isPlaying}
+                >
+                    <span class="text-xs">🎵</span>
+                </div>
             {/if}
+
+            <!-- Center Dot (Vinyl effect) -->
+            <div class="absolute w-2 h-2 bg-[#0F172A] rounded-full z-10"></div>
         </div>
 
         <!-- Info -->
