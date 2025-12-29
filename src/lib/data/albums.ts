@@ -30,7 +30,7 @@ export const ALBUMS: Album[] = [
         cover: '/assets/images/covers/asap.jpg',
         price: 'Gratis',
         tag: 'Nuevo',
-        description: 'Tributo chillhop a la leyenda del gaming. Álbum completo por JULYACTV.',
+        description: 'Tributo a ASAP en FamilyRP',
         vibeId: 'asap-forever',
         isPremium: false, // Available for everyone
         category: 'juegos', // Gaming category
