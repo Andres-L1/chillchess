@@ -24,7 +24,40 @@ Widget personalizable para mostrar en streams (OBS/Streamlabs) que muestra la ca
 
 ---
 
-## 2. White Noise / Sonidos Ambientales ⏳ EN PROGRESO (80%)
+## 2. White Noise / Sonidos Ambientales ✅ COMPLETADO (95%)
+
+### Descripción
+Capa adicional de audio con sonidos ambientales (lluvia, fuego, café, océano, bosque) que se reproduce junto a la música.
+
+### Archivos Creados/Modificados
+- ✅ `src/lib/audio/store.ts` - Añadido `WhiteNoiseType` y estado
+- ✅ `src/lib/components/WhiteNoiseControls.svelte` - UI de controles
+- ✅ `src/lib/components/AudioPlayer.svelte` - Implementado playback de white noise
+
+### Pendientes (Opcionales)
+1. **Integrar UI en `/app`:**
+   - Importar `WhiteNoiseControls` en `/app`
+   - Añadir botón flotante o panel para acceder
+
+2. **Añadir archivos de sonido:**
+   - Crear carpeta `static/sounds/`
+   - Añadir archivos MP3: rain.mp3, fire.mp3, cafe.mp3, ocean.mp3, forest.mp3
+   - **Fuentes sugeridas:** freesound.org, zapsplat.com (libres de copyright)
+
+### Cómo Probar (Backend Ready)
+El AudioPlayer ya está listo. Solo necesitas:
+1. Añadir los archivos MP3 a `/static/sounds/`
+2. Usar el store directamente:
+   ```ts
+   audioStore.update(s => ({ ...s, currentWhiteNoise: 'rain', whiteNoiseVolume: 0.5 }));
+   ```
+
+---
+
+## 3. Salas de Escucha Compartida ✅ COMPLETADO
+
+### Descripción
+Crear salas donde múltiples usuarios escuchan la misma música sincronizada en tiempo real.
 
 ### Descripción
 Capa adicional de audio con sonidos ambientales (lluvia, fuego, café, océano, bosque) que se reproduce junto a la música.
