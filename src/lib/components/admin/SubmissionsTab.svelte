@@ -1,21 +1,23 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { onMount, createEventDispatcher } from "svelte";
     import { db } from "$lib/firebase";
     import {
         collection,
+        query,
         getDocs,
         doc,
         updateDoc,
-        writeBatch,
-        serverTimestamp,
-        query,
         orderBy,
+        where,
+        getDoc,
     } from "firebase/firestore";
+
+    const dispatch = createEventDispatcher();
 
     interface Track {
         title: string;
         url: string;
-        duration?: number;
+        duration: number;
         fileName: string;
     }
 
@@ -34,439 +36,310 @@
 
     let submissions: Submission[] = [];
     let loading = true;
-    let filter: "all" | "pending" | "approved" | "rejected" = "pending";
+    let playingTrack: string | null = null;
+    let audio: HTMLAudioElement | null = null;
+    let statusMessage = "";
 
-    $: filteredSubmissions = submissions.filter((s) => {
-        if (filter === "all") return true;
-        return s.status === filter;
+    onMount(async () => {
+        await loadSubmissions();
     });
 
-    onMount(() => {
-        fetchSubmissions();
-    });
-
-    async function fetchSubmissions() {
+    async function loadSubmissions() {
         loading = true;
         try {
-            const q = query(
-                collection(db, "musicSubmissions"),
-                orderBy("submittedAt", "desc"),
-            );
-            const snap = await getDocs(q);
-            submissions = snap.docs.map(
-                (d) => ({ id: d.id, ...d.data() }) as Submission,
-            );
-        } catch (e) {
-            console.error("Error fetching submissions:", e);
-            alert("Error al cargar envíos");
+            const submissionsRef = collection(db, "musicSubmissions");
+            // Show all, but sort by status (pending first) then date
+            const q = query(submissionsRef, orderBy("submittedAt", "desc"));
+            const snapshot = await getDocs(q);
+
+            submissions = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            })) as Submission[];
+        } catch (e: any) {
+            console.error(e);
+            statusMessage = "❌ Error al cargar envíos: " + e.message;
         } finally {
             loading = false;
+        }
+    }
+
+    function togglePlay(url: string) {
+        if (playingTrack === url) {
+            audio?.pause();
+            playingTrack = null;
+        } else {
+            if (audio) audio.pause();
+            audio = new Audio(url);
+            audio.play();
+            playingTrack = url;
+            audio.onended = () => (playingTrack = null);
         }
     }
 
     async function approveSubmission(submission: Submission) {
         if (
             !confirm(
-                `¿Aprobar "${submission.releaseTitle}" de ${submission.artistName}? Esto lo publicará en la app.`,
+                `¿Aprobar "${submission.releaseTitle}" de ${submission.artistName}?`,
             )
         )
             return;
 
         try {
-            const batch = writeBatch(db);
-
+            // 1. Update submission status
             const subRef = doc(db, "musicSubmissions", submission.id);
-            batch.update(subRef, { status: "approved" });
+            await updateDoc(subRef, {
+                status: "approved",
+                reviewedAt: Date.now(),
+            });
 
-            const artistRef = doc(db, "artists", submission.artistId);
-            batch.update(artistRef, { isVerified: true });
+            // 2. Auto-verify artist
+            const userRef = doc(db, "users", submission.artistId);
+            const userSnap = await getDoc(userRef);
 
-            const newAlbumRef = doc(collection(db, "albums"));
-            const newAlbumData = {
-                id: newAlbumRef.id,
-                title: submission.releaseTitle,
-                artist: submission.artistName,
-                cover: submission.coverUrl,
-                category: "musica",
-                tags: [submission.genre.toLowerCase(), "new"],
-                tracks: submission.tracks.map((t, i) => ({
-                    id: i + 1,
-                    title: t.title,
-                    artist: submission.artistName,
-                    duration: t.duration || 180,
-                    src: t.url,
-                    cover: submission.coverUrl,
-                })),
-                createdAt: serverTimestamp(),
-            };
-            batch.set(newAlbumRef, newAlbumData);
+            if (userSnap.exists()) {
+                await updateDoc(userRef, {
+                    isVerified: true,
+                    updatedAt: Date.now(),
+                });
 
-            await batch.commit();
+                // Also update artist profile if it exists
+                const artistRef = doc(db, "artists", submission.artistId);
+                const artistSnap = await getDoc(artistRef);
+                if (artistSnap.exists()) {
+                    await updateDoc(artistRef, { isVerified: true });
+                }
+            }
 
-            submissions = submissions.map((s) =>
-                s.id === submission.id ? { ...s, status: "approved" } : s,
-            );
-            alert("✅ Lanzamiento aprobado y artista verificado.");
+            // Update local state
+            submission.status = "approved";
+            submissions = submissions;
+
+            statusMessage = `✅ Envío aprobado y artista ${submission.artistName} verificado automáticamente`;
+            dispatch("approved"); // Notify parent to update stats
+
+            setTimeout(() => (statusMessage = ""), 5000);
         } catch (e: any) {
-            console.error(e);
-            alert("Error al aprobar: " + e.message);
+            statusMessage = "❌ Error: " + e.message;
         }
     }
 
-    async function rejectSubmission(id: string) {
-        if (!confirm("¿Rechazar este envío?")) return;
+    async function rejectSubmission(submission: Submission) {
+        if (!confirm(`¿Rechazar "${submission.releaseTitle}"?`)) return;
 
         try {
-            const subRef = doc(db, "musicSubmissions", id);
-            await updateDoc(subRef, { status: "rejected" });
+            const subRef = doc(db, "musicSubmissions", submission.id);
+            await updateDoc(subRef, {
+                status: "rejected",
+                reviewedAt: Date.now(),
+            });
 
-            submissions = submissions.map((s) =>
-                s.id === id ? { ...s, status: "rejected" } : s,
-            );
-            alert("Envío rechazado");
+            submission.status = "rejected";
+            submissions = submissions;
+
+            statusMessage = `❌ Envío rechazado`;
+            dispatch("approved"); // Notify parent
+
+            setTimeout(() => (statusMessage = ""), 3000);
         } catch (e: any) {
-            console.error(e);
-            alert("Error: " + e.message);
+            statusMessage = "❌ Error: " + e.message;
         }
     }
 </script>
 
-<div class="space-y-6 p-4 md:p-6">
-    <!-- Header -->
-    <div class="space-y-4">
-        <div
-            class="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
-        >
-            <div>
-                <h2 class="text-2xl md:text-3xl font-bold">
-                    Envíos de Música (A&R)
-                </h2>
-                <p class="text-slate-400 text-sm md:text-base mt-1">
-                    Revisa y aprueba nueva música de artistas PRO.
-                </p>
-            </div>
-            <button
-                on:click={fetchSubmissions}
-                class="p-3 hover:bg-white/10 rounded-xl text-slate-400 hover:text-white transition-all self-end md:self-auto"
-                title="Recargar"
-            >
-                🔄
-            </button>
-        </div>
-
-        <!-- Filter Pills -->
-        <div class="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
-            <button
-                on:click={() => (filter = "pending")}
-                class="px-4 py-2 rounded-xl font-medium text-sm transition-all whitespace-nowrap {filter ===
-                'pending'
-                    ? 'bg-primary-500 text-white shadow-lg shadow-primary-900/20'
-                    : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'}"
-            >
-                🕐 Pendientes ({submissions.filter(
-                    (s) => s.status === "pending",
-                ).length})
-            </button>
-            <button
-                on:click={() => (filter = "approved")}
-                class="px-4 py-2 rounded-xl font-medium text-sm transition-all whitespace-nowrap {filter ===
-                'approved'
-                    ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                    : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'}"
-            >
-                ✅ Aprobadas ({submissions.filter(
-                    (s) => s.status === "approved",
-                ).length})
-            </button>
-            <button
-                on:click={() => (filter = "rejected")}
-                class="px-4 py-2 rounded-xl font-medium text-sm transition-all whitespace-nowrap {filter ===
-                'rejected'
-                    ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                    : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'}"
-            >
-                ✕ Rechazadas ({submissions.filter(
-                    (s) => s.status === "rejected",
-                ).length})
-            </button>
-            <button
-                on:click={() => (filter = "all")}
-                class="px-4 py-2 rounded-xl font-medium text-sm transition-all whitespace-nowrap {filter ===
-                'all'
-                    ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                    : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'}"
-            >
-                📋 Todas ({submissions.length})
-            </button>
-        </div>
+<div class="animate-fade-in">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-white mb-2">Envíos Musicales</h2>
+        <p class="text-slate-400">
+            Revisa música nueva y verifica artistas automáticamente
+        </p>
     </div>
 
-    <!-- Loading State -->
+    <!-- Status Message -->
+    {#if statusMessage}
+        <div class="mb-6 p-4 bg-white/10 border border-white/20 rounded-xl">
+            {statusMessage}
+        </div>
+    {/if}
+
+    <!-- List -->
     {#if loading}
-        <div class="text-center py-20">
+        <div class="text-center py-12">
             <div
-                class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-white/20 border-t-primary-500 mb-4"
+                class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-white/20 border-t-white"
             ></div>
-            <p class="text-slate-400">Cargando envíos...</p>
+            <p class="mt-4 text-slate-400">Cargando envíos...</p>
         </div>
-        <!-- Empty State -->
-    {:else if filteredSubmissions.length === 0}
-        <div
-            class="bg-[#1a1a1a] rounded-2xl border border-dashed border-white/10 p-12 md:p-16 text-center"
-        >
-            <div class="text-6xl mb-4">📭</div>
-            <p class="text-xl text-slate-300 mb-2">
-                {#if filter === "pending"}
-                    ¡Sin envíos pendientes!
-                {:else if filter === "approved"}
-                    Sin envíos aprobados aún
-                {:else if filter === "rejected"}
-                    Sin envíos rechazados
-                {:else}
-                    No hay envíos todavía
-                {/if}
-            </p>
-            <p class="text-sm text-slate-500">
-                {#if filter === "pending"}
-                    Todo el trabajo está al día 🎉
-                {:else}
-                    Los artistas PRO pueden enviar música desde su perfil.
-                {/if}
-            </p>
+    {:else if submissions.length === 0}
+        <div class="text-center py-12 text-slate-400">
+            <p>No hay envíos musicales</p>
         </div>
-        <!-- Submissions List -->
     {:else}
-        <div class="space-y-4">
-            {#each filteredSubmissions as sub (sub.id)}
+        <div class="space-y-6">
+            {#each submissions as sub}
                 <div
-                    class="bg-[#1a1a1a] rounded-2xl border border-white/10 overflow-hidden hover:border-primary-500/30 transition-all {sub.status !==
-                    'pending'
-                        ? 'opacity-70'
-                        : ''}"
+                    class="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors relative overflow-hidden"
                 >
-                    <div class="p-4 md:p-6">
-                        <!-- Mobile Layout -->
-                        <div class="md:hidden space-y-4">
-                            <div class="flex gap-4">
+                    <!-- Status Badge -->
+                    <div class="absolute top-4 right-4">
+                        {#if sub.status === "pending"}
+                            <span
+                                class="px-3 py-1 bg-yellow-500/20 text-yellow-300 rounded-full text-xs font-bold uppercase tracking-wider"
+                                >Pendiente</span
+                            >
+                        {:else if sub.status === "approved"}
+                            <span
+                                class="px-3 py-1 bg-green-500/20 text-green-300 rounded-full text-xs font-bold uppercase tracking-wider"
+                                >Aprobado</span
+                            >
+                        {:else}
+                            <span
+                                class="px-3 py-1 bg-red-500/20 text-red-300 rounded-full text-xs font-bold uppercase tracking-wider"
+                                >Rechazado</span
+                            >
+                        {/if}
+                    </div>
+
+                    <div class="flex flex-col md:flex-row gap-6 mb-6">
+                        <!-- Cover -->
+                        <div
+                            class="w-32 h-32 flex-shrink-0 rounded-xl overflow-hidden bg-black/50"
+                        >
+                            {#if sub.coverUrl}
                                 <img
                                     src={sub.coverUrl}
                                     alt={sub.releaseTitle}
-                                    class="w-24 h-24 rounded-lg object-cover shadow-lg flex-shrink-0"
+                                    class="w-full h-full object-cover"
                                 />
-                                <div class="flex-1 min-w-0">
-                                    <h3
-                                        class="font-bold text-lg leading-tight truncate"
-                                    >
-                                        {sub.releaseTitle}
-                                    </h3>
-                                    <p
-                                        class="text-primary-400 text-sm truncate"
-                                    >
-                                        {sub.artistName}
-                                    </p>
-                                    <div
-                                        class="flex items-center gap-2 mt-2 flex-wrap"
-                                    >
-                                        <span
-                                            class="text-xs bg-white/10 px-2 py-1 rounded"
-                                        >
-                                            {sub.genre}
-                                        </span>
-                                        <span class="text-xs text-slate-500">
-                                            {new Date(
-                                                sub.submittedAt?.toMillis?.() ||
-                                                    Date.now(),
-                                            ).toLocaleDateString()}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Tracks -->
-                            <div class="space-y-2">
-                                <h4
-                                    class="text-xs font-bold text-slate-500 uppercase"
-                                >
-                                    Pistas ({sub.tracks.length})
-                                </h4>
-                                {#each sub.tracks as track, i}
-                                    <div
-                                        class="bg-[#0B1120] p-3 rounded-lg border border-white/5 space-y-2"
-                                    >
-                                        <div class="flex items-center gap-2">
-                                            <span
-                                                class="w-6 h-6 rounded-full bg-primary-500/20 text-primary-400 flex items-center justify-center text-xs font-bold"
-                                            >
-                                                {i + 1}
-                                            </span>
-                                            <span
-                                                class="font-medium text-sm flex-1 truncate"
-                                            >
-                                                {track.title}
-                                            </span>
-                                        </div>
-                                        <audio
-                                            controls
-                                            src={track.url}
-                                            class="w-full h-8"
-                                            preload="none"
-                                        ></audio>
-                                    </div>
-                                {/each}
-                            </div>
-
-                            <!-- Actions -->
-                            {#if sub.status === "pending"}
-                                <div class="flex gap-2">
-                                    <button
-                                        on:click={() => approveSubmission(sub)}
-                                        class="flex-1 py-3 bg-green-600 hover:bg-green-500 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2"
-                                    >
-                                        ✅ Aprobar
-                                    </button>
-                                    <button
-                                        on:click={() =>
-                                            rejectSubmission(sub.id)}
-                                        class="flex-1 py-3 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-xl font-bold text-sm transition-colors"
-                                    >
-                                        ✕ Rechazar
-                                    </button>
-                                </div>
                             {:else}
                                 <div
-                                    class="text-center p-3 bg-white/5 rounded-xl"
+                                    class="w-full h-full flex items-center justify-center text-4xl"
                                 >
-                                    <p
-                                        class="font-bold {sub.status ===
-                                        'approved'
-                                            ? 'text-green-400'
-                                            : 'text-red-400'} uppercase text-sm"
-                                    >
-                                        {sub.status === "approved"
-                                            ? "✅ Aprobado"
-                                            : "✕ Rechazado"}
-                                    </p>
+                                    💿
                                 </div>
                             {/if}
                         </div>
 
-                        <!-- Desktop Layout -->
-                        <div
-                            class="hidden md:grid grid-cols-12 gap-6 items-start"
-                        >
-                            <!-- Cover -->
-                            <div class="col-span-2">
-                                <img
-                                    src={sub.coverUrl}
-                                    alt={sub.releaseTitle}
-                                    class="w-full aspect-square rounded-xl object-cover shadow-lg"
-                                />
-                            </div>
+                        <!-- Info -->
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold text-white mb-1">
+                                {sub.releaseTitle}
+                            </h3>
+                            <p class="text-lg text-slate-300 mb-2">
+                                {sub.artistName}
+                            </p>
 
-                            <!-- Info -->
-                            <div class="col-span-3 space-y-2">
-                                <h3 class="font-bold text-xl leading-tight">
-                                    {sub.releaseTitle}
-                                </h3>
-                                <p class="text-primary-400">{sub.artistName}</p>
-                                <div class="flex flex-col gap-2">
-                                    <span
-                                        class="inline-block text-xs bg-white/10 px-3 py-1 rounded-lg w-fit"
+                            <div
+                                class="flex flex-wrap gap-4 text-sm text-slate-400 mb-4"
+                            >
+                                <span class="flex items-center gap-1">
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                        ><path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                                        /></svg
                                     >
-                                        🎵 {sub.genre}
-                                    </span>
-                                    <span class="text-xs text-slate-500">
-                                        📅
-                                        {new Date(
-                                            sub.submittedAt?.toMillis?.() ||
-                                                Date.now(),
-                                        ).toLocaleDateString("es-ES", {
-                                            day: "numeric",
-                                            month: "long",
-                                            year: "numeric",
-                                        })}
-                                    </span>
-                                    <span
-                                        class="text-xs text-slate-500 truncate"
+                                    {sub.genre}
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                        ><path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                        /></svg
                                     >
-                                        📧 {sub.artistEmail}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Tracks -->
-                            <div class="col-span-5 space-y-2">
-                                <h4
-                                    class="text-xs font-bold text-slate-500 uppercase mb-3"
-                                >
-                                    Pistas · {sub.tracks.length} total{sub
-                                        .tracks.length !== 1
-                                        ? "es"
-                                        : ""}
-                                </h4>
-                                <div
-                                    class="space-y-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar"
-                                >
-                                    {#each sub.tracks as track, i}
-                                        <div
-                                            class="bg-[#0B1120] p-3 rounded-lg border border-white/5 flex items-center gap-3"
-                                        >
-                                            <div
-                                                class="w-7 h-7 rounded-full bg-primary-500/20 text-primary-400 flex items-center justify-center text-xs font-bold flex-shrink-0"
-                                            >
-                                                {i + 1}
-                                            </div>
-                                            <div class="flex-1 min-w-0">
-                                                <div
-                                                    class="font-medium text-sm truncate"
-                                                >
-                                                    {track.title}
-                                                </div>
-                                            </div>
-                                            <audio
-                                                controls
-                                                src={track.url}
-                                                class="h-8 w-52"
-                                                preload="none"
-                                            ></audio>
-                                        </div>
-                                    {/each}
-                                </div>
+                                    {sub.artistEmail}
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                        ><path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                        /></svg
+                                    >
+                                    {new Date(
+                                        sub.submittedAt?.seconds * 1000,
+                                    ).toLocaleDateString()}
+                                </span>
                             </div>
 
                             <!-- Actions -->
-                            <div class="col-span-2 flex flex-col gap-3">
-                                {#if sub.status === "pending"}
+                            {#if sub.status === "pending"}
+                                <div class="flex gap-3">
                                     <button
                                         on:click={() => approveSubmission(sub)}
-                                        class="w-full py-3 bg-green-600 hover:bg-green-500 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-lg shadow-green-900/20"
+                                        class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-bold text-sm transition-colors shadow-lg shadow-green-500/20"
                                     >
-                                        ✅ Aprobar
+                                        ✓ Aprobar y Verificar
                                     </button>
                                     <button
-                                        on:click={() =>
-                                            rejectSubmission(sub.id)}
-                                        class="w-full py-3 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-xl font-bold text-sm transition-colors"
+                                        on:click={() => rejectSubmission(sub)}
+                                        class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold text-sm transition-colors"
                                     >
-                                        ✕ Rechazar
+                                        ✗ Rechazar
                                     </button>
-                                {:else}
-                                    <div
-                                        class="text-center p-4 bg-white/5 rounded-xl"
+                                </div>
+                            {/if}
+                        </div>
+                    </div>
+
+                    <!-- Tracks -->
+                    <div class="bg-black/20 rounded-xl p-4">
+                        <h4
+                            class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2"
+                        >
+                            Pistas ({sub.tracks.length})
+                        </h4>
+                        <div class="space-y-2">
+                            {#each sub.tracks as track, i}
+                                <div
+                                    class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors group"
+                                >
+                                    <button
+                                        on:click={() => togglePlay(track.url)}
+                                        class="w-8 h-8 flex items-center justify-center rounded-full bg-primary-500 text-white hover:scale-105 transition-transform"
                                     >
-                                        <p
-                                            class="font-bold {sub.status ===
-                                            'approved'
-                                                ? 'text-green-400'
-                                                : 'text-red-400'} text-sm"
-                                        >
-                                            {sub.status === "approved"
-                                                ? "✅ APROBADO"
-                                                : "✕ RECHAZADO"}
-                                        </p>
-                                    </div>
-                                {/if}
-                            </div>
+                                        {#if playingTrack === track.url}
+                                            <span class="text-xs">⏸</span>
+                                        {:else}
+                                            <span class="text-xs">▶</span>
+                                        {/if}
+                                    </button>
+                                    <span
+                                        class="text-sm text-slate-500 font-mono w-6 text-right"
+                                        >{i + 1}</span
+                                    >
+                                    <span class="text-white font-medium flex-1"
+                                        >{track.title}</span
+                                    >
+                                    <a
+                                        href={track.url}
+                                        target="_blank"
+                                        class="p-2 text-slate-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                                        title="Descargar"
+                                    >
+                                        ⬇️
+                                    </a>
+                                </div>
+                            {/each}
                         </div>
                     </div>
                 </div>
@@ -474,31 +347,3 @@
         </div>
     {/if}
 </div>
-
-<style>
-    .hide-scrollbar::-webkit-scrollbar {
-        display: none;
-    }
-    .hide-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 10px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: rgba(255, 123, 61, 0.5);
-        border-radius: 10px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 123, 61, 0.7);
-    }
-</style>
