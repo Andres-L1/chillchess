@@ -5,6 +5,7 @@
     // @ts-ignore - SvelteKit module alias
     import { goto } from "$app/navigation";
     import SubmissionsTab from "$lib/components/admin/SubmissionsTab.svelte";
+    import ArtistsTab from "$lib/components/admin/ArtistsTab.svelte";
     import {
         ALBUMS,
         type Album,
@@ -50,6 +51,7 @@
         | "dashboard"
         | "music"
         | "users"
+        | "artists"
         | "proposals"
         | "submissions"
         | "logs" = "dashboard";
@@ -709,6 +711,19 @@
                     </button>
 
                     <button
+                        on:click={() => (activeTab = "artists")}
+                        class="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all {activeTab ===
+                        'artists'
+                            ? 'bg-primary-500 text-white shadow-lg shadow-primary-900/20'
+                            : 'text-slate-400 hover:bg-white/5 hover:text-white'}"
+                    >
+                        <span class="text-xl">🎤</span>
+                        <span class="hidden md:block font-medium text-sm"
+                            >Artistas</span
+                        >
+                    </button>
+
+                    <button
                         on:click={() => (activeTab = "proposals")}
                         class="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all {activeTab ===
                         'proposals'
@@ -1092,13 +1107,22 @@
                     </div>
                 {/if}
 
+                <!-- TAB: ARTISTS -->
+                {#if activeTab === "artists"}
+                    <div class="animate-fade-in">
+                        <ArtistsTab />
+                    </div>
+                {/if}
+
                 <!-- TAB: PROPOSALS -->
                 {#if activeTab === "proposals"}
                     <div class="animate-fade-in space-y-6">
                         <!-- Header & Filters -->
                         <div class="flex justify-between items-center">
                             <div>
-                                <h2 class="text-2xl font-bold text-slate-100 mb-1">
+                                <h2
+                                    class="text-2xl font-bold text-slate-100 mb-1"
+                                >
                                     Propuestas ({proposals.length})
                                 </h2>
                                 <p class="text-slate-400 text-sm">
@@ -1130,7 +1154,9 @@
                                 class="text-center py-12 bg-white/5 rounded-2xl border border-white/5"
                             >
                                 <span class="text-4xl block mb-4">📭</span>
-                                <h3 class="text-xl font-bold text-slate-100 mb-2">
+                                <h3
+                                    class="text-xl font-bold text-slate-100 mb-2"
+                                >
                                     No hay propuestas
                                 </h3>
                                 <p class="text-slate-400">
