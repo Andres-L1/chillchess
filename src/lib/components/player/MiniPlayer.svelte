@@ -7,6 +7,7 @@
     export let onExpand: () => void;
     export let isFavorite: boolean = false;
     export let onFavoriteClick: () => void = () => {};
+    export let onClose: (() => void) | undefined = undefined;
 
     $: currentAlbum = $audioStore.currentAlbumId
         ? getAlbumById($audioStore.currentAlbumId)
@@ -115,6 +116,27 @@
                 {/if}
             </button>
         </div>
+        <!-- Close Button (Hover) -->
+        {#if onClose}
+            <button
+                on:click|stopPropagation={onClose}
+                class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white shadow-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-600 hover:scale-110 z-50"
+                title="Cerrar"
+            >
+                <svg
+                    class="w-3 h-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2.5"
+                        d="M6 18L18 6M6 6l12 12"
+                    ></path></svg
+                >
+            </button>
+        {/if}
     </button>
 </div>
 
