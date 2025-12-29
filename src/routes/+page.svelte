@@ -471,7 +471,7 @@
             <div
                 class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-bold uppercase tracking-widest text-[#FFB347] mb-4 hover:bg-white/10 transition-colors cursor-default"
             >
-                <StarIcon size="sm" color="#FFB347" />
+                <StarIcon size="sm" gradient={false} />
                 <span>Música • Ambiente • Vibes</span>
             </div>
 
