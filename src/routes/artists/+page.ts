@@ -1,9 +1,8 @@
-import type { PageLoad } from './$types';
 import { db } from '$lib/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import type { ArtistProfile } from '$lib/types/artist';
 
-export const load: PageLoad = async () => {
+export async function load() {
     try {
         // Query verified artists from Firebase
         const artistsRef = collection(db, 'artists');
@@ -24,4 +23,4 @@ export const load: PageLoad = async () => {
             verifiedArtists: []
         };
     }
-};
+}

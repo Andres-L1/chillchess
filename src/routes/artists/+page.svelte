@@ -1,10 +1,10 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-    import type { PageData } from "./$types";
+    import type { ArtistProfile } from "$lib/types/artist";
     import VerifiedBadge from "$lib/components/VerifiedBadge.svelte";
     import { ALBUMS } from "$lib/data/albums";
 
-    export let data: PageData;
+    export let data: { verifiedArtists: ArtistProfile[] };
 
     $: verifiedArtists = data.verifiedArtists || [];
 

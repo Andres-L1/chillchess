@@ -1,12 +1,12 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-    import type { PageData } from "./$types";
+    import type { ArtistProfile } from "$lib/types/artist";
     import VerifiedBadge from "$lib/components/VerifiedBadge.svelte";
     import { ALBUMS } from "$lib/data/albums";
     import { playAlbum, audioStore } from "$lib/audio/store";
     import { SOCIAL_PLATFORMS } from "$lib/types/artist";
 
-    export let data: PageData;
+    export let data: { artistProfile: ArtistProfile };
 
     $: artist = data.artistProfile;
     $: artistAlbums = ALBUMS.filter(
