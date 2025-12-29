@@ -197,7 +197,9 @@
                 <div
                     class="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-colors"
                 >
-                    <div class="flex items-start gap-4">
+                    <div
+                        class="flex flex-col sm:flex-row items-center sm:items-start gap-4"
+                    >
                         <!-- Avatar -->
                         <div
                             class="w-16 h-16 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-2xl shrink-0"
@@ -214,8 +216,10 @@
                         </div>
 
                         <!-- Info -->
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2 mb-1">
+                        <div class="flex-1 min-w-0 text-center sm:text-left">
+                            <div
+                                class="flex items-center justify-center sm:justify-start gap-2 mb-1"
+                            >
                                 <h3
                                     class="text-lg font-bold text-white truncate"
                                 >
@@ -228,7 +232,9 @@
                             <p class="text-sm text-slate-400 mb-2 line-clamp-2">
                                 {artist.bio || "Sin biografía"}
                             </p>
-                            <div class="flex gap-4 text-xs text-slate-500">
+                            <div
+                                class="flex flex-wrap justify-center sm:justify-start gap-x-4 gap-y-2 text-xs text-slate-500"
+                            >
                                 <span>👤 {artist.userId.slice(0, 8)}...</span>
                                 <span
                                     >📀 {artistAlbums.length} álbum{artistAlbums.length !==
@@ -245,20 +251,22 @@
                         </div>
 
                         <!-- Actions -->
-                        <div class="flex gap-2 shrink-0">
+                        <div
+                            class="flex gap-2 shrink-0 w-full sm:w-auto mt-2 sm:mt-0 justify-stretch sm:justify-start"
+                        >
                             <button
                                 on:click={() => toggleVerification(artist)}
-                                class="px-3 py-1.5 {artist.isVerified
+                                class="flex-1 sm:flex-none px-3 py-2 {artist.isVerified
                                     ? 'bg-green-500/20 text-green-300'
-                                    : 'bg-slate-500/20 text-slate-300'} rounded-lg text-sm font-medium hover:opacity-80 transition-opacity"
+                                    : 'bg-slate-500/20 text-slate-300'} rounded-lg text-sm font-medium hover:opacity-80 transition-opacity whitespace-nowrap"
                             >
                                 {artist.isVerified
                                     ? "✓ Verificado"
-                                    : "Sin verificar"}
+                                    : "Verificar"}
                             </button>
                             <button
                                 on:click={() => openEditModal(artist)}
-                                class="px-3 py-1.5 bg-blue-500/20 text-blue-300 rounded-lg text-sm font-medium hover:opacity-80 transition-opacity"
+                                class="flex-1 sm:flex-none px-3 py-2 bg-blue-500/20 text-blue-300 rounded-lg text-sm font-medium hover:opacity-80 transition-opacity"
                             >
                                 Editar
                             </button>
@@ -281,7 +289,7 @@
         <div
             role="dialog"
             aria-modal="true"
-            class="bg-midnight-800 border border-white/10 rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            class="bg-midnight-800 border-x-0 border-y sm:border border-white/10 rounded-none sm:rounded-2xl p-4 sm:p-6 w-full h-full sm:h-auto sm:max-w-2xl sm:max-h-[90vh] overflow-y-auto flex flex-col"
             on:click|stopPropagation
             on:keydown|stopPropagation
         >

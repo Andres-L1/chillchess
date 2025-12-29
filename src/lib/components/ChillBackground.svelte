@@ -2,8 +2,8 @@
     import { vibeStore } from "$lib/stores/vibeStore";
     import { fade, fly } from "svelte/transition";
 
-    // Rain generation for Noir mode
-    const rainDrops = Array(100).fill(0);
+    // Rain generation for Noir mode (Optimized count)
+    const rainDrops = Array(30).fill(0);
 </script>
 
 <div
@@ -27,7 +27,7 @@
 
             <!-- Stars -->
             <div class="absolute inset-0">
-                {#each Array(30) as _, i}
+                {#each Array(15) as _, i}
                     <div
                         class="absolute w-1 h-1 bg-white rounded-full animate-twinkle"
                         style="left: {Math.random() *
@@ -104,7 +104,7 @@
             </div>
             <!-- Fog -->
             <div
-                class="absolute bottom-0 w-full h-1/2 bg-gradient-to-t from-slate-800/50 to-transparent blur-3xl"
+                class="absolute bottom-0 w-full h-1/2 bg-gradient-to-t from-slate-900/80 to-transparent"
             ></div>
         </div>
     {/if}
@@ -160,7 +160,7 @@
             transition:fade={{ duration: 1000 }}
         >
             <!-- Stars -->
-            {#each Array(100) as _, i}
+            {#each Array(40) as _, i}
                 <div
                     class="absolute bg-white rounded-full animate-twinkle"
                     style="width: {Math.random() *
