@@ -2,6 +2,15 @@
     import { vibeStore } from "$lib/stores/vibeStore";
     import { fade, fly } from "svelte/transition";
 
+    import { analysisStore } from "$lib/audio/analysis";
+
+    // Audio Reactivity
+    $: bass = $analysisStore.isPlaying ? $analysisStore.bass : 0;
+    // Smoothed values could be better, but direct binding is responsive
+    $: pulseScale = 1 + bass * 0.2; // Gentle pulse
+    $: intenseScale = 1 + bass * 0.4; // Stronger pulse
+    $: reactiveOpacity = 0.3 + bass * 0.7;
+
     // Rain generation for Noir mode (Optimized count)
     const rainDrops = Array(30).fill(0);
 </script>
@@ -14,7 +23,15 @@
         <div
             class="absolute inset-0 bg-[#0B1120]"
             transition:fade={{ duration: 1000 }}
-        ></div>
+        >
+            <!-- Subtle Reactive Glow even in Silence mode if music is playing -->
+            {#if $analysisStore.isPlaying}
+                <div
+                    class="absolute inset-0 bg-primary-500/5 mix-blend-overlay transition-opacity duration-75"
+                    style="opacity: {bass}"
+                ></div>
+            {/if}
+        </div>
     {/if}
 
     <!-- === MODE: LIBRARY (Default Lo-Fi Room) === -->
@@ -38,10 +55,15 @@
                 {/each}
             </div>
 
-            <!-- Moon -->
-            <div class="absolute top-20 right-24 w-24 h-24 md:w-32 md:h-32">
+            <!-- Moon (Reactive) -->
+            <div
+                class="absolute top-20 right-24 w-24 h-24 md:w-32 md:h-32 transition-transform duration-75 origin-center"
+                style="transform: scale({pulseScale})"
+            >
                 <div
                     class="w-full h-full rounded-full bg-gradient-to-br from-yellow-100 to-orange-200 shadow-[0_0_60px_rgba(255,220,120,0.4)] animate-float"
+                    style="box-shadow: 0 0 {60 +
+                        bass * 40}px rgba(255,220,120, {0.4 + bass * 0.3})"
                 ></div>
             </div>
 
@@ -69,13 +91,17 @@
                             ></div>
                         {/each}
                     </div>
-                    <!-- Lamp -->
+                    <!-- Lamp (Reactive Light) -->
                     <div class="absolute bottom-24 right-[30%]">
                         <div
                             class="w-20 h-14 bg-gradient-to-b from-[#e8d4a8] to-[#d4a574] rounded-b-full relative"
                         >
                             <div
-                                class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-yellow-200/10 rounded-full blur-2xl animate-pulse-slow"
+                                class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-yellow-200/10 rounded-full blur-2xl transition-all duration-75"
+                                style="opacity: {0.3 +
+                                    bass *
+                                        0.5}; transform: translate(-50%, 0) scale({1 +
+                                    bass});"
                             ></div>
                         </div>
                     </div>
@@ -90,6 +116,12 @@
             class="absolute inset-0 bg-gradient-to-b from-slate-900 to-black"
             transition:fade={{ duration: 1000 }}
         >
+            <!-- Reactive Lightning Flash (Subtle) -->
+            <div
+                class="absolute inset-0 bg-blue-500/10 mix-blend-overlay transition-opacity duration-50 pointer-events-none"
+                style="opacity: {bass > 0.6 ? bass * 0.8 : 0}"
+            ></div>
+
             <!-- Heavy Rain CSS -->
             <div class="rain-container absolute inset-0 opacity-40">
                 {#each rainDrops as _, i}
@@ -115,12 +147,19 @@
             class="absolute inset-0 bg-gradient-to-br from-[#1a2e1a] to-[#0d1f12]"
             transition:fade={{ duration: 1000 }}
         >
+            <!-- Reactive Forest Glow -->
+            <div
+                class="absolute inset-0 bg-green-400/5 transition-opacity duration-300"
+                style="opacity: {bass * 0.5}"
+            ></div>
+
             <!-- Floating Fireflies -->
             {#each Array(20) as _, i}
                 <div
-                    class="absolute w-1 h-1 bg-green-400 rounded-full shadow-[0_0_10px_rgba(74,222,128,0.8)] animate-float-slow"
+                    class="absolute w-1 h-1 bg-green-400 rounded-full shadow-[0_0_10px_rgba(74,222,128,0.8)] animate-float-slow transition-transform duration-300"
                     style="left: {Math.random() * 100}%; top: {Math.random() *
-                        100}%; animation-duration: {4 + Math.random() * 4}s;"
+                        100}%; animation-duration: {4 +
+                        Math.random() * 4}s; transform: scale({pulseScale})"
                 ></div>
             {/each}
             <!-- Bamboo Silhouette hints (CSS) -->
@@ -139,13 +178,16 @@
             class="absolute inset-0 bg-[#050510] overflow-hidden perspective-container"
             transition:fade={{ duration: 1000 }}
         >
-            <!-- Sun -->
+            <!-- Sun (Reactive) -->
             <div
-                class="absolute top-1/4 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full bg-gradient-to-b from-yellow-400 to-pink-600 blur-2xl opacity-80"
+                class="absolute top-1/4 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full bg-gradient-to-b from-yellow-400 to-pink-600 blur-2xl opacity-80 transition-transform duration-75 will-change-transform"
+                style="transform: translate(-50%, 0) scale({intenseScale}); box-shadow: 0 0 {100 *
+                    intenseScale}px rgba(236,72,153, {0.5 * intenseScale})"
             ></div>
             <!-- Grid Floor -->
             <div
                 class="absolute bottom-0 w-[200%] -left-[50%] h-[50vh] bg-grid perspective-grid animate-grid-move"
+                style="filter: brightness({1 + bass})"
             ></div>
             <div
                 class="absolute inset-0 bg-gradient-to-t from-[#050510] via-transparent to-transparent"
@@ -159,6 +201,12 @@
             class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900 via-[#0B1120] to-black"
             transition:fade={{ duration: 1000 }}
         >
+            <!-- Reactive Core -->
+            <div
+                class="absolute inset-0 bg-indigo-500/10 mix-blend-screen transition-opacity duration-75"
+                style="opacity: {bass * 0.4}"
+            ></div>
+
             <!-- Stars -->
             {#each Array(40) as _, i}
                 <div
@@ -170,13 +218,14 @@
                         100}%; animation-duration: {1 + Math.random() * 3}s;"
                 ></div>
             {/each}
-            <!-- Nebula -->
+            <!-- Nebula (Reactive) -->
             <div
-                class="absolute top-0 right-0 w-[800px] h-[800px] bg-purple-500/10 rounded-full blur-3xl mix-blend-screen animate-pulse-slow"
+                class="absolute top-0 right-0 w-[800px] h-[800px] bg-purple-500/10 rounded-full blur-3xl mix-blend-screen animate-pulse-slow transition-transform duration-100"
+                style="transform: scale({pulseScale})"
             ></div>
             <div
-                class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-3xl mix-blend-screen animate-pulse-slow"
-                style="animation-delay: 2s;"
+                class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-3xl mix-blend-screen animate-pulse-slow transition-transform duration-100"
+                style="animation-delay: 2s; transform: scale({pulseScale})"
             ></div>
         </div>
     {/if}

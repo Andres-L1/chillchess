@@ -554,7 +554,6 @@
                     <!-- Ambience Toggle (Rain Icon - Placeholder for now) -->
                     <button
                         on:click|stopPropagation={() => {
-                            // Future: Toggle Ambience Logic
                             showVibeStudio = true;
                         }}
                         class="text-white/50 hover:text-cyan-400 transition-colors p-1.5"
@@ -573,6 +572,23 @@
                             ></path></svg
                         >
                     </button>
+
+                    <!-- Volume Control -->
+                    <div class="w-px h-4 bg-white/10 mx-1"></div>
+                    <div
+                        class="flex items-center gap-2 group/vol"
+                        title="Volumen"
+                    >
+                        <input
+                            type="range"
+                            min="0"
+                            max="1"
+                            step="0.05"
+                            bind:value={$audioStore.musicVolume}
+                            on:click|stopPropagation
+                            class="w-16 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white hover:[&::-webkit-slider-thumb]:scale-125 transition-all opacity-50 hover:opacity-100"
+                        />
+                    </div>
                 </div>
             </div>
 

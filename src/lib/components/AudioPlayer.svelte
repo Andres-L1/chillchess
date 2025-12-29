@@ -217,6 +217,90 @@
         }
     }
 
+    // --- AUDIO ANALYSIS (VISUALIZER) ---
+    import { analysisStore } from "$lib/audio/analysis";
+
+    let audioContext: AudioContext;
+    let sourceNode: MediaElementAudioSourceNode;
+    let analyser: AnalyserNode;
+    let animationLoopId: number;
+
+    function initAudioAnalysis() {
+        if (!musicEl || audioContext) return;
+
+        try {
+            const AudioContextClass =
+                window.AudioContext || (window as any).webkitAudioContext;
+            audioContext = new AudioContextClass();
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 256; // 128 bins
+
+            // Connect graph
+            sourceNode = audioContext.createMediaElementSource(musicEl);
+            sourceNode.connect(analyser);
+            analyser.connect(audioContext.destination);
+
+            console.log("Audio Context Initialized for Visualization");
+        } catch (e) {
+            console.error("Audio Analysis Setup Failed:", e);
+        }
+    }
+
+    function updateVisualizer() {
+        if (!analyser) return;
+
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(dataArray);
+
+        // Simple frequency bands mapping
+        // 0-3: Bass
+        // 4-15: Mid
+        // 16+: High
+        const bassEnd = 4;
+        const midEnd = 16;
+
+        const getAvg = (start: number, end: number) => {
+            let sum = 0;
+            for (let i = start; i < end; i++) sum += dataArray[i];
+            return sum / (end - start) / 255;
+        };
+
+        const bass = getAvg(0, bassEnd);
+        const mid = getAvg(bassEnd, midEnd);
+        const high = getAvg(midEnd, 32);
+
+        analysisStore.set({ bass, mid, high, isPlaying: true });
+
+        if (!musicEl.paused) {
+            animationLoopId = requestAnimationFrame(updateVisualizer);
+        }
+    }
+
+    // Trigger analysis loop when playing
+    $: if ($audioStore.isPlaying) {
+        // Initialize context on first play (user interaction required)
+        if (!audioContext && musicEl) {
+            initAudioAnalysis();
+        }
+        // Resume context if suspended
+        if (audioContext?.state === "suspended") {
+            audioContext.resume();
+        }
+        // Start loop
+        cancelAnimationFrame(animationLoopId);
+        updateVisualizer();
+    } else {
+        cancelAnimationFrame(animationLoopId);
+        // Reset analysis when stopped to avoid stuck visuals
+        analysisStore.update((s) => ({
+            ...s,
+            bass: 0,
+            mid: 0,
+            high: 0,
+            isPlaying: false,
+        }));
+    }
+
     function handleDurationChange() {
         if (musicEl) {
             audioStore.update((s) => ({ ...s, duration: musicEl.duration }));
