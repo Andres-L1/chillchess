@@ -55,7 +55,7 @@
         // Load existing profile
         try {
             const profileDoc = await getDoc(
-                doc(db, "artistProfiles", $userStore.user.uid),
+                doc(db, "artists", $userStore.user.uid),
             );
 
             if (profileDoc.exists()) {
@@ -116,7 +116,7 @@
 
         try {
             await setDoc(
-                doc(db, "artistProfiles", $userStore.user.uid),
+                doc(db, "artists", $userStore.user.uid),
                 profileData,
                 { merge: true }, // Merge to be safe, though setDoc overwrites by default without it on new docs
             );
