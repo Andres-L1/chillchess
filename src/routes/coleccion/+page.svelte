@@ -37,7 +37,12 @@
 
     // Derived filtered albums
     // Derived filtered albums (Deep Search)
-    $: filteredAlbums = ALBUMS.filter((a) => {
+    $: sourceAlbums =
+        $audioStore.availableAlbums.length > 0
+            ? $audioStore.availableAlbums
+            : ALBUMS;
+
+    $: filteredAlbums = sourceAlbums.filter((a) => {
         const matchesCategory =
             selectedCategory === "all" || a.category === selectedCategory;
 

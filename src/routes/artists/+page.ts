@@ -14,29 +14,8 @@ export async function load() {
             verifiedArtists.push({ ...doc.data() } as ArtistProfile);
         });
 
-        // Inject Manual Artists (JULYACTV)
-        const manualArtists: ArtistProfile[] = [
-            {
-                userId: 'julyactv-official',
-                artistName: 'JULYACTV',
-                bio: 'Visionario del sonido urbano y creador de atmósferas inmersivas. La voz de una generación en ChillChess.',
-                avatarUrl: '/assets/images/covers/asap.jpg', // Using album cover as fallback avatar
-                isVerified: true,
-                followerCount: 12500,
-                socialLinks: [
-                    { platform: 'twitter', url: 'https://twitter.com/julyactv' },
-                    { platform: 'instagram', url: 'https://instagram.com/julyactv' }
-                ],
-                createdAt: Date.now(),
-                updatedAt: Date.now()
-            }
-        ];
-
-        // Merge Firebase results with manual artists, avoiding duplicates if possible
-        const combinedArtists = [...manualArtists, ...verifiedArtists.filter(a => a.artistName !== 'JULYACTV')];
-
         return {
-            verifiedArtists: combinedArtists
+            verifiedArtists
         };
     } catch (error) {
         console.error('Error loading verified artists:', error);
