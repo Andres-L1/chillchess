@@ -9,8 +9,26 @@
     $: showLogo = $page.url.searchParams.get("showLogo") !== "false";
     $: opacity = parseFloat($page.url.searchParams.get("opacity") || "0.9");
 
-    $: currentTrack = $audioStore.currentTrack;
+    // Derive current track from store
+    $: playlist = $audioStore.playlist;
+    $: currentTrackIndex = $audioStore.currentTrackIndex;
+    $: currentAlbumId = $audioStore.currentAlbumId;
     $: isPlaying = $audioStore.isPlaying;
+
+    $: currentTrack = playlist && playlist[currentTrackIndex];
+    $: currentAlbum = $audioStore.availableAlbums.find(
+        (a) => a.id === currentAlbumId,
+    );
+
+    // Combine track and album info
+    $: trackInfo =
+        currentTrack && currentAlbum
+            ? {
+                  title: currentTrack.title,
+                  artist: currentTrack.artist || currentAlbum.artist,
+                  cover: currentAlbum.cover,
+              }
+            : null;
 
     // Size configurations
     const sizes = {
@@ -27,7 +45,7 @@
     <meta name="robots" content="noindex" />
 </svelte:head>
 
-{#if currentTrack && isPlaying}
+{#if trackInfo && isPlaying}
     <div
         class="widget-container font-poppins transition-all duration-300"
         style="
@@ -45,8 +63,8 @@
             style="width: {config.imgSize}; height: {config.imgSize};"
         >
             <img
-                src={currentTrack.cover || "/default-cover.jpg"}
-                alt={currentTrack.title}
+                src={trackInfo.cover || "/default-cover.jpg"}
+                alt={trackInfo.title}
                 class="w-full h-full object-cover rounded-xl shadow-lg"
             />
         </div>
@@ -56,7 +74,7 @@
             <p
                 class="track-title font-bold {config.fontSize} leading-tight mb-1 line-clamp-1"
             >
-                {currentTrack.title}
+                {trackInfo.title}
             </p>
             <p
                 class="artist-name text-opacity-70 {config.fontSize ===
@@ -65,7 +83,7 @@
                     : 'text-xs'} line-clamp-1"
                 style="opacity: 0.7;"
             >
-                {currentTrack.artist}
+                {trackInfo.artist}
             </p>
             {#if showLogo}
                 <p
