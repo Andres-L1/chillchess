@@ -2,6 +2,7 @@
     import { goto } from "$app/navigation";
     import type { ArtistProfile } from "$lib/types/artist";
     import VerifiedBadge from "$lib/components/VerifiedBadge.svelte";
+    import MusicIcon from "$lib/components/icons/MusicIcon.svelte";
     import { ALBUMS } from "$lib/data/albums";
 
     export let data: { verifiedArtists: ArtistProfile[] };
@@ -172,7 +173,7 @@
                                         class="w-full h-full rounded-full object-cover"
                                     />
                                 {:else}
-                                    🎵
+                                    <MusicIcon size="xl" gradient={true} />
                                 {/if}
                             </div>
 

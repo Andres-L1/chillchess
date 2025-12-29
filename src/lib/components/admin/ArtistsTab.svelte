@@ -13,6 +13,8 @@
     } from "firebase/firestore";
     import type { ArtistProfile } from "$lib/types/artist";
     import VerifiedBadge from "$lib/components/VerifiedBadge.svelte";
+    import MusicIcon from "$lib/components/icons/MusicIcon.svelte";
+    import MicrophoneIcon from "$lib/components/icons/MicrophoneIcon.svelte";
     import { ALBUMS } from "$lib/data/albums";
 
     let artists: ArtistProfile[] = [];
@@ -185,7 +187,7 @@
         <div
             class="text-center py-12 bg-white/5 rounded-xl border border-white/10"
         >
-            <span class="text-4xl block mb-2">🎤</span>
+            <MicrophoneIcon size="xl" gradient={false} />
             <p class="text-slate-400">No hay artistas registrados</p>
         </div>
     {:else}
@@ -207,7 +209,7 @@
                                     class="w-full h-full rounded-full object-cover"
                                 />
                             {:else}
-                                🎵
+                                <MusicIcon size="lg" gradient={true} />
                             {/if}
                         </div>
 
