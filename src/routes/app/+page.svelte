@@ -2,7 +2,14 @@
     // @ts-nocheck
     import { onMount, onDestroy } from "svelte";
     import { goto } from "$app/navigation";
-    import { audioStore, unlockAudio, playAlbum } from "$lib/audio/store";
+    import {
+        audioStore,
+        unlockAudio,
+        playAlbum,
+        togglePlayback,
+        prevTrack,
+        nextTrack,
+    } from "$lib/audio/store";
     import { CATEGORY_LABELS, type AlbumCategory } from "$lib/data/albums";
     import { userStore } from "$lib/auth/userStore";
     import { userSubscription } from "$lib/subscription/userSubscription";
@@ -462,11 +469,91 @@
             </div>
         </main>
 
-        <!-- BOTTOM: VISUALIZER (Subtle) -->
+        <!-- BOTTOM: INTEGRATED PLAYER & VISUALIZER -->
         <div
-            class="h-24 w-full flex items-end justify-center pb-4 opacity-20 hover:opacity-100 transition-opacity"
+            class="w-full flex flex-col items-center justify-end pb-8 opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none hover:pointer-events-auto group/player"
+            class:opacity-100={!immersiveMode || uiVisible}
         >
-            <Visualizer />
+            <!-- Player Controls (Floating) -->
+            <div
+                class="bg-black/40 backdrop-blur-xl border border-white/10 rounded-full px-6 py-3 flex items-center gap-6 shadow-2xl mb-4 pointer-events-auto transform translate-y-4 group-hover/player:translate-y-0 transition-transform"
+            >
+                <!-- Track Info (Desktop) -->
+                <div class="hidden md:flex flex-col items-end mr-2 text-right">
+                    <span
+                        class="text-[10px] uppercase text-slate-400 font-bold tracking-widest leading-none mb-1"
+                        >Ahora Suena</span
+                    >
+                    <span
+                        class="text-xs text-white font-bold truncate max-w-[150px] leading-none"
+                    >
+                        {$audioStore.playlist[$audioStore.currentTrackIndex]
+                            ?.title || "ChillChess"}
+                    </span>
+                </div>
+
+                <!-- Controls -->
+                <div class="flex items-center gap-4">
+                    <button
+                        on:click|stopPropagation={prevTrack}
+                        class="text-slate-400 hover:text-white transition-colors p-1"
+                        aria-label="Anterior"
+                    >
+                        <svg
+                            class="w-5 h-5"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                            ><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" /></svg
+                        >
+                    </button>
+
+                    <button
+                        on:click|stopPropagation={togglePlayback}
+                        class="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-lg shadow-white/10"
+                        aria-label={$audioStore.isPlaying
+                            ? "Pausar"
+                            : "Reproducir"}
+                    >
+                        {#if $audioStore.isPlaying}
+                            <svg
+                                class="w-5 h-5"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                                ><path
+                                    d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"
+                                /></svg
+                            >
+                        {:else}
+                            <svg
+                                class="w-5 h-5 ml-0.5"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                                ><path d="M8 5v14l11-7z" /></svg
+                            >
+                        {/if}
+                    </button>
+
+                    <button
+                        on:click|stopPropagation={nextTrack}
+                        class="text-slate-400 hover:text-white transition-colors p-1"
+                        aria-label="Siguiente"
+                    >
+                        <svg
+                            class="w-5 h-5"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                            ><path
+                                d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"
+                            /></svg
+                        >
+                    </button>
+                </div>
+            </div>
+
+            <!-- Visualizer (Behind/Below) -->
+            <div class="h-12 w-full flex items-end justify-center opacity-40">
+                <Visualizer />
+            </div>
         </div>
     </div>
 

@@ -11,6 +11,7 @@
         arrow,
     } from "@floating-ui/dom";
     import { storePopup } from "@skeletonlabs/skeleton";
+    import { page } from "$app/stores";
     import DynamicBackground from "$lib/components/DynamicBackground.svelte";
     import AudioPlayer from "$lib/components/AudioPlayer.svelte";
     import BottomPlayer from "$lib/components/BottomPlayer.svelte";
@@ -45,9 +46,10 @@
         <slot />
     </div>
 
-    <!-- Global Audio & Interfaces -->
     <AudioPlayer />
-    <BottomPlayer />
+    {#if !$page.url.pathname.startsWith("/app")}
+        <BottomPlayer />
+    {/if}
     <MusicToast />
     <CookieConsent />
 </div>
