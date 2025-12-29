@@ -11,6 +11,7 @@
     import SendIcon from "$lib/components/icons/SendIcon.svelte";
     import BoltIcon from "$lib/components/icons/BoltIcon.svelte";
     import StarIcon from "$lib/components/icons/StarIcon.svelte";
+    import VerifiedBadge from "$lib/components/VerifiedBadge.svelte";
 
     let showAuthModal = false;
     let showPaywall = false;
@@ -140,9 +141,12 @@
                             class="flex flex-col items-start leading-none mr-2"
                         >
                             <span
-                                class="text-xs font-bold text-white tracking-wide"
+                                class="text-xs font-bold text-white tracking-wide flex items-center gap-1"
                             >
                                 {$userStore.user?.displayName || "Usuario"}
+                                {#if $userSubscription.tier === "pro" || $userSubscription.tier === "premium"}
+                                    <VerifiedBadge size="sm" />
+                                {/if}
                             </span>
                             <span
                                 class="text-[10px] uppercase font-bold text-slate-400"

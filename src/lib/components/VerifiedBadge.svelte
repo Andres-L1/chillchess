@@ -26,15 +26,15 @@
                 x2="100%"
                 y2="100%"
             >
-                <stop offset="0%" style="stop-color:#FF7B3D;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+                <stop offset="0%" style="stop-color:#FDB931;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#FF9100;stop-opacity:1" />
             </linearGradient>
         </defs>
         <!-- Checkmark path -->
         <path
             d="M20 6L9 17L4 12"
             stroke="url(#verifiedGradient-{size})"
-            filter="drop-shadow(0 0 4px rgba(255, 123, 61, 0.3))"
+            filter="drop-shadow(0 0 6px rgba(253, 185, 49, 0.4))"
         />
     </svg>
 

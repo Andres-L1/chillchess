@@ -11,11 +11,50 @@
     import Visualizer from "$lib/components/Visualizer.svelte";
     import ChillBackground from "$lib/components/ChillBackground.svelte";
     import PaywallModal from "$lib/components/PaywallModal.svelte";
+    import EyeIcon from "$lib/components/icons/EyeIcon.svelte";
 
     let showMusicExplorer = false;
     let showVibeStudio = false;
     let showPaywall = false;
     let isUserLoaded = false;
+
+    // Immersive Mode Logic
+    let immersiveMode = false;
+    let uiVisible = true;
+    let hideUiTimeout: any;
+
+    function toggleImmersive() {
+        const isPro =
+            $userSubscription.tier === "pro" ||
+            $userSubscription.tier === "premium" ||
+            $userSubscription.profile?.isAdmin;
+
+        if (!isPro) {
+            showPaywall = true;
+            return;
+        }
+
+        immersiveMode = !immersiveMode;
+        if (immersiveMode) {
+            resetInactivityTimer();
+        } else {
+            uiVisible = true;
+            if (hideUiTimeout) clearTimeout(hideUiTimeout);
+        }
+    }
+
+    function handleActivity() {
+        if (!immersiveMode) return;
+        uiVisible = true;
+        resetInactivityTimer();
+    }
+
+    function resetInactivityTimer() {
+        if (hideUiTimeout) clearTimeout(hideUiTimeout);
+        hideUiTimeout = setTimeout(() => {
+            if (immersiveMode) uiVisible = false;
+        }, 3000);
+    }
 
     // --- FOCUS TIMER LOGIC ---
     let timerRunning = false;
@@ -121,6 +160,12 @@
     });
 </script>
 
+<svelte:window
+    on:mousemove={handleActivity}
+    on:click={handleActivity}
+    on:keydown={handleActivity}
+/>
+
 <!-- Main Container: Zen Studio -->
 <div
     class="relative w-screen h-[100dvh] bg-[#0B1120] overflow-hidden flex flex-col text-white font-poppins selection:bg-primary-500/30"
@@ -137,7 +182,13 @@
     </div>
 
     <!-- UI LAYER -->
-    <div class="relative z-10 w-full h-full flex flex-col overflow-hidden">
+    <!-- UI LAYER -->
+    <div
+        class="relative z-10 w-full h-full flex flex-col overflow-hidden transition-opacity duration-700 ease-in-out {immersiveMode &&
+        !uiVisible
+            ? 'opacity-0 cursor-none'
+            : 'opacity-100'}"
+    >
         <!-- Navbar (Fixed height) -->
         <header
             class="p-4 md:p-6 flex justify-between items-center animate-fade-in-down shrink-0"
@@ -162,6 +213,25 @@
                 >
                     Vibe Studio
                 </span>
+            </button>
+
+            <!-- Immersive Toggle (PRO) -->
+            <button
+                on:click={toggleImmersive}
+                class="flex items-center gap-2 bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-full px-3 py-2 border border-white/10 hover:border-white/20 shadow-lg transition-all group ml-2"
+                title="Modo Inmersivo (PRO)"
+            >
+                <EyeIcon
+                    size="md"
+                    open={!immersiveMode}
+                    gradient={immersiveMode}
+                />
+                {#if immersiveMode}
+                    <span
+                        class="text-xs font-bold text-orange-400 font-mono tracking-wider ml-1"
+                        >ON</span
+                    >
+                {/if}
             </button>
 
             <button
@@ -507,6 +577,15 @@
                 </div>
             </div>
         </button>
+    {/if}
+
+    <!-- Immersive Education Toast -->
+    {#if immersiveMode && uiVisible}
+        <div
+            class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[80] bg-black/60 backdrop-blur-md px-4 py-2 rounded-full text-xs text-slate-400 pointer-events-none animate-fade-in"
+        >
+            Modo Inmersivo activo. Mueve el mouse para ver controles.
+        </div>
     {/if}
 
     <!-- Paywall Modal -->
