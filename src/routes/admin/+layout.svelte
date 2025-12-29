@@ -29,7 +29,17 @@
             return;
         }
 
-        // Check if user is admin
+        // HARDCODED ADMIN EMAIL - Only this email can access admin panel
+        const ADMIN_EMAIL = "andreslgumuzio@gmail.com";
+
+        if (user.email !== ADMIN_EMAIL) {
+            console.warn("Unauthorized admin access attempt");
+            isLoading = false;
+            goto("/");
+            return;
+        }
+
+        // Check if user is admin in database (secondary check)
         try {
             const { doc, getDoc } = await import("firebase/firestore");
             const { db } = await import("$lib/firebase");
