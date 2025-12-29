@@ -52,6 +52,38 @@
     on:close={() => (showPaywall = false)}
 />
 
+<svelte:head>
+    <title>ChillChess - Música Lo-Fi, Ambient y Jazz para Concentrarse</title>
+    <meta
+        name="description"
+        content="Tu santuario digital de música Lo-Fi y Ambient. Escucha sin interrupciones, descubre artistas exclusivos y mejora tu productividad con nuestros ambientes inmersivos."
+    />
+    <meta
+        name="keywords"
+        content="lo-fi, música para estudiar, ambient, jazz, focus music, chillchess, productividad, pomodoro, relax, white noise"
+    />
+    <meta name="author" content="ChillChess" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://chillchess.app/" />
+    <meta property="og:title" content="ChillChess - Tu Espacio de Calma" />
+    <meta
+        property="og:description"
+        content="Música reactiva y ambientes visuales para potenciar tu concentración. Únete a la comunidad de ChillChess."
+    />
+    <!-- <meta property="og:image" content="https://chillchess.app/og-image.jpg" /> -->
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://chillchess.app/" />
+    <meta property="twitter:title" content="ChillChess - Tu Espacio de Calma" />
+    <meta
+        property="twitter:description"
+        content="Música reactiva y ambientes visuales para potenciar tu concentración."
+    />
+</svelte:head>
+
 <!-- Changed Background to Midnight Blue and allowed scrolling -->
 <div
     class="min-h-screen bg-[#0B1120] text-slate-200 font-poppins overflow-x-hidden"
@@ -494,10 +526,12 @@
             <p
                 class="text-lg md:text-2xl text-slate-300 max-w-2xl mx-auto font-light leading-relaxed"
             >
-                Una colección exclusiva de música <strong
-                    class="text-white font-medium">Lo-Fi, Jazz y Ambient</strong
-                >.
-                <br class="hidden md:block" /> Diseñada para acompañarte, sin distraerte.
+                Tu banda sonora personal para estudiar, trabajar o relajarte.
+                <br class="hidden md:block" />
+                Música
+                <strong class="text-white font-medium"
+                    >Lo-Fi, Jazz y Ambient</strong
+                > sin interrupciones, diseñada para potenciar tu concentración.
             </p>
         </div>
 
@@ -530,60 +564,117 @@
         </div>
     </header>
 
-    <!-- Features Section -->
-    <section class="max-w-7xl mx-auto px-4 md:px-8 py-12 mb-20 relative z-10">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Feature 1 -->
+    <!-- Features Section (Funciones) -->
+    <section class="max-w-7xl mx-auto px-4 md:px-8 py-20 mb-20 relative z-10">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-5xl font-bold text-white mb-6">
+                Todo lo que necesitas para fluir
+            </h2>
+            <p class="text-slate-400 max-w-2xl mx-auto text-lg">
+                Más que un reproductor de música. ChillChess es un ecosistema
+                diseñado para cuidar tu estado mental y mejorar tu
+                productividad.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Feature 1: Infinite Radio -->
             <div
-                class="bg-[#131b2e]/60 backdrop-blur-xl p-8 rounded-3xl border border-white/5 hover:border-white/10 transition-all hover:-translate-y-1"
+                class="group bg-[#131b2e]/60 backdrop-blur-xl p-8 rounded-3xl border border-white/5 hover:border-primary-500/30 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary-500/10"
             >
                 <div
-                    class="w-12 h-12 bg-purple-500/20 rounded-2xl flex items-center justify-center text-purple-400 mb-4"
+                    class="w-14 h-14 bg-gradient-to-br from-primary-500 to-orange-500 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg group-hover:scale-110 transition-transform"
                 >
-                    <MusicIcon size="lg" />
+                    <MusicIcon size="md" />
                 </div>
-                <h3 class="text-xl font-bold text-slate-100 mb-2">
-                    Selección Premium
+                <h3 class="text-2xl font-bold text-slate-100 mb-3">
+                    Radio Infinita
                 </h3>
-                <p class="text-slate-400 leading-relaxed">
-                    Álbumes curados manualmente para garantizar la máxima
-                    calidad y una vibra coherente.
+                <p class="text-slate-400 leading-relaxed text-sm">
+                    Olvídate de elegir canciones. Nuestra radio inteligente
+                    selecciona la mezcla perfecta de Lo-Fi y Jazz para que nunca
+                    se rompa tu concentración.
                 </p>
             </div>
 
-            <!-- Feature 2 -->
+            <!-- Feature 2: Reactive Ambience -->
             <div
-                class="bg-[#131b2e]/60 backdrop-blur-xl p-8 rounded-3xl border border-white/5 hover:border-white/10 transition-all hover:-translate-y-1"
+                class="group bg-[#131b2e]/60 backdrop-blur-xl p-8 rounded-3xl border border-white/5 hover:border-blue-500/30 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10"
             >
                 <div
-                    class="w-12 h-12 bg-orange-500/20 rounded-2xl flex items-center justify-center text-orange-400 mb-4"
+                    class="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg group-hover:scale-110 transition-transform"
                 >
-                    <BoltIcon size="lg" />
+                    <EyeIcon size="md" />
                 </div>
-                <h3 class="text-xl font-bold text-slate-100 mb-2">
-                    Sin Pausas
+                <h3 class="text-2xl font-bold text-slate-100 mb-3">
+                    Ambientes Reactivos
                 </h3>
-                <p class="text-slate-400 leading-relaxed">
-                    Disfruta de una experiencia continua, ideal para largas
-                    sesiones de estudio o descanso.
+                <p class="text-slate-400 leading-relaxed text-sm">
+                    Fondos visuales que "respiran" con la música. Desde una
+                    habitación lluviosa hasta el espacio profundo, elige el
+                    entorno visual que te inspire.
                 </p>
             </div>
 
-            <!-- Feature 3 -->
+            <!-- Feature 3: Focus & Productivity -->
             <div
-                class="bg-[#131b2e]/60 backdrop-blur-xl p-8 rounded-3xl border border-white/5 hover:border-white/10 transition-all hover:-translate-y-1"
+                class="group bg-[#131b2e]/60 backdrop-blur-xl p-8 rounded-3xl border border-white/5 hover:border-purple-500/30 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-purple-500/10"
             >
                 <div
-                    class="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center text-blue-400 mb-4"
+                    class="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg group-hover:scale-110 transition-transform"
                 >
-                    <EyeIcon size="lg" />
+                    <BoltIcon size="md" />
                 </div>
-                <h3 class="text-xl font-bold text-slate-100 mb-2">
-                    Visuales Inmersivos
+                <h3 class="text-2xl font-bold text-slate-100 mb-3">
+                    Modo Enfoque
                 </h3>
-                <p class="text-slate-400 leading-relaxed">
-                    Desbloquea fondos dinámicos y sets de piezas premium que
-                    transforman tu experiencia visual.
+                <p class="text-slate-400 leading-relaxed text-sm">
+                    Herramientas integradas como temporizadores Pomodoro y
+                    bloqueadores de distracciones visuales para mantener tu
+                    mente en la tarea.
+                </p>
+            </div>
+
+            <!-- Feature 4: Artist Community -->
+            <div
+                class="group bg-[#131b2e]/60 backdrop-blur-xl p-8 rounded-3xl border border-white/5 hover:border-green-500/30 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-green-500/10 lg:col-span-2"
+            >
+                <div
+                    class="flex flex-col md:flex-row gap-6 items-start md:items-center"
+                >
+                    <div
+                        class="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center text-white flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform"
+                    >
+                        <UserIcon size="md" />
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-slate-100 mb-2">
+                            Comunidad de Artistas
+                        </h3>
+                        <p
+                            class="text-slate-400 leading-relaxed text-sm max-w-xl"
+                        >
+                            Apoyamos a productores independientes. Cada
+                            reproducción cuenta. Únete como artista, sube tus
+                            pistas y conecta con una audiencia que valora la
+                            música de calidad.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 5: Premium Experience -->
+            <div
+                class="group bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-xl p-8 rounded-3xl border border-white/10 hover:border-white/30 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-white/5 flex flex-col justify-center items-center text-center"
+            >
+                <div class="mb-4">
+                    <StarIcon size="md" gradient={true} />
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">
+                    Experiencia Premium
+                </h3>
+                <p class="text-slate-400 text-sm">
+                    Alta calidad de audio, sin compresiones.
                 </p>
             </div>
         </div>
