@@ -9,6 +9,19 @@
 
     const patches: Patch[] = [
         {
+            version: "v0.5",
+            date: "29 Dic 2025",
+            title: "Admin & Mobile Excellence",
+            type: "major",
+            changes: [
+                "👑 Admin Panel 2.0: Reconstrucción total del sistema de administración.",
+                "📱 Gestión Móvil Total: Los administradores ahora pueden gestionar usuarios y música desde cualquier lugar.",
+                "🎵 Librería Musical Dinámica: Control total sobre los álbumes (ver, escuchar preview, eliminar).",
+                "⚡ Verificación Sync: Sincronización automática de badges entre perfil de usuario y de artista.",
+                "🐞 Mobile Fixes: Mejoras críticas en las tablas de administración y UX móvil.",
+            ],
+        },
+        {
             version: "v0.4",
             date: "29 Dic 2025",
             title: "The Premium Vibe Update",

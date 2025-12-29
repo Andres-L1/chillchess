@@ -10,6 +10,14 @@
     const roadmapItems: RoadmapItem[] = [
         // Completado Recientemente (Hot Fixes & Features)
         {
+            title: "Panel de Administración 2.0",
+            description:
+                "Sistema de gestión integral para usuarios y música, optimizado para móvil con auto-verificación.",
+            status: "done",
+            date: "Diciembre 2025",
+            category: "tech",
+        },
+        {
             title: "Colección Premium & Búsqueda",
             description:
                 "Rediseño total de la galería musical con 'Hero Mode', filtrado instantáneo y tarjetas inmersivas. ¡Encontrar tu vibe nunca fue tan bonito!",
