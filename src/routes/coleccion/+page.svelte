@@ -17,6 +17,7 @@
         toggleFavorite,
         isFavorite,
     } from "$lib/data/favorites";
+    import VerifiedBadge from "$lib/components/VerifiedBadge.svelte";
 
     const categoryLabelMap = CATEGORY_LABELS.reduce(
         (acc, curr) => {
@@ -290,8 +291,13 @@
                                 {/if}
                             </div>
 
-                            <p class="text-sm text-slate-400 mb-3 truncate">
+                            <p
+                                class="text-sm text-slate-400 mb-3 truncate flex items-center gap-1.5"
+                            >
                                 {album.artist}
+                                {#if album.artist === "JULYACTV"}
+                                    <VerifiedBadge size="sm" />
+                                {/if}
                             </p>
 
                             <div

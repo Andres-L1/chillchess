@@ -4,6 +4,7 @@
     import { getAlbumById } from "$lib/data/albums";
     import { userSubscription } from "$lib/subscription/userSubscription";
     import PaywallModal from "$lib/components/PaywallModal.svelte";
+    import VerifiedBadge from "$lib/components/VerifiedBadge.svelte";
 
     $: albumId = $page.params.id;
     $: album = getAlbumById(albumId);
@@ -120,7 +121,14 @@
                             <h1 class="text-3xl font-bold mb-2">
                                 {album.title}
                             </h1>
-                            <p class="text-lg text-slate-400">{album.artist}</p>
+                            <p
+                                class="text-lg text-slate-400 flex items-center justify-center gap-2"
+                            >
+                                {album.artist}
+                                {#if album.artist === "JULYACTV"}
+                                    <VerifiedBadge size="sm" />
+                                {/if}
+                            </p>
                             <p class="text-sm text-slate-500 mt-2">
                                 {album.tracks.length} canciones
                             </p>
