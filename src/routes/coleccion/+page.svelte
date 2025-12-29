@@ -11,7 +11,6 @@
         nextTrack,
         prevTrack,
     } from "$lib/audio/store";
-    import { userSubscription } from "$lib/subscription/userSubscription";
     import {
         favoritesStore,
         toggleFavorite,
@@ -19,9 +18,10 @@
     } from "$lib/data/favorites";
     import VerifiedBadge from "$lib/components/VerifiedBadge.svelte";
     import MusicIcon from "$lib/components/icons/MusicIcon.svelte";
-    import AlbumIcon from "$lib/components/icons/AlbumIcon.svelte";
     import GameIcon from "$lib/components/icons/GameIcon.svelte";
     import LeafIcon from "$lib/components/icons/LeafIcon.svelte";
+    import SearchIcon from "$lib/components/icons/SearchIcon.svelte";
+    import { fade, fly } from "svelte/transition";
 
     const categoryLabelMap = CATEGORY_LABELS.reduce(
         (acc, curr) => {
@@ -33,21 +33,29 @@
 
     let selectedCategory: AlbumCategory | "all" = "all";
     let selectedAlbum: Album | null = null;
+    let searchQuery = "";
 
-    $: filteredAlbums =
-        selectedCategory === "all"
-            ? ALBUMS
-            : ALBUMS.filter((a) => a.category === selectedCategory);
+    // Derived filtered albums
+    $: filteredAlbums = ALBUMS.filter((a) => {
+        const matchesCategory =
+            selectedCategory === "all" || a.category === selectedCategory;
+        const matchesSearch =
+            searchQuery === "" ||
+            a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            a.artist.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCategory && matchesSearch;
+    });
+
+    // Featured album (randomized or specific)
+    $: featuredAlbum = ALBUMS[0]; // For now, the first one
 
     function togglePlayPause(albumId: string) {
         const isCurrentlyPlaying =
             $audioStore.currentAlbumId === albumId && $audioStore.isPlaying;
 
         if (isCurrentlyPlaying) {
-            // Pause
             audioStore.update((s) => ({ ...s, isPlaying: false }));
         } else {
-            // Play
             playAlbum(albumId);
         }
     }
@@ -60,24 +68,6 @@
         selectedAlbum = null;
     }
 
-    function playTrackFromAlbum(album: Album, index: number) {
-        const isCurrentAlbum = $audioStore.currentAlbumId === album.id;
-
-        if (isCurrentAlbum) {
-            // Just change track if same album
-            audioStore.update((s) => ({
-                ...s,
-                currentTrackIndex: index,
-                isPlaying: true,
-            }));
-        } else {
-            // Load album and play specific track
-            playAlbum(album.id);
-            // Must force index update after album load
-            audioStore.update((s) => ({ ...s, currentTrackIndex: index }));
-        }
-    }
-
     function toggleTrackPlay(album: Album, index: number) {
         const isCurrentAlbum = $audioStore.currentAlbumId === album.id;
         const isCurrentTrack =
@@ -86,127 +76,154 @@
         if (isCurrentTrack && $audioStore.isPlaying) {
             audioStore.update((s) => ({ ...s, isPlaying: false }));
         } else {
-            playTrackFromAlbum(album, index);
+            if (!isCurrentAlbum) {
+                playAlbum(album.id);
+            }
+            audioStore.update((s) => ({
+                ...s,
+                currentTrackIndex: index,
+                isPlaying: true,
+            }));
         }
     }
 </script>
 
 <svelte:head>
-    <title>Colección | ChillChess</title>
-    <meta
-        name="description"
-        content="Explora nuestra colección de música y soundtracks organizados por categorías"
-    />
+    <title>Colección Premium | ChillChess</title>
 </svelte:head>
 
-<div class="min-h-screen bg-[#0B1120] text-white pb-32">
-    <!-- Header -->
-    <div class="max-w-7xl mx-auto px-4 md:px-8 py-12">
+<div
+    class="min-h-screen bg-[#0B1120] text-white pb-32 font-poppins selection:bg-primary-500/30"
+>
+    <!-- Hero Section -->
+    <div
+        class="relative h-[50vh] min-h-[500px] w-full overflow-hidden flex items-end"
+    >
+        <!-- Animated Background Gradient -->
         <div
-            class="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-12"
+            class="absolute inset-0 bg-gradient-to-br from-[#0B1120] via-[#1a1a2e] to-[#0B1120]"
+        ></div>
+
+        <!-- Album Art Blur Backdrop -->
+        {#if featuredAlbum}
+            <div
+                class="absolute inset-0 bg-cover bg-center opacity-30 blur-3xl scale-125 transition-all duration-1000 transform"
+                style="background-image: url({featuredAlbum.cover});"
+            ></div>
+            <div
+                class="absolute inset-0 bg-gradient-to-b from-[#0B1120]/20 via-[#0B1120]/60 to-[#0B1120] z-0"
+            ></div>
+        {/if}
+
+        <!-- Hero Content -->
+        <div
+            class="relative z-10 w-full max-w-7xl mx-auto px-6 pb-12 flex flex-col md:flex-row items-end gap-8"
         >
-            <div>
-                <h1
-                    class="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent"
+            <div class="flex-1 space-y-4">
+                <div
+                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-500/20 border border-primary-500/30 text-primary-400 text-xs font-bold uppercase tracking-wider backdrop-blur-md"
                 >
-                    Colección Musical
+                    <span>✨</span> Colección Oficial
+                </div>
+                <h1 class="text-5xl md:text-7xl font-bold leading-tight">
+                    Explora tu <br />
+                    <span
+                        class="bg-gradient-to-r from-primary-400 via-primary-500 to-orange-400 bg-clip-text text-transparent drop-shadow-sm"
+                        >Atmósfera</span
+                    >
                 </h1>
-                <p class="text-slate-400 text-lg">
-                    Descubre {ALBUMS.length}
-                    {ALBUMS.length === 1 ? "álbum" : "álbumes"} organizados por categoría
+                <p
+                    class="text-slate-300 text-lg md:text-xl max-w-2xl font-light"
+                >
+                    Una selección curada de paisajes sonoros para concentración,
+                    relajación y gaming de alto rendimiento.
                 </p>
+
+                <!-- Search Bar -->
+                <div class="relative max-w-lg mt-8 group">
+                    <div
+                        class="absolute inset-0 bg-primary-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    ></div>
+                    <div
+                        class="relative flex items-center bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl hover:border-white/20 hover:bg-white/10 transition-all focus-within:ring-2 focus-within:ring-primary-500/50 focus-within:border-primary-500"
+                    >
+                        <div class="pl-4 text-slate-400">
+                            <SearchIcon />
+                        </div>
+                        <input
+                            type="text"
+                            bind:value={searchQuery}
+                            placeholder="Buscar artistas, álbumes o vibes..."
+                            class="w-full bg-transparent border-none text-white py-4 px-4 focus:ring-0 placeholder-slate-400 font-medium"
+                        />
+                    </div>
+                </div>
             </div>
-            <a
-                href="/"
-                class="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all hover:scale-105 active:scale-95 flex items-center gap-2 w-fit"
-            >
-                <svg
-                    class="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                    />
-                </svg>
-                Volver al Inicio
-            </a>
         </div>
+    </div>
 
-        <!-- View Toggle (Albums / Artists) -->
-        <div class="flex items-center gap-6 mb-12 border-b border-white/10">
-            <button
-                class="text-lg font-bold text-white border-b-2 border-primary-500 pb-4 px-2"
+    <!-- Main Grid Section -->
+    <div class="max-w-7xl mx-auto px-6 py-8 relative z-10">
+        <!-- Filters Toolbar -->
+        <div
+            class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 sticky top-4 z-20 py-4 bg-[#0B1120]/80 backdrop-blur-xl rounded-2xl md:bg-transparent md:backdrop-filter-none md:static"
+        >
+            <!-- Type Tabs -->
+            <div
+                class="flex items-center p-1 bg-white/5 rounded-xl border border-white/5"
             >
-                📀 Álbumes
-            </button>
-            <a
-                href="/artists"
-                class="text-lg font-bold text-slate-400 hover:text-white transition-colors pb-4 px-2 hover:border-b-2 hover:border-white/10"
-            >
-                🎤 Artistas
-            </a>
-        </div>
-
-        <!-- Category Filters -->
-        <div class="mb-12">
-            <div class="flex items-center gap-3 mb-6">
-                <svg
-                    class="w-6 h-6 text-blue-400"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
+                <button
+                    class="px-6 py-2 rounded-lg bg-white/10 text-white shadow-sm font-bold text-sm transition-all"
                 >
-                    <path
-                        d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"
-                    />
-                </svg>
-                <h2 class="text-2xl font-bold">Categorías</h2>
+                    📀 Álbumes
+                </button>
+                <a
+                    href="/artists"
+                    class="px-6 py-2 rounded-lg text-slate-400 hover:text-white font-medium text-sm transition-all hover:bg-white/5"
+                >
+                    🎤 Artistas
+                </a>
             </div>
 
-            <div class="flex flex-wrap gap-4">
+            <!-- Categories -->
+            <div
+                class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 hide-scrollbar mask-gradient-r"
+            >
                 <button
                     on:click={() => (selectedCategory = "all")}
-                    class="px-6 py-3 rounded-xl font-medium transition-all {selectedCategory ===
+                    class="px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all {selectedCategory ===
                     'all'
-                        ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/20'
-                        : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/10'}"
+                        ? 'bg-white text-black'
+                        : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/5'}"
                 >
-                    📚 Todas ({ALBUMS.length})
+                    Todas
                 </button>
                 <button
                     on:click={() => (selectedCategory = "musica")}
-                    class="px-6 py-3 rounded-xl font-medium transition-all {selectedCategory ===
+                    class="px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all flex items-center gap-2 {selectedCategory ===
                     'musica'
-                        ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/20'
-                        : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/10'}"
+                        ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/25'
+                        : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/5'}"
                 >
-                    🎵 Música ({ALBUMS.filter((a) => a.category === "musica")
-                        .length})
+                    <span>🎵</span> Música
                 </button>
                 <button
                     on:click={() => (selectedCategory = "juegos")}
-                    class="px-6 py-3 rounded-xl font-medium transition-all {selectedCategory ===
+                    class="px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all flex items-center gap-2 {selectedCategory ===
                     'juegos'
-                        ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/20'
-                        : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/10'}"
+                        ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/25'
+                        : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/5'}"
                 >
-                    🎮 Juegos ({ALBUMS.filter((a) => a.category === "juegos")
-                        .length})
+                    <span>🎮</span> Juegos
                 </button>
                 <button
                     on:click={() => (selectedCategory = "ambiente")}
-                    class="px-6 py-3 rounded-xl font-medium transition-all {selectedCategory ===
+                    class="px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all flex items-center gap-2 {selectedCategory ===
                     'ambiente'
-                        ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/20'
-                        : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/10'}"
+                        ? 'bg-green-500 text-white shadow-lg shadow-green-500/25'
+                        : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white border border-white/5'}"
                 >
-                    🌿 Ambiente ({ALBUMS.filter(
-                        (a) => a.category === "ambiente",
-                    ).length})
+                    <span>🌿</span> Ambiente
                 </button>
             </div>
         </div>
@@ -214,359 +231,261 @@
         <!-- Albums Grid -->
         {#if filteredAlbums.length > 0}
             <div
-                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
             >
-                {#each filteredAlbums as album}
+                {#each filteredAlbums as album (album.id)}
                     <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
                     <div
+                        in:fade={{ duration: 300 }}
                         on:click={() => showAlbumDetails(album)}
-                        class="group bg-[#1e293b]/60 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/5 hover:border-white/20 transition-all hover:scale-105 cursor-pointer"
+                        class="group relative bg-[#181825] rounded-2xl overflow-hidden hover:bg-[#232336] transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/50 cursor-pointer border border-white/5"
                     >
-                        <!-- Album Cover -->
-                        <div class="aspect-square relative overflow-hidden">
+                        <!-- Cover Wrapper -->
+                        <div
+                            class="aspect-square w-full relative overflow-hidden"
+                        >
                             <img
                                 src={album.cover}
                                 alt={album.title}
-                                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                             />
 
-                            <!-- Category Badge -->
+                            <!-- Badges -->
                             <div
-                                class="absolute top-3 left-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-sm text-xs font-bold flex items-center gap-1"
+                                class="absolute top-2 left-2 flex flex-col gap-1 items-start"
                             >
-                                {#if album.category === "musica"}
-                                    <MusicIcon size="sm" gradient={false} />
-                                {:else if album.category === "juegos"}
-                                    <GameIcon size="sm" gradient={false} />
-                                {:else}
-                                    <LeafIcon size="sm" gradient={false} />
+                                {#if album.isPremium}
+                                    <span
+                                        class="px-2 py-0.5 rounded-md bg-orange-500/90 backdrop-blur-sm text-black text-[10px] font-black uppercase shadow-lg"
+                                        >PRO</span
+                                    >
                                 {/if}
-                                {categoryLabelMap[album.category]}
                             </div>
 
-                            <!-- Premium Badge -->
-                            {#if album.isPremium}
-                                <div
-                                    class="absolute top-3 right-3 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full"
-                                >
-                                    PRO
-                                </div>
-                            {/if}
-
-                            <!-- Click to View Overlay -->
+                            <!-- Play Overlay -->
                             <div
-                                class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                                class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]"
                             >
-                                <div class="text-center">
+                                <button
+                                    class="w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center text-white shadow-xl shadow-primary-500/40 transform scale-50 group-hover:scale-100 transition-transform duration-300 hover:scale-110 hover:bg-primary-400"
+                                >
                                     <svg
-                                        class="w-16 h-16 mx-auto mb-2 text-white"
-                                        fill="none"
-                                        stroke="currentColor"
+                                        class="w-5 h-5 ml-1"
+                                        fill="currentColor"
                                         viewBox="0 0 24 24"
+                                        ><path d="M8 5v14l11-7z" /></svg
                                     >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-                                        />
-                                    </svg>
-                                    <p class="text-white font-bold">
-                                        Ver Canciones
-                                    </p>
-                                </div>
+                                </button>
                             </div>
                         </div>
 
-                        <!-- Album Info -->
-                        <div class="p-5">
-                            <div
-                                class="flex items-start justify-between gap-2 mb-2"
+                        <!-- Content -->
+                        <div class="p-4">
+                            <h3
+                                class="font-bold text-white text-base truncate mb-1"
+                                title={album.title}
                             >
-                                <h3 class="font-bold text-lg truncate flex-1">
-                                    {album.title}
-                                </h3>
-                                {#if album.tag}
-                                    <span
-                                        class="text-xs px-2 py-1 rounded-full bg-primary-500/20 text-primary-300 font-bold shrink-0"
-                                    >
-                                        {album.tag}
-                                    </span>
+                                {album.title}
+                            </h3>
+                            <div
+                                class="flex items-center gap-1.5 text-sm text-slate-400"
+                            >
+                                <span class="truncate max-w-[120px]"
+                                    >{album.artist}</span
+                                >
+                                {#if album.artist === "JULYACTV" || album.isVerified}
+                                    <VerifiedBadge
+                                        size="sm"
+                                        showTooltip={false}
+                                    />
                                 {/if}
                             </div>
-
-                            <p
-                                class="text-sm text-slate-400 mb-3 truncate flex items-center gap-1.5"
-                            >
-                                {album.artist}
-                                {#if album.artist === "JULYACTV"}
-                                    <VerifiedBadge size="sm" />
-                                {/if}
-                            </p>
-
                             <div
-                                class="flex items-center justify-between text-xs text-slate-500"
+                                class="flex items-center justify-between mt-3 text-xs text-slate-500 font-medium"
                             >
                                 <span
-                                    >{album.tracks?.length || 0} canciones</span
+                                    >{album.category.charAt(0).toUpperCase() +
+                                        album.category.slice(1)}</span
                                 >
                                 <span
-                                    class="font-bold {album.isPremium
-                                        ? 'text-orange-400'
-                                        : 'text-green-400'}"
+                                    class="bg-white/5 px-2 py-1 rounded text-slate-400"
+                                    >{album.tracks?.length || 0} tracks</span
                                 >
-                                    {album.price}
-                                </span>
                             </div>
-
-                            {#if album.description}
-                                <p
-                                    class="mt-3 text-xs text-slate-500 line-clamp-2"
-                                >
-                                    {album.description}
-                                </p>
-                            {/if}
                         </div>
                     </div>
                 {/each}
             </div>
         {:else}
-            <div class="text-center py-20">
-                <div
-                    class="w-20 h-20 mx-auto mb-6 rounded-full bg-white/5 flex items-center justify-center"
-                >
-                    <svg
-                        class="w-10 h-10 text-slate-600"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"
-                        />
-                    </svg>
-                </div>
-                <h3 class="text-xl font-bold text-slate-400 mb-2">
-                    No hay álbumes en esta categoría
+            <div
+                class="flex flex-col items-center justify-center py-20 text-center animate-fade-in"
+            >
+                <div class="text-6xl mb-4 opacity-50">🪐</div>
+                <h3 class="text-2xl font-bold text-white mb-2">
+                    Nada por aquí...
                 </h3>
-                <p class="text-slate-500">
-                    Próximamente añadiremos más contenido
+                <p class="text-slate-400 max-w-md">
+                    No encontramos resultados para tu búsqueda. Intenta con otro
+                    término o explora otras categorías.
                 </p>
+                <button
+                    on:click={() => {
+                        searchQuery = "";
+                        selectedCategory = "all";
+                    }}
+                    class="mt-6 px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl font-medium transition-all"
+                >
+                    Limpiar filtros
+                </button>
             </div>
         {/if}
     </div>
 </div>
 
-<!-- Track List Modal -->
+<!-- Modal View -->
 {#if selectedAlbum}
-    <div class="fixed inset-0 z-[200] flex items-center justify-center p-4">
-        <!-- Backdrop -->
-        <button
-            class="absolute inset-0 w-full h-full bg-black/70 backdrop-blur-sm"
-            on:click={closeAlbumDetails}
-            aria-label="Cerrar"
-        ></button>
-
-        <!-- Modal -->
+    <div class="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div
-            class="relative w-full max-w-lg bg-[#0B1120]/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/10 z-10 overflow-hidden"
-        >
-            <!-- Header -->
-            <div class="p-6 border-b border-white/10">
-                <div class="flex items-start justify-between gap-4 mb-4">
-                    <div class="flex-1">
-                        <h2 class="text-2xl font-bold text-slate-100 mb-1">
-                            {selectedAlbum.title}
-                        </h2>
-                        <p class="text-slate-400">
-                            {selectedAlbum.artist}
-                        </p>
-                        <p class="text-xs text-slate-500 mt-1">
-                            {selectedAlbum.tracks?.length || 0} canciones
-                        </p>
-                    </div>
-                    <button
-                        on:click={closeAlbumDetails}
-                        class="text-white/70 hover:text-white transition-colors text-2xl w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10"
-                        aria-label="Cerrar"
-                    >
-                        ✕
-                    </button>
-                </div>
+            class="absolute inset-0 bg-black/80 backdrop-blur-md"
+            on:click={closeAlbumDetails}
+            transition:fade
+        ></div>
 
-                <!-- Album Controls -->
-                <div class="flex items-center gap-3">
-                    <button
-                        on:click={prevTrack}
-                        class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white transition-colors"
+        <div
+            class="relative w-full max-w-4xl bg-[#0F172A] border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[80vh]"
+            transition:fly={{ y: 50 }}
+        >
+            <!-- Modal Cover Side -->
+            <div class="w-full md:w-1/3 relative min-h-[200px] md:min-h-0">
+                <img
+                    src={selectedAlbum.cover}
+                    alt="Cover"
+                    class="absolute inset-0 w-full h-full object-cover"
+                />
+                <div
+                    class="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-transparent md:bg-gradient-to-r"
+                ></div>
+
+                <div class="absolute bottom-0 left-0 p-6 z-10 w-full">
+                    <h2
+                        class="text-3xl font-bold text-white leading-tight mb-2 drop-shadow-md"
                     >
-                        <svg
-                            class="w-5 h-5"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                            ><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" /></svg
-                        >
-                    </button>
+                        {selectedAlbum.title}
+                    </h2>
+                    <div
+                        class="flex items-center gap-2 text-white/90 font-medium mb-4 drop-shadow-md"
+                    >
+                        {selectedAlbum.artist}
+                        <VerifiedBadge size="sm" />
+                    </div>
 
                     <button
                         on:click={() =>
                             togglePlayPause(selectedAlbum?.id || "")}
-                        class="flex-1 h-10 flex items-center justify-center gap-2 rounded-full bg-white text-black font-bold hover:scale-105 transition-transform"
+                        class="w-full py-3 bg-primary-500 hover:bg-primary-400 text-white font-bold rounded-xl shadow-lg shadow-primary-900/40 transition-all flex items-center justify-center gap-2"
                     >
                         {#if $audioStore.currentAlbumId === selectedAlbum.id && $audioStore.isPlaying}
-                            <svg
-                                class="w-5 h-5"
-                                fill="currentColor"
-                                viewBox="0 0 24 24"
-                                ><path
-                                    d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"
-                                /></svg
-                            >
-                            Pausar
+                            <span>⏸ Pausar</span>
                         {:else}
-                            <svg
-                                class="w-5 h-5"
-                                fill="currentColor"
-                                viewBox="0 0 24 24"
-                                ><path d="M8 5v14l11-7z" /></svg
-                            >
-                            Reproducir Álbum
+                            <span>▶ Reproducir Todo</span>
                         {/if}
-                    </button>
-
-                    <button
-                        on:click={nextTrack}
-                        class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white transition-colors"
-                    >
-                        <svg
-                            class="w-5 h-5"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                            ><path
-                                d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"
-                            /></svg
-                        >
                     </button>
                 </div>
             </div>
 
-            <!-- Track List -->
-            <div class="p-6 max-h-[60vh] overflow-y-auto">
-                {#if selectedAlbum.tracks && selectedAlbum.tracks.length > 0}
-                    <div class="space-y-2">
+            <!-- Modal Tracks Side -->
+            <div class="flex-1 overflow-y-auto bg-[#0F172A] p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold text-slate-200">
+                        Lista de Canciones
+                    </h3>
+                    <button
+                        on:click={closeAlbumDetails}
+                        class="p-2 hover:bg-white/10 rounded-full text-slate-400 hover:text-white transition-colors"
+                        >✕</button
+                    >
+                </div>
+
+                <div class="space-y-1">
+                    {#if selectedAlbum.tracks && selectedAlbum.tracks.length > 0}
                         {#each selectedAlbum.tracks as track, index}
                             <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
                             <div
-                                class="group flex items-center gap-3 rounded-xl p-3 transition-colors cursor-pointer {$audioStore.currentAlbumId ===
+                                class="group flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer {$audioStore.currentAlbumId ===
                                     selectedAlbum.id &&
                                 $audioStore.currentTrackIndex === index
-                                    ? 'bg-primary-500/20 border border-primary-500/30'
-                                    : 'bg-white/5 hover:bg-white/10 border border-transparent'}"
+                                    ? 'bg-white/5'
+                                    : ''}"
+                                on:click={() =>
+                                    selectedAlbum &&
+                                    toggleTrackPlay(selectedAlbum, index)}
                             >
                                 <div
-                                    class="w-8 h-8 flex items-center justify-center shrink-0"
-                                    on:click={() =>
-                                        selectedAlbum &&
-                                        toggleTrackPlay(selectedAlbum, index)}
+                                    class="w-8 flex justify-center text-sm font-medium text-slate-500 group-hover:text-white transition-colors"
                                 >
                                     {#if $audioStore.currentAlbumId === selectedAlbum.id && $audioStore.currentTrackIndex === index && $audioStore.isPlaying}
-                                        <!-- Playing Icon -->
-                                        <svg
-                                            class="w-4 h-4 text-blue-400"
-                                            fill="currentColor"
-                                            viewBox="0 0 24 24"
-                                            ><path
-                                                d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"
-                                            /></svg
-                                        >
-                                    {:else if $audioStore.currentAlbumId === selectedAlbum.id && $audioStore.currentTrackIndex === index}
-                                        <!-- Paused indicator if current -->
-                                        <svg
-                                            class="w-4 h-4 text-blue-400"
-                                            fill="currentColor"
-                                            viewBox="0 0 24 24"
-                                            ><path d="M8 5v14l11-7z" /></svg
+                                        <span
+                                            class="text-primary-400 animate-pulse"
+                                            >EqualizerIcon...</span
                                         >
                                     {:else}
-                                        <!-- Number / Play on Hover -->
-                                        <span
-                                            class="text-slate-500 font-bold group-hover:hidden"
+                                        <span class="group-hover:hidden"
                                             >{index + 1}</span
                                         >
-                                        <svg
-                                            class="w-4 h-4 text-white hidden group-hover:block"
-                                            fill="currentColor"
-                                            viewBox="0 0 24 24"
-                                            ><path d="M8 5v14l11-7z" /></svg
+                                        <span
+                                            class="hidden group-hover:block text-white"
+                                            >▶</span
                                         >
                                     {/if}
                                 </div>
 
-                                <div
-                                    class="flex-1 min-w-0"
-                                    on:click={() =>
-                                        selectedAlbum &&
-                                        toggleTrackPlay(selectedAlbum, index)}
-                                >
-                                    <div
-                                        class="font-medium text-white truncate {$audioStore.currentAlbumId ===
+                                <div class="flex-1 min-w-0">
+                                    <h4
+                                        class="font-medium text-slate-200 truncate {$audioStore.currentAlbumId ===
                                             selectedAlbum.id &&
                                         $audioStore.currentTrackIndex === index
-                                            ? 'text-blue-300'
+                                            ? 'text-primary-400'
                                             : ''}"
                                     >
                                         {track.title}
-                                    </div>
-                                    <div
-                                        class="text-sm text-slate-400 truncate"
-                                    >
+                                    </h4>
+                                    <p class="text-xs text-slate-500 truncate">
                                         {track.artist}
-                                    </div>
+                                    </p>
                                 </div>
 
-                                <!-- Like Button -->
-                                <button
-                                    on:click|stopPropagation={() =>
-                                        toggleFavorite(track.id || "")}
-                                    class="p-2 rounded-full transition-colors hover:bg-white/10 {isFavorite(
-                                        track.id || '',
-                                        $favoritesStore,
-                                    )
-                                        ? 'text-rose-500'
-                                        : 'text-slate-600 hover:text-rose-400'}"
-                                    title="Añadir a favoritos"
+                                <div
+                                    class="opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
-                                    {#if isFavorite(track.id || "", $favoritesStore)}
-                                        <svg
-                                            class="w-5 h-5"
-                                            fill="currentColor"
-                                            viewBox="0 0 24 24"
-                                            ><path
-                                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                                            /></svg
-                                        >
-                                    {:else}
-                                        <svg
-                                            class="w-5 h-5"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="2"
-                                            ><path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                                            /></svg
-                                        >
-                                    {/if}
-                                </button>
+                                    <button
+                                        on:click|stopPropagation={() =>
+                                            toggleFavorite(track.id || "")}
+                                        class="p-2 hover:bg-white/10 rounded-full {isFavorite(
+                                            track.id || '',
+                                            $favoritesStore,
+                                        )
+                                            ? 'text-red-500'
+                                            : 'text-slate-400'}"
+                                    >
+                                        ♥
+                                    </button>
+                                </div>
+
+                                <span class="text-xs text-slate-600 font-mono">
+                                    {Math.floor(
+                                        (track.duration || 180) / 60,
+                                    )}:{(track.duration || 180) % 60 < 10
+                                        ? "0"
+                                        : ""}{(track.duration || 180) % 60}
+                                </span>
                             </div>
                         {/each}
-                    </div>
-                {:else}
-                    <p class="text-center text-slate-500 py-8">
-                        No hay canciones en este álbum
-                    </p>
-                {/if}
+                    {:else}
+                        <div class="text-center py-10 text-slate-500">
+                            No hay tracks disponibles
+                        </div>
+                    {/if}
+                </div>
             </div>
         </div>
     </div>

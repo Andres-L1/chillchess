@@ -8,7 +8,32 @@
     }
 
     const roadmapItems: RoadmapItem[] = [
-        // Completado
+        // Completado Recientemente (Hot Fixes & Features)
+        {
+            title: "Colección Premium & Búsqueda",
+            description:
+                "Rediseño total de la galería musical con 'Hero Mode', filtrado instantáneo y tarjetas inmersivas. ¡Encontrar tu vibe nunca fue tan bonito!",
+            status: "done",
+            date: "Diciembre 2025",
+            category: "visual",
+        },
+        {
+            title: "Vibe Studio 2.1",
+            description:
+                "Personalización total del entorno: Relojes (Neon, Retro, Analógico) y Fondos Dinámicos (Lluvia, Cyber, Zen) reactivos.",
+            status: "done",
+            date: "Diciembre 2025",
+            category: "visual",
+        },
+        {
+            title: "Hub de Artistas Automatizado",
+            description:
+                "Nuevo flujo de envío de música con carga masiva (drag & drop) y verificación automática de perfiles al aprobar lanzamientos.",
+            status: "done",
+            date: "Diciembre 2025",
+            category: "tech",
+        },
+
         {
             title: "Sistema de Favoritos",
             description:

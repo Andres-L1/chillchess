@@ -13,7 +13,8 @@ export interface Album {
     title: string;
     artist: string;
     cover: string;
-    tracks: Track[];
+    tracks?: Track[]; // Lista de canciones del álbum
+    isVerified?: boolean; // Si el artista del álbum está verificado
     vibeId?: string;
     price: string;
     tag: string;
