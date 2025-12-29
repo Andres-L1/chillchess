@@ -240,11 +240,11 @@
                                         $audioStore.availableAlbums.find(
                                             (a) =>
                                                 a.id ===
-                                                room.currentTrack?.albumId,
+                                                room?.currentTrack?.albumId,
                                         )}
                                     {@const currentTrack =
                                         currentAlbum?.tracks?.[
-                                            room.currentTrack?.trackIndex ?? 0
+                                            room?.currentTrack?.trackIndex ?? 0
                                         ]}
 
                                     <div class="text-center">
