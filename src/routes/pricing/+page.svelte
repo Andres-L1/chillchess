@@ -5,6 +5,7 @@
     import AuthModal from "$lib/components/AuthModal.svelte";
     import { goto } from "$app/navigation";
     import { onMount } from "svelte";
+    import SettingsIcon from "$lib/components/icons/SettingsIcon.svelte";
 
     let showAuthModal = false;
     let loading = false;
@@ -173,7 +174,14 @@
                 disabled={loading}
                 class="px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl font-medium transition-all disabled:opacity-50"
             >
-                {loading ? "Cargando..." : "⚙️ Gestionar Suscripción"}
+                {#if loading}
+                    <span>Cargando...</span>
+                {:else}
+                    <div class="flex items-center gap-2">
+                        <SettingsIcon size="sm" gradient={false} />
+                        <span>Gestionar Suscripción</span>
+                    </div>
+                {/if}
             </button>
         </div>
     {/if}

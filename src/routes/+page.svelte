@@ -4,6 +4,13 @@
     import PaywallModal from "$lib/components/PaywallModal.svelte";
     import { userStore, logout } from "$lib/auth/userStore";
     import { userSubscription } from "$lib/subscription/userSubscription";
+    import SettingsIcon from "$lib/components/icons/SettingsIcon.svelte";
+    import UserIcon from "$lib/components/icons/UserIcon.svelte";
+    import HeartIcon from "$lib/components/icons/HeartIcon.svelte";
+    import BulbIcon from "$lib/components/icons/BulbIcon.svelte";
+    import SendIcon from "$lib/components/icons/SendIcon.svelte";
+    import BoltIcon from "$lib/components/icons/BoltIcon.svelte";
+    import StarIcon from "$lib/components/icons/StarIcon.svelte";
 
     let showAuthModal = false;
     let showPaywall = false;
@@ -88,11 +95,15 @@
                 <!-- Pricing CTA -->
                 <a
                     href="/pricing"
-                    class="bg-primary-500 hover:bg-primary-600 text-white px-4 py-1.5 rounded-full font-bold transition-all shadow-lg shadow-primary-500/20 hover:scale-105 ml-2"
+                    class="bg-primary-500 hover:bg-primary-600 text-white px-4 py-1.5 rounded-full font-bold transition-all shadow-lg shadow-primary-500/20 hover:scale-105 ml-2 flex items-center gap-1"
                 >
-                    {$userSubscription?.tier === "free"
-                        ? "⚡ Mejorar Plan"
-                        : "⭐ Mi Plan"}
+                    {#if $userSubscription?.tier === "free"}
+                        <BoltIcon size="sm" gradient={false} />
+                        <span>Mejorar Plan</span>
+                    {:else}
+                        <StarIcon size="sm" gradient={false} />
+                        <span>Mi Plan</span>
+                    {/if}
                 </a>
             {:else}
                 <a
@@ -104,9 +115,11 @@
             {#if $userSubscription?.profile?.isAdmin}
                 <a
                     href="/admin"
-                    class="text-slate-300 hover:text-primary-400 transition-colors font-bold flex items-center gap-1 bg-white/5 px-2 py-1 rounded"
-                    >⚙️ Admin</a
+                    class="text-slate-300 hover:text-primary-400 transition-colors font-bold flex items-center gap-2 bg-white/5 px-2 py-1.5 rounded"
                 >
+                    <SettingsIcon size="sm" gradient={false} />
+                    <span>Admin</span>
+                </a>
             {/if}
 
             {#if $userStore.isLoggedIn}
@@ -166,20 +179,24 @@
                                 href="/artist"
                                 class="px-4 py-2 text-slate-300 hover:text-white hover:bg-white/5 text-left flex items-center gap-2"
                             >
-                                👤 Mi Perfil
+                                <UserIcon size="sm" gradient={false} />
+                                <span>Mi Perfil</span>
                             </a>
                             <a
                                 href="/favorites"
                                 class="px-4 py-2 text-slate-300 hover:text-white hover:bg-white/5 text-left flex items-center gap-2"
                             >
-                                ❤️ Mis Favoritos
+                                <HeartIcon size="sm" gradient={false} />
+                                <span>Mis Favoritos</span>
                             </a>
                             {#if $userSubscription.tier === "pro" || $userSubscription.tier === "premium"}
                                 <a
                                     href="/proposals"
                                     class="px-4 py-2 text-purple-300 hover:text-purple-200 hover:bg-purple-500/10 text-left flex items-center gap-2"
                                 >
-                                    💡 Propuestas <span
+                                    <BulbIcon size="sm" gradient={true} />
+                                    <span>Propuestas</span>
+                                    <span
                                         class="text-[10px] bg-purple-500/30 px-1.5 py-0.5 rounded font-bold"
                                         >PRO</span
                                     >
@@ -188,7 +205,9 @@
                                     href="/artist/submit"
                                     class="px-4 py-2 text-blue-300 hover:text-blue-200 hover:bg-blue-500/10 text-left flex items-center gap-2"
                                 >
-                                    🎵 Enviar Música <span
+                                    <SendIcon size="sm" gradient={false} />
+                                    <span>Enviar Música</span>
+                                    <span
                                         class="text-[10px] bg-blue-500/30 px-1.5 py-0.5 rounded font-bold"
                                         >PRO</span
                                     >
@@ -304,9 +323,13 @@
                             on:click={() => (mobileMenuOpen = false)}
                             class="py-3 px-4 bg-primary-500/10 hover:bg-primary-500 text-primary-500 hover:text-white rounded-lg transition-colors font-bold flex items-center gap-2 mt-2"
                         >
-                            {$userSubscription?.tier === "free"
-                                ? "⚡ Mejorar Plan"
-                                : "⭐ Mi Plan"}
+                            {#if $userSubscription?.tier === "free"}
+                                <BoltIcon size="sm" gradient={false} />
+                                <span>Mejorar Plan</span>
+                            {:else}
+                                <StarIcon size="sm" gradient={false} />
+                                <span>Mi Plan</span>
+                            {/if}
                         </a>
                     {/if}
 
@@ -330,9 +353,10 @@
                         <a
                             href="/admin"
                             on:click={() => (mobileMenuOpen = false)}
-                            class="py-3 px-4 hover:bg-white/5 rounded-lg transition-colors text-orange-400 font-bold"
+                            class="py-3 px-4 hover:bg-white/5 rounded-lg transition-colors text-orange-400 font-bold flex items-center gap-2"
                         >
-                            ⚙️ Admin
+                            <SettingsIcon size="sm" gradient={false} />
+                            <span>Admin</span>
                         </a>
                     {/if}
 
@@ -366,7 +390,8 @@
                                 class="flex items-center gap-3 mb-3 text-sm font-bold text-slate-300 hover:text-white px-1"
                                 on:click={() => (mobileMenuOpen = false)}
                             >
-                                ❤️ Mis Favoritos
+                                <HeartIcon size="sm" gradient={false} />
+                                <span>Mis Favoritos</span>
                             </a>
                             {#if $userSubscription.tier === "pro" || $userSubscription.tier === "premium"}
                                 <a
@@ -374,7 +399,9 @@
                                     class="flex items-center gap-3 mb-3 text-sm font-bold text-purple-300 hover:text-purple-200 px-1"
                                     on:click={() => (mobileMenuOpen = false)}
                                 >
-                                    💡 Propuestas <span
+                                    <BulbIcon size="sm" gradient={true} />
+                                    <span>Propuestas</span>
+                                    <span
                                         class="text-[10px] bg-purple-500/30 px-1.5 py-0.5 rounded font-bold ml-auto"
                                         >PRO</span
                                     >
@@ -384,7 +411,9 @@
                                     class="flex items-center gap-3 mb-3 text-sm font-bold text-blue-300 hover:text-blue-200 px-1"
                                     on:click={() => (mobileMenuOpen = false)}
                                 >
-                                    🎵 Enviar Música <span
+                                    <SendIcon size="sm" gradient={false} />
+                                    <span>Enviar Música</span>
+                                    <span
                                         class="text-[10px] bg-blue-500/30 px-1.5 py-0.5 rounded font-bold ml-auto"
                                         >PRO</span
                                     >

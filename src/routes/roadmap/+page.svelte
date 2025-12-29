@@ -109,12 +109,11 @@
         return "📦 Próximamente";
     }
 
-    function getCategoryIcon(category: RoadmapItem["category"]) {
-        if (category === "music") return "🎵";
-        if (category === "visual") return "🎨";
-        if (category === "tech") return "⚡";
-        return "👥";
-    }
+    import MusicIcon from "$lib/components/icons/MusicIcon.svelte";
+    import ArtIcon from "$lib/components/icons/ArtIcon.svelte";
+    import BoltIcon from "$lib/components/icons/BoltIcon.svelte";
+    import UsersIcon from "$lib/components/icons/UsersIcon.svelte";
+    import BulbIcon from "$lib/components/icons/BulbIcon.svelte";
 </script>
 
 <svelte:head>
@@ -171,10 +170,18 @@
                                 class="flex flex-wrap items-start justify-between gap-4 mb-3"
                             >
                                 <div class="flex items-center gap-3">
-                                    <span class="text-2xl"
-                                        >{getCategoryIcon(item.category)}</span
+                                    {#if item.category === "music"}
+                                        <MusicIcon size="lg" gradient={true} />
+                                    {:else if item.category === "visual"}
+                                        <ArtIcon size="lg" gradient={true} />
+                                    {:else if item.category === "tech"}
+                                        <BoltIcon size="lg" gradient={true} />
+                                    {:else}
+                                        <UsersIcon size="lg" gradient={true} />
+                                    {/if}
+                                    <h3
+                                        class="text-xl font-bold text-slate-100"
                                     >
-                                    <h3 class="text-xl font-bold text-slate-100">
                                         {item.title}
                                     </h3>
                                 </div>
@@ -220,7 +227,9 @@
             class="mt-16 p-6 bg-primary-500/10 border border-primary-500/20 rounded-2xl"
         >
             <div class="flex items-start gap-4">
-                <span class="text-2xl">💡</span>
+                <div class="mt-1">
+                    <BulbIcon size="lg" gradient={true} />
+                </div>
                 <div>
                     <h4 class="font-bold text-white mb-2">¿Tienes ideas?</h4>
                     <p class="text-sm text-slate-300 leading-relaxed">
