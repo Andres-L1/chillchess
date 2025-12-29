@@ -51,7 +51,7 @@
 
             const data = snapshot.data() as RoomData;
             room = data;
-            isHost = data.hostId === $userStore.user.uid;
+            isHost = data.hostId === $userStore.user?.uid;
 
             // Update participants list
             participantsList = Object.entries(data.participants).map(
@@ -69,10 +69,12 @@
                         $audioStore.currentTrackIndex
                 ) {
                     // Sync track
-                    playAlbum(
-                        data.currentTrack.albumId,
-                        data.currentTrack.trackIndex,
-                    );
+                    playAlbum(data.currentTrack.albumId);
+                    // Manually set track index
+                    audioStore.update((s) => ({
+                        ...s,
+                        currentTrackIndex: data.currentTrack!.trackIndex,
+                    }));
                 }
 
                 // Sync play/pause
@@ -90,15 +92,17 @@
         });
 
         // Add self to participants if not already
-        try {
-            await updateDoc(roomRef, {
-                [`participants.${$userStore.user.uid}`]: {
-                    displayName: $userStore.user.displayName || "Usuario",
-                    joinedAt: serverTimestamp(),
-                },
-            });
-        } catch (err) {
-            console.error("Error joining room:", err);
+        if ($userStore.user) {
+            try {
+                await updateDoc(roomRef, {
+                    [`participants.${$userStore.user.uid}`]: {
+                        displayName: $userStore.user.displayName || "Usuario",
+                        joinedAt: serverTimestamp(),
+                    },
+                });
+            } catch (err) {
+                console.error("Error joining room:", err);
+            }
         }
 
         // If host, sync local state to Firestore
@@ -134,7 +138,7 @@
         if (unsubscribe) unsubscribe();
 
         // Remove self from participants
-        if ($userStore.isLoggedIn) {
+        if ($userStore.isLoggedIn && $userStore.user) {
             try {
                 const { doc, updateDoc, deleteField } = await import(
                     "firebase/firestore"
@@ -225,54 +229,56 @@
                             </h2>
 
                             {#if room.currentTrack}
-                                <div class="text-center">
+                                {#if room.currentTrack}
                                     {@const currentAlbum =
                                         $audioStore.availableAlbums.find(
                                             (a) =>
                                                 a.id ===
-                                                room.currentTrack.albumId,
+                                                room.currentTrack?.albumId,
                                         )}
                                     {@const currentTrack =
-                                        currentAlbum?.tracks[
-                                            room.currentTrack.trackIndex
+                                        currentAlbum?.tracks?.[
+                                            room.currentTrack?.trackIndex ?? 0
                                         ]}
 
-                                    {#if currentAlbum && currentTrack}
-                                        <img
-                                            src={currentAlbum.cover}
-                                            alt={currentAlbum.title}
-                                            class="w-64 h-64 mx-auto rounded-2xl shadow-2xl mb-6"
-                                        />
-                                        <h3 class="text-2xl font-bold mb-2">
-                                            {currentTrack.title}
-                                        </h3>
-                                        <p class="text-slate-400 mb-4">
-                                            {currentTrack.artist ||
-                                                currentAlbum.artist}
-                                        </p>
-                                        <div
-                                            class="flex items-center justify-center gap-2"
-                                        >
-                                            {#if room.currentTrack.isPlaying}
-                                                <div
-                                                    class="w-3 h-3 bg-green-400 rounded-full animate-pulse"
-                                                ></div>
-                                                <span
-                                                    class="text-green-400 text-sm font-bold"
-                                                    >Reproduciendo</span
-                                                >
-                                            {:else}
-                                                <div
-                                                    class="w-3 h-3 bg-slate-500 rounded-full"
-                                                ></div>
-                                                <span
-                                                    class="text-slate-500 text-sm font-bold"
-                                                    >Pausado</span
-                                                >
-                                            {/if}
-                                        </div>
-                                    {/if}
-                                </div>
+                                    <div class="text-center">
+                                        {#if currentAlbum && currentTrack}
+                                            <img
+                                                src={currentAlbum.cover}
+                                                alt={currentAlbum.title}
+                                                class="w-64 h-64 mx-auto rounded-2xl shadow-2xl mb-6"
+                                            />
+                                            <h3 class="text-2xl font-bold mb-2">
+                                                {currentTrack.title}
+                                            </h3>
+                                            <p class="text-slate-400 mb-4">
+                                                {currentTrack.artist ||
+                                                    currentAlbum.artist}
+                                            </p>
+                                            <div
+                                                class="flex items-center justify-center gap-2"
+                                            >
+                                                {#if room.currentTrack.isPlaying}
+                                                    <div
+                                                        class="w-3 h-3 bg-green-400 rounded-full animate-pulse"
+                                                    ></div>
+                                                    <span
+                                                        class="text-green-400 text-sm font-bold"
+                                                        >Reproduciendo</span
+                                                    >
+                                                {:else}
+                                                    <div
+                                                        class="w-3 h-3 bg-slate-500 rounded-full"
+                                                    ></div>
+                                                    <span
+                                                        class="text-slate-500 text-sm font-bold"
+                                                        >Pausado</span
+                                                    >
+                                                {/if}
+                                            </div>
+                                        {/if}
+                                    </div>
+                                {/if}
                             {:else}
                                 <div class="text-center py-12 text-slate-500">
                                     {#if isHost}
@@ -338,7 +344,7 @@
                                                 </p>
                                             {/if}
                                         </div>
-                                        {#if participant.uid === $userStore.user.uid}
+                                        {#if participant.uid === $userStore.user?.uid}
                                             <span class="text-xs text-slate-500"
                                                 >(Tú)</span
                                             >

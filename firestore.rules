@@ -78,6 +78,38 @@ service cloud.firestore {
     }
     
     // ============================================
+    // LISTENING ROOMS - Real-time shared listening
+    // ============================================
+    match /listeningRooms/{roomId} {
+      // Allow anyone authenticated to read public rooms
+      allow read: if request.auth != null && resource.data.isPublic == true;
+      
+      // Allow participants to read their room (public or private)
+      allow read: if request.auth != null && 
+                     request.auth.uid in resource.data.participants;
+      
+      // Allow authenticated users to create rooms
+      allow create: if request.auth != null &&
+                       request.resource.data.hostId == request.auth.uid;
+      
+      // Allow host to update the room
+      // OR participants to update their own participant data
+      allow update: if request.auth != null && (
+        resource.data.hostId == request.auth.uid ||
+        (
+          // Only allow updating own participant entry
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['participants']) &&
+          request.resource.data.participants[request.auth.uid] != null
+        )
+      );
+      
+      // Allow host to delete the room
+      allow delete: if request.auth != null &&
+                       resource.data.hostId == request.auth.uid;
+    }
+    
+    // ============================================
     // DEFAULT DENY - Seguridad por defecto
     // ============================================
     match /{document=**} {
