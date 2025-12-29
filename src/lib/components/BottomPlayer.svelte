@@ -36,51 +36,55 @@
                 currentTrack?.id && toggleFavorite(currentTrack.id)}
         />
     {:else}
-        <!-- FULL BAR -->
+        <!-- FLOATING DOCK PLAYER -->
         <div
-            transition:slide={{ duration: 300, axis: "y" }}
-            class="fixed bottom-0 left-0 w-full bg-[#121212]/95 backdrop-blur-xl border-t border-white/10 z-[50] text-white px-4 py-3 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]"
+            transition:slide={{ duration: 400, axis: "y" }}
+            class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[98%] md:w-auto md:min-w-[700px] max-w-5xl z-[50]"
         >
-            <!-- Minimize Button -->
-            <button
-                on:click={() => (isCollapsed = true)}
-                class="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-4 bg-[#121212]/95 border-t border-l border-r border-white/10 rounded-t-lg flex items-center justify-center text-white/30 hover:text-white hover:h-6 transition-all group"
-                title="Minimizar reproductor"
-            >
-                <div class="w-8 h-1 bg-current rounded-full"></div>
-            </button>
-
             <div
-                class="flex items-center justify-between gap-4 max-w-[1920px] mx-auto relative"
+                class="bg-[#0F172A]/80 backdrop-blur-2xl border border-white/10 rounded-full p-2 pl-3 pr-6 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex items-center justify-between gap-4 md:gap-12 relative overflow-hidden group"
             >
+                <!-- Shine Effect -->
+                <div
+                    class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[2s] pointer-events-none"
+                ></div>
+
+                <!-- Minimize Button (Hover Area on Top) -->
+                <button
+                    on:click={() => (isCollapsed = true)}
+                    class="absolute top-0 right-12 md:left-1/2 md:-translate-x-1/2 w-20 h-4 flex items-start justify-center text-white/20 hover:text-white/80 transition-colors z-20 cursor-s-resize"
+                    title="Minimizar"
+                >
+                    <div class="w-8 h-1 bg-current rounded-full mt-1.5"></div>
+                </button>
+
                 <!-- Left: Track Info & Favorite -->
-                <TrackInfo
-                    {currentTrack}
-                    isFavorite={isTrackFavorite}
-                    onFavoriteClick={() =>
-                        currentTrack?.id && toggleFavorite(currentTrack.id)}
-                    onShowTracks={() => dispatch("showTracks")}
-                />
+                <div class="flex-shrink-0">
+                    <TrackInfo
+                        {currentTrack}
+                        isFavorite={isTrackFavorite}
+                        onFavoriteClick={() =>
+                            currentTrack?.id && toggleFavorite(currentTrack.id)}
+                        onShowTracks={() => dispatch("showTracks")}
+                    />
+                </div>
 
                 <!-- Center: Controls & Progress -->
                 <div
-                    class="flex flex-col items-center justify-center flex-1 w-full max-w-xl"
+                    class="flex-1 flex flex-col justify-center max-w-md w-full"
                 >
-                    <PlaybackControls />
-                    <ProgressBar />
+                    <div class="flex items-center justify-center -mb-1">
+                        <PlaybackControls />
+                    </div>
+                    <div class="w-full px-2">
+                        <ProgressBar />
+                    </div>
                 </div>
 
                 <!-- Right: Volume Control -->
-                <VolumeControl bind:showVolumeSlider>
-                    <svelte:fragment slot="minimize-button">
-                        <button
-                            on:click={() => (isCollapsed = true)}
-                            class="md:hidden text-white/50 hover:text-white"
-                        >
-                            ⬇
-                        </button>
-                    </svelte:fragment>
-                </VolumeControl>
+                <div class="flex-shrink-0 hidden md:block">
+                    <VolumeControl bind:showVolumeSlider />
+                </div>
             </div>
         </div>
     {/if}
