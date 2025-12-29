@@ -27,6 +27,12 @@
     let isHost = false;
     let unsubscribe: (() => void) | null = null;
     let participantsList: { uid: string; name: string }[] = [];
+    let showMusicSelector = false; // NEW
+
+    function selectAlbum(albumId: string) {
+        playAlbum(albumId);
+        showMusicSelector = false;
+    }
 
     onMount(async () => {
         if (!$userStore.isLoggedIn) {
@@ -279,18 +285,53 @@
                                         {/if}
                                     </div>
                                 {/if}
+                            {:else if isHost}
+                                <div class="text-center py-8">
+                                    <p class="text-slate-400 mb-6">
+                                        Selecciona un álbum para empezar a
+                                        escuchar juntos
+                                    </p>
+
+                                    <!-- Albums Grid -->
+                                    <div
+                                        class="grid grid-cols-2 md:grid-cols-3 gap-4 max-h-96 overflow-y-auto px-4"
+                                    >
+                                        {#each $audioStore.availableAlbums as album}
+                                            <button
+                                                on:click={() =>
+                                                    selectAlbum(album.id)}
+                                                class="group relative rounded-xl overflow-hidden hover:scale-105 transition-transform"
+                                            >
+                                                <img
+                                                    src={album.cover}
+                                                    alt={album.title}
+                                                    class="w-full aspect-square object-cover"
+                                                />
+                                                <div
+                                                    class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                                                >
+                                                    <div
+                                                        class="text-center p-2"
+                                                    >
+                                                        <p
+                                                            class="text-sm font-bold text-white"
+                                                        >
+                                                            {album.title}
+                                                        </p>
+                                                        <p
+                                                            class="text-xs text-slate-300"
+                                                        >
+                                                            {album.artist}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        {/each}
+                                    </div>
+                                </div>
                             {:else}
                                 <div class="text-center py-12 text-slate-500">
-                                    {#if isHost}
-                                        <p>
-                                            Ve a /app y reproduce algo para
-                                            compartir con la sala.
-                                        </p>
-                                    {:else}
-                                        <p>
-                                            El host aún no ha reproducido nada.
-                                        </p>
-                                    {/if}
+                                    <p>El host aún no ha reproducido nada.</p>
                                 </div>
                             {/if}
 
