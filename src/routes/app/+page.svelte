@@ -743,7 +743,7 @@
                     {:else if vibeTab === "clock"}
                         <div class="space-y-6">
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {#each [{ id: "modern", label: "Moderno", font: "font-poppins", desc: "Limpio y minimalista", pro: false }, { id: "neon", label: "Neon Cyber", font: "font-mono text-primary-400 shadow-glow", desc: "Estilo hacker brillante", pro: true }, { id: "retro", label: "Pixel Retro", font: "font-mono", desc: "Estilo 8-bit clásico", pro: true }, { id: "elegant", label: "Editorial", font: "font-serif italic", desc: "Sofisticado y clásico", pro: true }] as style}
+                                {#each [{ id: "modern", label: "Moderno", font: "font-poppins", desc: "Limpio y minimalista", pro: false }, { id: "neon", label: "Neon Cyber", font: "font-mono text-primary-400 shadow-glow", desc: "Estilo hacker brillante", pro: true }, { id: "retro", label: "Pixel Retro", font: "font-mono", desc: "Estilo 8-bit clásico", pro: true }, { id: "elegant", label: "Editorial", font: "font-serif italic", desc: "Sofisticado y clásico", pro: true }, { id: "analog", label: "Analógico", font: "text-2xl", desc: "Clásico y atemporal", pro: true }] as style}
                                     {@const isLocked =
                                         style.pro &&
                                         $userSubscription.tier !== "pro"}
@@ -768,16 +768,51 @@
                                         <div
                                             class="h-16 flex items-center justify-center bg-black/20 rounded-lg text-2xl text-white"
                                         >
-                                            <span
-                                                class="{style.font} {style.id ===
-                                                'neon'
-                                                    ? 'drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]'
-                                                    : ''} {style.id === 'retro'
-                                                    ? 'font-bold'
-                                                    : ''}"
-                                            >
-                                                12:45
-                                            </span>
+                                            {#if style.id === "analog"}
+                                                <svg
+                                                    viewBox="0 0 100 100"
+                                                    class="w-10 h-10 text-white opacity-80"
+                                                >
+                                                    <circle
+                                                        cx="50"
+                                                        cy="50"
+                                                        r="45"
+                                                        stroke="currentColor"
+                                                        stroke-width="4"
+                                                        fill="none"
+                                                    />
+                                                    <line
+                                                        x1="50"
+                                                        y1="50"
+                                                        x2="50"
+                                                        y2="25"
+                                                        stroke="currentColor"
+                                                        stroke-width="4"
+                                                        stroke-linecap="round"
+                                                    />
+                                                    <line
+                                                        x1="50"
+                                                        y1="50"
+                                                        x2="70"
+                                                        y2="50"
+                                                        stroke="currentColor"
+                                                        stroke-width="3"
+                                                        stroke-linecap="round"
+                                                    />
+                                                </svg>
+                                            {:else}
+                                                <span
+                                                    class="{style.font} {style.id ===
+                                                    'neon'
+                                                        ? 'drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]'
+                                                        : ''} {style.id ===
+                                                    'retro'
+                                                        ? 'font-bold'
+                                                        : ''}"
+                                                >
+                                                    12:45
+                                                </span>
+                                            {/if}
                                         </div>
 
                                         <div
