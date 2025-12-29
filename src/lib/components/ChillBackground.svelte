@@ -57,13 +57,18 @@
 
             <!-- Moon (Reactive) -->
             <div
-                class="absolute top-20 right-24 w-24 h-24 md:w-32 md:h-32 transition-transform duration-75 origin-center"
+                class="absolute top-20 right-24 w-24 h-24 md:w-32 md:h-32 transition-transform duration-75 origin-center will-change-transform"
                 style="transform: scale({pulseScale})"
             >
+                <!-- Static Glow Container -->
                 <div
-                    class="w-full h-full rounded-full bg-gradient-to-br from-yellow-100 to-orange-200 shadow-[0_0_60px_rgba(255,220,120,0.4)] animate-float"
-                    style="box-shadow: 0 0 {60 +
-                        bass * 40}px rgba(255,220,120, {0.4 + bass * 0.3})"
+                    class="absolute inset-0 rounded-full bg-yellow-100 opacity-20 blur-xl md:blur-2xl transition-opacity duration-75"
+                    style="opacity: {0.3 + bass * 0.4}"
+                ></div>
+
+                <!-- Moon Body -->
+                <div
+                    class="w-full h-full rounded-full bg-gradient-to-br from-yellow-100 to-orange-200 shadow-[0_0_60px_rgba(255,220,120,0.3)] animate-float"
                 ></div>
             </div>
 
@@ -97,11 +102,11 @@
                             class="w-20 h-14 bg-gradient-to-b from-[#e8d4a8] to-[#d4a574] rounded-b-full relative"
                         >
                             <div
-                                class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-yellow-200/10 rounded-full blur-2xl transition-all duration-75"
-                                style="opacity: {0.3 +
+                                class="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-40 bg-yellow-200/10 rounded-full blur-3xl transition-opacity duration-75 will-change-transform"
+                                style="opacity: {0.4 +
                                     bass *
-                                        0.5}; transform: translate(-50%, 0) scale({1 +
-                                    bass});"
+                                        0.6}; transform: translate(-50%, -20%) scale({1 +
+                                    bass * 0.5});"
                             ></div>
                         </div>
                     </div>
@@ -118,8 +123,8 @@
         >
             <!-- Reactive Lightning Flash (Subtle) -->
             <div
-                class="absolute inset-0 bg-blue-500/10 mix-blend-overlay transition-opacity duration-50 pointer-events-none"
-                style="opacity: {bass > 0.6 ? bass * 0.8 : 0}"
+                class="absolute inset-0 bg-blue-500/10 mix-blend-overlay transition-opacity duration-100 pointer-events-none"
+                style="opacity: {bass > 0.7 ? bass * 0.5 : 0}"
             ></div>
 
             <!-- Heavy Rain CSS -->
@@ -180,14 +185,25 @@
         >
             <!-- Sun (Reactive) -->
             <div
-                class="absolute top-1/4 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full bg-gradient-to-b from-yellow-400 to-pink-600 blur-2xl opacity-80 transition-transform duration-75 will-change-transform"
-                style="transform: translate(-50%, 0) scale({intenseScale}); box-shadow: 0 0 {100 *
-                    intenseScale}px rgba(236,72,153, {0.5 * intenseScale})"
-            ></div>
+                class="absolute top-1/4 left-1/2 -translate-x-1/2 w-64 h-64 transition-transform duration-75 will-change-transform"
+                style="transform: translate(-50%, 0) scale({intenseScale});"
+            >
+                <!-- Glow Layer (Static Shadow, Dynamic Opacity) -->
+                <div
+                    class="absolute inset-0 rounded-full bg-pink-500 blur-3xl opacity-50 transition-opacity"
+                    style="opacity: {0.4 + bass * 0.4}"
+                ></div>
+
+                <!-- Sun Core -->
+                <div
+                    class="absolute inset-0 rounded-full bg-gradient-to-b from-yellow-400 to-pink-600 shadow-[0_0_50px_rgba(236,72,153,0.5)]"
+                ></div>
+            </div>
+
             <!-- Grid Floor -->
             <div
                 class="absolute bottom-0 w-[200%] -left-[50%] h-[50vh] bg-grid perspective-grid animate-grid-move"
-                style="filter: brightness({1 + bass})"
+                style="opacity: {0.6 + bass * 0.4}"
             ></div>
             <div
                 class="absolute inset-0 bg-gradient-to-t from-[#050510] via-transparent to-transparent"
