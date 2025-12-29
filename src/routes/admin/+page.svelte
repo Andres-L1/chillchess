@@ -6,6 +6,7 @@
     import { goto } from "$app/navigation";
     import SubmissionsTab from "$lib/components/admin/SubmissionsTab.svelte";
     import ArtistsTab from "$lib/components/admin/ArtistsTab.svelte";
+    import VerifyTab from "$lib/components/admin/VerifyTab.svelte";
     import DashboardIcon from "$lib/components/icons/DashboardIcon.svelte";
     import MusicIcon from "$lib/components/icons/MusicIcon.svelte";
     import UsersIcon from "$lib/components/icons/UsersIcon.svelte";
@@ -58,6 +59,7 @@
         | "artists"
         | "proposals"
         | "submissions"
+        | "verify"
         | "logs" = "dashboard";
     let syncingMusic = false;
 
@@ -1790,6 +1792,11 @@
                             {/each}
                         </div>
                     </div>
+                {/if}
+
+                <!-- TAB: VERIFY -->
+                {#if activeTab === "verify"}
+                    <VerifyTab />
                 {/if}
 
                 <!-- TAB: LOGS -->
