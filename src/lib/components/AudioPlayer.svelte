@@ -24,11 +24,25 @@
     }
 
     // --- MEDIA SESSION API INTEGRATION (Background Play & Metadata) ---
+
+    // Update Playback State (Playing/Paused) for System UI
+    $: if (typeof navigator !== "undefined" && "mediaSession" in navigator) {
+        navigator.mediaSession.playbackState = $audioStore.isPlaying
+            ? "playing"
+            : "paused";
+    }
+
     $: updateMediaSession(
         $audioStore.currentTrackIndex,
         $audioStore.currentAlbumId,
         $audioStore.playlist,
     );
+
+    function getAbsoluteUrl(path: string) {
+        if (!path) return "";
+        if (path.startsWith("http")) return path;
+        return window.location.origin + path;
+    }
 
     function updateMediaSession(
         index: number,
@@ -44,24 +58,20 @@
         }
 
         const currentTrack = playlist[index];
-        // Encontrar info del álbum para la carátula
         const currentAlbum = $audioStore.availableAlbums.find(
             (a) => a.id === albumId,
         );
 
         if (currentTrack && currentAlbum) {
+            const artUrl = getAbsoluteUrl(currentAlbum.cover);
+
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: currentTrack.title,
                 artist: currentTrack.artist || currentAlbum.artist,
                 album: currentAlbum.title,
                 artwork: [
                     {
-                        src: currentAlbum.cover,
-                        sizes: "512x512",
-                        type: "image/png",
-                    },
-                    {
-                        src: currentAlbum.cover,
+                        src: artUrl,
                         sizes: "512x512",
                         type: "image/jpeg",
                     },
@@ -69,21 +79,34 @@
             });
 
             // Set Action Handlers
-            navigator.mediaSession.setActionHandler("play", () => {
-                if (!$audioStore.isPlaying) togglePlayback();
-            });
-            navigator.mediaSession.setActionHandler("pause", () => {
-                if ($audioStore.isPlaying) togglePlayback();
-            });
-            navigator.mediaSession.setActionHandler("previoustrack", () =>
-                prevTrack(),
-            );
-            navigator.mediaSession.setActionHandler("nexttrack", () =>
-                nextTrack(),
-            );
-            navigator.mediaSession.setActionHandler("stop", () => {
-                if ($audioStore.isPlaying) togglePlayback();
-            });
+            try {
+                navigator.mediaSession.setActionHandler("play", () =>
+                    togglePlayback(),
+                );
+                navigator.mediaSession.setActionHandler("pause", () =>
+                    togglePlayback(),
+                );
+                navigator.mediaSession.setActionHandler("previoustrack", () =>
+                    prevTrack(),
+                );
+                navigator.mediaSession.setActionHandler("nexttrack", () =>
+                    nextTrack(),
+                );
+                navigator.mediaSession.setActionHandler("seekto", (details) => {
+                    // Support system scrubber
+                    if (
+                        details.seekTime !== undefined &&
+                        details.fastSeek === false
+                    ) {
+                        audioStore.update((s) => ({
+                            ...s,
+                            seekRequest: details.seekTime ?? null,
+                        }));
+                    }
+                });
+            } catch (e) {
+                console.warn("Media Session Action Handler error:", e);
+            }
         }
     }
 

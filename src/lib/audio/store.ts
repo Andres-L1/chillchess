@@ -65,37 +65,64 @@ export const audioStore = writable<AudioState>(initialState);
 // --- Initialization ---
 
 export async function initAudioLibrary() {
+    // 1. FAST LOAD: Try to load from LocalStorage first
+    if (typeof localStorage !== 'undefined') {
+        const cached = localStorage.getItem('chillchess_albums_cache');
+        if (cached) {
+            try {
+                const parsed = JSON.parse(cached);
+                console.log("[AudioLibrary] Loaded from cache (Instant).");
+                audioStore.update(s => ({
+                    ...s,
+                    availableAlbums: parsed,
+                    isLoadingLibrary: false
+                }));
+            } catch (e) {
+                console.warn("Invalid cache", e);
+            }
+        }
+    }
+
+    // 2. BACKGROUND SYNC: Fetch from Firestore (Stale-while-revalidate)
     try {
-        // Try to fetch from Firestore
         const q = query(collection(db, 'albums'));
         const snapshot = await getDocs(q);
 
         if (!snapshot.empty) {
             const fetchedAlbums = snapshot.docs.map(doc => {
                 const data = doc.data() as Album;
-                // Ensure ID reflects doc ID if missing (though they should match)
                 return { ...data, id: doc.id };
             });
 
-            console.log(`[AudioLibrary] Loaded ${fetchedAlbums.length} albums from Firestore.`);
+            console.log(`[AudioLibrary] Synced ${fetchedAlbums.length} albums from Cloud.`);
+
+            // Update Store
             audioStore.update(s => ({
                 ...s,
                 availableAlbums: fetchedAlbums,
                 isLoadingLibrary: false
             }));
+
+            // Save to Cache for next time
+            if (typeof localStorage !== 'undefined') {
+                localStorage.setItem('chillchess_albums_cache', JSON.stringify(fetchedAlbums));
+            }
             return;
         }
     } catch (e) {
-        console.error("[AudioLibrary] Connection error, using offline fallback:", e);
+        console.warn("[AudioLibrary] Connection error, keeping cached or static version:", e);
     }
 
-    // Fallback to static data
-    console.log("[AudioLibrary] Using static fallback.");
-    audioStore.update(s => ({
-        ...s,
-        availableAlbums: ALBUMS,
-        isLoadingLibrary: false
-    }));
+    // 3. FALLBACK: Only if Cache AND Network fail, use static
+    audioStore.update(s => {
+        if (s.availableAlbums.length > 0) return s; // Keep cache if we have it
+        console.log("[AudioLibrary] Using static fallback.");
+        return {
+            ...s,
+            availableAlbums: ALBUMS,
+            isLoadingLibrary: false
+        };
+    });
 }
 
 
@@ -146,7 +173,7 @@ export function playAlbum(albumId: string) {
 
         return {
             ...s,
-            playlist: album.tracks,
+            playlist: album.tracks || [],
             currentTrackIndex: 0,
             currentAlbumId: albumId,
             isPlaying: true,
@@ -200,7 +227,7 @@ export function setVibe(vibe: VibePreset) {
             // Since we are inside update(), we return the new state directly
             return {
                 ...s,
-                playlist: album.tracks,
+                playlist: album.tracks || [],
                 currentTrackIndex: 0,
                 currentAlbumId: album.id,
                 isPlaying: true,
