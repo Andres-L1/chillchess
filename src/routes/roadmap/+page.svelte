@@ -67,13 +67,13 @@
             category: "tech",
         },
 
-        // En desarrollo (próximo mes)
+        // En desarrollo (Hitos hacia la perfección)
         {
-            title: "Lanzamiento v1.0 Estable",
+            title: "Lanzamiento v1.0 (Gold)",
             description:
-                "Primera versión estable con todas las funciones core probadas y pulidas.",
-            status: "in-progress",
-            date: "Enero 2026",
+                "El hito final de estabilidad. Solo ocurrirá cuando tengamos 0 bugs críticos, múltiples artistas verificados y una experiencia 100% pulida sin fallos ni aristas.",
+            status: "planned",
+            date: "2026",
             category: "tech",
         },
         {

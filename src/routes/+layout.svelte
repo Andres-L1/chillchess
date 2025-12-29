@@ -15,6 +15,7 @@
     import AudioPlayer from "$lib/components/AudioPlayer.svelte";
     import BottomPlayer from "$lib/components/BottomPlayer.svelte";
     import MusicToast from "$lib/components/MusicToast.svelte";
+    import CookieConsent from "$lib/components/CookieConsent.svelte";
 
     storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 
@@ -48,6 +49,7 @@
     <AudioPlayer />
     <BottomPlayer />
     <MusicToast />
+    <CookieConsent />
 </div>
 
 <style>
