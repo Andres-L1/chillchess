@@ -1,14 +1,40 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
+    import { onMount, onDestroy } from "svelte";
     import type { ArtistProfile } from "$lib/types/artist";
     import VerifiedBadge from "$lib/components/VerifiedBadge.svelte";
     import MusicIcon from "$lib/components/icons/MusicIcon.svelte";
     import AlbumIcon from "$lib/components/icons/AlbumIcon.svelte";
     import { ALBUMS } from "$lib/data/albums";
+    import { db } from "$lib/firebase";
+    import { collection, query, where, onSnapshot } from "firebase/firestore";
 
     export let data: { verifiedArtists: ArtistProfile[] };
 
-    $: verifiedArtists = data.verifiedArtists || [];
+    // Use reactive variable for real-time updates
+    let verifiedArtists = data.verifiedArtists || [];
+    let unsubscribe: (() => void) | null = null;
+
+    // Set up real-time listener for verified artists
+    onMount(() => {
+        const artistsRef = collection(db, "artists");
+        const q = query(artistsRef, where("isVerified", "==", true));
+
+        unsubscribe = onSnapshot(q, (querySnapshot) => {
+            verifiedArtists = [];
+            querySnapshot.forEach((doc) => {
+                verifiedArtists.push({ ...doc.data() } as ArtistProfile);
+            });
+            // Force reactivity
+            verifiedArtists = verifiedArtists;
+        });
+    });
+
+    onDestroy(() => {
+        if (unsubscribe) {
+            unsubscribe();
+        }
+    });
 
     // Get albums for each verified artist
     function getArtistAlbums(artistName: string) {

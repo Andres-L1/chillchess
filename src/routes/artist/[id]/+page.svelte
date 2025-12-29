@@ -1,15 +1,38 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
+    import { onMount, onDestroy } from "svelte";
     import type { ArtistProfile } from "$lib/types/artist";
     import VerifiedBadge from "$lib/components/VerifiedBadge.svelte";
     import MusicIcon from "$lib/components/icons/MusicIcon.svelte";
     import { ALBUMS } from "$lib/data/albums";
     import { playAlbum, audioStore } from "$lib/audio/store";
     import { SOCIAL_PLATFORMS } from "$lib/types/artist";
+    import { db } from "$lib/firebase";
+    import { doc, onSnapshot } from "firebase/firestore";
 
     export let data: { artistProfile: ArtistProfile };
 
-    $: artist = data.artistProfile;
+    // Use reactive variable for real-time updates
+    let artist = data.artistProfile;
+    let unsubscribe: (() => void) | null = null;
+
+    // Set up real-time listener
+    onMount(() => {
+        const artistRef = doc(db, "artists", artist.userId);
+
+        unsubscribe = onSnapshot(artistRef, (docSnap) => {
+            if (docSnap.exists()) {
+                artist = docSnap.data() as ArtistProfile;
+            }
+        });
+    });
+
+    onDestroy(() => {
+        if (unsubscribe) {
+            unsubscribe();
+        }
+    });
+
     $: artistAlbums = ALBUMS.filter(
         (album) => album.artist === artist.artistName,
     );
