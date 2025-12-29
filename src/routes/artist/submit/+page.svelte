@@ -92,6 +92,27 @@
         }
     }
 
+    function handleMultiTrackSelect(e: Event) {
+        const input = e.target as HTMLInputElement;
+        if (input.files && input.files.length > 0) {
+            const newTracks = Array.from(input.files).map((file) => ({
+                id: Math.random().toString(36),
+                title: file.name
+                    .replace(".mp3", "")
+                    .replace(/_/g, " ")
+                    .replace(/-/g, " "),
+                file: file,
+            }));
+
+            // Si hay un track vacío inicial, lo reemplazamos
+            if (tracks.length === 1 && !tracks[0].file && !tracks[0].title) {
+                tracks = newTracks;
+            } else {
+                tracks = [...tracks, ...newTracks];
+            }
+        }
+    }
+
     function canProceedToStep(step: number): boolean {
         if (step === 2) {
             // Para avanzar AL paso 2, solo necesitamos título y género
@@ -528,62 +549,90 @@
                         </button>
                     </div>
 
-                    <div class="space-y-4">
+                    <div class="space-y-4 animate-fade-in">
+                        <!-- Bulk Upload Zone -->
+                        <div
+                            class="relative border-2 border-dashed border-white/20 rounded-xl p-8 text-center hover:border-primary-500/50 hover:bg-white/5 transition-all group cursor-pointer"
+                        >
+                            <input
+                                type="file"
+                                accept=".mp3,audio/mpeg"
+                                multiple
+                                class="absolute inset-0 opacity-0 cursor-pointer z-10"
+                                on:change={handleMultiTrackSelect}
+                            />
+                            <div
+                                class="text-4xl mb-3 group-hover:scale-110 transition-transform"
+                            >
+                                📂
+                            </div>
+                            <h3 class="font-bold text-white mb-1">
+                                Arrastra tus canciones aquí
+                            </h3>
+                            <p class="text-slate-400 text-sm">
+                                o haz clic para seleccionar múltiples archivos
+                                MP3
+                            </p>
+                        </div>
+
                         {#each tracks as track, i (track.id)}
                             <div
-                                class="bg-[#0B1120] p-4 rounded-xl border border-white/5 relative group hover:border-primary-500/20 transition-all"
+                                class="bg-[#0B1120] p-4 rounded-xl border border-white/5 relative group hover:border-primary-500/20 transition-all flex items-center gap-4 animate-slide-in"
                             >
-                                <div class="grid md:grid-cols-2 gap-4">
+                                <div
+                                    class="w-8 h-8 rounded-full bg-primary-500/10 text-primary-400 flex items-center justify-center font-bold text-sm shrink-0"
+                                >
+                                    {i + 1}
+                                </div>
+
+                                <div class="flex-1 grid md:grid-cols-2 gap-4">
+                                    <!-- File Input (Hidden/Compact if file exists) -->
                                     <div>
-                                        <span
-                                            class="block text-xs font-medium mb-2 text-slate-400 flex items-center gap-2"
-                                        >
-                                            <span
-                                                class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs"
-                                                >{i + 1}</span
-                                            >
-                                            Archivo MP3
-                                        </span>
-                                        <div class="relative">
+                                        {#if !track.file}
                                             <input
                                                 type="file"
                                                 accept=".mp3,audio/mpeg"
-                                                class="block w-full text-xs text-slate-400
-                                                file:mr-4 file:py-2 file:px-4
-                                                file:rounded-lg file:border-0
-                                                file:text-xs file:font-semibold
-                                                file:bg-primary-500/10 file:text-primary-400
-                                                hover:file:bg-primary-500/20 file:cursor-pointer file:transition-all"
+                                                class="block w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20 file:cursor-pointer"
                                                 on:change={(e) =>
                                                     handleAudioSelect(e, i)}
                                             />
-                                        </div>
+                                        {:else}
+                                            <div
+                                                class="flex items-center gap-2 text-sm text-green-400 bg-green-500/10 px-3 py-2 rounded-lg border border-green-500/20"
+                                            >
+                                                <span>🎵</span>
+                                                <span
+                                                    class="truncate max-w-[150px]"
+                                                    >{track.file.name}</span
+                                                >
+                                                <button
+                                                    class="ml-auto text-slate-400 hover:text-white"
+                                                    on:click={() => {
+                                                        track.file = null;
+                                                        track.title = "";
+                                                    }}>Cambiar</button
+                                                >
+                                            </div>
+                                        {/if}
                                     </div>
 
                                     <div>
-                                        <span
-                                            class="block text-xs font-medium mb-2 text-slate-400"
-                                        >
-                                            Título
-                                        </span>
                                         <input
                                             type="text"
                                             bind:value={track.title}
-                                            placeholder="Nombre de la canción"
+                                            placeholder="Título de la canción"
                                             class="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-primary-500 focus:outline-none transition-all"
                                         />
                                     </div>
                                 </div>
 
-                                {#if tracks.length > 1}
-                                    <button
-                                        on:click={() => removeTrack(i)}
-                                        class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                                        title="Eliminar"
-                                    >
-                                        ✕
-                                    </button>
-                                {/if}
+                                <button
+                                    on:click={() => removeTrack(i)}
+                                    class="text-slate-500 hover:text-red-400 transition-colors p-2"
+                                    title="Eliminar"
+                                >
+                                    ✕
+                                </button>
                             </div>
                         {/each}
                     </div>

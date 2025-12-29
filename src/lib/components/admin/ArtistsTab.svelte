@@ -286,6 +286,8 @@
         on:click={() => (showCreateModal = false)}
         on:keydown={(e) => e.key === "Escape" && (showCreateModal = false)}
     >
+        <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
         <div
             role="dialog"
             aria-modal="true"

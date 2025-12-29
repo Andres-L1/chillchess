@@ -78,7 +78,7 @@
             const subRef = doc(db, "musicSubmissions", submission.id);
             batch.update(subRef, { status: "approved" });
 
-            const artistRef = doc(db, "artistProfiles", submission.artistId);
+            const artistRef = doc(db, "artists", submission.artistId);
             batch.update(artistRef, { isVerified: true });
 
             const newAlbumRef = doc(collection(db, "albums"));
