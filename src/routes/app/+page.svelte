@@ -177,6 +177,7 @@
     onDestroy(() => {
         stopTimer();
     });
+    $: hideUI = immersiveMode && !uiVisible;
 </script>
 
 <svelte:window
@@ -201,16 +202,12 @@
     </div>
 
     <!-- UI LAYER -->
-    <!-- UI LAYER -->
-    <div
-        class="relative z-10 w-full h-full flex flex-col overflow-hidden transition-opacity duration-700 ease-in-out {immersiveMode &&
-        !uiVisible
-            ? 'opacity-0 cursor-none'
-            : 'opacity-100'}"
-    >
+    <div class="relative z-10 w-full h-full flex flex-col overflow-hidden">
         <!-- Navbar (Fixed height) -->
         <header
-            class="p-4 md:p-6 flex justify-between items-center animate-fade-in-down shrink-0"
+            class="p-4 md:p-6 flex justify-between items-center animate-fade-in-down shrink-0 transition-opacity duration-700 ease-in-out"
+            class:opacity-0={hideUI}
+            class:pointer-events-none={hideUI}
         >
             <a
                 href="/"
@@ -395,9 +392,11 @@
                 </div>
             </div>
 
-            <!-- Controls (Flexible positioning) -->
+            <!-- Controls (Flexible positioning) - Hide in Immersive Mode -->
             <div
-                class="flex flex-col items-center gap-6 md:gap-8 animate-fade-in-up w-full max-w-md"
+                class="flex flex-col items-center gap-6 md:gap-8 animate-fade-in-up w-full max-w-md transition-opacity duration-700 ease-in-out"
+                class:opacity-0={hideUI}
+                class:pointer-events-none={hideUI}
             >
                 <!-- Main Action -->
                 <button
@@ -471,36 +470,37 @@
 
         <!-- BOTTOM: INTEGRATED PLAYER & VISUALIZER -->
         <div
-            class="w-full flex flex-col items-center justify-end pb-8 opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none hover:pointer-events-auto group/player"
-            class:opacity-100={!immersiveMode || uiVisible}
+            class="w-full flex flex-col items-center justify-end pb-8 transition-all duration-500 pointer-events-none hover:pointer-events-auto group/player"
+            class:translate-y-20={hideUI}
+            class:opacity-0={hideUI}
         >
-            <!-- Player Controls (Floating) -->
+            <!-- Player Controls (Floating - Minimal) -->
             <div
-                class="bg-black/40 backdrop-blur-xl border border-white/10 rounded-full px-6 py-3 flex items-center gap-6 shadow-2xl mb-4 pointer-events-auto transform translate-y-4 group-hover/player:translate-y-0 transition-transform"
+                class="bg-black/20 backdrop-blur-md border border-white/5 rounded-full px-4 py-2 flex items-center gap-4 shadow-xl mb-4 pointer-events-auto transform translate-y-4 group-hover/player:translate-y-0 transition-all hover:bg-black/40 hover:border-white/10 hover:scale-105"
             >
-                <!-- Track Info (Desktop) -->
-                <div class="hidden md:flex flex-col items-end mr-2 text-right">
-                    <span
-                        class="text-[10px] uppercase text-slate-400 font-bold tracking-widest leading-none mb-1"
-                        >Ahora Suena</span
+                <!-- Track Info (Desktop - Minimal) -->
+                {#if $audioStore.isPlaying}
+                    <div
+                        class="hidden md:flex flex-col items-end mr-2 text-right opacity-60"
                     >
-                    <span
-                        class="text-xs text-white font-bold truncate max-w-[150px] leading-none"
-                    >
-                        {$audioStore.playlist[$audioStore.currentTrackIndex]
-                            ?.title || "ChillChess"}
-                    </span>
-                </div>
+                        <span
+                            class="text-[9px] uppercase font-bold tracking-widest leading-none"
+                        >
+                            {$audioStore.playlist[$audioStore.currentTrackIndex]
+                                ?.title || "Musica"}
+                        </span>
+                    </div>
+                {/if}
 
                 <!-- Controls -->
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
                     <button
                         on:click|stopPropagation={prevTrack}
-                        class="text-slate-400 hover:text-white transition-colors p-1"
+                        class="text-white/50 hover:text-white transition-colors p-1.5"
                         aria-label="Anterior"
                     >
                         <svg
-                            class="w-5 h-5"
+                            class="w-4 h-4"
                             fill="currentColor"
                             viewBox="0 0 24 24"
                             ><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" /></svg
@@ -509,14 +509,14 @@
 
                     <button
                         on:click|stopPropagation={togglePlayback}
-                        class="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-lg shadow-white/10"
+                        class="w-8 h-8 bg-white/10 hover:bg-white text-white hover:text-black rounded-full flex items-center justify-center transition-all"
                         aria-label={$audioStore.isPlaying
                             ? "Pausar"
                             : "Reproducir"}
                     >
                         {#if $audioStore.isPlaying}
                             <svg
-                                class="w-5 h-5"
+                                class="w-4 h-4"
                                 fill="currentColor"
                                 viewBox="0 0 24 24"
                                 ><path
@@ -525,7 +525,7 @@
                             >
                         {:else}
                             <svg
-                                class="w-5 h-5 ml-0.5"
+                                class="w-4 h-4 ml-0.5"
                                 fill="currentColor"
                                 viewBox="0 0 24 24"
                                 ><path d="M8 5v14l11-7z" /></svg
@@ -535,7 +535,7 @@
 
                     <button
                         on:click|stopPropagation={nextTrack}
-                        class="text-slate-400 hover:text-white transition-colors p-1"
+                        class="text-white/50 hover:text-white transition-colors p-1.5"
                         aria-label="Siguiente"
                     >
                         <svg
@@ -545,6 +545,32 @@
                             ><path
                                 d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"
                             /></svg
+                        >
+                    </button>
+
+                    <!-- Divider -->
+                    <div class="w-px h-4 bg-white/10 mx-1"></div>
+
+                    <!-- Ambience Toggle (Rain Icon - Placeholder for now) -->
+                    <button
+                        on:click|stopPropagation={() => {
+                            // Future: Toggle Ambience Logic
+                            showVibeStudio = true;
+                        }}
+                        class="text-white/50 hover:text-cyan-400 transition-colors p-1.5"
+                        title="Configurar Ambiente"
+                    >
+                        <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            ><path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
+                            ></path></svg
                         >
                     </button>
                 </div>
