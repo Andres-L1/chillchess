@@ -3,6 +3,7 @@
     import type { ArtistProfile } from "$lib/types/artist";
     import VerifiedBadge from "$lib/components/VerifiedBadge.svelte";
     import MusicIcon from "$lib/components/icons/MusicIcon.svelte";
+    import AlbumIcon from "$lib/components/icons/AlbumIcon.svelte";
     import { ALBUMS } from "$lib/data/albums";
 
     export let data: { verifiedArtists: ArtistProfile[] };
@@ -140,7 +141,9 @@
             <div
                 class="text-center py-20 bg-white/5 rounded-3xl border border-white/10"
             >
-                <span class="text-6xl block mb-4">🎨</span>
+                <div class="inline-flex justify-center mb-4 text-slate-600">
+                    <MusicIcon size="xl" />
+                </div>
                 <h3 class="text-2xl font-bold mb-2">Próximamente</h3>
                 <p class="text-slate-400">
                     Los artistas verificados aparecerán aquí pronto.
@@ -194,8 +197,8 @@
 
                         <!-- Stats -->
                         <div class="flex gap-4 text-sm text-slate-500 mb-4">
-                            <div class="flex items-center gap-1">
-                                <span>📀</span>
+                            <div class="flex items-center gap-1.5">
+                                <AlbumIcon size="sm" />
                                 <span
                                     >{artistAlbums.length} álbum{artistAlbums.length !==
                                     1
@@ -203,8 +206,8 @@
                                         : ""}</span
                                 >
                             </div>
-                            <div class="flex items-center gap-1">
-                                <span>🎵</span>
+                            <div class="flex items-center gap-1.5">
+                                <MusicIcon size="sm" />
                                 <span>{totalTracks} canciones</span>
                             </div>
                         </div>

@@ -11,6 +11,8 @@
     import SendIcon from "$lib/components/icons/SendIcon.svelte";
     import BoltIcon from "$lib/components/icons/BoltIcon.svelte";
     import StarIcon from "$lib/components/icons/StarIcon.svelte";
+    import MusicIcon from "$lib/components/icons/MusicIcon.svelte";
+    import EyeIcon from "$lib/components/icons/EyeIcon.svelte";
     import VerifiedBadge from "$lib/components/VerifiedBadge.svelte";
 
     let showAuthModal = false;
@@ -286,7 +288,7 @@
         <!-- Mobile Menu Dropdown -->
         {#if mobileMenuOpen}
             <div
-                class="absolute top-full left-0 right-0 mt-2 mx-4 bg-[#1a1a1a]/98 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden md:hidden z-10"
+                class="absolute top-full left-0 right-0 mt-2 mx-4 bg-[#1a1a1a]/98 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden md:hidden z-50 transform origin-top animate-fade-in"
             >
                 <div class="flex flex-col p-4 gap-3">
                     <a
@@ -467,9 +469,10 @@
 
         <div class="space-y-4 relative z-10">
             <div
-                class="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-bold uppercase tracking-widest text-[#FFB347] mb-4 hover:bg-white/10 transition-colors cursor-default"
+                class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-bold uppercase tracking-widest text-[#FFB347] mb-4 hover:bg-white/10 transition-colors cursor-default"
             >
-                ✨ Música • Ambiente • Vibes
+                <StarIcon size="xs" color="#FFB347" />
+                <span>Música • Ambiente • Vibes</span>
             </div>
 
             <h1
@@ -529,9 +532,9 @@
                 class="bg-[#131b2e]/60 backdrop-blur-xl p-8 rounded-3xl border border-white/5 hover:border-white/10 transition-all hover:-translate-y-1"
             >
                 <div
-                    class="w-12 h-12 bg-purple-500/20 rounded-2xl flex items-center justify-center text-2xl mb-4 text-purple-400"
+                    class="w-12 h-12 bg-purple-500/20 rounded-2xl flex items-center justify-center text-purple-400 mb-4"
                 >
-                    🎵
+                    <MusicIcon size="lg" />
                 </div>
                 <h3 class="text-xl font-bold text-slate-100 mb-2">
                     Selección Premium
@@ -547,9 +550,9 @@
                 class="bg-[#131b2e]/60 backdrop-blur-xl p-8 rounded-3xl border border-white/5 hover:border-white/10 transition-all hover:-translate-y-1"
             >
                 <div
-                    class="w-12 h-12 bg-orange-500/20 rounded-2xl flex items-center justify-center text-2xl mb-4 text-orange-400"
+                    class="w-12 h-12 bg-orange-500/20 rounded-2xl flex items-center justify-center text-orange-400 mb-4"
                 >
-                    ⚡
+                    <BoltIcon size="lg" />
                 </div>
                 <h3 class="text-xl font-bold text-slate-100 mb-2">
                     Sin Pausas
@@ -565,9 +568,9 @@
                 class="bg-[#131b2e]/60 backdrop-blur-xl p-8 rounded-3xl border border-white/5 hover:border-white/10 transition-all hover:-translate-y-1"
             >
                 <div
-                    class="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center text-2xl mb-4 text-blue-400"
+                    class="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center text-blue-400 mb-4"
                 >
-                    🌌
+                    <EyeIcon size="lg" />
                 </div>
                 <h3 class="text-xl font-bold text-slate-100 mb-2">
                     Visuales Inmersivos
@@ -619,11 +622,17 @@
                 <p class="text-sm text-slate-500">
                     &copy; 2025 ChillChess. Todos los derechos reservados.
                 </p>
-                <p class="text-xs text-slate-600 max-w-md">
-                    🎵 Nuestra música es de uso libre. Te pedimos por favor que
-                    nos menciones como
-                    <span class="text-slate-500 font-medium">ChillChess</span> al
-                    utilizarla.
+                <p
+                    class="text-xs text-slate-600 max-w-md flex items-center gap-2 justify-center md:justify-start"
+                >
+                    <MusicIcon size="xs" />
+                    <span>
+                        Nuestra música es de uso libre. Te pedimos por favor que
+                        nos menciones como
+                        <span class="text-slate-500 font-medium"
+                            >ChillChess</span
+                        > al utilizarla.
+                    </span>
                 </p>
             </div>
             <div class="flex gap-8 text-sm font-medium">
