@@ -3,7 +3,6 @@
     import { fade } from "svelte/transition";
 
     export let timeLeft: number; // In seconds
-    export let isTimerRunning: boolean;
 
     let timeString = "";
 

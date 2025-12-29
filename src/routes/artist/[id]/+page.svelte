@@ -14,9 +14,13 @@
         (album) => album.artist === artist.artistName,
     );
     $: totalTracks = artistAlbums.reduce(
-        (sum, album) => sum + album.tracks.length,
+        (sum, album) => sum + (album.tracks?.length || 0),
         0,
     );
+    $: popularTracks = artistAlbums
+        .flatMap((album) => album.tracks || [])
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 5);
 
     function handlePlayAlbum(albumId: string) {
         playAlbum(albumId);

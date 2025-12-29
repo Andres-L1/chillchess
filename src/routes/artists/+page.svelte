@@ -153,7 +153,7 @@
                 {#each verifiedArtists as artist}
                     {@const artistAlbums = getArtistAlbums(artist.artistName)}
                     {@const totalTracks = artistAlbums.reduce(
-                        (sum, album) => sum + album.tracks.length,
+                        (sum, album) => sum + (album.tracks?.length || 0),
                         0,
                     )}
 
