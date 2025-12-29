@@ -43,9 +43,7 @@
         }
 
         // Check if pro
-        isPro =
-            $userSubscription.tier === "pro" ||
-            $userSubscription.tier === "premium";
+        isPro = $userSubscription.tier === "pro";
 
         // Load badge preferences from user profile (users collection)
         showVerifiedBadge =

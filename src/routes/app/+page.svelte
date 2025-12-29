@@ -29,7 +29,6 @@
     function toggleImmersive() {
         const isPro =
             $userSubscription.tier === "pro" ||
-            $userSubscription.tier === "premium" ||
             $userSubscription.profile?.isAdmin;
 
         if (!isPro) {
@@ -553,8 +552,7 @@
                             {#each [{ id: "none", label: "Silencio Digital", icon: "🔇", desc: "Sin efectos de fondo", pro: false }, { id: "noir", label: "Lluvia Nocturna", icon: "🌧️", desc: "Sonido de lluvia suave y tonos oscuros", pro: false }, { id: "library", label: "Biblioteca", icon: "📚", desc: "Ambiente académico y texturas de papel", pro: false }, { id: "zen", label: "Jardín Zen", icon: "🎋", desc: "Naturaleza y sonidos de viento", pro: true }, { id: "space", label: "Cosmos", icon: "🌌", desc: "Frecuencias espaciales y vacío", pro: true }, { id: "cyber", label: "Cyber Grid", icon: "👾", desc: "Rejilla de neón retro-futurista", pro: true }, { id: "breathe", label: "Modo Respiración", icon: "🧘", desc: "Fondo pulsante para guiado 4-7-8", pro: true }] as vibe}
                                 {@const isLocked =
                                     vibe.pro &&
-                                    $userSubscription.tier !== "pro" &&
-                                    $userSubscription.tier !== "premium"}
+                                    $userSubscription.tier !== "pro"}
                                 <button
                                     on:click={() => {
                                         if (isLocked) {
@@ -607,8 +605,7 @@
                                 {#each [{ id: "modern", label: "Moderno", font: "font-poppins", desc: "Limpio y minimalista", pro: false }, { id: "neon", label: "Neon Cyber", font: "font-mono text-primary-400 shadow-glow", desc: "Estilo hacker brillante", pro: true }, { id: "retro", label: "Pixel Retro", font: "font-mono", desc: "Estilo 8-bit clásico", pro: true }, { id: "elegant", label: "Editorial", font: "font-serif italic", desc: "Sofisticado y clásico", pro: true }] as style}
                                     {@const isLocked =
                                         style.pro &&
-                                        $userSubscription.tier !== "pro" &&
-                                        $userSubscription.tier !== "premium"}
+                                        $userSubscription.tier !== "pro"}
                                     <button
                                         on:click={() => {
                                             if (isLocked) {

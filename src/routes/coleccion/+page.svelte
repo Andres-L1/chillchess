@@ -585,7 +585,7 @@
                                     </button>
 
                                     <!-- Download Button (PRO only) -->
-                                    {#if $userSubscription.tier === "pro" || $userSubscription.tier === "premium"}
+                                    {#if $userSubscription.tier === "pro"}
                                         <button
                                             on:click|stopPropagation={() => {
                                                 // Simple download trigger

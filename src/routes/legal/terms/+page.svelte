@@ -25,8 +25,8 @@
                     1. Suscripciones y Pagos
                 </h2>
                 <p class="leading-relaxed mb-4">
-                    ChillChess ofrece planes de suscripción (PRO y Premium) que
-                    se facturan por adelantado de forma anual o mensual. Al
+                    ChillChess ofrece un plan de suscripción (PRO) que se
+                    facturan por adelantado de forma anual o mensual. Al
                     suscribirte, autorizas a ChillChess (a través de nuestro
                     procesador de pagos Stripe) a cobrar la tarifa
                     correspondiente a tu método de pago seleccionado.

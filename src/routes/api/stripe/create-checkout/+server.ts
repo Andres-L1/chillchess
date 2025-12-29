@@ -18,10 +18,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
             priceId = STRIPE_PRICE_IDS.pro_monthly;
         } else if (plan === 'pro' && interval === 'yearly') {
             priceId = STRIPE_PRICE_IDS.pro_yearly;
-        } else if (plan === 'premium' && interval === 'monthly') {
-            priceId = STRIPE_PRICE_IDS.premium_monthly;
-        } else if (plan === 'premium' && interval === 'yearly') {
-            priceId = STRIPE_PRICE_IDS.premium_yearly;
         } else {
             return json({ error: 'Invalid plan or interval' }, { status: 400 });
         }

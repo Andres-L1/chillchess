@@ -28,8 +28,6 @@ export const stripe = {
 export const STRIPE_PRICE_IDS = {
     pro_monthly: process.env.PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID || '',
     pro_yearly: process.env.PUBLIC_STRIPE_PRO_YEARLY_PRICE_ID || '',
-    premium_monthly: process.env.PUBLIC_STRIPE_PREMIUM_MONTHLY_PRICE_ID || '',
-    premium_yearly: process.env.PUBLIC_STRIPE_PREMIUM_YEARLY_PRICE_ID || '',
 } as const;
 
 // Webhook secret for verifying Stripe events

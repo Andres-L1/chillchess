@@ -105,14 +105,12 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
 
     // Determine tier from price
     const priceId = subscription.items.data[0]?.price.id;
-    let tier: 'free' | 'pro' | 'premium' = 'free';
+    let tier: 'free' | 'pro' = 'free';
 
     // You'll need to map price IDs to tiers
     // This is a simplified version - adjust based on your actual price IDs
-    if (priceId?.includes('pro')) {
+    if (priceId?.includes('pro') || priceId?.includes('premium')) {
         tier = 'pro';
-    } else if (priceId?.includes('premium')) {
-        tier = 'premium';
     }
 
     const isActive = status === 'active' || status === 'trialing';

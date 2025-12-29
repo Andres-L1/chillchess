@@ -14,9 +14,7 @@
     let currentStep = 1;
 
     // Check PRO status
-    $: isPro =
-        $userSubscription.tier === "pro" ||
-        $userSubscription.tier === "premium";
+    $: isPro = $userSubscription.tier === "pro";
 
     // Form Data
     let releaseTitle = "";
