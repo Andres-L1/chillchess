@@ -60,7 +60,7 @@
     />
     <meta
         name="keywords"
-        content="lo-fi, música para estudiar, ambient, jazz, focus music, chillchess, productividad, pomodoro, relax, white noise"
+        content="lo-fi, música para estudiar, ambient, jazz, focus music, chillchess, productividad, pomodoro, relax, white noise, stream safe music, copyright free music"
     />
     <meta name="author" content="ChillChess" />
 
@@ -496,7 +496,6 @@
     </nav>
 
     <!-- Hero Section -->
-    <!-- Hero Section -->
     <header
         class="relative px-4 md:px-8 py-20 md:py-32 max-w-7xl mx-auto text-center space-y-8 animate-fade-in overflow-hidden"
     >
@@ -526,12 +525,12 @@
             <p
                 class="text-lg md:text-2xl text-slate-300 max-w-2xl mx-auto font-light leading-relaxed"
             >
-                Tu banda sonora personal para estudiar, trabajar o relajarte.
-                <br class="hidden md:block" />
-                Música
+                Música de todo tipo sin interrupciones.
                 <strong class="text-white font-medium"
-                    >Lo-Fi, Jazz y Ambient</strong
-                > sin interrupciones, diseñada para potenciar tu concentración.
+                    >Perfecta para tus Streams y Sesiones de Trabajo.</strong
+                >
+                <br class="hidden md:block" />
+                Olvídate del Copyright y los anuncios.
             </p>
         </div>
 
@@ -568,17 +567,35 @@
     <section class="max-w-7xl mx-auto px-4 md:px-8 py-20 mb-20 relative z-10">
         <div class="text-center mb-16">
             <h2 class="text-3xl md:text-5xl font-bold text-white mb-6">
-                Todo lo que necesitas para fluir
+                La atmósfera perfecta para tu audiencia
             </h2>
             <p class="text-slate-400 max-w-2xl mx-auto text-lg">
-                Más que un reproductor de música. ChillChess es un ecosistema
-                diseñado para cuidar tu estado mental y mejorar tu
-                productividad.
+                ChillChess te da el control total del ambiente. Sin sorpresas,
+                sin cortes y seguras para tu contenido.
             </p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- Feature 1: Infinite Radio -->
+            <!-- Feature 1: Stream Safe -->
+            <div
+                class="group bg-[#131b2e]/60 backdrop-blur-xl p-8 rounded-3xl border border-white/5 hover:border-green-500/30 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-green-500/10"
+            >
+                <div
+                    class="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg group-hover:scale-110 transition-transform"
+                >
+                    <div class="text-2xl">🎥</div>
+                </div>
+                <h3 class="text-2xl font-bold text-slate-100 mb-3">
+                    100% Stream Safe
+                </h3>
+                <p class="text-slate-400 leading-relaxed text-sm">
+                    Utiliza nuestra música en tus directos de Twitch, YouTube o
+                    Kick. Solo pedimos créditos en la descripción. ¡Cero
+                    strikes!
+                </p>
+            </div>
+
+            <!-- Feature 2: Infinite Radio -->
             <div
                 class="group bg-[#131b2e]/60 backdrop-blur-xl p-8 rounded-3xl border border-white/5 hover:border-primary-500/30 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary-500/10"
             >
@@ -588,16 +605,16 @@
                     <MusicIcon size="md" />
                 </div>
                 <h3 class="text-2xl font-bold text-slate-100 mb-3">
-                    Radio Infinita
+                    Radio Sin Cortes
                 </h3>
                 <p class="text-slate-400 leading-relaxed text-sm">
-                    Olvídate de elegir canciones. Nuestra radio inteligente
-                    selecciona la mezcla perfecta de Lo-Fi y Jazz para que nunca
-                    se rompa tu concentración.
+                    Olvídate de cambiar de canción a mitad de una partida. Flujo
+                    continuo de Lo-Fi y Jazz para mantener el "vibe" durante
+                    horas.
                 </p>
             </div>
 
-            <!-- Feature 2: Reactive Ambience -->
+            <!-- Feature 3: Visuals -->
             <div
                 class="group bg-[#131b2e]/60 backdrop-blur-xl p-8 rounded-3xl border border-white/5 hover:border-blue-500/30 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10"
             >
@@ -607,57 +624,37 @@
                     <EyeIcon size="md" />
                 </div>
                 <h3 class="text-2xl font-bold text-slate-100 mb-3">
-                    Ambientes Reactivos
+                    Estética Visual
                 </h3>
                 <p class="text-slate-400 leading-relaxed text-sm">
-                    Fondos visuales que "respiran" con la música. Desde una
-                    habitación lluviosa hasta el espacio profundo, elige el
-                    entorno visual que te inspire.
+                    Fondos animados y elegantes que puedes capturar en tu OBS
+                    para darle un toque profesional a tus escenas de "Just
+                    Chatting" o "Be Right Back".
                 </p>
             </div>
 
-            <!-- Feature 3: Focus & Productivity -->
+            <!-- Feature 4: Artist Community (Wide) -->
             <div
-                class="group bg-[#131b2e]/60 backdrop-blur-xl p-8 rounded-3xl border border-white/5 hover:border-purple-500/30 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-purple-500/10"
-            >
-                <div
-                    class="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg group-hover:scale-110 transition-transform"
-                >
-                    <BoltIcon size="md" />
-                </div>
-                <h3 class="text-2xl font-bold text-slate-100 mb-3">
-                    Modo Enfoque
-                </h3>
-                <p class="text-slate-400 leading-relaxed text-sm">
-                    Herramientas integradas como temporizadores Pomodoro y
-                    bloqueadores de distracciones visuales para mantener tu
-                    mente en la tarea.
-                </p>
-            </div>
-
-            <!-- Feature 4: Artist Community -->
-            <div
-                class="group bg-[#131b2e]/60 backdrop-blur-xl p-8 rounded-3xl border border-white/5 hover:border-green-500/30 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-green-500/10 lg:col-span-2"
+                class="group bg-[#131b2e]/60 backdrop-blur-xl p-8 rounded-3xl border border-white/5 hover:border-purple-500/30 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-purple-500/10 lg:col-span-2"
             >
                 <div
                     class="flex flex-col md:flex-row gap-6 items-start md:items-center"
                 >
                     <div
-                        class="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center text-white flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform"
+                        class="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-white flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform"
                     >
                         <UserIcon size="md" />
                     </div>
                     <div>
                         <h3 class="text-2xl font-bold text-slate-100 mb-2">
-                            Comunidad de Artistas
+                            Apoya a Artistas Reales
                         </h3>
                         <p
                             class="text-slate-400 leading-relaxed text-sm max-w-xl"
                         >
-                            Apoyamos a productores independientes. Cada
-                            reproducción cuenta. Únete como artista, sube tus
-                            pistas y conecta con una audiencia que valora la
-                            música de calidad.
+                            Al usar ChillChess, ayudas a músicos independientes
+                            a ser escuchados. Una comunidad real detrás de cada
+                            beat.
                         </p>
                     </div>
                 </div>
@@ -671,10 +668,11 @@
                     <StarIcon size="md" gradient={true} />
                 </div>
                 <h3 class="text-xl font-bold text-white mb-2">
-                    Experiencia Premium
+                    Gratis para Empezar
                 </h3>
                 <p class="text-slate-400 text-sm">
-                    Alta calidad de audio, sin compresiones.
+                    Biblioteca básica gratuita y planes Pro para desbloquear
+                    todo.
                 </p>
             </div>
         </div>
@@ -686,11 +684,11 @@
             class="bg-gradient-to-br from-blue-600/10 to-purple-600/10 border border-white/10 rounded-3xl p-12"
         >
             <h2 class="text-3xl md:text-4xl font-bold text-slate-100 mb-4">
-                Explora Nuestra Colección
+                Listo para mejorar tu Stream?
             </h2>
             <p class="text-slate-400 mb-8 max-w-xl mx-auto">
-                Descubre álbumes curados de lo-fi, jazz y música ambient
-                perfecta para concentrarte.
+                Únete a otros creadores que ya usan ChillChess para sus fondos
+                musicales.
             </p>
             <a
                 href="/coleccion"
@@ -724,11 +722,11 @@
                 >
                     <MusicIcon size="sm" />
                     <span>
-                        Nuestra música es de uso libre. Te pedimos por favor que
-                        nos menciones como
+                        Nuestra música es de uso libre en Streams. Te pedimos
+                        por favor que nos menciones como
                         <span class="text-slate-500 font-medium"
                             >ChillChess</span
-                        > al utilizarla.
+                        > en tu descripción.
                     </span>
                 </p>
             </div>
