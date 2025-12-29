@@ -39,27 +39,25 @@
         <!-- FLOATING DOCK PLAYER -->
         <div
             transition:slide={{ duration: 400, axis: "y" }}
-            class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[98%] md:w-auto md:min-w-[700px] max-w-5xl z-[50]"
+            class="fixed bottom-2 md:bottom-6 left-1/2 -translate-x-1/2 w-[95%] md:w-auto md:min-w-[700px] max-w-5xl z-[50] flex flex-col items-center"
         >
+            <!-- Minimize Button (Outside Main Container to avoid clipping) -->
+            <button
+                on:click={() => (isCollapsed = true)}
+                class="w-16 h-6 flex items-center justify-center bg-[#0F172A]/90 backdrop-blur-md border border-white/20 border-b-0 rounded-t-xl text-slate-400 hover:text-white transition-all cursor-pointer active:scale-95 -mb-[1px] z-10"
+                title="Minimizar"
+                aria-label="Minimizar reproductor"
+            >
+                <div class="w-8 h-1 bg-current rounded-full"></div>
+            </button>
+
             <div
-                class="bg-[#0F172A]/80 backdrop-blur-2xl border border-white/10 rounded-full p-2 pl-3 pr-6 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex items-center justify-between gap-4 md:gap-12 relative overflow-hidden group"
+                class="w-full bg-[#0F172A]/90 backdrop-blur-2xl border border-white/10 rounded-2xl md:rounded-full p-3 md:px-6 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex items-center justify-between gap-3 md:gap-12 relative overflow-hidden group"
             >
                 <!-- Shine Effect -->
                 <div
                     class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[2s] pointer-events-none"
                 ></div>
-
-                <!-- Minimize Button - Better Mobile UX -->
-                <button
-                    on:click={() => (isCollapsed = true)}
-                    class="absolute -top-10 md:-top-6 left-1/2 -translate-x-1/2 w-20 h-12 md:w-20 md:h-6 flex items-center justify-center bg-[#0F172A]/90 md:bg-[#0F172A]/60 backdrop-blur-sm rounded-t-2xl border-2 md:border border-white/30 border-b-0 text-white md:text-white/40 hover:text-white transition-all z-20 cursor-pointer active:scale-95 shadow-lg"
-                    title="Minimizar"
-                    aria-label="Minimizar reproductor"
-                >
-                    <div
-                        class="w-12 h-2 md:w-8 md:h-1 bg-current rounded-full"
-                    ></div>
-                </button>
 
                 <!-- Left: Track Info & Favorite -->
                 <div class="flex-shrink-0">
