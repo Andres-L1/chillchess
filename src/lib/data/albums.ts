@@ -26,11 +26,11 @@ export const ALBUMS: Album[] = [
     {
         id: 'asap-forever',
         title: 'ASAP is forever',
-        artist: 'ASAP Tribute',
+        artist: 'JULYACTV',
         cover: '/assets/images/covers/asap.jpg',
         price: 'Gratis',
         tag: 'Nuevo',
-        description: 'Tributo chillhop a la leyenda del gaming. Álbum completo.',
+        description: 'Tributo chillhop a la leyenda del gaming. Álbum completo por JULYACTV.',
         vibeId: 'asap-forever',
         isPremium: false, // Available for everyone
         category: 'juegos', // Gaming category
