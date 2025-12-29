@@ -85,20 +85,45 @@
 
     async function toggleVerified(user: User) {
         try {
-            const userRef = doc(db, "users", user.uid);
             const newValue = !user.isVerified;
+            const updates = [];
 
-            await updateDoc(userRef, {
-                isVerified: newValue,
-                updatedAt: Date.now(),
-            });
+            // 1. Update User document
+            const userRef = doc(db, "users", user.uid);
+            updates.push(
+                updateDoc(userRef, {
+                    isVerified: newValue,
+                    updatedAt: Date.now(),
+                }),
+            );
+
+            // 2. Try to update Artist document (if it exists)
+            // We verify even if they aren't an artist yet, so they are ready if they become one
+            try {
+                const { getDoc, setDoc } = await import("firebase/firestore");
+                const artistRef = doc(db, "artists", user.uid);
+                const artistSnap = await getDoc(artistRef);
+
+                if (artistSnap.exists()) {
+                    updates.push(
+                        updateDoc(artistRef, {
+                            isVerified: newValue,
+                        }),
+                    );
+                }
+            } catch (err) {
+                console.warn("Could not sync with artist profile:", err);
+            }
+
+            await Promise.all(updates);
 
             user.isVerified = newValue;
             users = users;
 
-            statusMessage = `✅ ${user.email} ${newValue ? "verificado" : "desverificado"}`;
+            statusMessage = `✅ ${user.email} ${newValue ? "verificado" : "desverificado"} correctamente`;
             setTimeout(() => (statusMessage = ""), 3000);
         } catch (e: any) {
+            console.error(e);
             statusMessage = "❌ Error: " + e.message;
         }
     }
