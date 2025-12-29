@@ -277,8 +277,10 @@
         }
     }
 
+    import { browser } from "$app/environment";
+
     // Trigger analysis loop when playing
-    $: if ($audioStore.isPlaying) {
+    $: if (browser && $audioStore.isPlaying) {
         // Initialize context on first play (user interaction required)
         if (!audioContext && musicEl) {
             initAudioAnalysis();
@@ -290,7 +292,7 @@
         // Start loop
         cancelAnimationFrame(animationLoopId);
         updateVisualizer();
-    } else {
+    } else if (browser) {
         cancelAnimationFrame(animationLoopId);
         // Reset analysis when stopped to avoid stuck visuals
         analysisStore.update((s) => ({
