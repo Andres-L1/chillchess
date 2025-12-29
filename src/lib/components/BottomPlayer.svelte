@@ -49,13 +49,15 @@
                     class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[2s] pointer-events-none"
                 ></div>
 
-                <!-- Minimize Button (Hover Area on Top) -->
+                <!-- Minimize Button - Better Mobile UX -->
                 <button
                     on:click={() => (isCollapsed = true)}
-                    class="absolute top-0 right-12 md:left-1/2 md:-translate-x-1/2 w-20 h-4 flex items-start justify-center text-white/20 hover:text-white/80 transition-colors z-20 cursor-s-resize"
+                    class="absolute -top-8 md:-top-6 left-1/2 -translate-x-1/2 w-16 h-10 md:w-20 md:h-6 flex items-center justify-center bg-[#0F172A]/60 backdrop-blur-sm rounded-t-2xl border border-white/10 border-b-0 text-white/40 hover:text-white/80 transition-all z-20 cursor-pointer active:scale-95"
                     title="Minimizar"
                 >
-                    <div class="w-8 h-1 bg-current rounded-full mt-1.5"></div>
+                    <div
+                        class="w-10 h-1.5 md:w-8 md:h-1 bg-current rounded-full"
+                    ></div>
                 </button>
 
                 <!-- Left: Track Info & Favorite -->
@@ -81,8 +83,8 @@
                     </div>
                 </div>
 
-                <!-- Right: Volume Control -->
-                <div class="flex-shrink-0 hidden md:block">
+                <!-- Right: Volume Control - Always visible on desktop -->
+                <div class="flex-shrink-0 hidden lg:flex items-center">
                     <VolumeControl bind:showVolumeSlider />
                 </div>
             </div>
