@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { fade, fly, slide } from "svelte/transition";
+    import { fade, fly, scale } from "svelte/transition";
     import { cubicOut } from "svelte/easing";
     import { audioStore } from "$lib/audio/store";
     import UsersTab from "$lib/components/admin/UsersTab.svelte";
@@ -16,6 +16,13 @@
         | "submissions"
         | "music"
         | "logs";
+
+    interface TabDef {
+        id: Tab;
+        label: string;
+        icon: string;
+        badge?: number;
+    }
 
     let activeTab: Tab = "dashboard";
     let stats = {
@@ -85,7 +92,7 @@
         }
     }
 
-    const tabs = [
+    const tabs: TabDef[] = [
         { id: "dashboard", label: "Dashboard", icon: "📊" },
         { id: "users", label: "Usuarios", icon: "👥" },
         {
@@ -106,270 +113,336 @@
 </script>
 
 <svelte:head>
-    <title>Admin Studio | ChillChess</title>
+    <title>AdminOS | ChillChess</title>
+    <meta name="theme-color" content="#0B1120" />
 </svelte:head>
 
 <div
-    class="min-h-screen bg-[#0B1120] text-white font-poppins pb-20 relative overflow-hidden"
+    class="min-h-screen bg-[#0B1120] text-white font-poppins relative overflow-hidden"
 >
-    <!-- Background Decor (Admin Vibe) -->
-    <div
-        class="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-primary-500/5 rounded-full blur-[120px] pointer-events-none"
-    ></div>
-    <div
-        class="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none"
-    ></div>
-
-    <div class="relative max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-12">
-        <!-- Header -->
+    <!-- OS Wallpaper / Ambient Background -->
+    <div class="absolute inset-0 pointer-events-none">
         <div
-            class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10"
-            in:fly={{ y: -20, duration: 600 }}
-        >
-            <div>
-                <h1
-                    class="text-4xl md:text-5xl font-bold text-white mb-2 tracking-tight"
-                >
-                    Admin<span
-                        class="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-orange-400"
-                        >Studio</span
-                    >
-                </h1>
-                <p class="text-slate-400 font-light text-lg">
-                    Centro de Comando & Control
-                </p>
-            </div>
+            class="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-primary-500/10 rounded-full blur-[120px] animate-pulse-slow"
+        ></div>
+        <div
+            class="absolute bottom-[-20%] left-[-10%] w-[800px] h-[800px] bg-blue-500/10 rounded-full blur-[120px] animate-pulse-slow"
+            style="animation-delay: 2s"
+        ></div>
+    </div>
 
+    <!-- === DESKTOP / HOME VIEW === -->
+    <div
+        class="relative h-screen flex flex-col p-4 md:p-8 overflow-y-auto no-scrollbar"
+    >
+        <!-- Status Bar -->
+        <div
+            class="flex justify-between items-center mb-8 px-2"
+            in:fly={{ y: -20, duration: 800 }}
+        >
+            <div class="flex flex-col">
+                <span
+                    class="text-xs font-mono text-slate-400 uppercase tracking-widest mb-1"
+                    >ChillOS v1.0</span
+                >
+                <h1 class="text-2xl font-bold">Hola, Admin 👋</h1>
+            </div>
             <div
-                class="flex items-center gap-3 px-5 py-2.5 bg-white/5 rounded-full border border-white/10 backdrop-blur-md shadow-lg"
+                class="flex items-center gap-3 px-4 py-2 bg-white/5 rounded-full border border-white/10 backdrop-blur-md"
             >
                 <div
-                    class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+                    class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
                 ></div>
-                <span
-                    class="text-xs font-bold text-slate-300 uppercase tracking-widest"
-                    >Sistema Activo</span
-                >
+                <span class="text-xs font-bold text-slate-300">Online</span>
             </div>
         </div>
 
-        <!-- Navigation Dock -->
-        <div
-            class="sticky top-4 z-40 mb-10"
-            in:fly={{ y: 20, duration: 600, delay: 100 }}
-        >
+        <!-- Dashboard Widgets (Apps) -->
+        {#if loading}
             <div
-                class="flex p-1.5 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl w-full md:w-max overflow-x-auto no-scrollbar shadow-2xl mx-auto md:mx-0"
+                class="flex-1 flex flex-col items-center justify-center text-slate-500"
             >
-                {#each tabs as tab}
-                    <button
-                        on:click={() => (activeTab = tab.id)}
-                        class="relative px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 whitespace-nowrap flex items-center gap-2 group {activeTab ===
-                        tab.id
-                            ? 'text-white'
-                            : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+                <div
+                    class="w-10 h-10 border-2 border-white/20 border-t-white rounded-full animate-spin mb-4"
+                ></div>
+                <p class="animate-pulse">Iniciando sistema...</p>
+            </div>
+        {:else}
+            <!-- Métricas Principales (Widgets) -->
+            <div
+                class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8 max-w-6xl mx-auto w-full"
+            >
+                <!-- Users Widget -->
+                <button
+                    on:click={() => (activeTab = "users")}
+                    class="group relative aspect-square md:aspect-video rounded-3xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-white/10 p-6 flex flex-col justify-between hover:scale-[1.02] active:scale-95 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/10 ring-0 hover:ring-2 ring-white/10"
+                >
+                    <div
+                        class="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center text-2xl group-hover:rotate-6 transition-transform"
                     >
-                        {#if activeTab === tab.id}
-                            <div
-                                class="absolute inset-0 bg-white/10 rounded-xl border border-white/10 shadow-inner"
-                                transition:fade={{ duration: 200 }}
-                            ></div>
-                        {/if}
-                        <span
-                            class="relative z-10 text-lg group-hover:scale-110 transition-transform"
-                            >{tab.icon}</span
-                        >
-                        <span class="relative z-10 hidden md:inline-block"
-                            >{tab.label}</span
-                        >
+                        👥
+                    </div>
+                    <div class="text-left">
+                        <p class="text-3xl font-bold text-white">
+                            {stats.totalUsers}
+                        </p>
+                        <p class="text-sm text-slate-400">Usuarios</p>
+                    </div>
+                </button>
 
-                        {#if tab.badge && tab.badge > 0}
+                <!-- Pro Widget -->
+                <button
+                    on:click={() => (activeTab = "users")}
+                    class="group relative aspect-square md:aspect-video rounded-3xl bg-gradient-to-br from-purple-900/20 to-slate-900/50 border border-white/10 p-6 flex flex-col justify-between hover:scale-[1.02] active:scale-95 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/10 ring-0 hover:ring-2 ring-purple-500/30"
+                >
+                    <div
+                        class="w-12 h-12 rounded-2xl bg-purple-500/20 flex items-center justify-center text-2xl group-hover:rotate-6 transition-transform"
+                    >
+                        👑
+                    </div>
+                    <div class="text-left">
+                        <p class="text-3xl font-bold text-white">
+                            {stats.proUsers}
+                        </p>
+                        <p class="text-sm text-slate-400">PRO</p>
+                    </div>
+                </button>
+
+                <!-- Music Widget -->
+                <button
+                    on:click={() => (activeTab = "music")}
+                    class="group relative aspect-square md:aspect-video rounded-3xl bg-gradient-to-br from-pink-900/20 to-slate-900/50 border border-white/10 p-6 flex flex-col justify-between hover:scale-[1.02] active:scale-95 transition-all duration-300 hover:shadow-2xl hover:shadow-pink-500/10 ring-0 hover:ring-2 ring-pink-500/30"
+                >
+                    <div
+                        class="w-12 h-12 rounded-2xl bg-pink-500/20 flex items-center justify-center text-2xl group-hover:rotate-6 transition-transform"
+                    >
+                        💿
+                    </div>
+                    <div class="text-left">
+                        <p class="text-3xl font-bold text-white">
+                            {stats.totalAlbums}
+                        </p>
+                        <p class="text-sm text-slate-400">Álbumes</p>
+                    </div>
+                </button>
+
+                <!-- Submissions Widget (Notification style) -->
+                <button
+                    on:click={() => (activeTab = "submissions")}
+                    class="col-span-1 md:col-span-1 group relative aspect-square md:aspect-video rounded-3xl bg-gradient-to-br from-orange-900/20 to-slate-900/50 border border-white/10 p-6 flex flex-col justify-between hover:scale-[1.02] active:scale-95 transition-all duration-300 ring-0 hover:ring-2 ring-orange-500/30"
+                >
+                    <div class="flex justify-between items-start w-full">
+                        <div
+                            class="w-12 h-12 rounded-2xl bg-orange-500/20 flex items-center justify-center text-2xl group-hover:rotate-6 transition-transform"
+                        >
+                            🎵
+                        </div>
+                        {#if stats.pendingSubmissions > 0}
                             <span
-                                class="relative z-10 ml-1 px-1.5 py-0.5 bg-red-500 text-white text-[10px] rounded-full shadow-lg animate-pulse"
+                                class="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-full animate-bounce"
+                                >{stats.pendingSubmissions}</span
                             >
-                                {tab.badge}
-                            </span>
                         {/if}
+                    </div>
+                    <div class="text-left">
+                        <p class="text-lg font-bold text-white leading-tight">
+                            Envíos
+                        </p>
+                        <p class="text-xs text-slate-400">Pendientes</p>
+                    </div>
+                </button>
+            </div>
+
+            <!-- More Apps Grid -->
+            <div
+                class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4 max-w-6xl mx-auto w-full"
+            >
+                {#each tabs.filter((t) => t.id !== "dashboard") as app}
+                    <button
+                        on:click={() => (activeTab = app.id)}
+                        class="flex flex-col items-center gap-3 p-4 rounded-3xl hover:bg-white/5 transition-colors group"
+                    >
+                        <div
+                            class="w-16 h-16 rounded-2xl bg-gradient-to-b from-slate-700 to-slate-800 border-t border-white/20 shadow-lg flex items-center justify-center text-3xl group-hover:scale-110 transition-transform duration-300 relative"
+                        >
+                            {app.icon}
+                            {#if app.badge && app.badge > 0}
+                                <div
+                                    class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full border-2 border-[#0B1120] flex items-center justify-center text-[10px] font-bold"
+                                >
+                                    {app.badge}
+                                </div>
+                            {/if}
+                        </div>
+                        <span
+                            class="text-xs font-medium text-slate-300 group-hover:text-white"
+                            >{app.label}</span
+                        >
                     </button>
                 {/each}
             </div>
-        </div>
-
-        <!-- Content Area -->
-        <div class="min-h-[500px]" in:fade={{ duration: 400, delay: 200 }}>
-            {#if activeTab === "dashboard"}
-                {#if loading}
-                    <div
-                        class="flex flex-col items-center justify-center h-64 text-slate-500 animate-pulse"
-                    >
-                        <div
-                            class="w-12 h-12 border-4 border-white/10 border-t-primary-500 rounded-full animate-spin mb-4"
-                        ></div>
-                        <p>Cargando datos del sistema...</p>
-                    </div>
-                {:else}
-                    <div
-                        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                        in:fly={{ y: 20, duration: 500 }}
-                    >
-                        <!-- Stat Card 1 -->
-                        <div
-                            class="group relative bg-gradient-to-br from-[#1e293b]/80 to-[#0f172a]/80 backdrop-blur-xl border border-white/5 hover:border-primary-500/30 rounded-3xl p-8 overflow-hidden transition-all hover:shadow-[0_0_30px_rgba(236,72,153,0.1)] hover:-translate-y-1"
-                        >
-                            <div
-                                class="absolute -right-4 -bottom-4 text-[120px] opacity-[0.03] group-hover:opacity-[0.08] transition-opacity grayscale group-hover:grayscale-0"
-                            >
-                                👥
-                            </div>
-                            <h3
-                                class="text-slate-400 font-medium mb-2 uppercase tracking-wider text-xs"
-                            >
-                                Total Usuarios
-                            </h3>
-                            <p class="text-5xl font-bold text-white mb-2">
-                                {stats.totalUsers}
-                            </p>
-                            <div
-                                class="h-1 w-12 bg-primary-500 rounded-full group-hover:w-24 transition-all duration-500"
-                            ></div>
-                        </div>
-
-                        <!-- Stat Card 2 -->
-                        <div
-                            class="group relative bg-gradient-to-br from-[#1e293b]/80 to-[#0f172a]/80 backdrop-blur-xl border border-white/5 hover:border-purple-500/30 rounded-3xl p-8 overflow-hidden transition-all hover:shadow-[0_0_30px_rgba(168,85,247,0.1)] hover:-translate-y-1"
-                        >
-                            <div
-                                class="absolute -right-4 -bottom-4 text-[120px] opacity-[0.03] group-hover:opacity-[0.08] transition-opacity grayscale group-hover:grayscale-0"
-                            >
-                                👑
-                            </div>
-                            <h3
-                                class="text-slate-400 font-medium mb-2 uppercase tracking-wider text-xs"
-                            >
-                                Miembros PRO
-                            </h3>
-                            <p class="text-5xl font-bold text-white mb-2">
-                                {stats.proUsers}
-                            </p>
-                            <div
-                                class="h-1 w-12 bg-purple-500 rounded-full group-hover:w-24 transition-all duration-500"
-                            ></div>
-                        </div>
-
-                        <!-- Stat Card 3 -->
-                        <div
-                            class="group relative bg-gradient-to-br from-[#1e293b]/80 to-[#0f172a]/80 backdrop-blur-xl border border-white/5 hover:border-blue-500/30 rounded-3xl p-8 overflow-hidden transition-all hover:shadow-[0_0_30px_rgba(59,130,246,0.1)] hover:-translate-y-1"
-                        >
-                            <div
-                                class="absolute -right-4 -bottom-4 text-[120px] opacity-[0.03] group-hover:opacity-[0.08] transition-opacity grayscale group-hover:grayscale-0"
-                            >
-                                💿
-                            </div>
-                            <h3
-                                class="text-slate-400 font-medium mb-2 uppercase tracking-wider text-xs"
-                            >
-                                Álbumes Activos
-                            </h3>
-                            <p class="text-5xl font-bold text-white mb-2">
-                                {stats.totalAlbums}
-                            </p>
-                            <div
-                                class="h-1 w-12 bg-blue-500 rounded-full group-hover:w-24 transition-all duration-500"
-                            ></div>
-                        </div>
-
-                        <!-- Actions Grid -->
-                        <div class="col-span-1 lg:col-span-3 mt-8">
-                            <h2 class="text-2xl font-bold text-white mb-6">
-                                Acciones Requeridas
-                            </h2>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {#if stats.pendingSubmissions > 0}
-                                    <button
-                                        on:click={() =>
-                                            (activeTab = "submissions")}
-                                        class="group flex items-center gap-6 p-6 bg-orange-500/10 border border-orange-500/20 hover:bg-orange-500/20 rounded-2xl transition-all text-left"
-                                    >
-                                        <div
-                                            class="p-4 bg-orange-500/20 rounded-xl text-2xl group-hover:scale-110 transition-transform"
-                                        >
-                                            🎵
-                                        </div>
-                                        <div>
-                                            <h4
-                                                class="font-bold text-white text-lg"
-                                            >
-                                                Revisar Envíos Musicales
-                                            </h4>
-                                            <p
-                                                class="text-orange-200/60 text-sm mt-1"
-                                            >
-                                                {stats.pendingSubmissions} pistas
-                                                esperando tu oído crítico.
-                                            </p>
-                                        </div>
-                                    </button>
-                                {/if}
-                                {#if stats.pendingProposals > 0}
-                                    <button
-                                        on:click={() =>
-                                            (activeTab = "proposals")}
-                                        class="group flex items-center gap-6 p-6 bg-yellow-500/10 border border-yellow-500/20 hover:bg-yellow-500/20 rounded-2xl transition-all text-left"
-                                    >
-                                        <div
-                                            class="p-4 bg-yellow-500/20 rounded-xl text-2xl group-hover:scale-110 transition-transform"
-                                        >
-                                            💡
-                                        </div>
-                                        <div>
-                                            <h4
-                                                class="font-bold text-white text-lg"
-                                            >
-                                                Revisar Propuestas
-                                            </h4>
-                                            <p
-                                                class="text-yellow-200/60 text-sm mt-1"
-                                            >
-                                                {stats.pendingProposals} ideas de
-                                                la comunidad.
-                                            </p>
-                                        </div>
-                                    </button>
-                                {/if}
-                                {#if stats.pendingSubmissions === 0 && stats.pendingProposals === 0}
-                                    <div
-                                        class="col-span-2 p-8 border border-dashed border-white/10 rounded-2xl text-center"
-                                    >
-                                        <p class="text-slate-500">
-                                            Todo limpio. Tómate un café. ☕
-                                        </p>
-                                    </div>
-                                {/if}
-                            </div>
-                        </div>
-                    </div>
-                {/if}
-            {:else if activeTab === "users"}
-                <div in:slide={{ duration: 300, axis: "y" }}>
-                    <UsersTab />
-                </div>
-            {:else if activeTab === "proposals"}
-                <div in:slide={{ duration: 300, axis: "y" }}>
-                    <ProposalsTab />
-                </div>
-            {:else if activeTab === "submissions"}
-                <div in:slide={{ duration: 300, axis: "y" }}>
-                    <SubmissionsTab on:approved={loadStats} />
-                </div>
-            {:else if activeTab === "music"}
-                <div in:slide={{ duration: 300, axis: "y" }}>
-                    <MusicTab />
-                </div>
-            {:else if activeTab === "logs"}
-                <div in:slide={{ duration: 300, axis: "y" }}>
-                    <LogsTab />
-                </div>
-            {/if}
-        </div>
+        {/if}
     </div>
+
+    <!-- === WINDOW / FULLSCREEN OVERLAY === -->
+    {#if activeTab !== "dashboard"}
+        <!-- Backdrop (Desktop) / Background (Mobile) -->
+        <div
+            class="fixed inset-0 z-40 flex items-center justify-center md:p-10"
+        >
+            <!-- Backdrop Button -->
+            <button
+                transition:fade={{ duration: 200 }}
+                class="absolute inset-0 bg-black/60 backdrop-blur-sm w-full h-full border-0 cursor-default"
+                on:click={() => (activeTab = "dashboard")}
+                aria-label="Cerrar ventana"
+            ></button>
+
+            <!-- Window Container -->
+            <div
+                class="relative z-10 w-full h-full md:w-[90vw] md:h-[85vh] md:max-w-6xl md:rounded-3xl bg-[#0B1120] md:bg-[#0f172a]/95 md:backdrop-blur-2xl md:border border-white/10 shadow-2xl overflow-hidden flex flex-col"
+                in:scale={{ start: 0.95, duration: 300, easing: cubicOut }}
+                role="dialog"
+                aria-modal="true"
+            >
+                <!-- Window Header / Native App Bar -->
+                <div
+                    class="flex-shrink-0 h-16 md:h-14 border-b border-white/5 flex items-center justify-between px-4 md:px-6 bg-white/[0.02]"
+                >
+                    <div class="flex items-center gap-4">
+                        <button
+                            on:click={() => (activeTab = "dashboard")}
+                            class="md:hidden p-2 -ml-2 text-slate-400 hover:text-white"
+                        >
+                            <svg
+                                class="w-6 h-6"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                ><path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M15 19l-7-7 7-7"
+                                /></svg
+                            >
+                        </button>
+                        <!-- Traffic Lights (Desktop Only) -->
+                        <div class="hidden md:flex gap-2">
+                            <button
+                                on:click={() => (activeTab = "dashboard")}
+                                class="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400 transition-colors"
+                                aria-label="Cerrar"
+                            ></button>
+                            <div
+                                class="w-3 h-3 rounded-full bg-yellow-500"
+                            ></div>
+                            <div
+                                class="w-3 h-3 rounded-full bg-green-500"
+                            ></div>
+                        </div>
+                        <h2
+                            class="text-lg font-bold text-white ml-2 md:ml-4 flex items-center gap-2"
+                        >
+                            <span
+                                >{tabs.find((t) => t.id === activeTab)
+                                    ?.icon}</span
+                            >
+                            {tabs.find((t) => t.id === activeTab)?.label}
+                        </h2>
+                    </div>
+
+                    <button
+                        on:click={() => (activeTab = "dashboard")}
+                        class="text-sm font-medium text-slate-400 hover:text-white transition-colors"
+                    >
+                        Esc
+                    </button>
+                </div>
+
+                <!-- Window Content -->
+                <div
+                    class="flex-1 overflow-y-auto overflow-x-hidden p-0 md:p-6 bg-[#0B1120] md:bg-transparent custom-track"
+                >
+                    {#if activeTab === "users"}
+                        <UsersTab />
+                    {:else if activeTab === "proposals"}
+                        <ProposalsTab />
+                    {:else if activeTab === "submissions"}
+                        <SubmissionsTab on:approved={loadStats} />
+                    {:else if activeTab === "music"}
+                        <MusicTab />
+                    {:else if activeTab === "logs"}
+                        <LogsTab />
+                    {/if}
+                </div>
+            </div>
+        </div>
+    {/if}
+
+    <!-- === DOCK (Desktop Only - Persistent Quick Access) === -->
+    {#if activeTab === "dashboard"}
+        <div
+            class="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 hidden md:flex items-end gap-2 p-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl"
+            in:fly={{ y: 50, duration: 600, delay: 500 }}
+        >
+            {#each tabs.filter((t) => t.id !== "dashboard") as app}
+                <button
+                    on:click={() => (activeTab = app.id)}
+                    class="group relative w-12 h-12 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 hover:scale-110 active:scale-95 transition-all duration-200"
+                    title={app.label}
+                >
+                    <span class="text-xl">{app.icon}</span>
+                    {#if app.badge && app.badge > 0}
+                        <div
+                            class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-[#0B1120]"
+                        ></div>
+                    {/if}
+                    <!-- Tooltip -->
+                    <div
+                        class="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/80 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap"
+                    >
+                        {app.label}
+                    </div>
+                </button>
+            {/each}
+        </div>
+    {/if}
 </div>
+
+<style>
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .custom-track::-webkit-scrollbar {
+        width: 6px;
+    }
+    .custom-track::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .custom-track::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+    }
+    .custom-track::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    .animate-pulse-slow {
+        animation: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse {
+        0%,
+        100% {
+            opacity: 0.1;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.3;
+            transform: scale(1.1);
+        }
+    }
+</style>
