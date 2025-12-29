@@ -19,8 +19,9 @@ export interface UserProfile {
     lastGamePlayed: number; // Timestamp
     lastResetDate: string; // YYYY-MM-DD format
 
-    // Admin Access
+    // Admin & Status
     isAdmin?: boolean;
+    isVerified?: boolean;
 
     // Created/Updated
     createdAt: number; // Timestamp

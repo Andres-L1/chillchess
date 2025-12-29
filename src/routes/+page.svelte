@@ -147,9 +147,14 @@
                                 class="text-xs font-bold text-white tracking-wide flex items-center gap-1"
                             >
                                 {$userStore.user?.displayName || "Usuario"}
-                                {#if $userSubscription.tier === "pro" || $userSubscription.tier === "premium"}
-                                    <FounderBadge size="sm" />
-                                {/if}
+                                <div class="flex items-center gap-1">
+                                    {#if $userSubscription.profile?.isVerified}
+                                        <VerifiedBadge size="sm" />
+                                    {/if}
+                                    {#if $userSubscription.tier === "pro" || $userSubscription.tier === "premium"}
+                                        <FounderBadge size="sm" />
+                                    {/if}
+                                </div>
                             </span>
                             <span
                                 class="text-[10px] uppercase font-bold text-slate-400"
