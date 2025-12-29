@@ -226,6 +226,7 @@
     let animationLoopId: number;
 
     function initAudioAnalysis() {
+        if (typeof window === "undefined") return;
         if (!musicEl || audioContext) return;
 
         try {
