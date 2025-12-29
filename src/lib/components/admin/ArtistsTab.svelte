@@ -272,10 +272,9 @@
 
 <!-- Create/Edit Modal -->
 {#if showCreateModal}
-    <div
-        role="button"
-        tabindex="0"
-        class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+    <button
+        type="button"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 w-full h-full cursor-default border-none"
         on:click={() => (showCreateModal = false)}
         on:keydown={(e) => e.key === "Escape" && (showCreateModal = false)}
     >
@@ -294,11 +293,13 @@
                 <!-- User ID -->
                 <div>
                     <label
+                        for="userId"
                         class="block text-sm font-medium text-slate-300 mb-2"
                     >
                         User ID (Firebase UID) *
                     </label>
                     <input
+                        id="userId"
                         type="text"
                         bind:value={formData.userId}
                         disabled={!!editingArtist}
@@ -313,11 +314,13 @@
                 <!-- Artist Name -->
                 <div>
                     <label
+                        for="artistName"
                         class="block text-sm font-medium text-slate-300 mb-2"
                     >
                         Nombre del Artista *
                     </label>
                     <input
+                        id="artistName"
                         type="text"
                         bind:value={formData.artistName}
                         placeholder="JULYACTV"
@@ -328,11 +331,13 @@
                 <!-- Bio -->
                 <div>
                     <label
+                        for="bio"
                         class="block text-sm font-medium text-slate-300 mb-2"
                     >
                         Biografía
                     </label>
                     <textarea
+                        id="bio"
                         bind:value={formData.bio}
                         placeholder="Productor de música Lo-Fi y Chillhop..."
                         rows="3"
@@ -343,11 +348,13 @@
                 <!-- Avatar URL -->
                 <div>
                     <label
+                        for="avatarUrl"
                         class="block text-sm font-medium text-slate-300 mb-2"
                     >
                         Avatar URL
                     </label>
                     <input
+                        id="avatarUrl"
                         type="url"
                         bind:value={formData.avatarUrl}
                         placeholder="https://..."
@@ -358,11 +365,13 @@
                 <!-- Banner URL -->
                 <div>
                     <label
+                        for="bannerUrl"
                         class="block text-sm font-medium text-slate-300 mb-2"
                     >
                         Banner URL
                     </label>
                     <input
+                        id="bannerUrl"
                         type="url"
                         bind:value={formData.bannerUrl}
                         placeholder="https://..."
@@ -402,5 +411,5 @@
                 </button>
             </div>
         </div>
-    </div>
+    </button>
 {/if}
