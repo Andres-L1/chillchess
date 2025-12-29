@@ -2,6 +2,8 @@
     import { goto } from "$app/navigation";
     import { browser } from "$app/environment";
 
+    import { toast } from "$lib/stores/notificationStore";
+
     let theme: "dark" | "light" = "dark";
     let size: "compact" | "medium" | "large" = "medium";
     let showLogo = true;
@@ -13,7 +15,7 @@
 
     function copyToClipboard() {
         navigator.clipboard.writeText(widgetUrl);
-        alert("✅ URL copiada al portapapeles!");
+        toast.success("URL copiada al portapapeles");
     }
 </script>
 

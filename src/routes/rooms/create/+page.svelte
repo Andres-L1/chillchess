@@ -2,6 +2,7 @@
     import { goto } from "$app/navigation";
     import { userStore } from "$lib/auth/userStore";
     import { onMount } from "svelte";
+    import { toast } from "$lib/stores/notificationStore";
 
     let roomName = "";
     let isPublic = true;
@@ -25,14 +26,14 @@
 
             const roomData = {
                 name: roomName.trim(),
-                hostId: $userStore.user.uid,
-                hostName: $userStore.user.displayName || "Usuario",
+                hostId: $userStore.user?.uid,
+                hostName: $userStore.user?.displayName || "Usuario",
                 createdAt: serverTimestamp(),
                 isPublic,
                 currentTrack: null,
                 participants: {
-                    [$userStore.user.uid]: {
-                        displayName: $userStore.user.displayName || "Usuario",
+                    [$userStore.user?.uid || "unknown"]: {
+                        displayName: $userStore.user?.displayName || "Usuario",
                         joinedAt: serverTimestamp(),
                     },
                 },
@@ -45,7 +46,7 @@
             goto(`/rooms/${docRef.id}`);
         } catch (error) {
             console.error("Error creating room:", error);
-            alert("Error al crear la sala. Intenta de nuevo.");
+            toast.error("Error al crear la sala. Intenta de nuevo.");
         } finally {
             creating = false;
         }
@@ -92,8 +93,8 @@
 
                 <!-- Privacy -->
                 <div>
-                    <label class="block text-sm font-medium mb-3"
-                        >Privacidad</label
+                    <span class="block text-sm font-medium mb-3"
+                        >Privacidad</span
                     >
                     <div class="flex gap-4">
                         <button

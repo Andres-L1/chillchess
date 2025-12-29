@@ -17,6 +17,7 @@
     import BottomPlayer from "$lib/components/BottomPlayer.svelte";
     import MusicToast from "$lib/components/MusicToast.svelte";
     import CookieConsent from "$lib/components/CookieConsent.svelte";
+    import ToastContainer from "$lib/components/ToastContainer.svelte";
 
     storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 
@@ -51,6 +52,7 @@
         <BottomPlayer />
     {/if}
     <MusicToast />
+    <ToastContainer />
     <CookieConsent />
 </div>
 

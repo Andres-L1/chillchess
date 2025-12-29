@@ -5,6 +5,7 @@
     import { userStore } from "$lib/auth/userStore";
     import { audioStore, playAlbum } from "$lib/audio/store";
     import ChillBackground from "$lib/components/ChillBackground.svelte";
+    import { toast } from "$lib/stores/notificationStore";
 
     const roomId = $page.params.id;
 
