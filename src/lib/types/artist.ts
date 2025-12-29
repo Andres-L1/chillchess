@@ -20,6 +20,10 @@ export interface ArtistProfile {
     // Social Links
     socialLinks: SocialLink[];
 
+    // Verification
+    isVerified?: boolean;
+    verifiedAt?: number;
+
     // Stats
     totalPlays?: number;
     followerCount?: number;
