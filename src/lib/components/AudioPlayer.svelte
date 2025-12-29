@@ -247,8 +247,18 @@
         }
     }
 
-    function updateVisualizer() {
+    function updateVisualizer(time: number) {
         if (!analyser) return;
+
+        // Throttling: Limit updates to ~30fps to save CPU
+        // 1000ms / 30fps = ~33ms
+        if (time - lastFrameTime < 33) {
+            if (!musicEl.paused) {
+                animationLoopId = requestAnimationFrame(updateVisualizer);
+            }
+            return;
+        }
+        lastFrameTime = time;
 
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(dataArray);
@@ -278,20 +288,21 @@
     }
 
     import { browser } from "$app/environment";
+    let lastFrameTime = 0;
 
     // Trigger analysis loop when playing
     $: if (browser && $audioStore.isPlaying) {
-        // Initialize context on first play (user interaction required)
+        // Initialize context on first play
         if (!audioContext && musicEl) {
             initAudioAnalysis();
         }
-        // Resume context if suspended
+        // Resume context
         if (audioContext?.state === "suspended") {
             audioContext.resume();
         }
         // Start loop
         cancelAnimationFrame(animationLoopId);
-        updateVisualizer();
+        animationLoopId = requestAnimationFrame(updateVisualizer);
     } else if (browser) {
         cancelAnimationFrame(animationLoopId);
         // Reset analysis when stopped to avoid stuck visuals
