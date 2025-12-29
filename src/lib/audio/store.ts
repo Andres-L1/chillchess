@@ -6,12 +6,17 @@ import { collection, getDocs, query } from 'firebase/firestore';
 
 export type AmbienceType = 'rain' | 'library' | 'garden' | 'none';
 export type VibePreset = 'noir' | 'library' | 'zen' | 'custom';
+export type WhiteNoiseType = 'none' | 'rain' | 'fire' | 'cafe' | 'ocean' | 'forest';
 
 export interface AudioState {
     musicVolume: number;
     // Ambience
     ambienceVolume: number;
     currentAmbience: AmbienceType;
+
+    // White Noise
+    whiteNoiseVolume: number;
+    currentWhiteNoise: WhiteNoiseType;
 
     isMuted: boolean;
 
@@ -41,6 +46,10 @@ const initialState: AudioState = {
     musicVolume: 0.4,
     ambienceVolume: 0.6,
     currentAmbience: 'none',
+
+    whiteNoiseVolume: 0.5,
+    currentWhiteNoise: 'none',
+
     isMuted: false,
 
     availableAlbums: [], // Starts empty, fills from DB
