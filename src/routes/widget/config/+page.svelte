@@ -21,18 +21,20 @@
     <title>Widget OBS - Configuración | ChillChess</title>
 </svelte:head>
 
-<div class="min-h-screen bg-[#0B1120] text-white font-poppins p-8">
+<div class="min-h-screen bg-[#0B1120] text-white font-poppins px-4 py-8 md:p-8">
     <div class="max-w-6xl mx-auto">
         <!-- Header -->
         <div class="mb-8">
             <button
                 on:click={() => goto("/")}
-                class="text-slate-400 hover:text-white mb-4 flex items-center gap-2"
+                class="text-slate-400 hover:text-white mb-4 flex items-center gap-2 text-sm"
             >
                 ← Volver al inicio
             </button>
-            <h1 class="text-4xl font-bold mb-2">Widget para OBS/Streamlabs</h1>
-            <p class="text-slate-400">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2">
+                Widget para OBS/Streamlabs
+            </h1>
+            <p class="text-slate-400 text-sm md:text-base">
                 Muestra lo que estás escuchando en tu stream. 100% gratis.
             </p>
         </div>

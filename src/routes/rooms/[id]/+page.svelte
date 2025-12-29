@@ -191,10 +191,14 @@
         </div>
 
         <!-- Content -->
-        <div class="relative z-10 min-h-screen text-white font-poppins p-8">
+        <div
+            class="relative z-10 min-h-screen text-white font-poppins px-4 py-8 md:p-8"
+        >
             <div class="max-w-6xl mx-auto">
                 <!-- Header -->
-                <div class="flex justify-between items-center mb-8">
+                <div
+                    class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8"
+                >
                     <div>
                         <button
                             on:click={() => goto("/rooms")}
@@ -214,7 +218,7 @@
                     </div>
                     <button
                         on:click={copyRoomLink}
-                        class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium"
+                        class="w-full md:w-auto px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium"
                     >
                         📋 Copiar Enlace
                     </button>

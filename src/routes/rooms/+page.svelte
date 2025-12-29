@@ -59,24 +59,26 @@
     <title>Salas de Escucha | ChillChess</title>
 </svelte:head>
 
-<div class="min-h-screen bg-[#0B1120] text-white font-poppins p-8">
+<div class="min-h-screen bg-[#0B1120] text-white font-poppins px-4 py-8 md:p-8">
     <div class="max-w-6xl mx-auto">
-        <div class="flex justify-between items-center mb-8">
+        <div
+            class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8"
+        >
             <div>
                 <button
                     on:click={() => goto("/app")}
-                    class="text-slate-400 hover:text-white mb-2 flex items-center gap-2"
+                    class="text-slate-400 hover:text-white mb-2 flex items-center gap-2 text-sm"
                 >
                     ← Volver al Ambiente
                 </button>
-                <h1 class="text-4xl font-bold">Salas de Escucha</h1>
-                <p class="text-slate-400 mt-2">
+                <h1 class="text-3xl md:text-4xl font-bold">Salas de Escucha</h1>
+                <p class="text-slate-400 mt-2 text-sm md:text-base">
                     Escucha música sincronizada con amigos en tiempo real
                 </p>
             </div>
             <button
                 on:click={() => goto("/rooms/create")}
-                class="px-6 py-3 bg-primary-500 hover:bg-primary-600 rounded-full font-bold transition-all shadow-lg hover:scale-105"
+                class="w-full md:w-auto px-6 py-3 bg-primary-500 hover:bg-primary-600 rounded-full font-bold transition-all shadow-lg hover:scale-105"
             >
                 + Crear Sala
             </button>
