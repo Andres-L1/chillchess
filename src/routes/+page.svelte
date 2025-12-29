@@ -148,10 +148,10 @@
                             >
                                 {$userStore.user?.displayName || "Usuario"}
                                 <div class="flex items-center gap-1">
-                                    {#if $userSubscription.profile?.isVerified}
+                                    {#if $userSubscription.profile?.isVerified && ($userSubscription.profile?.showVerifiedBadge ?? true)}
                                         <VerifiedBadge size="sm" />
                                     {/if}
-                                    {#if $userSubscription.tier === "pro" || $userSubscription.tier === "premium"}
+                                    {#if ($userSubscription.tier === "pro" || $userSubscription.tier === "premium") && ($userSubscription.profile?.showFounderBadge ?? true)}
                                         <FounderBadge size="sm" />
                                     {/if}
                                 </div>

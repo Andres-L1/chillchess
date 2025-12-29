@@ -31,6 +31,10 @@
     let newLinkUrl = "";
     let newLinkLabel = "";
 
+    // Badge preferences
+    let showVerifiedBadge = true;
+    let showFounderBadge = true;
+
     onMount(async () => {
         // Check auth
         if (!$userStore.user) {
@@ -42,6 +46,11 @@
         isPro =
             $userSubscription.tier === "pro" ||
             $userSubscription.tier === "premium";
+
+        // Load badge preferences from user profile (users collection)
+        showVerifiedBadge =
+            $userSubscription.profile?.showVerifiedBadge ?? true;
+        showFounderBadge = $userSubscription.profile?.showFounderBadge ?? true;
 
         // Load existing profile
         try {
@@ -112,6 +121,14 @@
                 { merge: true }, // Merge to be safe, though setDoc overwrites by default without it on new docs
             );
             profile = profileData as ArtistProfile;
+
+            // Save badge preferences to user profile (users collection)
+            await updateDoc(doc(db, "users", $userStore.user.uid), {
+                showVerifiedBadge,
+                showFounderBadge,
+                updatedAt: Date.now(),
+            });
+
             alert("✅ Perfil guardado correctamente");
         } catch (error: any) {
             console.error("Error saving profile:", error);
@@ -270,6 +287,119 @@
                         </div>
                     </div>
 
+                    <!-- Badge Visibility Settings -->
+                    <div
+                        class="bg-[#1a1a1a] rounded-2xl border border-white/10 p-6"
+                    >
+                        <h2 class="text-xl font-bold mb-4">
+                            Insignias y Visibilidad
+                        </h2>
+                        <p class="text-sm text-slate-400 mb-6">
+                            Controla qué insignias se muestran en tu perfil
+                            público
+                        </p>
+
+                        <div class="space-y-4">
+                            <!-- Verified Badge Toggle -->
+                            {#if $userSubscription.profile?.isVerified}
+                                <label
+                                    class="flex items-center justify-between p-4 bg-white/5 rounded-xl cursor-pointer hover:bg-white/10 transition-colors"
+                                >
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg"
+                                        >
+                                            <svg
+                                                class="w-5 h-5"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                            >
+                                                <path
+                                                    d="M8.5 12L11 14.5L15.5 9.5"
+                                                    stroke="white"
+                                                    stroke-width="2.5"
+                                                    stroke-linecap="round"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div class="font-medium text-white">
+                                                Artista Verificado
+                                            </div>
+                                            <div class="text-xs text-slate-400">
+                                                Check dorado oficial
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <input
+                                        type="checkbox"
+                                        bind:checked={showVerifiedBadge}
+                                        class="w-5 h-5 rounded bg-white/10 border-white/20 text-primary-500 focus:ring-primary-500"
+                                    />
+                                </label>
+                            {/if}
+
+                            <!-- Founder Badge Toggle -->
+                            {#if isPro}
+                                <label
+                                    class="flex items-center justify-between p-4 bg-white/5 rounded-xl cursor-pointer hover:bg-white/10 transition-colors"
+                                >
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-lg"
+                                        >
+                                            <svg
+                                                class="w-5 h-5"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                            >
+                                                <path
+                                                    d="M12 2L2 12L12 22L22 12L12 2Z"
+                                                    fill="white"
+                                                    fill-opacity="0.9"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div class="font-medium text-white">
+                                                Fundador
+                                            </div>
+                                            <div class="text-xs text-slate-400">
+                                                Diamante púrpura exclusivo
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <input
+                                        type="checkbox"
+                                        bind:checked={showFounderBadge}
+                                        class="w-5 h-5 rounded bg-white/10 border-white/20 text-purple-500 focus:ring-purple-500"
+                                    />
+                                </label>
+                            {/if}
+
+                            {#if !$userSubscription.profile?.isVerified && !isPro}
+                                <div class="text-center py-8 text-slate-500">
+                                    <svg
+                                        class="w-12 h-12 mx-auto mb-3 opacity-30"
+                                        fill="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            d="M12 2L2 12L12 22L22 12L12 2Z"
+                                        />
+                                    </svg>
+                                    <p class="text-sm">
+                                        Conviértete en <a
+                                            href="/pricing"
+                                            class="text-primary-400 hover:underline"
+                                            >Fundador</a
+                                        > para desbloquear insignias exclusivas
+                                    </p>
+                                </div>
+                            {/if}
+                        </div>
+                    </div>
+
                     <!-- Customization (PRO) -->
                     {#if isPro}
                         <div
@@ -285,7 +415,9 @@
                             >
                                 <span class="text-2xl">🎨</span>
                                 <div>
-                                    <h2 class="text-xl font-bold text-slate-100">
+                                    <h2
+                                        class="text-xl font-bold text-slate-100"
+                                    >
                                         Personalización Pro
                                     </h2>
                                     <p class="text-xs text-purple-300">

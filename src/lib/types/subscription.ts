@@ -23,6 +23,10 @@ export interface UserProfile {
     isAdmin?: boolean;
     isVerified?: boolean;
 
+    // Badge Preferences
+    showVerifiedBadge?: boolean; // Default true if isVerified
+    showFounderBadge?: boolean;  // Default true if pro/premium
+
     // Created/Updated
     createdAt: number; // Timestamp
     updatedAt: number; // Timestamp

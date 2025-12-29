@@ -36,6 +36,7 @@ export const TIERS: Record<SubscriptionTier, TierConfig> = {
         billing: 'año',
         features: [
             'Catálogo Musical Completo',
+            'Descarga de Música (MP3/WAV)',
             'Fondos y Ambientes Exclusivos',
             'Experiencia Sin Interrupciones',
             'Modo Inmersivo (Ocultar UI)',
@@ -55,6 +56,7 @@ export const TIERS: Record<SubscriptionTier, TierConfig> = {
         billing: 'año',
         features: [
             'Todo lo de PRO',
+            'Descarga de Música (MP3/WAV)',
             'Badge de Fundador',
             'Personalización Total',
         ],
