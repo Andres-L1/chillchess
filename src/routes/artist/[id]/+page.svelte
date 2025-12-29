@@ -230,7 +230,7 @@
                                 {album.title}
                             </h3>
                             <p class="text-sm text-slate-400 truncate">
-                                {album.tracks.length} canciones
+                                {(album.tracks || []).length} canciones
                             </p>
 
                             {#if album.tag}
