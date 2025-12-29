@@ -124,6 +124,16 @@
         setTimeout(() => playMoveSound(true), 1000);
     }
 
+    function adjustTime(minutes: number) {
+        if (timerRunning) return;
+        let newTime = timeLeft + minutes * 60;
+        if (newTime < 60) newTime = 60; // Min 1 min
+        if (newTime > 180 * 60) newTime = 180 * 60; // Max 180 min
+        timeLeft = newTime;
+        focusDuration = timeLeft;
+        timerMode = "custom";
+    }
+
     // Circular Progress
     $: progressCircle = ((focusDuration - timeLeft) / focusDuration) * 283;
     // --- END TIMER ---
@@ -276,8 +286,9 @@
                         stroke-dasharray="283"
                         stroke-dashoffset={progressCircle}
                         stroke-linecap="round"
-                        class="text-white filter drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-1000 ease-linear"
+                        class="text-white filter drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-1000 ease-linear origin-center"
                         class:text-green-400={timerRunning}
+                        class:animate-breathe={timerRunning}
                     />
                 </svg>
 
@@ -287,31 +298,74 @@
                 >
                     {#if !timerRunning}
                         <div
-                            class="flex items-baseline justify-center relative group/input"
+                            class="flex items-center justify-center relative group/input gap-4"
                         >
-                            <input
-                                type="number"
-                                min="1"
-                                max="180"
-                                value={Math.floor(timeLeft / 60)}
-                                on:input={(e) => {
-                                    const val = parseInt(e.currentTarget.value);
-                                    if (val > 0 && val <= 180) {
-                                        timeLeft = val * 60;
-                                        focusDuration = timeLeft;
-                                        timerMode = "custom";
-                                    }
-                                }}
-                                class="font-mono text-5xl md:text-8xl font-light tracking-tighter text-white bg-transparent text-center w-[1.5em] focus:outline-none focus:border-b-2 focus:border-white/20 appearance-none m-0 p-0 selection:bg-white/20 hover:scale-105 transition-transform cursor-pointer"
-                            />
-                            <span
-                                class="text-2xl text-slate-500 font-medium absolute -right-6 top-2 md:top-8 md:-right-8 opacity-0 group-hover/input:opacity-100 transition-opacity"
-                                >m</span
+                            <button
+                                on:click={() => adjustTime(-5)}
+                                class="text-slate-500 hover:text-white transition-colors p-2 opacity-0 group-hover/input:opacity-100"
+                                aria-label="- 5 minutos"
                             >
+                                <svg
+                                    class="w-6 h-6"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    ><path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M20 12H4"
+                                    /></svg
+                                >
+                            </button>
+
+                            <div class="relative">
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max="180"
+                                    value={Math.floor(timeLeft / 60)}
+                                    on:input={(e) => {
+                                        const val = parseInt(
+                                            e.currentTarget.value,
+                                        );
+                                        if (val > 0 && val <= 180) {
+                                            timeLeft = val * 60;
+                                            focusDuration = timeLeft;
+                                            timerMode = "custom";
+                                        }
+                                    }}
+                                    class="font-mono text-5xl md:text-8xl font-light tracking-tighter text-white bg-transparent text-center w-[1.5em] focus:outline-none focus:border-b-2 focus:border-white/20 appearance-none m-0 p-0 selection:bg-white/20 hover:scale-105 transition-transform cursor-pointer"
+                                />
+                                <span
+                                    class="text-2xl text-slate-500 font-medium absolute -right-6 top-2 md:top-8 md:-right-8 opacity-0 group-hover/input:opacity-100 transition-opacity"
+                                    >m</span
+                                >
+                            </div>
+
+                            <button
+                                on:click={() => adjustTime(5)}
+                                class="text-slate-500 hover:text-white transition-colors p-2 opacity-0 group-hover/input:opacity-100"
+                                aria-label="+ 5 minutos"
+                            >
+                                <svg
+                                    class="w-6 h-6"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    ><path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M12 4v16m8-8H4"
+                                    /></svg
+                                >
+                            </button>
+
                             <div
-                                class="absolute -bottom-6 text-xs text-slate-500 opacity-0 group-hover/input:opacity-100 transition-opacity whitespace-nowrap"
+                                class="absolute -bottom-6 text-xs text-slate-500 opacity-0 group-hover/input:opacity-100 transition-opacity whitespace-nowrap pointer-events-none"
                             >
-                                Click para editar
+                                Click para editar o usa +/-
                             </div>
                         </div>
                     {:else}
@@ -729,5 +783,21 @@
     input[type="number"] {
         -moz-appearance: textfield;
         appearance: textfield;
+    }
+
+    @keyframes breathe {
+        0%,
+        100% {
+            transform: scale(1);
+            opacity: 0.8;
+        }
+        50% {
+            transform: scale(1.03);
+            opacity: 1;
+        }
+    }
+    .animate-breathe {
+        animation: breathe 4s ease-in-out infinite;
+        transform-origin: center;
     }
 </style>
