@@ -273,12 +273,18 @@
 <!-- Create/Edit Modal -->
 {#if showCreateModal}
     <div
+        role="button"
+        tabindex="0"
         class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         on:click={() => (showCreateModal = false)}
+        on:keydown={(e) => e.key === "Escape" && (showCreateModal = false)}
     >
         <div
+            role="dialog"
+            aria-modal="true"
             class="bg-midnight-800 border border-white/10 rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
             on:click|stopPropagation
+            on:keydown|stopPropagation
         >
             <h3 class="text-2xl font-bold text-white mb-6">
                 {editingArtist ? "Editar" : "Crear"} Artista
