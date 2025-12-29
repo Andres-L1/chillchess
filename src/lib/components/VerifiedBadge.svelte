@@ -8,62 +8,46 @@
     };
 </script>
 
-<div
-    class="inline-flex items-center justify-center {sizes[size]} relative group"
-    title="Artista Verificado"
->
-    <!-- Outer glow -->
-    <div
-        class="absolute inset-0 bg-primary-500/20 blur-sm rounded-full animate-pulse"
-    ></div>
-
-    <!-- Badge circle -->
-    <div
-        class="relative {sizes[
-            size
-        ]} bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center shadow-lg"
+<div class="inline-flex items-center group relative">
+    <!-- Verified Checkmark with Orange Gradient -->
+    <svg
+        class="{sizes[size]} transition-all group-hover:scale-110"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
     >
-        <!-- Checkmark -->
-        <svg
-            class="w-3/5 h-3/5 text-white drop-shadow-md"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-        >
-            <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="3"
-                d="M5 13l4 4L19 7"
-            />
-        </svg>
-    </div>
+        <defs>
+            <linearGradient
+                id="verifiedGradient-{size}"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="100%"
+            >
+                <stop offset="0%" style="stop-color:#FF7B3D;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
+            </linearGradient>
+        </defs>
+        <!-- Checkmark path -->
+        <path
+            d="M20 6L9 17L4 12"
+            stroke="url(#verifiedGradient-{size})"
+            filter="drop-shadow(0 0 4px rgba(255, 123, 61, 0.3))"
+        />
+    </svg>
 
     <!-- Tooltip on hover -->
     <div
-        class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap"
+        class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-midnight-800 border border-primary-500/30 rounded-lg text-xs font-medium text-primary-300 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
     >
-        <div
-            class="bg-midnight-800 text-white text-xs px-3 py-1.5 rounded-lg shadow-xl border border-primary-500/30"
-        >
-            Artista Verificado
-            <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
-                <div
-                    class="border-4 border-transparent border-t-midnight-800"
-                ></div>
-            </div>
+        Artista Verificado
+        <!-- Arrow -->
+        <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-px">
+            <div
+                class="border-4 border-transparent border-t-midnight-800"
+            ></div>
         </div>
     </div>
 </div>
-
-<style>
-    @keyframes pulse {
-        0%,
-        100% {
-            opacity: 0.6;
-        }
-        50% {
-            opacity: 0.3;
-        }
-    }
-</style>
