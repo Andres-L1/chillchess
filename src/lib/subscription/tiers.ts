@@ -48,22 +48,6 @@ export const TIERS: Record<SubscriptionTier, TierConfig> = {
         canAccessPremiumVibes: true,
         canCustomizeBoard: true,
     },
-    premium: {
-        id: 'premium',
-        name: 'Premium',
-        price: '€19.99',
-        priceValue: 19.99,
-        billing: 'año',
-        features: [
-            'Todo lo de PRO',
-            'Prioridad en Soporte',
-            'Badge de Fundador Gold',
-            'Acceso Anticipado a Features',
-        ],
-        maxGamesDaily: Infinity,
-        canAccessPremiumVibes: true,
-        canCustomizeBoard: true,
-    },
 };
 
 // Helper: Check if user can access a specific vibe

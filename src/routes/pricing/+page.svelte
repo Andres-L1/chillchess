@@ -25,7 +25,7 @@
     });
 
     async function handleSubscribe(
-        plan: "pro" | "premium",
+        plan: "pro",
         interval: "monthly" | "yearly",
     ) {
         if (!$userStore.user) {

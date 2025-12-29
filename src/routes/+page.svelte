@@ -151,7 +151,7 @@
                                     {#if $userSubscription.profile?.isVerified && ($userSubscription.profile?.showVerifiedBadge ?? true)}
                                         <VerifiedBadge size="sm" />
                                     {/if}
-                                    {#if ($userSubscription.tier === "pro" || $userSubscription.tier === "premium") && ($userSubscription.profile?.showFounderBadge ?? true)}
+                                    {#if $userSubscription.tier === "pro" && ($userSubscription.profile?.showFounderBadge ?? true)}
                                         <FounderBadge size="sm" />
                                     {/if}
                                 </div>
@@ -201,7 +201,7 @@
                                 <HeartIcon size="sm" gradient={false} />
                                 <span>Mis Favoritos</span>
                             </a>
-                            {#if $userSubscription.tier === "pro" || $userSubscription.tier === "premium"}
+                            {#if $userSubscription.tier === "pro"}
                                 <a
                                     href="/proposals"
                                     class="px-4 py-2 text-purple-300 hover:text-purple-200 hover:bg-purple-500/10 text-left flex items-center gap-2"
@@ -405,7 +405,7 @@
                                 <HeartIcon size="sm" gradient={false} />
                                 <span>Mis Favoritos</span>
                             </a>
-                            {#if $userSubscription.tier === "pro" || $userSubscription.tier === "premium"}
+                            {#if $userSubscription.tier === "pro"}
                                 <a
                                     href="/proposals"
                                     class="flex items-center gap-3 mb-3 text-sm font-bold text-purple-300 hover:text-purple-200 px-1"

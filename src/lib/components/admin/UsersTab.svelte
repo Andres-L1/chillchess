@@ -68,9 +68,7 @@
                 filterType === "all" ||
                 (filterType === "verified" && user.isVerified) ||
                 (filterType === "unverified" && !user.isVerified) ||
-                (filterType === "pro" &&
-                    (user.subscriptionTier === "pro" ||
-                        user.subscriptionTier === "premium")) ||
+                (filterType === "pro" && user.subscriptionTier === "pro") ||
                 (filterType === "admin" && user.isAdmin);
 
             return matchesSearch && matchesFilter;
@@ -259,7 +257,7 @@
                     <option value="all">Todos</option>
                     <option value="verified">Solo Verificados</option>
                     <option value="unverified">Solo No Verificados</option>
-                    <option value="pro">Solo PRO/Premium</option>
+                    <option value="pro">Solo PRO</option>
                     <option value="admin">Solo Admins</option>
                 </select>
             </div>
@@ -331,7 +329,6 @@
                                     >
                                         <option value="free">Free</option>
                                         <option value="pro">PRO</option>
-                                        <option value="premium">Premium</option>
                                     </select>
                                 </td>
                                 <td class="px-6 py-4">
@@ -427,7 +424,6 @@
                             >
                                 <option value="free">Free</option>
                                 <option value="pro">PRO</option>
-                                <option value="premium">Premium</option>
                             </select>
                         </div>
                     </div>
