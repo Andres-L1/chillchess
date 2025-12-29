@@ -114,11 +114,34 @@
     class="min-h-screen bg-midnight-900 text-white font-poppins pt-24 pb-20 px-4"
 >
     <!-- Header -->
-    <div class="max-w-4xl mx-auto text-center mb-16 space-y-4">
-        <h1 class="text-4xl md:text-5xl font-bold tracking-tight">
+    <div class="max-w-4xl mx-auto mb-16 space-y-4">
+        <!-- Back Button -->
+        <div class="mb-8">
+            <a
+                href="/"
+                class="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors group"
+            >
+                <svg
+                    class="w-5 h-5 transition-transform group-hover:-translate-x-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 19l-7-7 7-7"
+                    />
+                </svg>
+                <span class="font-medium">Volver</span>
+            </a>
+        </div>
+
+        <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-center">
             Invierte en tu <span class="text-primary-500">Calma</span>
         </h1>
-        <p class="text-slate-400 text-lg max-w-2xl mx-auto">
+        <p class="text-slate-400 text-lg max-w-2xl mx-auto text-center">
             Un único plan simple. Todo incluido.
             <br class="hidden md:block" />
             Sin complicaciones.
