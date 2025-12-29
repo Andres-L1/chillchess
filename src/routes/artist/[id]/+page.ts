@@ -15,7 +15,8 @@ export async function load({ params }: { params: { id: string } }) {
         const artistProfile = artistSnap.data() as ArtistProfile;
 
         return {
-            artistProfile
+            artistProfile,
+            artistId: params.id  // Pass the ID for real-time listener
         };
     } catch (err) {
         console.error('Error loading artist profile:', err);

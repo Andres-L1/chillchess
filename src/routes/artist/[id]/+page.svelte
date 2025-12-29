@@ -10,7 +10,7 @@
     import { db } from "$lib/firebase";
     import { doc, onSnapshot } from "firebase/firestore";
 
-    export let data: { artistProfile: ArtistProfile };
+    export let data: { artistProfile: ArtistProfile; artistId: string };
 
     // Use reactive variable for real-time updates
     let artist = data.artistProfile;
@@ -18,7 +18,7 @@
 
     // Set up real-time listener
     onMount(() => {
-        const artistRef = doc(db, "artists", artist.userId);
+        const artistRef = doc(db, "artists", data.artistId);
 
         unsubscribe = onSnapshot(artistRef, (docSnap) => {
             if (docSnap.exists()) {
