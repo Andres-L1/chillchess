@@ -52,11 +52,12 @@
                 <!-- Minimize Button - Better Mobile UX -->
                 <button
                     on:click={() => (isCollapsed = true)}
-                    class="absolute -top-8 md:-top-6 left-1/2 -translate-x-1/2 w-16 h-10 md:w-20 md:h-6 flex items-center justify-center bg-[#0F172A]/60 backdrop-blur-sm rounded-t-2xl border border-white/10 border-b-0 text-white/40 hover:text-white/80 transition-all z-20 cursor-pointer active:scale-95"
+                    class="absolute -top-10 md:-top-6 left-1/2 -translate-x-1/2 w-20 h-12 md:w-20 md:h-6 flex items-center justify-center bg-[#0F172A]/90 md:bg-[#0F172A]/60 backdrop-blur-sm rounded-t-2xl border-2 md:border border-white/30 border-b-0 text-white md:text-white/40 hover:text-white transition-all z-20 cursor-pointer active:scale-95 shadow-lg"
                     title="Minimizar"
+                    aria-label="Minimizar reproductor"
                 >
                     <div
-                        class="w-10 h-1.5 md:w-8 md:h-1 bg-current rounded-full"
+                        class="w-12 h-2 md:w-8 md:h-1 bg-current rounded-full"
                     ></div>
                 </button>
 
