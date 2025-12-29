@@ -17,11 +17,11 @@
     // White Noise files (loops)
     const WHITE_NOISE_TRACKS = {
         none: "",
-        rain: "/sounds/rain.wav",
-        fire: "/sounds/fire.mp3",
-        cafe: "/sounds/cafe.wav",
-        ocean: "/sounds/ocean.flac",
-        forest: "/sounds/forest.wav",
+        rain: "/whitenoise/rain.wav",
+        fire: "/whitenoise/fire.mp3",
+        cafe: "/whitenoise/cafe.wav",
+        ocean: "/whitenoise/ocean.flac",
+        forest: "/whitenoise/forest.wav",
     };
 
     let musicEl: HTMLAudioElement;
