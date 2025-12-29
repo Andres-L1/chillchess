@@ -14,8 +14,19 @@
         none: "",
     };
 
+    // White Noise files (loops)
+    const WHITE_NOISE_TRACKS = {
+        none: "",
+        rain: "/sounds/rain.mp3",
+        fire: "/sounds/fire.mp3",
+        cafe: "/sounds/cafe.mp3",
+        ocean: "/sounds/ocean.mp3",
+        forest: "/sounds/forest.mp3",
+    };
+
     let musicEl: HTMLAudioElement;
     let ambienceEl: HTMLAudioElement;
+    let whiteNoiseEl: HTMLAudioElement;
 
     // Handle Seek Request
     $: if (musicEl && $audioStore.seekRequest !== null) {
@@ -182,6 +193,34 @@
         }
     }
 
+    // Handle White Noise Layer (independent of music playback)
+    $: if (whiteNoiseEl) {
+        whiteNoiseEl.volume = $audioStore.isMuted
+            ? 0
+            : $audioStore.whiteNoiseVolume;
+
+        const whiteNoiseSrc = WHITE_NOISE_TRACKS[$audioStore.currentWhiteNoise];
+
+        if (whiteNoiseEl.getAttribute("src") !== whiteNoiseSrc) {
+            if (whiteNoiseSrc) {
+                whiteNoiseEl.src = whiteNoiseSrc;
+                whiteNoiseEl.play().catch(console.error);
+            } else {
+                whiteNoiseEl.pause();
+                whiteNoiseEl.src = "";
+            }
+        }
+
+        // Keep playing if has source (white noise is always on when selected)
+        if (
+            whiteNoiseSrc &&
+            whiteNoiseEl.paused &&
+            whiteNoiseEl.readyState >= 2
+        ) {
+            whiteNoiseEl.play().catch(console.error);
+        }
+    }
+
     function handleTrackEnd() {
         console.log("Track ended");
 
@@ -334,4 +373,8 @@
 
 <!-- Ambience Player (Loop) -->
 <audio bind:this={ambienceEl} loop preload="auto" crossorigin="anonymous"
+></audio>
+
+<!-- White Noise Player (Loop) -->
+<audio bind:this={whiteNoiseEl} loop preload="auto" crossorigin="anonymous"
 ></audio>
