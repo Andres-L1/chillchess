@@ -6,6 +6,10 @@
     import { goto } from "$app/navigation";
     import SubmissionsTab from "$lib/components/admin/SubmissionsTab.svelte";
     import ArtistsTab from "$lib/components/admin/ArtistsTab.svelte";
+    import DashboardIcon from "$lib/components/icons/DashboardIcon.svelte";
+    import MusicIcon from "$lib/components/icons/MusicIcon.svelte";
+    import UsersIcon from "$lib/components/icons/UsersIcon.svelte";
+    import MicrophoneIcon from "$lib/components/icons/MicrophoneIcon.svelte";
     import {
         ALBUMS,
         type Album,
@@ -678,7 +682,10 @@
                             ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
                             : 'text-slate-400 hover:bg-white/5 hover:text-white'}"
                     >
-                        <span class="text-xl">📊</span>
+                        <DashboardIcon
+                            size="md"
+                            gradient={activeTab === "dashboard"}
+                        />
                         <span class="hidden md:block font-medium text-sm"
                             >Dashboard</span
                         >
@@ -691,7 +698,7 @@
                             ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
                             : 'text-slate-400 hover:bg-white/5 hover:text-white'}"
                     >
-                        <span class="text-xl">🎵</span>
+                        <MusicIcon size="md" gradient={activeTab === "music"} />
                         <span class="hidden md:block font-medium text-sm"
                             >Contenido & Música</span
                         >
@@ -704,7 +711,7 @@
                             ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
                             : 'text-slate-400 hover:bg-white/5 hover:text-white'}"
                     >
-                        <span class="text-xl">👥</span>
+                        <UsersIcon size="md" gradient={activeTab === "users"} />
                         <span class="hidden md:block font-medium text-sm"
                             >Usuarios</span
                         >
@@ -717,7 +724,10 @@
                             ? 'bg-primary-500 text-white shadow-lg shadow-primary-900/20'
                             : 'text-slate-400 hover:bg-white/5 hover:text-white'}"
                     >
-                        <span class="text-xl">🎤</span>
+                        <MicrophoneIcon
+                            size="md"
+                            gradient={activeTab === "artists"}
+                        />
                         <span class="hidden md:block font-medium text-sm"
                             >Artistas</span
                         >
