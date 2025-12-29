@@ -18,6 +18,10 @@
         isFavorite,
     } from "$lib/data/favorites";
     import VerifiedBadge from "$lib/components/VerifiedBadge.svelte";
+    import MusicIcon from "$lib/components/icons/MusicIcon.svelte";
+    import AlbumIcon from "$lib/components/icons/AlbumIcon.svelte";
+    import GameIcon from "$lib/components/icons/GameIcon.svelte";
+    import LeafIcon from "$lib/components/icons/LeafIcon.svelte";
 
     const categoryLabelMap = CATEGORY_LABELS.reduce(
         (acc, curr) => {
@@ -231,11 +235,11 @@
                                 class="absolute top-3 left-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-sm text-xs font-bold flex items-center gap-1"
                             >
                                 {#if album.category === "musica"}
-                                    <span>🎵</span>
+                                    <MusicIcon size="sm" gradient={false} />
                                 {:else if album.category === "juegos"}
-                                    <span>🎮</span>
+                                    <GameIcon size="sm" gradient={false} />
                                 {:else}
-                                    <span>🌿</span>
+                                    <LeafIcon size="sm" gradient={false} />
                                 {/if}
                                 {categoryLabelMap[album.category]}
                             </div>

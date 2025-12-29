@@ -4,6 +4,12 @@
 
     export let status = 500;
     export let error: Error | null = null;
+
+    import SearchIcon from "$lib/components/icons/SearchIcon.svelte";
+    import PawnIcon from "$lib/components/icons/PawnIcon.svelte";
+    import AlertIcon from "$lib/components/icons/AlertIcon.svelte";
+    import HomeIcon from "$lib/components/icons/HomeIcon.svelte";
+    import CollectionIcon from "$lib/components/icons/CollectionIcon.svelte";
 </script>
 
 <svelte:head>
@@ -15,13 +21,13 @@
 >
     <div class="max-w-2xl w-full text-center space-y-8">
         <!-- Error Icon -->
-        <div class="text-8xl">
+        <div class="flex justify-center mb-6">
             {#if status === 404}
-                🔍
+                <SearchIcon size="2xl" gradient={true} />
             {:else if status === 500}
-                ♟️
+                <PawnIcon size="2xl" gradient={true} />
             {:else}
-                ⚠️
+                <AlertIcon size="2xl" gradient={true} />
             {/if}
         </div>
 
@@ -70,16 +76,18 @@
         >
             <button
                 on:click={() => goto("/")}
-                class="px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 rounded-xl font-bold text-lg transition-all hover:scale-105 shadow-lg shadow-primary-900/30"
+                class="px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 rounded-xl font-bold text-lg transition-all hover:scale-105 shadow-lg shadow-primary-900/30 flex items-center justify-center gap-3"
             >
-                🏠 Volver al Inicio
+                <HomeIcon size="md" gradient={false} />
+                <span>Volver al Inicio</span>
             </button>
 
             <button
                 on:click={() => goto("/coleccion")}
-                class="px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl font-bold text-lg transition-all"
+                class="px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-3"
             >
-                🎵 Ir a la Colección
+                <CollectionIcon size="md" gradient={false} />
+                <span>Ir a la Colección</span>
             </button>
         </div>
 
