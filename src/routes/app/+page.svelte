@@ -12,10 +12,13 @@
     import ChillBackground from "$lib/components/ChillBackground.svelte";
     import PaywallModal from "$lib/components/PaywallModal.svelte";
     import EyeIcon from "$lib/components/icons/EyeIcon.svelte";
+    import Clock from "$lib/components/Clock.svelte";
+    import { vibeStore } from "$lib/stores/vibeStore";
 
     let showMusicExplorer = false;
     let showVibeStudio = false;
     let showPaywall = false;
+    let vibeTab: "scenes" | "clock" = "scenes"; // Tab state for modal
     let isUserLoaded = false;
 
     // Immersive Mode Logic
@@ -313,11 +316,16 @@
                             </div>
                         </div>
                     {:else}
+                        <Clock {timeLeft} isTimerRunning={timerRunning} />
+                    {/if}
+
+                    {#if !timerRunning}
                         <div
-                            class="font-mono text-5xl md:text-8xl font-light tracking-tighter text-white drop-shadow-lg tabular-nums select-none"
+                            class="text-slate-400 text-sm tracking-[0.2em] mt-2 md:mt-4 uppercase opacity-60 font-medium"
                         >
-                            {formatTime(timeLeft)}
+                            ENFOQUE
                         </div>
+                    {:else}
                         <div
                             class="text-slate-400 text-sm tracking-[0.2em] mt-2 md:mt-4 uppercase opacity-60 font-medium animate-pulse"
                         >
@@ -498,7 +506,7 @@
             tabindex="0"
         >
             <div class="max-w-4xl mx-auto w-full h-full flex flex-col">
-                <div class="flex justify-between items-center mb-8 shrink-0">
+                <div class="flex justify-between items-center mb-6 shrink-0">
                     <div>
                         <h2 class="text-3xl font-bold text-slate-100 mb-1">
                             Vibe Studio
@@ -515,65 +523,177 @@
                     </button>
                 </div>
 
-                <div
-                    class="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto"
-                >
-                    <!-- Example Vibes (Hardcoded mainly for UI demo, should link to actual logic) -->
-                    {#each [{ id: "none", label: "Silencio Digital", icon: "🔇", desc: "Sin efectos de fondo", pro: false }, { id: "noir", label: "Lluvia Nocturna", icon: "🌧️", desc: "Sonido de lluvia suave y tonos oscuros", pro: false }, { id: "library", label: "Biblioteca", icon: "📚", desc: "Ambiente académico y texturas de papel", pro: false }, { id: "zen", label: "Jardín Zen", icon: "🎋", desc: "Naturaleza y sonidos de viento", pro: true }, { id: "space", label: "Cosmos", icon: "🌌", desc: "Frecuencias espaciales y vacío", pro: true }] as vibe}
-                        {@const isLocked =
-                            vibe.pro &&
-                            $userSubscription.tier !== "pro" &&
-                            $userSubscription.tier !== "premium"}
-                        <button
-                            on:click={() => {
-                                if (isLocked) {
-                                    showPaywall = true;
-                                } else {
-                                    // Logic to set vibe background
-                                    // For now just console log or minor implementation
-                                    console.log("Setting vibe:", vibe.id);
-                                    // Ideally call a store function here
-                                    showVibeStudio = false;
-                                }
-                            }}
-                            class="relative p-6 rounded-2xl border transition-all text-left flex items-start gap-4 group {isLocked
-                                ? 'bg-white/5 border-white/5 opacity-70 hover:opacity-100 cursor-not-allowed'
-                                : 'bg-[#1e293b]/50 border-white/10 hover:bg-[#1e293b] hover:border-orange-500/50 cursor-pointer'}"
-                        >
-                            <div
-                                class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl {isLocked
-                                    ? 'bg-white/5 grayscale'
-                                    : 'bg-white/10 group-hover:bg-orange-500/20'}"
-                            >
-                                {vibe.icon}
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <h3 class="font-bold text-white text-lg">
-                                        {vibe.label}
-                                    </h3>
-                                    {#if isLocked}
-                                        <span
-                                            class="text-[10px] bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider border border-orange-500/20"
-                                            >PRO</span
+                <!-- TABS -->
+                <div class="flex gap-4 mb-6 border-b border-white/10 pb-1">
+                    <button
+                        on:click={() => (vibeTab = "scenes")}
+                        class="px-4 py-2 text-sm font-bold uppercase tracking-wider transition-colors border-b-2 {vibeTab ===
+                        'scenes'
+                            ? 'border-primary-500 text-white'
+                            : 'border-transparent text-slate-500 hover:text-white'}"
+                    >
+                        🌆 Ambientes
+                    </button>
+                    <button
+                        on:click={() => (vibeTab = "clock")}
+                        class="px-4 py-2 text-sm font-bold uppercase tracking-wider transition-colors border-b-2 {vibeTab ===
+                        'clock'
+                            ? 'border-primary-500 text-white'
+                            : 'border-transparent text-slate-500 hover:text-white'}"
+                    >
+                        🕰️ Reloj
+                    </button>
+                </div>
+
+                <!-- CONTENT -->
+                <div class="overflow-y-auto flex-1 pr-2">
+                    {#if vibeTab === "scenes"}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Existing Scenes Logic -->
+                            {#each [{ id: "none", label: "Silencio Digital", icon: "🔇", desc: "Sin efectos de fondo", pro: false }, { id: "noir", label: "Lluvia Nocturna", icon: "🌧️", desc: "Sonido de lluvia suave y tonos oscuros", pro: false }, { id: "library", label: "Biblioteca", icon: "📚", desc: "Ambiente académico y texturas de papel", pro: false }, { id: "zen", label: "Jardín Zen", icon: "🎋", desc: "Naturaleza y sonidos de viento", pro: true }, { id: "space", label: "Cosmos", icon: "🌌", desc: "Frecuencias espaciales y vacío", pro: true }, { id: "cyber", label: "Cyber Grid", icon: "👾", desc: "Rejilla de neón retro-futurista", pro: true }, { id: "breathe", label: "Modo Respiración", icon: "🧘", desc: "Fondo pulsante para guiado 4-7-8", pro: true }] as vibe}
+                                {@const isLocked =
+                                    vibe.pro &&
+                                    $userSubscription.tier !== "pro" &&
+                                    $userSubscription.tier !== "premium"}
+                                <button
+                                    on:click={() => {
+                                        if (isLocked) {
+                                            showPaywall = true;
+                                        } else {
+                                            console.log(
+                                                "Setting vibe:",
+                                                vibe.id,
+                                            );
+                                            // vibeStore.setBackground(vibe.id); implementation pending
+                                            showVibeStudio = false;
+                                        }
+                                    }}
+                                    class="relative p-5 rounded-2xl border transition-all text-left flex items-center gap-4 group {isLocked
+                                        ? 'bg-white/5 border-white/5 opacity-70 hover:opacity-100 cursor-not-allowed'
+                                        : 'bg-[#1e293b]/50 border-white/10 hover:bg-[#1e293b] hover:border-orange-500/50 cursor-pointer'}"
+                                >
+                                    <div
+                                        class="w-10 h-10 rounded-lg flex items-center justify-center text-xl {isLocked
+                                            ? 'bg-white/5 grayscale'
+                                            : 'bg-white/10 group-hover:bg-orange-500/20'}"
+                                    >
+                                        {vibe.icon}
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2">
+                                            <h3
+                                                class="font-bold text-slate-200 text-sm"
+                                            >
+                                                {vibe.label}
+                                            </h3>
+                                            {#if isLocked}
+                                                <span
+                                                    class="text-[9px] bg-orange-500/20 text-orange-400 px-1 py-0.5 rounded font-bold uppercase tracking-wider border border-orange-500/20"
+                                                    >PRO</span
+                                                >
+                                            {/if}
+                                        </div>
+                                        <p
+                                            class="text-xs text-slate-400 mt-0.5"
                                         >
+                                            {vibe.desc}
+                                        </p>
+                                    </div>
+                                    {#if isLocked}
+                                        <div class="text-slate-500">🔒</div>
                                     {/if}
-                                </div>
-                                <p
-                                    class="text-sm text-slate-400 leading-relaxed"
-                                >
-                                    {vibe.desc}
-                                </p>
+                                </button>
+                            {/each}
+                        </div>
+                    {:else if vibeTab === "clock"}
+                        <div class="space-y-6">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {#each [{ id: "modern", label: "Moderno", font: "font-poppins", desc: "Limpio y minimalista", pro: false }, { id: "neon", label: "Neon Cyber", font: "font-mono text-primary-400 shadow-glow", desc: "Estilo hacker brillante", pro: true }, { id: "retro", label: "Pixel Retro", font: "font-mono", desc: "Estilo 8-bit clásico", pro: true }, { id: "elegant", label: "Editorial", font: "font-serif italic", desc: "Sofisticado y clásico", pro: true }] as style}
+                                    {@const isLocked =
+                                        style.pro &&
+                                        $userSubscription.tier !== "pro" &&
+                                        $userSubscription.tier !== "premium"}
+                                    <button
+                                        on:click={() => {
+                                            if (isLocked) {
+                                                showPaywall = true;
+                                            } else {
+                                                vibeStore.setClockStyle(
+                                                    style.id,
+                                                );
+                                            }
+                                        }}
+                                        class="group relative p-4 rounded-xl border transition-all text-left flex flex-col gap-3
+                                            {$vibeStore.clockStyle === style.id
+                                            ? 'bg-primary-500/10 border-primary-500'
+                                            : isLocked
+                                              ? 'bg-white/5 border-white/5 opacity-70'
+                                              : 'bg-[#1e293b]/50 border-white/10 hover:border-white/30'}"
+                                    >
+                                        <!-- Preview -->
+                                        <div
+                                            class="h-16 flex items-center justify-center bg-black/20 rounded-lg text-2xl text-white"
+                                        >
+                                            <span
+                                                class="{style.font} {style.id ===
+                                                'neon'
+                                                    ? 'drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]'
+                                                    : ''} {style.id === 'retro'
+                                                    ? 'font-bold'
+                                                    : ''}"
+                                            >
+                                                12:45
+                                            </span>
+                                        </div>
+
+                                        <div
+                                            class="flex justify-between items-end"
+                                        >
+                                            <div>
+                                                <h3
+                                                    class="font-bold text-white text-sm flex items-center gap-2"
+                                                >
+                                                    {style.label}
+                                                    {#if isLocked}
+                                                        <span
+                                                            class="text-[9px] bg-orange-500/20 text-orange-400 px-1 py-0.5 rounded font-bold uppercase tracking-wider"
+                                                            >PRO</span
+                                                        >
+                                                    {/if}
+                                                </h3>
+                                                <p
+                                                    class="text-xs text-slate-400 mt-0.5"
+                                                >
+                                                    {style.desc}
+                                                </p>
+                                            </div>
+
+                                            {#if $vibeStore.clockStyle === style.id}
+                                                <div class="text-primary-400">
+                                                    <svg
+                                                        class="w-5 h-5"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                        ><path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M5 13l4 4L19 7"
+                                                        ></path></svg
+                                                    >
+                                                </div>
+                                            {:else if isLocked}
+                                                <div class="text-slate-500">
+                                                    🔒
+                                                </div>
+                                            {/if}
+                                        </div>
+                                    </button>
+                                {/each}
                             </div>
-                            {#if isLocked}
-                                <div
-                                    class="absolute top-4 right-4 text-slate-500"
-                                >
-                                    🔒
-                                </div>
-                            {/if}
-                        </button>
-                    {/each}
+                        </div>
+                    {/if}
                 </div>
             </div>
         </button>
