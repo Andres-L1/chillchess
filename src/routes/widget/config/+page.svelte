@@ -49,9 +49,7 @@
 
                     <!-- Theme -->
                     <div class="mb-4">
-                        <label class="block text-sm font-medium mb-2"
-                            >Tema</label
-                        >
+                        <span class="block text-sm font-medium mb-2">Tema</span>
                         <div class="flex gap-3">
                             <button
                                 on:click={() => (theme = "dark")}
@@ -76,8 +74,8 @@
 
                     <!-- Size -->
                     <div class="mb-4">
-                        <label class="block text-sm font-medium mb-2"
-                            >Tamaño</label
+                        <span class="block text-sm font-medium mb-2"
+                            >Tamaño</span
                         >
                         <div class="flex gap-3">
                             <button
@@ -112,10 +110,13 @@
 
                     <!-- Opacity -->
                     <div class="mb-4">
-                        <label class="block text-sm font-medium mb-2"
+                        <label
+                            for="opacity-slider"
+                            class="block text-sm font-medium mb-2"
                             >Opacidad: {(opacity * 100).toFixed(0)}%</label
                         >
                         <input
+                            id="opacity-slider"
                             type="range"
                             min="0.3"
                             max="1"
