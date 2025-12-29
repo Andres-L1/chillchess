@@ -57,10 +57,7 @@
         }
     }
 
-    const navItems = [
-        { path: "/admin", label: "Dashboard", icon: "📊" },
-        { path: "/admin/logs", label: "Logs", icon: "📝" },
-    ];
+    const navItems = [{ path: "/admin", label: "Dashboard", icon: "📊" }];
 
     $: currentPath = $page.url.pathname;
 

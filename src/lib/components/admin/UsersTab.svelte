@@ -98,9 +98,8 @@
             );
 
             // 2. Try to update Artist document (if it exists)
-            // We verify even if they aren't an artist yet, so they are ready if they become one
             try {
-                const { getDoc, setDoc } = await import("firebase/firestore");
+                const { getDoc } = await import("firebase/firestore");
                 const artistRef = doc(db, "artists", user.uid);
                 const artistSnap = await getDoc(artistRef);
 
@@ -276,8 +275,9 @@
             <p class="mt-4 text-slate-400">Cargando usuarios...</p>
         </div>
     {:else}
+        <!-- Desktop Table (Hidden on Mobile) -->
         <div
-            class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden"
+            class="hidden md:block bg-white/5 border border-white/10 rounded-2xl overflow-hidden"
         >
             <div class="overflow-x-auto">
                 <table class="w-full">
@@ -340,18 +340,7 @@
                                             <span
                                                 class="inline-flex items-center gap-1 px-2 py-1 bg-green-500/20 text-green-300 rounded-lg text-xs font-bold"
                                             >
-                                                <svg
-                                                    class="w-3 h-3"
-                                                    fill="currentColor"
-                                                    viewBox="0 0 20 20"
-                                                >
-                                                    <path
-                                                        fill-rule="evenodd"
-                                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                        clip-rule="evenodd"
-                                                    />
-                                                </svg>
-                                                Verificado
+                                                ✓ Verificado
                                             </span>
                                         {/if}
                                         {#if user.isAdmin}
@@ -370,38 +359,32 @@
                                         <button
                                             on:click={() =>
                                                 toggleVerified(user)}
-                                            class="px-3 py-1.5 rounded-lg font-medium text-xs transition-colors {user.isVerified
-                                                ? 'bg-red-500/20 text-red-300 hover:bg-red-500/30'
-                                                : 'bg-green-500/20 text-green-300 hover:bg-green-500/30'}"
+                                            class="p-2 rounded-lg transition-colors {user.isVerified
+                                                ? 'bg-red-500/20 text-red-300'
+                                                : 'bg-green-500/20 text-green-300'}"
                                             title={user.isVerified
                                                 ? "Quitar verificado"
                                                 : "Verificar"}
                                         >
-                                            {user.isVerified
-                                                ? "✗ Verificado"
-                                                : "✓ Verificar"}
+                                            {user.isVerified ? "✗" : "✓"}
                                         </button>
-
                                         <button
                                             on:click={() => toggleAdmin(user)}
-                                            class="px-3 py-1.5 rounded-lg font-medium text-xs transition-colors {user.isAdmin
-                                                ? 'bg-orange-500/20 text-orange-300 hover:bg-orange-500/30'
-                                                : 'bg-slate-500/20 text-slate-300 hover:bg-slate-500/30'}"
+                                            class="p-2 rounded-lg transition-colors {user.isAdmin
+                                                ? 'bg-orange-500/20 text-orange-300'
+                                                : 'bg-slate-500/20 text-slate-300'}"
                                             title={user.isAdmin
                                                 ? "Quitar admin"
                                                 : "Hacer admin"}
                                         >
-                                            {user.isAdmin
-                                                ? "👑 Admin"
-                                                : "Hacer Admin"}
+                                            👑
                                         </button>
-
                                         <button
                                             on:click={() => deleteUser(user)}
-                                            class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg font-medium text-xs transition-colors"
+                                            class="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors"
                                             title="Eliminar usuario"
                                         >
-                                            🗑️ Eliminar
+                                            🗑️
                                         </button>
                                     </div>
                                 </td>
@@ -410,18 +393,100 @@
                     </tbody>
                 </table>
             </div>
+        </div>
 
-            {#if filteredUsers.length === 0}
-                <div class="text-center py-12 text-slate-400">
-                    <p>No se encontraron usuarios con esos criterios</p>
+        <!-- Mobile Cards (Visible on Mobile) -->
+        <div class="md:hidden space-y-4">
+            {#each filteredUsers as user}
+                <div
+                    class="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4"
+                >
+                    <!-- Header -->
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1 pr-4">
+                            <p class="font-bold text-white text-lg break-all">
+                                {user.displayName || "Sin nombre"}
+                            </p>
+                            <p class="text-sm text-slate-400 break-all">
+                                {user.email}
+                            </p>
+                            <p
+                                class="text-xs text-slate-600 font-mono mt-1 text-ellipsis overflow-hidden w-full"
+                            >
+                                {user.uid}
+                            </p>
+                        </div>
+                        <div
+                            class="flex flex-col gap-2 items-end flex-shrink-0"
+                        >
+                            <select
+                                on:change={(e) =>
+                                    changeTier(user, e.currentTarget.value)}
+                                value={user.subscriptionTier || "free"}
+                                class="px-3 py-1 rounded-lg text-xs font-bold bg-midnight-800 border border-white/20 text-white"
+                            >
+                                <option value="free">Free</option>
+                                <option value="pro">PRO</option>
+                                <option value="premium">Premium</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Badges -->
+                    <div class="flex flex-wrap gap-2">
+                        {#if user.isVerified}
+                            <span
+                                class="inline-flex items-center gap-1 px-2 py-1 bg-green-500/20 text-green-300 rounded-lg text-xs font-bold"
+                                >✓ Verificado</span
+                            >
+                        {/if}
+                        {#if user.isAdmin}
+                            <span
+                                class="inline-flex items-center gap-1 px-2 py-1 bg-red-500/20 text-red-300 rounded-lg text-xs font-bold"
+                                >👑 Admin</span
+                            >
+                        {/if}
+                    </div>
+
+                    <!-- Actions -->
+                    <div
+                        class="grid grid-cols-3 gap-2 pt-4 border-t border-white/10"
+                    >
+                        <button
+                            on:click={() => toggleVerified(user)}
+                            class="py-2 px-3 rounded-lg font-medium text-xs flex items-center justify-center gap-1 transition-colors {user.isVerified
+                                ? 'bg-red-500/20 text-red-300'
+                                : 'bg-green-500/20 text-green-300'}"
+                        >
+                            {user.isVerified ? "Quitar" : "Verificar"}
+                        </button>
+                        <button
+                            on:click={() => toggleAdmin(user)}
+                            class="py-2 px-3 rounded-lg font-medium text-xs flex items-center justify-center gap-1 transition-colors {user.isAdmin
+                                ? 'bg-orange-500/20 text-orange-300'
+                                : 'bg-slate-500/20 text-slate-300'}"
+                        >
+                            Admin
+                        </button>
+                        <button
+                            on:click={() => deleteUser(user)}
+                            class="py-2 px-3 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg font-medium text-xs flex items-center justify-center gap-1 transition-colors"
+                        >
+                            Eliminar
+                        </button>
+                    </div>
                 </div>
-            {/if}
+            {/each}
+        </div>
 
-            <div
-                class="px-6 py-4 bg-white/5 border-t border-white/10 text-sm text-slate-400"
-            >
-                Mostrando {filteredUsers.length} de {users.length} usuarios
+        {#if filteredUsers.length === 0}
+            <div class="text-center py-12 text-slate-400">
+                <p>No se encontraron usuarios con esos criterios</p>
             </div>
+        {/if}
+
+        <div class="px-2 py-4 text-sm text-slate-500 text-center">
+            Mostrando {filteredUsers.length} de {users.length} usuarios
         </div>
     {/if}
 </div>
