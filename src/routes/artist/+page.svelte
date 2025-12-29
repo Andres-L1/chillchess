@@ -89,12 +89,24 @@
 
         saving = true;
 
+        // Clean socialLinks to remove any undefined values (Firestore doesn't accept them)
+        const cleanedSocialLinks = socialLinks.map((link) => {
+            const cleaned: any = {
+                platform: link.platform,
+                url: link.url,
+            };
+            if (link.label) {
+                cleaned.label = link.label;
+            }
+            return cleaned;
+        });
+
         // Construct object conditionally to avoid 'undefined' values which Firestore rejects
         const baseData = {
             userId: $userStore.user.uid,
             artistName: artistName.trim(),
             bio: bio.trim(),
-            socialLinks: socialLinks,
+            socialLinks: cleanedSocialLinks,
             totalPlays: profile?.totalPlays || 0,
             followerCount: profile?.followerCount || 0,
             createdAt: profile?.createdAt || Date.now(),
@@ -144,14 +156,17 @@
             return;
         }
 
-        socialLinks = [
-            ...socialLinks,
-            {
-                platform: newLinkPlatform,
-                url: newLinkUrl.trim(),
-                label: newLinkLabel.trim() || undefined,
-            },
-        ];
+        const newLink: any = {
+            platform: newLinkPlatform,
+            url: newLinkUrl.trim(),
+        };
+
+        // Only add label if it has a value (Firestore doesn't accept undefined)
+        if (newLinkLabel.trim()) {
+            newLink.label = newLinkLabel.trim();
+        }
+
+        socialLinks = [...socialLinks, newLink];
 
         // Reset form
         newLinkUrl = "";
