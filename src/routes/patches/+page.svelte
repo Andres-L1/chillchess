@@ -9,6 +9,21 @@
 
     const patches: Patch[] = [
         {
+            version: "v0.4",
+            date: "29 Dic 2025",
+            title: "The Premium Vibe Update",
+            type: "major",
+            changes: [
+                "✨ Vibe Studio 2.1: Personaliza tu espacio con nuevos Relojes (Neon, Retro, Analógico) y Fondos Dinámicos.",
+                "🎶 Colección Premium: Rediseño visual completo con 'Hero Mode', buscador instantáneo y tarjetas inmersivas.",
+                "📀 Artist Hub: Nuevo sistema de carga de música masiva (Drag & Drop) para artistas.",
+                "✅ Verificación Instantánea: Los artistas reciben su badge automáticamente al aprobarse su música.",
+                "🏅 Nueva Insignia Dorada: Rediseño de lujo para perfiles verificados.",
+                "🔧 Backend Cleanup: Sistema automático de limpieza de archivos basura.",
+            ],
+        },
+
+        {
             version: "v0.3",
             date: "28 Dic 2025",
             title: "Sistema de Favoritos",
