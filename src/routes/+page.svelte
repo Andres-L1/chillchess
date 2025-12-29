@@ -14,6 +14,7 @@
     import MusicIcon from "$lib/components/icons/MusicIcon.svelte";
     import EyeIcon from "$lib/components/icons/EyeIcon.svelte";
     import VerifiedBadge from "$lib/components/VerifiedBadge.svelte";
+    import FounderBadge from "$lib/components/FounderBadge.svelte";
 
     let showAuthModal = false;
     let showPaywall = false;
@@ -147,7 +148,7 @@
                             >
                                 {$userStore.user?.displayName || "Usuario"}
                                 {#if $userSubscription.tier === "pro" || $userSubscription.tier === "premium"}
-                                    <VerifiedBadge size="sm" />
+                                    <FounderBadge size="sm" />
                                 {/if}
                             </span>
                             <span
