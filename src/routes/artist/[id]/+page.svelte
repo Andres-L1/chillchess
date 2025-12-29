@@ -105,7 +105,7 @@
                     <h1 class="text-4xl md:text-5xl font-bold">
                         {artist.artistName}
                     </h1>
-                    <VerifiedBadge size="md" />
+                    <VerifiedBadge size="xl2" />
                 </div>
 
                 <p class="text-lg text-slate-300 mb-6 max-w-2xl">
@@ -169,7 +169,9 @@
                 <div
                     class="text-center py-12 bg-white/5 rounded-2xl border border-white/10"
                 >
-                    <span class="text-4xl block mb-3">🎵</span>
+                    <div class="inline-flex justify-center mb-3 text-slate-400">
+                        <MusicIcon size="xl" />
+                    </div>
                     <p class="text-slate-400">
                         Este artista aún no tiene álbumes publicados.
                     </p>

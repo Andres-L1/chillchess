@@ -1,5 +1,5 @@
 <script lang="ts">
-    export let size: "sm" | "md" | "lg" | "xl" = "md";
+    export let size: "sm" | "md" | "lg" | "xl" | "xl2" = "md";
     export let showTooltip = true;
 
     const sizes = {
@@ -7,6 +7,7 @@
         md: "w-5 h-5",
         lg: "w-6 h-6", // Slightly bigger for profiles
         xl: "w-12 h-12", // Giant for success modals
+        xl2: "w-9 h-9", // Perfect for Hero Titles
     };
 </script>
 
@@ -74,7 +75,7 @@
     </svg>
 
     <!-- Sparkle Decoration (Only for large sizes) -->
-    {#if size === "lg" || size === "xl"}
+    {#if size === "lg" || size === "xl" || size === "xl2"}
         <div
             class="absolute -top-1 -right-1 text-yellow-300 animate-pulse text-[10px]"
         >
