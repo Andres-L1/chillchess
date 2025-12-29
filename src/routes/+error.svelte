@@ -88,10 +88,12 @@
             <p class="text-sm text-slate-500">
                 ¿El problema persiste?
                 <a
-                    href="mailto:support@chillchess.app"
+                    href="https://discord.gg/G7SrFtJHnr"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     class="text-primary-400 hover:text-primary-300 underline ml-1"
                 >
-                    Contáctanos
+                    Contáctanos en Discord
                 </a>
             </p>
         </div>
