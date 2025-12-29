@@ -346,9 +346,13 @@
 {#if selectedAlbum}
     <div class="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div
-            class="absolute inset-0 bg-black/80 backdrop-blur-md"
+            class="absolute inset-0 bg-black/80 backdrop-blur-md cursor-pointer"
+            role="button"
+            tabindex="0"
             on:click={closeAlbumDetails}
+            on:keydown={(e) => e.key === "Escape" && closeAlbumDetails()}
             transition:fade
+            aria-label="Cerrar detalles del álbum"
         ></div>
 
         <div
@@ -424,10 +428,20 @@
                                     class="w-8 flex justify-center text-sm font-medium text-slate-500 group-hover:text-white transition-colors"
                                 >
                                     {#if $audioStore.currentAlbumId === selectedAlbum.id && $audioStore.currentTrackIndex === index && $audioStore.isPlaying}
-                                        <span
-                                            class="text-primary-400 animate-pulse"
-                                            >EqualizerIcon...</span
+                                        <!-- Equalizer Animation Widget -->
+                                        <div
+                                            class="flex items-end gap-[2px] h-3"
                                         >
+                                            <div
+                                                class="w-1 bg-primary-400 animate-[bounce_0.8s_infinite] h-2"
+                                            ></div>
+                                            <div
+                                                class="w-1 bg-primary-400 animate-[bounce_1.2s_infinite] h-3"
+                                            ></div>
+                                            <div
+                                                class="w-1 bg-primary-400 animate-[bounce_0.6s_infinite] h-1"
+                                            ></div>
+                                        </div>
                                     {:else}
                                         <span class="group-hover:hidden"
                                             >{index + 1}</span
