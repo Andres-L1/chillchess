@@ -36,14 +36,28 @@
     let searchQuery = "";
 
     // Derived filtered albums
+    // Derived filtered albums (Deep Search)
     $: filteredAlbums = ALBUMS.filter((a) => {
         const matchesCategory =
             selectedCategory === "all" || a.category === selectedCategory;
-        const matchesSearch =
-            searchQuery === "" ||
-            a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            a.artist.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesCategory && matchesSearch;
+
+        if (searchQuery === "") return matchesCategory;
+
+        const lowQuery = searchQuery.toLowerCase();
+
+        // 1. Match Album Title or Artist
+        const matchesAlbumInfo =
+            a.title.toLowerCase().includes(lowQuery) ||
+            a.artist.toLowerCase().includes(lowQuery);
+
+        // 2. Deep Match: Check into tracks
+        const matchesTracks = a.tracks?.some(
+            (t) =>
+                t.title.toLowerCase().includes(lowQuery) ||
+                t.artist.toLowerCase().includes(lowQuery),
+        );
+
+        return matchesCategory && (matchesAlbumInfo || matchesTracks);
     });
 
     // Featured album (randomized or specific)
@@ -107,7 +121,7 @@
         <!-- Album Art Blur Backdrop -->
         {#if featuredAlbum}
             <div
-                class="absolute inset-0 bg-cover bg-center opacity-30 blur-3xl scale-125 transition-all duration-1000 transform"
+                class="absolute inset-0 bg-cover bg-center opacity-20 blur-2xl scale-110 transition-all duration-1000 transform"
                 style="background-image: url({featuredAlbum.cover});"
             ></div>
             <div
