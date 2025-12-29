@@ -125,8 +125,17 @@
                     >Ambiente</a
                 >
                 <a
+                    href="/rooms"
+                    class="hover:text-primary-400 transition-colors">🎵 Salas</a
+                >
+                <a
                     href="/patches"
                     class="hover:text-primary-400 transition-colors">Parches</a
+                >
+                <a
+                    href="/widget/config"
+                    class="hover:text-primary-400 transition-colors"
+                    >📺 Widget</a
                 >
                 <!-- Pricing CTA -->
                 <a
@@ -355,11 +364,25 @@
                             Ambiente
                         </a>
                         <a
+                            href="/rooms"
+                            on:click={() => (mobileMenuOpen = false)}
+                            class="py-3 px-4 hover:bg-white/5 rounded-lg transition-colors text-slate-300 hover:text-white"
+                        >
+                            🎵 Salas Compartidas
+                        </a>
+                        <a
                             href="/patches"
                             on:click={() => (mobileMenuOpen = false)}
                             class="py-3 px-4 hover:bg-white/5 rounded-lg transition-colors text-slate-300 hover:text-white"
                         >
                             📜 Notas del Parche
+                        </a>
+                        <a
+                            href="/widget/config"
+                            on:click={() => (mobileMenuOpen = false)}
+                            class="py-3 px-4 hover:bg-white/5 rounded-lg transition-colors text-slate-300 hover:text-white"
+                        >
+                            📺 Widget para OBS
                         </a>
                         <!-- Mobile Pricing -->
                         <a

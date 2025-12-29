@@ -20,11 +20,13 @@
     import PaywallModal from "$lib/components/PaywallModal.svelte";
     import EyeIcon from "$lib/components/icons/EyeIcon.svelte";
     import Clock from "$lib/components/Clock.svelte";
+    import WhiteNoiseControls from "$lib/components/WhiteNoiseControls.svelte";
     import { vibeStore } from "$lib/stores/vibeStore";
 
     let showMusicExplorer = false;
     let showVibeStudio = false;
     let showPaywall = false;
+    let showWhiteNoise = false; // NEW
     let vibeTab: "scenes" | "clock" = "scenes"; // Tab state for modal
     let isUserLoaded = false;
 
@@ -228,6 +230,20 @@
                     class="text-xs font-bold text-slate-300 group-hover:text-white font-mono tracking-wider uppercase"
                 >
                     Vibe Studio
+                </span>
+            </button>
+
+            <!-- White Noise Button -->
+            <button
+                on:click={() => (showWhiteNoise = !showWhiteNoise)}
+                class="flex items-center gap-2 bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/10 hover:border-white/20 shadow-lg transition-all group ml-2"
+                title="Sonidos Ambientales"
+            >
+                <span class="text-sm">🎧</span>
+                <span
+                    class="text-xs font-bold text-slate-300 group-hover:text-white font-mono tracking-wider uppercase"
+                >
+                    White Noise
                 </span>
             </button>
 
@@ -916,6 +932,36 @@
             class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[80] bg-black/60 backdrop-blur-md px-4 py-2 rounded-full text-xs text-slate-400 pointer-events-none animate-fade-in"
         >
             Modo Inmersivo activo. Mueve el mouse para ver controles.
+        </div>
+    {/if}
+
+    <!-- White Noise Modal -->
+    {#if showWhiteNoise}
+        <div
+            class="fixed inset-0 z-[100] flex items-center justify-center p-4"
+            on:click={() => (showWhiteNoise = false)}
+        >
+            <div
+                class="bg-[#0f1729]/95 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 max-w-md w-full shadow-2xl"
+                on:click|stopPropagation
+            >
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">Sonidos Ambientales</h2>
+                    <button
+                        on:click={() => (showWhiteNoise = false)}
+                        class="text-slate-400 hover:text-white transition-colors"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                <WhiteNoiseControls />
+
+                <p class="text-xs text-slate-500 mt-6 text-center">
+                    Los sonidos ambientales se mezclan con la música para crear
+                    la atmósfera perfecta.
+                </p>
+            </div>
         </div>
     {/if}
 
