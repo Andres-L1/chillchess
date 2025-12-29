@@ -132,11 +132,6 @@
                     href="/patches"
                     class="hover:text-primary-400 transition-colors">Parches</a
                 >
-                <a
-                    href="/widget/config"
-                    class="hover:text-primary-400 transition-colors"
-                    >📺 Widget</a
-                >
                 <!-- Pricing CTA -->
                 <a
                     href="/pricing"
@@ -241,6 +236,13 @@
                             >
                                 <HeartIcon size="sm" gradient={false} />
                                 <span>Mis Favoritos</span>
+                            </a>
+                            <a
+                                href="/widget/config"
+                                class="px-4 py-2 text-slate-300 hover:text-white hover:bg-white/5 text-left flex items-center gap-2"
+                            >
+                                📺
+                                <span>Widget OBS</span>
                             </a>
                             {#if $userSubscription.tier === "pro"}
                                 <a
@@ -376,13 +378,6 @@
                             class="py-3 px-4 hover:bg-white/5 rounded-lg transition-colors text-slate-300 hover:text-white"
                         >
                             📜 Notas del Parche
-                        </a>
-                        <a
-                            href="/widget/config"
-                            on:click={() => (mobileMenuOpen = false)}
-                            class="py-3 px-4 hover:bg-white/5 rounded-lg transition-colors text-slate-300 hover:text-white"
-                        >
-                            📺 Widget para OBS
                         </a>
                         <!-- Mobile Pricing -->
                         <a

@@ -9,6 +9,20 @@
 
     const patches: Patch[] = [
         {
+            version: "v0.6",
+            date: "30 Dic 2025",
+            title: "Community & Streaming Features",
+            type: "major",
+            changes: [
+                "📺 Widget para OBS: Widget personalizable con animaciones premium, barra de progreso y logo dinámico. Perfecto para streams.",
+                "🎧 Sonidos Ambientales: Nueva capa de audio con lluvia, fuego, café, océano y bosque que se mezcla con tu música.",
+                "🎵 Salas de Escucha Compartida: Crea salas para escuchar música sincronizada en tiempo real con amigos.",
+                "🎨 Selector de Música Inline: Los hosts pueden seleccionar álbumes directamente desde la sala.",
+                "🔐 Firestore Rules: Seguridad completa para las salas compartidas.",
+                "🎯 Widget OBS ahora en el menú de usuario para facilitar acceso.",
+            ],
+        },
+        {
             version: "v0.5",
             date: "29 Dic 2025",
             title: "Admin & Mobile Excellence",

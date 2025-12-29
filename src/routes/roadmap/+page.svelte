@@ -50,6 +50,33 @@
             date: "Diciembre 2025",
             category: "music",
         },
+
+        {
+            title: "Widget para OBS/Streaming",
+            description:
+                "Widget personalizable con gradientes animados, barra de progreso, equalizer y logo SVG. Perfecto para mostrar en streams.",
+            status: "done",
+            date: "Diciembre 2025",
+            category: "tech",
+        },
+
+        {
+            title: "Sonidos Ambientales (White Noise)",
+            description:
+                "Capa adicional de audio con sonidos de lluvia, fuego, café, océano y bosque que se mezcla con la música.",
+            status: "done",
+            date: "Diciembre 2025",
+            category: "music",
+        },
+
+        {
+            title: "Salas de Escucha Compartida",
+            description:
+                "Crea salas públicas o privadas para escuchar música sincronizada en tiempo real con amigos. El host controla la reproducción.",
+            status: "done",
+            date: "Diciembre 2025",
+            category: "community",
+        },
         {
             title: "Navegación Simplificada",
             description:
