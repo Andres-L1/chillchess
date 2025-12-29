@@ -1,11 +1,11 @@
 import { json } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
+import type { RequestEvent } from '@sveltejs/kit';
 import { stripe, STRIPE_WEBHOOK_SECRET } from '$lib/stripe/config';
 import { db } from '$lib/firebase';
 import { doc, updateDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import type Stripe from 'stripe';
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST = async ({ request }: RequestEvent) => {
     const body = await request.text();
     const signature = request.headers.get('stripe-signature');
 
@@ -16,7 +16,7 @@ export const POST: RequestHandler = async ({ request }) => {
     let event: Stripe.Event;
 
     try {
-        event = stripe.webhooks.constructEvent(
+        event = stripe.instance.webhooks.constructEvent(
             body,
             signature,
             STRIPE_WEBHOOK_SECRET
@@ -101,7 +101,7 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
     }
 
     const status = subscription.status;
-    const currentPeriodEnd = new Date(subscription.current_period_end * 1000);
+    const currentPeriodEnd = new Date((subscription as any).current_period_end * 1000);
 
     // Determine tier from price
     const priceId = subscription.items.data[0]?.price.id;
@@ -156,7 +156,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 }
 
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
-    const subscriptionId = invoice.subscription as string;
+    const subscriptionId = (invoice as any).subscription as string;
     if (!subscriptionId) return;
 
     // Optionally log successful payment
@@ -164,7 +164,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
-    const subscriptionId = invoice.subscription as string;
+    const subscriptionId = (invoice as any).subscription as string;
     if (!subscriptionId) return;
 
     // Optionally handle failed payment (send email, etc)

@@ -1,10 +1,28 @@
 // Stripe configuration
 import Stripe from 'stripe';
 
-// Server-side Stripe instance (only use on server)
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-    apiVersion: '2024-12-18.acacia',
-});
+// Lazy initialization - only create Stripe instance when needed
+let stripeInstance: Stripe | null = null;
+
+function getStripe(): Stripe {
+    if (!stripeInstance) {
+        const apiKey = process.env.STRIPE_SECRET_KEY;
+        if (!apiKey) {
+            throw new Error('STRIPE_SECRET_KEY is not configured');
+        }
+        stripeInstance = new Stripe(apiKey, {
+            apiVersion: '2025-12-15.clover' as any,
+        });
+    }
+    return stripeInstance;
+}
+
+// Export getter instead of instance
+export const stripe = {
+    get instance() {
+        return getStripe();
+    }
+};
 
 // Price IDs from Stripe Dashboard
 export const STRIPE_PRICE_IDS = {
@@ -25,7 +43,7 @@ export async function createCheckoutSession(params: {
     successUrl: string;
     cancelUrl: string;
 }) {
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
         mode: 'subscription',
         payment_method_types: ['card'],
         line_items: [
@@ -53,7 +71,7 @@ export async function createCheckoutSession(params: {
 
 // Helper to create customer portal session
 export async function createPortalSession(customerId: string, returnUrl: string) {
-    const session = await stripe.billingPortal.sessions.create({
+    const session = await getStripe().billingPortal.sessions.create({
         customer: customerId,
         return_url: returnUrl,
     });
