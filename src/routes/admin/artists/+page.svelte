@@ -9,7 +9,7 @@
     onMount(async () => {
         // Check if user is admin (you can adjust this logic)
         if (!$userStore) {
-            goto("/login");
+            goto("/");
             return;
         }
         loading = false;

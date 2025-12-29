@@ -37,7 +37,7 @@
 
     onMount(() => {
         if (!$userStore.user) {
-            goto("/login");
+            goto("/");
         }
     });
 
