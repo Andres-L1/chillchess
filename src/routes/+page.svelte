@@ -644,14 +644,14 @@
             <div class="flex gap-8 text-sm font-medium">
                 <div class="flex gap-8 text-sm font-medium">
                     <a
-                        href="/privacy"
+                        href="/legal/cookies"
                         class="text-slate-500 hover:text-white transition-colors"
-                        >Privacidad</a
+                        >Política de Cookies</a
                     >
                     <a
-                        href="/terms"
+                        href="/legal/terms"
                         class="text-slate-500 hover:text-white transition-colors"
-                        >Términos</a
+                        >Términos y Condiciones</a
                     >
                     <a
                         href="https://discord.gg/G7SrFtJHnr"
