@@ -1,10 +1,19 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { userSubscription } from "$lib/subscription/userSubscription";
     import { audioStore } from "$lib/audio/store";
-    import VerifyTab from "$lib/components/admin/VerifyTab.svelte";
+    import UsersTab from "$lib/components/admin/UsersTab.svelte";
+    import ProposalsTab from "$lib/components/admin/ProposalsTab.svelte";
+    import SubmissionsTab from "$lib/components/admin/SubmissionsTab.svelte";
+    import MusicTab from "$lib/components/admin/MusicTab.svelte";
+    import LogsTab from "$lib/components/admin/LogsTab.svelte";
 
-    type Tab = "dashboard" | "verify" | "legacy";
+    type Tab =
+        | "dashboard"
+        | "users"
+        | "proposals"
+        | "submissions"
+        | "music"
+        | "logs";
 
     let activeTab: Tab = "dashboard";
     let stats = {
@@ -12,18 +21,25 @@
         proUsers: 0,
         totalAlbums: 0,
         verifiedArtists: 0,
+        pendingSubmissions: 0,
+        pendingProposals: 0,
     };
 
     let loading = true;
 
     onMount(async () => {
+        await loadStats();
+    });
+
+    async function loadStats() {
+        loading = true;
         try {
             const { collection, getDocs, query, where } = await import(
                 "firebase/firestore"
             );
             const { db } = await import("$lib/firebase");
 
-            // Get user stats
+            // Users stats
             const usersSnap = await getDocs(collection(db, "users"));
             stats.totalUsers = usersSnap.size;
             stats.proUsers = usersSnap.docs.filter((doc) => {
@@ -31,25 +47,59 @@
                 return tier === "pro" || tier === "premium";
             }).length;
 
-            // Get verified artists
+            // Verified artists
             const artistsRef = collection(db, "artists");
-            const q = query(artistsRef, where("isVerified", "==", true));
-            const artistsSnap = await getDocs(q);
+            const verifiedQuery = query(
+                artistsRef,
+                where("isVerified", "==", true),
+            );
+            const artistsSnap = await getDocs(verifiedQuery);
             stats.verifiedArtists = artistsSnap.size;
 
-            // Get albums from store
+            // Albums
             stats.totalAlbums = $audioStore.availableAlbums.length;
+
+            // Pending submissions
+            const submissionsRef = collection(db, "musicSubmissions");
+            const pendingSubsQuery = query(
+                submissionsRef,
+                where("status", "==", "pending"),
+            );
+            const pendingSubsSnap = await getDocs(pendingSubsQuery);
+            stats.pendingSubmissions = pendingSubsSnap.size;
+
+            // Pending proposals
+            const proposalsRef = collection(db, "proposals");
+            const pendingPropsQuery = query(
+                proposalsRef,
+                where("status", "==", "pending"),
+            );
+            const pendingPropsSnap = await getDocs(pendingPropsQuery);
+            stats.pendingProposals = pendingPropsSnap.size;
         } catch (e) {
             console.error("Error loading stats:", e);
         } finally {
             loading = false;
         }
-    });
+    }
 
     const tabs = [
         { id: "dashboard" as Tab, label: "Dashboard", icon: "📊" },
-        { id: "verify" as Tab, label: "Verificar Usuarios", icon: "✓" },
-        { id: "legacy" as Tab, label: "Panel Completo", icon: "⚙️" },
+        { id: "users" as Tab, label: "Usuarios", icon: "👥" },
+        {
+            id: "proposals" as Tab,
+            label: "Propuestas",
+            icon: "💡",
+            badge: stats.pendingProposals,
+        },
+        {
+            id: "submissions" as Tab,
+            label: "Envíos Musicales",
+            icon: "🎵",
+            badge: stats.pendingSubmissions,
+        },
+        { id: "music" as Tab, label: "Música", icon: "🎼" },
+        { id: "logs" as Tab, label: "Logs", icon: "📝" },
     ];
 </script>
 
@@ -59,24 +109,34 @@
 
 <div class="p-4 md:p-8">
     <div class="max-w-7xl mx-auto">
-        <!-- Header with Tabs -->
+        <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-white mb-6">
+            <h1 class="text-3xl font-bold text-white mb-2">
                 Panel de Administración
             </h1>
+            <p class="text-slate-400">Gestión completa de ChillChess</p>
+        </div>
 
-            <!-- Tab Navigation -->
-            <div class="flex gap-2 overflow-x-auto pb-2">
+        <!-- Tab Navigation -->
+        <div class="mb-8 overflow-x-auto pb-2">
+            <div class="flex gap-2 min-w-max">
                 {#each tabs as tab}
                     <button
                         on:click={() => (activeTab = tab.id)}
-                        class="px-6 py-3 rounded-xl font-medium whitespace-nowrap transition-all {activeTab ===
+                        class="relative px-6 py-3 rounded-xl font-medium whitespace-nowrap transition-all {activeTab ===
                         tab.id
                             ? 'bg-primary-500 text-white shadow-lg'
                             : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'}"
                     >
                         <span class="mr-2">{tab.icon}</span>
                         {tab.label}
+                        {#if tab.badge && tab.badge > 0}
+                            <span
+                                class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"
+                            >
+                                {tab.badge}
+                            </span>
+                        {/if}
                     </button>
                 {/each}
             </div>
@@ -85,7 +145,7 @@
         <!-- Tab Content -->
         <div class="animate-fade-in">
             {#if activeTab === "dashboard"}
-                <!-- Dashboard Stats -->
+                <!-- Dashboard -->
                 {#if loading}
                     <div class="text-center py-12">
                         <div
@@ -96,16 +156,18 @@
                         </p>
                     </div>
                 {:else}
+                    <!-- Stats Grid -->
                     <div
-                        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+                        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
                     >
+                        <!-- Total Users -->
                         <div
-                            class="bg-white/5 border border-white/10 rounded-2xl p-6"
+                            class="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors"
                         >
-                            <div class="flex items-center gap-4">
+                            <div class="flex items-center justify-between mb-4">
                                 <div class="p-3 bg-primary-500/20 rounded-xl">
                                     <svg
-                                        class="w-8 h-8 text-primary-400"
+                                        class="w-6 h-6 text-primary-400"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -118,24 +180,26 @@
                                         />
                                     </svg>
                                 </div>
-                                <div>
-                                    <p class="text-sm text-slate-400">
-                                        Total Usuarios
-                                    </p>
-                                    <p class="text-2xl font-bold text-white">
-                                        {stats.totalUsers}
-                                    </p>
-                                </div>
+                                <button
+                                    on:click={() => (activeTab = "users")}
+                                    class="text-xs text-primary-400 hover:text-primary-300"
+                                    >Ver →</button
+                                >
                             </div>
+                            <p class="text-3xl font-bold text-white mb-1">
+                                {stats.totalUsers}
+                            </p>
+                            <p class="text-sm text-slate-400">Total Usuarios</p>
                         </div>
 
+                        <!-- PRO Users -->
                         <div
-                            class="bg-white/5 border border-white/10 rounded-2xl p-6"
+                            class="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors"
                         >
-                            <div class="flex items-center gap-4">
+                            <div class="flex items-center justify-between mb-4">
                                 <div class="p-3 bg-purple-500/20 rounded-xl">
                                     <svg
-                                        class="w-8 h-8 text-purple-400"
+                                        class="w-6 h-6 text-purple-400"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -148,24 +212,60 @@
                                         />
                                     </svg>
                                 </div>
-                                <div>
-                                    <p class="text-sm text-slate-400">
-                                        Usuarios PRO
-                                    </p>
-                                    <p class="text-2xl font-bold text-white">
-                                        {stats.proUsers}
-                                    </p>
-                                </div>
+                                <button
+                                    on:click={() => (activeTab = "users")}
+                                    class="text-xs text-purple-400 hover:text-purple-300"
+                                    >Ver →</button
+                                >
                             </div>
+                            <p class="text-3xl font-bold text-white mb-1">
+                                {stats.proUsers}
+                            </p>
+                            <p class="text-sm text-slate-400">Usuarios PRO</p>
                         </div>
 
+                        <!-- Verified Artists -->
                         <div
-                            class="bg-white/5 border border-white/10 rounded-2xl p-6"
+                            class="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors"
                         >
-                            <div class="flex items-center gap-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="p-3 bg-green-500/20 rounded-xl">
+                                    <svg
+                                        class="w-6 h-6 text-green-400"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                    </svg>
+                                </div>
+                                <button
+                                    on:click={() => (activeTab = "users")}
+                                    class="text-xs text-green-400 hover:text-green-300"
+                                    >Ver →</button
+                                >
+                            </div>
+                            <p class="text-3xl font-bold text-white mb-1">
+                                {stats.verifiedArtists}
+                            </p>
+                            <p class="text-sm text-slate-400">
+                                Artistas Verificados
+                            </p>
+                        </div>
+
+                        <!-- Total Albums -->
+                        <div
+                            class="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors"
+                        >
+                            <div class="flex items-center justify-between mb-4">
                                 <div class="p-3 bg-blue-500/20 rounded-xl">
                                     <svg
-                                        class="w-8 h-8 text-blue-400"
+                                        class="w-6 h-6 text-blue-400"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -178,24 +278,28 @@
                                         />
                                     </svg>
                                 </div>
-                                <div>
-                                    <p class="text-sm text-slate-400">
-                                        Total Álbumes
-                                    </p>
-                                    <p class="text-2xl font-bold text-white">
-                                        {stats.totalAlbums}
-                                    </p>
-                                </div>
+                                <button
+                                    on:click={() => (activeTab = "music")}
+                                    class="text-xs text-blue-400 hover:text-blue-300"
+                                    >Ver →</button
+                                >
                             </div>
+                            <p class="text-3xl font-bold text-white mb-1">
+                                {stats.totalAlbums}
+                            </p>
+                            <p class="text-sm text-slate-400">
+                                Álbumes Totales
+                            </p>
                         </div>
 
+                        <!-- Pending Submissions -->
                         <div
-                            class="bg-white/5 border border-white/10 rounded-2xl p-6"
+                            class="bg-white/5 border border-orange-500/20 rounded-2xl p-6 hover:bg-white/10 transition-colors"
                         >
-                            <div class="flex items-center gap-4">
-                                <div class="p-3 bg-green-500/20 rounded-xl">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="p-3 bg-orange-500/20 rounded-xl">
                                     <svg
-                                        class="w-8 h-8 text-green-400"
+                                        class="w-6 h-6 text-orange-400"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -204,35 +308,137 @@
                                             stroke-linecap="round"
                                             stroke-linejoin="round"
                                             stroke-width="2"
-                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                                         />
                                     </svg>
                                 </div>
-                                <div>
-                                    <p class="text-sm text-slate-400">
-                                        Artistas Verificados
-                                    </p>
-                                    <p class="text-2xl font-bold text-white">
-                                        {stats.verifiedArtists}
-                                    </p>
-                                </div>
+                                <button
+                                    on:click={() => (activeTab = "submissions")}
+                                    class="text-xs text-orange-400 hover:text-orange-300"
+                                    >Ver →</button
+                                >
                             </div>
+                            <p class="text-3xl font-bold text-white mb-1">
+                                {stats.pendingSubmissions}
+                            </p>
+                            <p class="text-sm text-slate-400">
+                                Envíos Pendientes
+                            </p>
+                        </div>
+
+                        <!-- Pending Proposals -->
+                        <div
+                            class="bg-white/5 border border-yellow-500/20 rounded-2xl p-6 hover:bg-white/10 transition-colors"
+                        >
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="p-3 bg-yellow-500/20 rounded-xl">
+                                    <svg
+                                        class="w-6 h-6 text-yellow-400"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                                        />
+                                    </svg>
+                                </div>
+                                <button
+                                    on:click={() => (activeTab = "proposals")}
+                                    class="text-xs text-yellow-400 hover:text-yellow-300"
+                                    >Ver →</button
+                                >
+                            </div>
+                            <p class="text-3xl font-bold text-white mb-1">
+                                {stats.pendingProposals}
+                            </p>
+                            <p class="text-sm text-slate-400">
+                                Propuestas Pendientes
+                            </p>
                         </div>
                     </div>
 
                     <!-- Quick Actions -->
                     <div>
                         <h2 class="text-xl font-bold text-white mb-4">
-                            Acciones Rápidas
+                            Acciones Pendientes
                         </h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <button
-                                on:click={() => (activeTab = "verify")}
-                                class="group relative overflow-hidden bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 hover:scale-105 transition-transform text-left"
-                            >
-                                <div class="relative z-10">
+                        <div class="space-y-4">
+                            {#if stats.pendingSubmissions > 0}
+                                <button
+                                    on:click={() => (activeTab = "submissions")}
+                                    class="w-full text-left bg-orange-500/10 border border-orange-500/20 hover:border-orange-500/40 rounded-xl p-4 transition-all group"
+                                >
+                                    <div
+                                        class="flex items-center justify-between"
+                                    >
+                                        <div>
+                                            <p class="text-white font-medium">
+                                                Revisar Envíos Musicales
+                                            </p>
+                                            <p class="text-sm text-slate-400">
+                                                {stats.pendingSubmissions} envíos
+                                                esperando aprobación
+                                            </p>
+                                        </div>
+                                        <svg
+                                            class="w-5 h-5 text-orange-400 group-hover:translate-x-1 transition-transform"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 5l7 7-7 7"
+                                            />
+                                        </svg>
+                                    </div>
+                                </button>
+                            {/if}
+
+                            {#if stats.pendingProposals > 0}
+                                <button
+                                    on:click={() => (activeTab = "proposals")}
+                                    class="w-full text-left bg-yellow-500/10 border border-yellow-500/20 hover:border-yellow-500/40 rounded-xl p-4 transition-all group"
+                                >
+                                    <div
+                                        class="flex items-center justify-between"
+                                    >
+                                        <div>
+                                            <p class="text-white font-medium">
+                                                Revisar Propuestas
+                                            </p>
+                                            <p class="text-sm text-slate-400">
+                                                {stats.pendingProposals} propuestas
+                                                de usuarios PRO
+                                            </p>
+                                        </div>
+                                        <svg
+                                            class="w-5 h-5 text-yellow-400 group-hover:translate-x-1 transition-transform"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 5l7 7-7 7"
+                                            />
+                                        </svg>
+                                    </div>
+                                </button>
+                            {/if}
+
+                            {#if stats.pendingSubmissions === 0 && stats.pendingProposals === 0}
+                                <div class="text-center py-8 text-slate-400">
                                     <svg
-                                        class="w-12 h-12 mb-4 text-white"
+                                        class="w-16 h-16 mx-auto mb-4 opacity-50"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -244,107 +450,25 @@
                                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                                         />
                                     </svg>
-                                    <h3
-                                        class="text-xl font-bold text-white mb-2"
-                                    >
-                                        Verificar Usuarios
-                                    </h3>
-                                    <p class="text-white/80">
-                                        Gestiona artistas verificados
+                                    <p class="font-medium">¡Todo al día!</p>
+                                    <p class="text-sm">
+                                        No hay acciones pendientes
                                     </p>
                                 </div>
-                                <div
-                                    class="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors"
-                                ></div>
-                            </button>
-
-                            <button
-                                on:click={() => (activeTab = "legacy")}
-                                class="group relative overflow-hidden bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-6 hover:scale-105 transition-transform text-left"
-                            >
-                                <div class="relative z-10">
-                                    <svg
-                                        class="w-12 h-12 mb-4 text-white"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                                        /><path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                        />
-                                    </svg>
-                                    <h3
-                                        class="text-xl font-bold text-white mb-2"
-                                    >
-                                        Panel Completo
-                                    </h3>
-                                    <p class="text-white/80">
-                                        Todas las funciones avanzadas
-                                    </p>
-                                </div>
-                                <div
-                                    class="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors"
-                                ></div>
-                            </button>
+                            {/if}
                         </div>
                     </div>
                 {/if}
-            {:else if activeTab === "verify"}
-                <!-- Verify Users Tab -->
-                <VerifyTab />
-            {:else if activeTab === "legacy"}
-                <!-- Legacy Panel Info -->
-                <div
-                    class="bg-white/5 border border-white/10 rounded-2xl p-8 text-center"
-                >
-                    <svg
-                        class="w-16 h-16 mx-auto mb-4 text-primary-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                    </svg>
-                    <h3 class="text-2xl font-bold text-white mb-2">
-                        Panel Completo
-                    </h3>
-                    <p class="text-slate-400 mb-6 max-w-md mx-auto">
-                        El panel completo con todas las funcionalidades
-                        avanzadas está disponible en una página separada
-                    </p>
-                    <a
-                        href="/admin/legacy"
-                        class="inline-flex items-center gap-2 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-xl transition-colors"
-                    >
-                        Abrir Panel Completo
-                        <svg
-                            class="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M14 5l7 7m0 0l-7 7m7-7H3"
-                            />
-                        </svg>
-                    </a>
-                </div>
+            {:else if activeTab === "users"}
+                <UsersTab />
+            {:else if activeTab === "proposals"}
+                <ProposalsTab />
+            {:else if activeTab === "submissions"}
+                <SubmissionsTab on:approved={loadStats} />
+            {:else if activeTab === "music"}
+                <MusicTab />
+            {:else if activeTab === "logs"}
+                <LogsTab />
             {/if}
         </div>
     </div>
