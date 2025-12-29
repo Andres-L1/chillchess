@@ -560,11 +560,7 @@
                                         if (isLocked) {
                                             showPaywall = true;
                                         } else {
-                                            console.log(
-                                                "Setting vibe:",
-                                                vibe.id,
-                                            );
-                                            // vibeStore.setBackground(vibe.id); implementation pending
+                                            vibeStore.setBackground(vibe.id);
                                             showVibeStudio = false;
                                         }
                                     }}

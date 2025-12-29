@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 
 export type ClockStyle = 'modern' | 'neon' | 'elegant' | 'retro' | 'analog';
-export type BackgroundMode = 'gradient' | 'particles' | 'grid' | 'aurora';
+export type BackgroundMode = 'none' | 'library' | 'noir' | 'zen' | 'space' | 'cyber' | 'breathe' | 'gradient';
 
 interface VibeState {
     background: BackgroundMode;
