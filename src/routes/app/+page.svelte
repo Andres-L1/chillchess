@@ -940,16 +940,27 @@
         <div
             class="fixed inset-0 z-[100] flex items-center justify-center p-4"
             on:click={() => (showWhiteNoise = false)}
+            on:keydown={(e) => e.key === "Escape" && (showWhiteNoise = false)}
+            role="button"
+            tabindex="-1"
+            aria-label="Close modal"
         >
             <div
                 class="bg-[#0f1729]/95 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 max-w-md w-full shadow-2xl"
                 on:click|stopPropagation
+                on:keydown|stopPropagation
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="white-noise-title"
             >
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold">Sonidos Ambientales</h2>
+                    <h2 id="white-noise-title" class="text-2xl font-bold">
+                        Sonidos Ambientales
+                    </h2>
                     <button
                         on:click={() => (showWhiteNoise = false)}
                         class="text-slate-400 hover:text-white transition-colors"
+                        aria-label="Cerrar"
                     >
                         ✕
                     </button>
