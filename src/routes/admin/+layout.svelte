@@ -59,7 +59,6 @@
 
     const navItems = [
         { path: "/admin", label: "Dashboard", icon: "📊" },
-        { path: "/admin/verify", label: "Verificar Usuarios", icon: "✓" },
         { path: "/admin/logs", label: "Logs", icon: "📝" },
     ];
 
