@@ -6,8 +6,8 @@
 
     let isAuthorized = false;
     let isLoading = true;
+    let mobileMenuOpen = false;
 
-    // Check admin access
     onMount(async () => {
         if ($userStore.loading) {
             const unsubscribe = userStore.subscribe((state) => {
@@ -64,6 +64,10 @@
     ];
 
     $: currentPath = $page.url.pathname;
+
+    function closeMobileMenu() {
+        mobileMenuOpen = false;
+    }
 </script>
 
 {#if isLoading}
@@ -76,45 +80,110 @@
         </div>
     </div>
 {:else if isAuthorized}
-    <div class="min-h-screen bg-midnight-900 flex">
-        <!-- Sidebar -->
-        <aside
-            class="w-64 bg-midnight-800 border-r border-white/10 flex flex-col"
+    <div class="min-h-screen bg-midnight-900">
+        <!-- Mobile Header -->
+        <header
+            class="lg:hidden bg-midnight-800 border-b border-white/10 p-4 sticky top-0 z-50"
         >
-            <div class="p-6 border-b border-white/10">
-                <h1 class="text-xl font-bold text-white">Admin Panel</h1>
-                <p class="text-xs text-slate-400 mt-1">ChillChess</p>
-            </div>
-
-            <nav class="flex-1 p-4 space-y-2">
-                {#each navItems as item}
-                    <a
-                        href={item.path}
-                        class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {currentPath ===
-                        item.path
-                            ? 'bg-primary-500 text-white'
-                            : 'text-slate-400 hover:bg-white/5 hover:text-white'}"
-                    >
-                        <span class="text-xl">{item.icon}</span>
-                        <span class="font-medium">{item.label}</span>
-                    </a>
-                {/each}
-            </nav>
-
-            <div class="p-4 border-t border-white/10">
-                <a
-                    href="/"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-white/5 hover:text-white transition-all"
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-lg font-bold text-white">Admin Panel</h1>
+                    <p class="text-xs text-slate-400">ChillChess</p>
+                </div>
+                <button
+                    on:click={() => (mobileMenuOpen = !mobileMenuOpen)}
+                    class="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                    aria-label="Toggle menu"
                 >
-                    <span class="text-xl">←</span>
-                    <span class="font-medium">Volver al Sitio</span>
-                </a>
+                    <svg
+                        class="w-6 h-6 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        {#if mobileMenuOpen}
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                            />
+                        {:else}
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16"
+                            />
+                        {/if}
+                    </svg>
+                </button>
             </div>
-        </aside>
+        </header>
 
-        <!-- Main content -->
-        <main class="flex-1 overflow-auto">
-            <slot />
-        </main>
+        <!-- Mobile Menu Overlay -->
+        {#if mobileMenuOpen}
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <!-- svelte-ignore a11y-no-static-element-interactions -->
+            <div
+                class="lg:hidden fixed inset-0 bg-black/50 z-40 top-[73px]"
+                on:click={closeMobileMenu}
+            ></div>
+        {/if}
+
+        <div class="flex">
+            <!-- Sidebar -->
+            <aside
+                class="
+                {mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+                lg:translate-x-0
+                fixed lg:static
+                inset-y-0 left-0
+                w-64 bg-midnight-800 border-r border-white/10
+                flex flex-col
+                z-50
+                transition-transform duration-300
+                top-[73px] lg:top-0
+            "
+            >
+                <!-- Desktop Header -->
+                <div class="hidden lg:block p-6 border-b border-white/10">
+                    <h1 class="text-xl font-bold text-white">Admin Panel</h1>
+                    <p class="text-xs text-slate-400 mt-1">ChillChess</p>
+                </div>
+
+                <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+                    {#each navItems as item}
+                        <a
+                            href={item.path}
+                            on:click={closeMobileMenu}
+                            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {currentPath ===
+                            item.path
+                                ? 'bg-primary-500 text-white'
+                                : 'text-slate-400 hover:bg-white/5 hover:text-white'}"
+                        >
+                            <span class="text-xl">{item.icon}</span>
+                            <span class="font-medium">{item.label}</span>
+                        </a>
+                    {/each}
+                </nav>
+
+                <div class="p-4 border-t border-white/10">
+                    <a
+                        href="/"
+                        on:click={closeMobileMenu}
+                        class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-white/5 hover:text-white transition-all"
+                    >
+                        <span class="text-xl">←</span>
+                        <span class="font-medium">Volver al Sitio</span>
+                    </a>
+                </div>
+            </aside>
+
+            <!-- Main content -->
+            <main class="flex-1 w-full lg:w-auto overflow-auto">
+                <slot />
+            </main>
+        </div>
     </div>
 {/if}
