@@ -47,12 +47,59 @@
 
         <!-- Header -->
         <header class="mb-12 text-center">
-            <div class="inline-flex items-center gap-3 mb-4">
-                <div
-                    class="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-3xl shadow-lg shadow-primary-900/50"
+            <div class="inline-flex items-center justify-center mb-4">
+                <!-- Microphone SVG Icon -->
+                <svg
+                    class="w-16 h-16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
                 >
-                    🎤
-                </div>
+                    <defs>
+                        <linearGradient
+                            id="micGradient"
+                            x1="0%"
+                            y1="0%"
+                            x2="100%"
+                            y2="100%"
+                        >
+                            <stop
+                                offset="0%"
+                                style="stop-color:#FF7B3D;stop-opacity:1"
+                            />
+                            <stop
+                                offset="100%"
+                                style="stop-color:#FFB347;stop-opacity:1"
+                            />
+                        </linearGradient>
+                    </defs>
+                    <!-- Microphone body -->
+                    <rect
+                        x="9"
+                        y="2"
+                        width="6"
+                        height="11"
+                        rx="3"
+                        stroke="url(#micGradient)"
+                        stroke-width="2"
+                        fill="none"
+                    />
+                    <!-- Microphone stand -->
+                    <path
+                        d="M12 19v3M8 22h8"
+                        stroke="url(#micGradient)"
+                        stroke-width="2"
+                    />
+                    <!-- Sound waves -->
+                    <path
+                        d="M19 10v2a7 7 0 0 1-14 0v-2"
+                        stroke="url(#micGradient)"
+                        stroke-width="2"
+                    />
+                </svg>
             </div>
             <h1 class="text-4xl md:text-5xl font-bold mb-4">
                 Artistas <span class="text-primary-500">Verificados</span>
