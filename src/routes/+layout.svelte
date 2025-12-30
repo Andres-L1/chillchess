@@ -31,10 +31,27 @@
     import "@fontsource/inter/400.css";
 
     import { onMount } from "svelte";
-    import { initAudioLibrary } from "$lib/audio/store";
+    import { initAudioLibrary, audioStore } from "$lib/audio/store";
+    import { beforeNavigate } from "$app/navigation";
 
     onMount(() => {
         initAudioLibrary();
+    });
+
+    beforeNavigate(({ from, to }) => {
+        // If leaving /app path, stop music and white noise
+        if (
+            from?.url.pathname.startsWith("/app") &&
+            to?.url.pathname &&
+            !to.url.pathname.startsWith("/app")
+        ) {
+            audioStore.update((s) => ({
+                ...s,
+                isPlaying: false,
+                currentWhiteNoise: "none",
+                currentAmbience: "none",
+            }));
+        }
     });
 </script>
 
