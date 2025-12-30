@@ -23,15 +23,9 @@
     let coverFile: File | null = null;
     let coverPreview: string | null = null;
 
-    interface TrackInput {
-        id: string;
-        title: string;
-        file: File | null;
-    }
-
-    let tracks: TrackInput[] = [
-        { id: Math.random().toString(36), title: "", file: null },
-    ];
+    // New Fields
+    let downloadLink = "";
+    let tracklist = "";
 
     onMount(() => {
         if (!$userStore.user) {
@@ -55,84 +49,21 @@
         }
     }
 
-    function addTrack() {
-        tracks = [
-            ...tracks,
-            { id: Math.random().toString(36), title: "", file: null },
-        ];
-    }
-
-    function removeTrack(index: number) {
-        if (tracks.length > 1) {
-            tracks = tracks.filter((_, i) => i !== index);
-        }
-    }
-
-    function handleAudioSelect(e: Event, index: number) {
-        const input = e.target as HTMLInputElement;
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-            if (file.type !== "audio/mpeg" && !file.name.endsWith(".mp3")) {
-                alert("Solo se admiten archivos MP3");
-                return;
-            }
-            if (file.size > 20 * 1024 * 1024) {
-                alert("El archivo de audio no puede superar los 20MB");
-                return;
-            }
-            tracks[index].file = file;
-
-            if (!tracks[index].title) {
-                tracks[index].title = file.name
-                    .replace(".mp3", "")
-                    .replace(/_/g, " ");
-            }
-        }
-    }
-
-    function handleMultiTrackSelect(e: Event) {
-        const input = e.target as HTMLInputElement;
-        if (input.files && input.files.length > 0) {
-            const newTracks = Array.from(input.files).map((file) => ({
-                id: Math.random().toString(36),
-                title: file.name
-                    .replace(".mp3", "")
-                    .replace(/_/g, " ")
-                    .replace(/-/g, " "),
-                file: file,
-            }));
-
-            // Si hay un track vacío inicial, lo reemplazamos
-            if (tracks.length === 1 && !tracks[0].file && !tracks[0].title) {
-                tracks = newTracks;
-            } else {
-                tracks = [...tracks, ...newTracks];
-            }
-        }
-    }
-
     function canProceedToStep(step: number): boolean {
         if (step === 2) {
-            // Para avanzar AL paso 2, solo necesitamos título y género
             const hasValidGenre =
                 genre !== "Otra" ||
                 (genre === "Otra" && customGenre.trim() !== "");
             return releaseTitle.trim() !== "" && hasValidGenre;
         }
         if (step === 3) {
-            // Para avanzar AL paso 3, necesitamos la portada
             return coverFile !== null;
         }
-        // Para enviar (desde paso 3), necesitamos todos los tracks
-        return tracks.every((t) => t.title && t.file);
+        return downloadLink.trim() !== "" && tracklist.trim() !== "";
     }
 
     async function submitRelease() {
-        if (
-            !releaseTitle.trim() ||
-            !coverFile ||
-            tracks.some((t) => !t.title || !t.file)
-        ) {
+        if (!releaseTitle.trim() || !coverFile || !downloadLink.trim()) {
             alert("Por favor completa todos los campos");
             return;
         }
@@ -148,38 +79,16 @@
             const timestamp = Date.now();
             const basePath = `submissions/${userId}/${timestamp}`;
 
+            // Upload Cover Only
             const coverRef = ref(
                 storage,
                 `${basePath}/cover_${coverFile.name}`,
             );
             await uploadBytes(coverRef, coverFile);
             const coverUrl = await getDownloadURL(coverRef);
-            uploadProgress = 30;
+            uploadProgress = 50;
 
-            const processedTracks = [];
-            let completedTracks = 0;
-
-            for (const track of tracks) {
-                if (!track.file) continue;
-
-                const trackRef = ref(
-                    storage,
-                    `${basePath}/tracks/${track.file.name}`,
-                );
-                await uploadBytes(trackRef, track.file);
-                const audioUrl = await getDownloadURL(trackRef);
-
-                processedTracks.push({
-                    title: track.title,
-                    url: audioUrl,
-                    duration: 0,
-                    fileName: track.file.name,
-                });
-
-                completedTracks++;
-                uploadProgress = 30 + (completedTracks / tracks.length) * 50;
-            }
-
+            // Save to Firestore with Link
             await addDoc(collection(db, "musicSubmissions"), {
                 artistId: userId,
                 artistName: $userStore.user?.displayName || "Unknown Artist",
@@ -187,7 +96,9 @@
                 releaseTitle,
                 genre: genre === "Otra" ? customGenre : genre,
                 coverUrl,
-                tracks: processedTracks,
+                downloadLink: downloadLink.trim(),
+                tracklist: tracklist.trim(),
+                submissionType: "link", // Flag to identify new format
                 status: "pending",
                 submittedAt: serverTimestamp(),
             });
@@ -197,7 +108,7 @@
             goto("/artist");
         } catch (e: any) {
             console.error("Error upload:", e);
-            alert("Error al subir contenido: " + e.message);
+            alert("Error al enviar: " + e.message);
         } finally {
             uploading = false;
         }
@@ -530,109 +441,72 @@
                 </div>
             {/if}
 
-            <!-- Step 3: Tracks -->
+            <!-- Step 3: Download Link & Tracklist -->
             {#if currentStep === 3}
                 <div
                     class="bg-[#1a1a1a]/80 backdrop-blur-xl rounded-2xl border border-white/10 p-6 md:p-8 space-y-6 animate-fade-in"
                 >
-                    <div class="flex justify-between items-center">
+                    <div class="flex flex-col gap-2">
                         <h2 class="text-xl font-bold flex items-center gap-2">
-                            <span class="text-2xl">🎵</span> Canciones ({tracks.length})
+                            <span class="text-2xl">🔗</span> Enlace de Descarga
                         </h2>
-                        <button
-                            on:click={addTrack}
-                            class="px-4 py-2 bg-primary-500/20 hover:bg-primary-500/30 text-primary-400 rounded-lg text-sm font-bold transition-all flex items-center gap-2"
-                        >
-                            <span>+</span> Añadir
-                        </button>
+                        <p class="text-sm text-slate-400">
+                            Sube tu música a Mega, Google Drive, Dropbox o
+                            WeTransfer y pega el enlace aquí.
+                        </p>
                     </div>
 
-                    <div class="space-y-4 animate-fade-in">
-                        <!-- Bulk Upload Zone -->
-                        <div
-                            class="relative border-2 border-dashed border-white/20 rounded-xl p-8 text-center hover:border-primary-500/50 hover:bg-white/5 transition-all group cursor-pointer"
-                        >
-                            <input
-                                type="file"
-                                accept=".mp3,audio/mpeg"
-                                multiple
-                                class="absolute inset-0 opacity-0 cursor-pointer z-10"
-                                on:change={handleMultiTrackSelect}
-                            />
-                            <div
-                                class="text-4xl mb-3 group-hover:scale-110 transition-transform"
+                    <div class="space-y-6">
+                        <!-- Link Input -->
+                        <div>
+                            <label
+                                for="download-link"
+                                class="block text-sm font-medium mb-2 text-slate-300"
                             >
-                                📂
+                                URL de la Carpeta/Archivo
+                            </label>
+                            <div class="relative">
+                                <span
+                                    class="absolute left-4 top-3.5 text-slate-500"
+                                    >🌐</span
+                                >
+                                <input
+                                    id="download-link"
+                                    type="url"
+                                    bind:value={downloadLink}
+                                    placeholder="https://mega.nz/..."
+                                    class="w-full bg-[#0B1120] border border-white/10 rounded-xl pl-10 pr-4 py-3 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all font-mono text-sm text-primary-300"
+                                />
                             </div>
-                            <h3 class="font-bold text-white mb-1">
-                                Arrastra tus canciones aquí
-                            </h3>
-                            <p class="text-slate-400 text-sm">
-                                o haz clic para seleccionar múltiples archivos
-                                MP3
-                            </p>
+                            <!-- Security Tip -->
+                            <div
+                                class="mt-2 flex items-center gap-2 text-xs text-slate-500"
+                            >
+                                <span class="text-green-400">🛡️</span>
+                                Recomendamos usar servicios encriptados como Mega
+                                o protegidos con contraseña.
+                            </div>
                         </div>
 
-                        {#each tracks as track, i (track.id)}
-                            <div
-                                class="bg-[#0B1120] p-4 rounded-xl border border-white/5 relative group hover:border-primary-500/20 transition-all flex items-center gap-4 animate-slide-in"
+                        <!-- Tracklist Textarea -->
+                        <div>
+                            <label
+                                for="tracklist"
+                                class="block text-sm font-medium mb-2 text-slate-300"
                             >
-                                <div
-                                    class="w-8 h-8 rounded-full bg-primary-500/10 text-primary-400 flex items-center justify-center font-bold text-sm shrink-0"
-                                >
-                                    {i + 1}
-                                </div>
-
-                                <div class="flex-1 grid md:grid-cols-2 gap-4">
-                                    <!-- File Input (Hidden/Compact if file exists) -->
-                                    <div>
-                                        {#if !track.file}
-                                            <input
-                                                type="file"
-                                                accept=".mp3,audio/mpeg"
-                                                class="block w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20 file:cursor-pointer"
-                                                on:change={(e) =>
-                                                    handleAudioSelect(e, i)}
-                                            />
-                                        {:else}
-                                            <div
-                                                class="flex items-center gap-2 text-sm text-green-400 bg-green-500/10 px-3 py-2 rounded-lg border border-green-500/20"
-                                            >
-                                                <span>🎵</span>
-                                                <span
-                                                    class="truncate max-w-[150px]"
-                                                    >{track.file.name}</span
-                                                >
-                                                <button
-                                                    class="ml-auto text-slate-400 hover:text-white"
-                                                    on:click={() => {
-                                                        track.file = null;
-                                                        track.title = "";
-                                                    }}>Cambiar</button
-                                                >
-                                            </div>
-                                        {/if}
-                                    </div>
-
-                                    <div>
-                                        <input
-                                            type="text"
-                                            bind:value={track.title}
-                                            placeholder="Título de la canción"
-                                            class="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-primary-500 focus:outline-none transition-all"
-                                        />
-                                    </div>
-                                </div>
-
-                                <button
-                                    on:click={() => removeTrack(i)}
-                                    class="text-slate-500 hover:text-red-400 transition-colors p-2"
-                                    title="Eliminar"
-                                >
-                                    ✕
-                                </button>
-                            </div>
-                        {/each}
+                                Lista de Canciones (Tracklist)
+                            </label>
+                            <textarea
+                                id="tracklist"
+                                bind:value={tracklist}
+                                placeholder="1. Intro - 2:30&#10;2. Midnight Vibes - 3:45&#10;3. ..."
+                                rows="6"
+                                class="w-full bg-[#0B1120] border border-white/10 rounded-xl px-4 py-3 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all resize-none font-mono text-sm"
+                            ></textarea>
+                            <p class="text-xs text-slate-500 mt-2">
+                                Escribe el nombre de las canciones en orden.
+                            </p>
+                        </div>
                     </div>
 
                     <div class="flex gap-3">
@@ -644,20 +518,16 @@
                         </button>
                         <button
                             on:click={submitRelease}
-                            disabled={uploading || !canProceedToStep(3)}
+                            disabled={uploading || !downloadLink || !tracklist}
                             class="flex-1 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg shadow-lg shadow-primary-900/20 transition-all flex items-center justify-center gap-3"
                         >
                             {#if uploading}
                                 <div
                                     class="animate-spin rounded-full h-5 w-5 border-2 border-white/20 border-t-white"
                                 ></div>
-                                <span
-                                    >Subiendo {Math.round(
-                                        uploadProgress,
-                                    )}%...</span
-                                >
+                                <span>Enviando...</span>
                             {:else}
-                                <span>🚀 Enviar para Revisión</span>
+                                <span>🚀 Finalizar Envío</span>
                             {/if}
                         </button>
                     </div>

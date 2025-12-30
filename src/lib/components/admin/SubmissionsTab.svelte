@@ -8,18 +8,10 @@
         doc,
         updateDoc,
         orderBy,
-        where,
         getDoc,
     } from "firebase/firestore";
 
     const dispatch = createEventDispatcher();
-
-    interface Track {
-        title: string;
-        url: string;
-        duration: number;
-        fileName: string;
-    }
 
     interface Submission {
         id: string;
@@ -29,15 +21,19 @@
         releaseTitle: string;
         genre: string;
         coverUrl: string;
-        tracks: Track[];
+        // New fields
+        downloadLink?: string;
+        tracklist?: string;
+        submissionType?: "link";
+        // Legacy fallback
+        tracks?: any[];
+
         status: "pending" | "approved" | "rejected";
         submittedAt: any;
     }
 
     let submissions: Submission[] = [];
     let loading = true;
-    let playingTrack: string | null = null;
-    let audio: HTMLAudioElement | null = null;
     let statusMessage = "";
 
     onMount(async () => {
@@ -48,7 +44,6 @@
         loading = true;
         try {
             const submissionsRef = collection(db, "musicSubmissions");
-            // Show all, but sort by status (pending first) then date
             const q = query(submissionsRef, orderBy("submittedAt", "desc"));
             const snapshot = await getDocs(q);
 
@@ -64,17 +59,31 @@
         }
     }
 
-    function togglePlay(url: string) {
-        if (playingTrack === url) {
-            audio?.pause();
-            playingTrack = null;
-        } else {
-            if (audio) audio.pause();
-            audio = new Audio(url);
-            audio.play();
-            playingTrack = url;
-            audio.onended = () => (playingTrack = null);
+    function getDomain(url: string) {
+        try {
+            return new URL(url).hostname;
+        } catch {
+            return "url-invalida";
         }
+    }
+
+    function isKnownSafe(url: string) {
+        if (!url) return false;
+        const domain = getDomain(url).toLowerCase();
+        return (
+            domain.includes("mega.nz") ||
+            domain.includes("drive.google.com") ||
+            domain.includes("dropbox.com") ||
+            domain.includes("wetransfer.com")
+        );
+    }
+
+    function analyzeLink(url: string) {
+        // Open Google Transparency Report for Safety Check
+        window.open(
+            `https://transparencyreport.google.com/safe-browsing/search?url=${encodeURIComponent(url)}`,
+            "_blank",
+        );
     }
 
     async function approveSubmission(submission: Submission) {
@@ -86,14 +95,12 @@
             return;
 
         try {
-            // 1. Update submission status
             const subRef = doc(db, "musicSubmissions", submission.id);
             await updateDoc(subRef, {
                 status: "approved",
                 reviewedAt: Date.now(),
             });
 
-            // 2. Auto-verify artist
             const userRef = doc(db, "users", submission.artistId);
             const userSnap = await getDoc(userRef);
 
@@ -103,7 +110,6 @@
                     updatedAt: Date.now(),
                 });
 
-                // Also update artist profile if it exists
                 const artistRef = doc(db, "artists", submission.artistId);
                 const artistSnap = await getDoc(artistRef);
                 if (artistSnap.exists()) {
@@ -111,12 +117,11 @@
                 }
             }
 
-            // Update local state
             submission.status = "approved";
             submissions = submissions;
 
-            statusMessage = `✅ Envío aprobado y artista ${submission.artistName} verificado automáticamente`;
-            dispatch("approved"); // Notify parent to update stats
+            statusMessage = `✅ Envío aprobado y artista ${submission.artistName} verificado`;
+            dispatch("approved");
 
             setTimeout(() => (statusMessage = ""), 5000);
         } catch (e: any) {
@@ -138,7 +143,7 @@
             submissions = submissions;
 
             statusMessage = `❌ Envío rechazado`;
-            dispatch("approved"); // Notify parent
+            dispatch("approved");
 
             setTimeout(() => (statusMessage = ""), 3000);
         } catch (e: any) {
@@ -151,18 +156,17 @@
     <div class="mb-6">
         <h2 class="text-2xl font-bold text-white mb-2">Envíos Musicales</h2>
         <p class="text-slate-400">
-            Revisa música nueva y verifica artistas automáticamente
+            Revisa enlaces de descarga y verifica artistas. Analiza la seguridad
+            antes de descargar.
         </p>
     </div>
 
-    <!-- Status Message -->
     {#if statusMessage}
         <div class="mb-6 p-4 bg-white/10 border border-white/20 rounded-xl">
             {statusMessage}
         </div>
     {/if}
 
-    <!-- List -->
     {#if loading}
         <div class="text-center py-12">
             <div
@@ -172,7 +176,7 @@
         </div>
     {:else if submissions.length === 0}
         <div class="text-center py-12 text-slate-400">
-            <p>No hay envíos musicales</p>
+            <p>No hay envíos pendientes</p>
         </div>
     {:else}
         <div class="space-y-6">
@@ -180,7 +184,6 @@
                 <div
                     class="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors relative overflow-hidden"
                 >
-                    <!-- Status Badge -->
                     <div class="absolute top-4 right-4">
                         {#if sub.status === "pending"}
                             <span
@@ -201,7 +204,6 @@
                     </div>
 
                     <div class="flex flex-col md:flex-row gap-6 mb-6">
-                        <!-- Cover -->
                         <div
                             class="w-32 h-32 flex-shrink-0 rounded-xl overflow-hidden bg-black/50"
                         >
@@ -220,7 +222,6 @@
                             {/if}
                         </div>
 
-                        <!-- Info -->
                         <div class="flex-1">
                             <h3 class="text-2xl font-bold text-white mb-1">
                                 {sub.releaseTitle}
@@ -233,62 +234,25 @@
                                 class="flex flex-wrap gap-4 text-sm text-slate-400 mb-4"
                             >
                                 <span class="flex items-center gap-1">
-                                    <svg
-                                        class="w-4 h-4"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                        ><path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-                                        /></svg
-                                    >
-                                    {sub.genre}
+                                    🎵 {sub.genre}
                                 </span>
                                 <span class="flex items-center gap-1">
-                                    <svg
-                                        class="w-4 h-4"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                        ><path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                        /></svg
-                                    >
-                                    {sub.artistEmail}
+                                    📧 {sub.artistEmail}
                                 </span>
                                 <span class="flex items-center gap-1">
-                                    <svg
-                                        class="w-4 h-4"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                        ><path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                        /></svg
-                                    >
-                                    {new Date(
+                                    📅 {new Date(
                                         sub.submittedAt?.seconds * 1000,
                                     ).toLocaleDateString()}
                                 </span>
                             </div>
 
-                            <!-- Actions -->
                             {#if sub.status === "pending"}
                                 <div class="flex gap-3">
                                     <button
                                         on:click={() => approveSubmission(sub)}
                                         class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-bold text-sm transition-colors shadow-lg shadow-green-500/20"
                                     >
-                                        ✓ Aprobar y Verificar
+                                        ✓ Aprobar
                                     </button>
                                     <button
                                         on:click={() => rejectSubmission(sub)}
@@ -301,45 +265,82 @@
                         </div>
                     </div>
 
-                    <!-- Tracks -->
-                    <div class="bg-black/20 rounded-xl p-4">
+                    <!-- Link Security & Downloads -->
+                    <div class="bg-black/20 rounded-xl p-6">
                         <h4
-                            class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2"
+                            class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center justify-between"
                         >
-                            Pistas ({sub.tracks.length})
-                        </h4>
-                        <div class="space-y-2">
-                            {#each sub.tracks as track, i}
-                                <div
-                                    class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors group"
+                            <span>Material para Revisión</span>
+                            {#if sub.downloadLink && isKnownSafe(sub.downloadLink)}
+                                <span
+                                    class="text-green-400 text-xs flex items-center gap-1 border border-green-500/30 px-2 py-1 rounded bg-green-500/10"
                                 >
-                                    <button
-                                        on:click={() => togglePlay(track.url)}
-                                        class="w-8 h-8 flex items-center justify-center rounded-full bg-primary-500 text-white hover:scale-105 transition-transform"
-                                    >
-                                        {#if playingTrack === track.url}
-                                            <span class="text-xs">⏸</span>
-                                        {:else}
-                                            <span class="text-xs">▶</span>
-                                        {/if}
-                                    </button>
-                                    <span
-                                        class="text-sm text-slate-500 font-mono w-6 text-right"
-                                        >{i + 1}</span
-                                    >
-                                    <span class="text-white font-medium flex-1"
-                                        >{track.title}</span
-                                    >
+                                    🛡️ Dominio Confiable ({getDomain(
+                                        sub.downloadLink,
+                                    )})
+                                </span>
+                            {:else if sub.downloadLink}
+                                <span
+                                    class="text-yellow-400 text-xs flex items-center gap-1 border border-yellow-500/30 px-2 py-1 rounded bg-yellow-500/10"
+                                >
+                                    ⚠️ Check Domain: {getDomain(
+                                        sub.downloadLink,
+                                    )}
+                                </span>
+                            {/if}
+                        </h4>
+
+                        {#if sub.downloadLink}
+                            <div
+                                class="flex flex-col sm:flex-row items-center gap-3 mb-6 bg-white/5 p-4 rounded-lg border border-white/5"
+                            >
+                                <div class="flex-1 w-full overflow-hidden">
+                                    <p class="text-xs text-slate-500 mb-1">
+                                        Enlace de Descarga
+                                    </p>
                                     <a
-                                        href={track.url}
+                                        href={sub.downloadLink}
                                         target="_blank"
-                                        class="p-2 text-slate-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                                        title="Descargar"
+                                        class="text-blue-400 hover:text-blue-300 hover:underline truncate block font-mono text-sm transition-colors"
                                     >
-                                        ⬇️
+                                        {sub.downloadLink}
                                     </a>
                                 </div>
-                            {/each}
+                                <div class="flex gap-2 w-full sm:w-auto">
+                                    <button
+                                        on:click={() =>
+                                            analyzeLink(sub.downloadLink || "")}
+                                        class="flex-1 sm:flex-none px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-xs font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        🔍 Analizar (Google Safety)
+                                    </button>
+                                    <a
+                                        href={sub.downloadLink}
+                                        target="_blank"
+                                        class="flex-1 sm:flex-none px-4 py-2 bg-primary-600 hover:bg-primary-500 text-white rounded-lg text-xs font-bold whitespace-nowrap transition-colors shadow-lg shadow-primary-900/20 flex items-center justify-center gap-2"
+                                    >
+                                        ⬇️ Abrir Enlace
+                                    </a>
+                                </div>
+                            </div>
+                        {:else if sub.tracks}
+                            <!-- Fallback for legacy uploads -->
+                            <div
+                                class="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg mb-4"
+                            >
+                                <p class="text-yellow-200 text-sm">
+                                    ⚠️ Envío antiguo (Archivos directos)
+                                </p>
+                            </div>
+                        {/if}
+
+                        <div>
+                            <p class="text-xs text-slate-500 mb-2">
+                                Tracklist Declarado
+                            </p>
+                            <pre
+                                class="text-xs text-slate-300 font-mono bg-black/40 border border-white/5 p-4 rounded-lg whitespace-pre-wrap leading-relaxed">{sub.tracklist ||
+                                    "No especificado por el artista."}</pre>
                         </div>
                     </div>
                 </div>
