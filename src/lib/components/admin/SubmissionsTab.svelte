@@ -23,18 +23,49 @@
         coverUrl: string;
         // New fields
         downloadLink?: string;
-        tracklist?: string;
-        submissionType?: "link";
-        // Legacy fallback
-        tracks?: any[];
-
+        tracklist: string;
         status: "pending" | "approved" | "rejected";
         submittedAt: any;
+
+        // New R2 Fields
+        submissionType?: "link" | "direct" | "r2_direct";
+        r2CoverKey?: string;
+        r2AudioKeys?: { key: string; name: string; size: number }[];
+        audioFiles?: any[]; // Legacy direct upload
     }
 
     let submissions: Submission[] = [];
     let loading = true;
     let statusMessage = "";
+    let playingAudio: HTMLAudioElement | null = null;
+    let playingKey = "";
+
+    async function playR2Audio(key: string) {
+        if (playingKey === key && playingAudio) {
+            playingAudio.paused ? playingAudio.play() : playingAudio.pause();
+            return;
+        }
+
+        if (playingAudio) {
+            playingAudio.pause();
+            playingAudio = null;
+        }
+
+        try {
+            const res = await fetch("/api/r2/get-url", {
+                method: "POST",
+                body: JSON.stringify({ key }),
+            });
+            const { url } = await res.json();
+
+            playingAudio = new Audio(url);
+            playingAudio.play();
+            playingKey = key;
+        } catch (e) {
+            console.error("Error playing audio:", e);
+            statusMessage = "Error al reproducir audio";
+        }
+    }
 
     onMount(async () => {
         await loadSubmissions();
@@ -145,31 +176,84 @@
                     "firebase/firestore"
                 );
 
-                const albumData = {
-                    title: submission.releaseTitle,
-                    artist: submission.artistName,
-                    artistId: submission.artistId,
-                    cover: submission.coverUrl,
-                    category: submission.genre || "Chill",
-                    tracks: submission.tracklist
+                let tracksForAlbum = [];
+                let secureCoverKey = submission.r2CoverKey;
+
+                if (submission.submissionType === "r2_direct") {
+                    // 🚀 R2 Migration (Move files to permanent folder)
+                    statusMessage = "⏳ Migrando archivos en Cloudflare R2...";
+
+                    const filesToMigrate = [
+                        {
+                            key: submission.r2CoverKey,
+                            name: `cover_${Date.now()}.jpg`,
+                        },
+                        ...submission.r2AudioKeys.map((f) => ({
+                            key: f.key,
+                            name: f.name,
+                        })),
+                    ];
+
+                    const moveRes = await fetch("/api/r2/approve", {
+                        method: "POST",
+                        body: JSON.stringify({
+                            submissionId: submission.id,
+                            artistVerifiedName: submission.artistName,
+                            albumTitle: submission.releaseTitle,
+                            files: filesToMigrate,
+                        }),
+                    });
+
+                    if (!moveRes.ok)
+                        throw new Error("Error moviendo archivos en R2");
+
+                    const { migratedFiles } = await moveRes.json();
+
+                    // Map back to tracks
+                    const newCover = migratedFiles[0]; // First one was cover
+                    secureCoverKey = newCover.key;
+
+                    const audioFiles = migratedFiles.slice(1);
+                    tracksForAlbum = audioFiles.map((f, idx) => ({
+                        id: `track-${idx + 1}`,
+                        title: f.name.replace(/\.(mp3|wav|m4a)$/i, ""),
+                        r2Key: f.key, // Store Private Key
+                        duration: 0, // TODO: Extract metadata if possible
+                    }));
+                } else {
+                    // Legacy (Link based)
+                    tracksForAlbum = submission.tracklist
                         ? submission.tracklist
                               .split("\n")
                               .filter((t) => t.trim())
                               .map((line, idx) => ({
                                   id: `track-${idx + 1}`,
-                                  title: line.replace(/^\d+\.\s*/, "").trim(), // Remove "1. " prefix
-                                  url: submission.downloadLink, // Placeholder until you upload individual tracks
+                                  title: line.replace(/^\d+\.\s*/, "").trim(),
+                                  url: submission.downloadLink,
                               }))
-                        : [],
-                    downloadLink: submission.downloadLink,
+                        : [];
+                }
+
+                const albumData = {
+                    title: submission.releaseTitle,
+                    artist: submission.artistName,
+                    artistId: submission.artistId,
+                    cover: submission.coverUrl, // Keep original URL for display if available, or fetch from key
+                    r2CoverKey: secureCoverKey,
+                    category: submission.genre || "Chill",
+                    tracks: tracksForAlbum,
                     releaseDate: Date.now(),
                     createdAt: Date.now(),
                     submissionId: submission.id,
+                    storageProvider:
+                        submission.submissionType === "r2_direct"
+                            ? "cloudflare_r2"
+                            : "external_link",
                 };
 
                 await addDoc(collection(db, "albums"), albumData);
 
-                statusMessage += ` 🎵 | Álbum publicado en colección`;
+                statusMessage = `✅ ¡Publicado! Archivos migrados y álbum creado.`;
             }
 
             submission.status = "approved";
@@ -319,32 +403,66 @@
                         </div>
                     </div>
 
-                    <!-- Link Security & Downloads -->
+                    <!-- Material Inspector -->
                     <div class="bg-black/20 rounded-xl p-6">
                         <h4
                             class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center justify-between"
                         >
-                            <span>Material para Revisión</span>
-                            {#if sub.downloadLink && isKnownSafe(sub.downloadLink)}
+                            <span>Archivos de Audio</span>
+                            {#if sub.submissionType === "r2_direct"}
                                 <span
-                                    class="text-green-400 text-xs flex items-center gap-1 border border-green-500/30 px-2 py-1 rounded bg-green-500/10"
+                                    class="text-blue-400 text-xs flex items-center gap-1 border border-blue-500/30 px-2 py-1 rounded bg-blue-500/10"
                                 >
-                                    🛡️ Dominio Confiable ({getDomain(
-                                        sub.downloadLink,
-                                    )})
+                                    ☁️ Cloudflare R2
                                 </span>
-                            {:else if sub.downloadLink}
+                            {:else}
                                 <span
                                     class="text-yellow-400 text-xs flex items-center gap-1 border border-yellow-500/30 px-2 py-1 rounded bg-yellow-500/10"
                                 >
-                                    ⚠️ Check Domain: {getDomain(
-                                        sub.downloadLink,
-                                    )}
+                                    🔗 Enlace Externo
                                 </span>
                             {/if}
                         </h4>
 
-                        {#if sub.downloadLink}
+                        {#if sub.submissionType === "r2_direct" && sub.r2AudioKeys}
+                            <div class="space-y-2">
+                                {#each sub.r2AudioKeys as track, i}
+                                    <div
+                                        class="flex items-center gap-4 bg-white/5 p-3 rounded-lg border border-white/5 hover:border-white/10 transition-all"
+                                    >
+                                        <button
+                                            on:click={() =>
+                                                playR2Audio(track.key)}
+                                            class="w-10 h-10 rounded-full flex items-center justify-center transition-all {playingKey ===
+                                            track.key
+                                                ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/20'
+                                                : 'bg-white/10 text-white hover:bg-white/20'}"
+                                        >
+                                            {#if playingKey === track.key && playingAudio && !playingAudio.paused}
+                                                ⏸
+                                            {:else}
+                                                ▶
+                                            {/if}
+                                        </button>
+                                        <div class="flex-1 overflow-hidden">
+                                            <p
+                                                class="font-bold text-sm truncate text-white"
+                                            >
+                                                {track.name}
+                                            </p>
+                                            <p class="text-xs text-slate-400">
+                                                {(
+                                                    track.size /
+                                                    1024 /
+                                                    1024
+                                                ).toFixed(2)} MB
+                                            </p>
+                                        </div>
+                                    </div>
+                                {/each}
+                            </div>
+                        {:else if sub.downloadLink}
+                            <!-- Legacy Link View -->
                             <div
                                 class="flex flex-col sm:flex-row items-center gap-3 mb-6 bg-white/5 p-4 rounded-lg border border-white/5"
                             >
@@ -362,45 +480,24 @@
                                 </div>
                                 <div class="flex gap-2 w-full sm:w-auto">
                                     <button
-                                        on:click={() =>
-                                            analyzeLink(sub.downloadLink || "")}
-                                        class="flex-1 sm:flex-none px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-xs font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-2"
-                                    >
-                                        🔍 Analizar (Google Safety)
-                                    </button>
-                                    <button
                                         on:click={() => {
                                             navigator.clipboard.writeText(
                                                 sub.downloadLink || "",
                                             );
-                                            statusMessage = `📋 URL copiada. Pégala en MEGA Cloud para subir directamente sin descargar a tu PC.`;
-                                            setTimeout(
-                                                () => (statusMessage = ""),
-                                                4000,
-                                            );
+                                            statusMessage = "📋 URL copiada";
                                         }}
-                                        class="flex-1 sm:flex-none px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-bold whitespace-nowrap transition-colors shadow-lg flex items-center justify-center gap-2"
-                                        title="Copiar URL para subir a MEGA Cloud"
+                                        class="flex-1 sm:flex-none px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-xs font-bold whitespace-nowrap transition-colors"
                                     >
-                                        📥 Copiar para MEGA
+                                        📋 Copiar
                                     </button>
                                     <a
                                         href={sub.downloadLink}
                                         target="_blank"
-                                        class="flex-1 sm:flex-none px-4 py-2 bg-primary-600 hover:bg-primary-500 text-white rounded-lg text-xs font-bold whitespace-nowrap transition-colors shadow-lg shadow-primary-900/20 flex items-center justify-center gap-2"
+                                        class="flex-1 sm:flex-none px-4 py-2 bg-primary-600 hover:bg-primary-500 text-white rounded-lg text-xs font-bold whitespace-nowrap transition-colors shadow-lg shadow-primary-900/20"
                                     >
-                                        ⬇️ Abrir Enlace
+                                        ⬇️ Abrir
                                     </a>
                                 </div>
-                            </div>
-                        {:else if sub.tracks}
-                            <!-- Fallback for legacy uploads -->
-                            <div
-                                class="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg mb-4"
-                            >
-                                <p class="text-yellow-200 text-sm">
-                                    ⚠️ Envío antiguo (Archivos directos)
-                                </p>
                             </div>
                         {/if}
 

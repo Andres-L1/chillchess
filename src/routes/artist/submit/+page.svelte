@@ -76,6 +76,35 @@
         return audioFiles.length > 0;
     }
 
+    async function uploadToR2(file: File, folder: string) {
+        // 1. Get Signed URL
+        const res = await fetch("/api/r2/sign-url", {
+            method: "POST",
+            body: JSON.stringify({
+                fileName: file.name,
+                fileType: file.type,
+                folder,
+            }),
+        });
+
+        if (!res.ok) throw new Error("Failed to get upload URL");
+
+        const { uploadUrl, key } = await res.json();
+
+        // 2. Upload direct to R2
+        const upload = await fetch(uploadUrl, {
+            method: "PUT",
+            body: file,
+            headers: {
+                "Content-Type": file.type,
+            },
+        });
+
+        if (!upload.ok) throw new Error("Upload to R2 failed");
+
+        return { key, name: file.name, size: file.size, type: file.type };
+    }
+
     async function submitRelease() {
         if (!releaseTitle.trim() || !coverFile || audioFiles.length === 0) {
             alert(
@@ -95,43 +124,34 @@
             const timestamp = Date.now();
             const basePath = `submissions/${userId}/${timestamp}`;
 
-            // Upload Cover
-            const coverRef = ref(
-                storage,
-                `${basePath}/cover_${coverFile.name}`,
-            );
-            await uploadBytes(coverRef, coverFile);
-            const coverUrl = await getDownloadURL(coverRef);
+            // Upload Cover to R2
+            const coverData = await uploadToR2(coverFile, basePath);
             uploadProgress = 20;
 
-            // Upload Audio Files
-            const audioUrls: { name: string; url: string; size: number }[] = [];
+            // Upload Audio Files to R2
+            const uploadedAudio = [];
             const totalFiles = audioFiles.length;
 
             for (let i = 0; i < audioFiles.length; i++) {
                 const file = audioFiles[i];
-                const audioRef = ref(storage, `${basePath}/audio_${file.name}`);
-                await uploadBytes(audioRef, file);
-                const url = await getDownloadURL(audioRef);
-                audioUrls.push({
-                    name: file.name,
-                    url,
-                    size: file.size,
-                });
-                uploadProgress = 20 + ((i + 1) / totalFiles) * 70; // 20% to 90%
+                const data = await uploadToR2(file, basePath);
+                uploadedAudio.push(data);
+                uploadProgress = 20 + ((i + 1) / totalFiles) * 70;
             }
 
-            // Save to Firestore
+            // Save Metadata to Firestore
+            // We save the 'key' (path in R2) instead of the full URL
+            // because we'll generate timed URLs for privacy or simply construct the public URL if public.
             await addDoc(collection(db, "musicSubmissions"), {
                 artistId: userId,
                 artistName: $userStore.user?.displayName || "Unknown Artist",
                 artistEmail: $userStore.user?.email,
                 releaseTitle,
                 genre: genre === "Otra" ? customGenre : genre,
-                coverUrl,
-                audioFiles: audioUrls,
+                r2CoverKey: coverData.key,
+                r2AudioKeys: uploadedAudio, // Array of { key, name, size }
                 tracklist: tracklist.trim(),
-                submissionType: "direct", // Direct upload
+                submissionType: "r2_direct",
                 status: "pending",
                 submittedAt: serverTimestamp(),
             });
