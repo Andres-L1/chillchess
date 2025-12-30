@@ -6,7 +6,7 @@
     import { toast } from "$lib/stores/notificationStore";
 
     let theme: "dark" | "light" = "dark";
-    let size: "compact" | "medium" | "large" = "medium";
+    let size: "compact" | "medium" | "large" = "large";
     let showLogo = true;
     let opacity = 0.9;
 
@@ -54,65 +54,13 @@
                 >
                     <h2 class="text-xl font-bold mb-4">⚙️ Personalización</h2>
 
-                    <!-- Theme -->
-                    <div class="mb-4">
-                        <span class="block text-sm font-medium mb-2">Tema</span>
-                        <div class="flex gap-3">
-                            <button
-                                on:click={() => (theme = "dark")}
-                                class="flex-1 py-2 px-4 rounded-lg {theme ===
-                                'dark'
-                                    ? 'bg-primary-500 text-white'
-                                    : 'bg-white/10 text-slate-300'} transition-colors"
-                            >
-                                🌙 Oscuro
-                            </button>
-                            <button
-                                on:click={() => (theme = "light")}
-                                class="flex-1 py-2 px-4 rounded-lg {theme ===
-                                'light'
-                                    ? 'bg-primary-500 text-white'
-                                    : 'bg-white/10 text-slate-300'} transition-colors"
-                            >
-                                ☀️ Claro
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Size -->
-                    <div class="mb-4">
-                        <span class="block text-sm font-medium mb-2"
-                            >Tamaño</span
-                        >
-                        <div class="flex gap-3">
-                            <button
-                                on:click={() => (size = "compact")}
-                                class="flex-1 py-2 px-4 rounded-lg text-sm {size ===
-                                'compact'
-                                    ? 'bg-primary-500 text-white'
-                                    : 'bg-white/10 text-slate-300'} transition-colors"
-                            >
-                                Compacto
-                            </button>
-                            <button
-                                on:click={() => (size = "medium")}
-                                class="flex-1 py-2 px-4 rounded-lg text-sm {size ===
-                                'medium'
-                                    ? 'bg-primary-500 text-white'
-                                    : 'bg-white/10 text-slate-300'} transition-colors"
-                            >
-                                Mediano
-                            </button>
-                            <button
-                                on:click={() => (size = "large")}
-                                class="flex-1 py-2 px-4 rounded-lg text-sm {size ===
-                                'large'
-                                    ? 'bg-primary-500 text-white'
-                                    : 'bg-white/10 text-slate-300'} transition-colors"
-                            >
-                                Grande
-                            </button>
-                        </div>
+                    <!-- Theme & Size removed (Defaults: Dark & Large) -->
+                    <!-- Personalización Simplificada -->
+                    <div class="mb-6">
+                        <p class="text-sm text-slate-400 mb-4">
+                            Hemos configurado el widget con los mejores ajustes
+                            de visibilidad para tu stream.
+                        </p>
                     </div>
 
                     <!-- Opacity -->

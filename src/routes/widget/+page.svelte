@@ -68,8 +68,8 @@
     // Size configurations
     const sizes = {
         compact: { width: "300px", imgSize: "60px", fontSize: "text-sm" },
-        medium: { width: "400px", imgSize: "80px", fontSize: "text-base" },
-        large: { width: "500px", imgSize: "100px", fontSize: "text-lg" },
+        medium: { width: "380px", imgSize: "72px", fontSize: "text-base" },
+        large: { width: "450px", imgSize: "90px", fontSize: "text-lg" },
     };
 
     $: config = sizes[size as keyof typeof sizes] || sizes.medium;
@@ -88,13 +88,7 @@
             opacity: {opacity};
         "
     >
-        <!-- Background Glow -->
-        <div
-            class="glow-bg"
-            style="background: linear-gradient(135deg, {theme === 'light'
-                ? '#4f46e5, #06b6d4'
-                : '#ff7b3d, #6366f1'});"
-        ></div>
+        <!-- Background Glow removed for cleaner look -->
 
         <!-- Vinilo Giratorio -->
         <div
@@ -194,41 +188,24 @@
         position: relative;
         display: flex;
         align-items: center;
-        gap: 20px; /* More space */
-        padding: 20px;
+        gap: 24px;
+        padding: 16px 24px;
 
-        /* Premium Glassmorphism */
-        background: rgba(13, 17, 26, 0.6); /* Darker but transparent */
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
+        /* Modern Minimalist Dark - Complementary Style */
+        background: rgba(10, 10, 12, 0.75);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
 
-        border-radius: 24px;
-        border: 1px solid rgba(255, 255, 255, 0.08); /* Subtle border */
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.05); /* Very subtle */
 
-        box-shadow:
-            0 25px 50px -12px rgba(0, 0, 0, 0.5),
-            /* Deep shadow */ inset 0 1px 0 rgba(255, 255, 255, 0.1); /* Top highlight */
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 
         overflow: hidden;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.3s ease;
     }
 
-    /* Ambient Glow */
-    .glow-bg {
-        position: absolute;
-        width: 150%;
-        height: 150%;
-        top: -25%;
-        left: -25%;
-        background: radial-gradient(
-            circle at 30% 50%,
-            rgba(99, 102, 241, 0.15),
-            transparent 60%
-        );
-        animation: pulse-glow 8s ease-in-out infinite alternate;
-        pointer-events: none;
-        z-index: 0;
-    }
+    /* Glow removed */
 
     .album-container {
         position: relative;
