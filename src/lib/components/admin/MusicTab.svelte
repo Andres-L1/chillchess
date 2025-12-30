@@ -471,7 +471,7 @@
                                             <option value={artist.uid}>
                                                 {artist.displayName}
                                                 {artist.isFounder
-                                                    ? "(Fundador 🏆)"
+                                                    ? "(Fundador 💎)"
                                                     : ""}
                                             </option>
                                         {/each}
