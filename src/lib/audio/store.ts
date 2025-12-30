@@ -73,7 +73,10 @@ export const audioStore = writable<AudioState>(initialState);
 
 // --- Initialization ---
 
+// --- Initialization ---
+
 let isInitialized = false;
+const CACHE_VERSION = "v3_r2_migration"; // Update this when Album/Track schema changes
 
 export async function initAudioLibrary() {
     if (isInitialized) return;
@@ -82,7 +85,9 @@ export async function initAudioLibrary() {
     // 1. FAST LOAD: Try to load from LocalStorage first
     if (typeof localStorage !== 'undefined') {
         const cached = localStorage.getItem('chillchess_albums_cache');
-        if (cached) {
+        const cachedVersion = localStorage.getItem('chillchess_cache_version');
+
+        if (cached && cachedVersion === CACHE_VERSION) {
             try {
                 const parsed = JSON.parse(cached);
                 console.log("[AudioLibrary] Loaded from cache (Instant).");
@@ -94,6 +99,8 @@ export async function initAudioLibrary() {
             } catch (e) {
                 console.warn("Invalid cache", e);
             }
+        } else {
+            console.log("[AudioLibrary] Cache outdated or missing, fetching fresh.");
         }
     }
 
@@ -120,6 +127,7 @@ export async function initAudioLibrary() {
             // Save to Cache for next time
             if (typeof localStorage !== 'undefined') {
                 localStorage.setItem('chillchess_albums_cache', JSON.stringify(fetchedAlbums));
+                localStorage.setItem('chillchess_cache_version', CACHE_VERSION);
             }
             return;
         }

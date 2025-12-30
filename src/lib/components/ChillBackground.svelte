@@ -124,12 +124,12 @@
             <!-- Reactive Lightning Flash (Subtle) -->
             <div
                 class="absolute inset-0 bg-blue-500/10 mix-blend-overlay transition-opacity duration-100 pointer-events-none"
-                style="opacity: {bass > 0.7 ? bass * 0.5 : 0}"
+                style="opacity: {bass > 0.7 ? bass * 0.3 : 0}"
             ></div>
 
-            <!-- Heavy Rain CSS -->
+            <!-- Heavy Rain CSS (Optimized count to 15) -->
             <div class="rain-container absolute inset-0 opacity-40">
-                {#each rainDrops as _, i}
+                {#each Array(15) as _, i}
                     <div
                         class="rain-drop"
                         style="left: {Math.random() *
@@ -139,9 +139,9 @@
                     ></div>
                 {/each}
             </div>
-            <!-- Fog -->
+            <!-- Fog (Reduced complexity) -->
             <div
-                class="absolute bottom-0 w-full h-1/2 bg-gradient-to-t from-slate-900/80 to-transparent"
+                class="absolute bottom-0 w-full h-1/3 bg-gradient-to-t from-slate-900/80 to-transparent"
             ></div>
         </div>
     {/if}
@@ -155,13 +155,13 @@
             <!-- Reactive Forest Glow -->
             <div
                 class="absolute inset-0 bg-green-400/5 transition-opacity duration-300"
-                style="opacity: {bass * 0.5}"
+                style="opacity: {bass * 0.3}"
             ></div>
 
-            <!-- Floating Fireflies -->
-            {#each Array(20) as _, i}
+            <!-- Floating Fireflies (Reduced to 10) -->
+            {#each Array(10) as _, i}
                 <div
-                    class="absolute w-1 h-1 bg-green-400 rounded-full shadow-[0_0_10px_rgba(74,222,128,0.8)] animate-float-slow transition-transform duration-300"
+                    class="absolute w-1 h-1 bg-green-400 rounded-full shadow-[0_0_5px_rgba(74,222,128,0.8)] animate-float-slow transition-transform duration-300"
                     style="left: {Math.random() * 100}%; top: {Math.random() *
                         100}%; animation-duration: {4 +
                         Math.random() * 4}s; transform: scale({pulseScale})"
@@ -169,10 +169,10 @@
             {/each}
             <!-- Bamboo Silhouette hints (CSS) -->
             <div
-                class="absolute bottom-0 left-10 w-4 h-[60vh] bg-black/20 blur-sm transform rotate-2"
+                class="absolute bottom-0 left-10 w-4 h-[50vh] bg-black/20 blur-sm transform rotate-2"
             ></div>
             <div
-                class="absolute bottom-0 right-20 w-6 h-[70vh] bg-black/20 blur-sm transform -rotate-1"
+                class="absolute bottom-0 right-20 w-6 h-[60vh] bg-black/20 blur-sm transform -rotate-1"
             ></div>
         </div>
     {/if}
@@ -185,25 +185,25 @@
         >
             <!-- Sun (Reactive) -->
             <div
-                class="absolute top-1/4 left-1/2 -translate-x-1/2 w-64 h-64 transition-transform duration-75 will-change-transform"
+                class="absolute top-1/4 left-1/2 -translate-x-1/2 w-48 h-48 transition-transform duration-75 will-change-transform"
                 style="transform: translate(-50%, 0) scale({intenseScale});"
             >
-                <!-- Glow Layer (Static Shadow, Dynamic Opacity) -->
+                <!-- Glow Layer (Optimized blur) -->
                 <div
-                    class="absolute inset-0 rounded-full bg-pink-500 blur-3xl opacity-50 transition-opacity"
-                    style="opacity: {0.4 + bass * 0.4}"
+                    class="absolute inset-0 rounded-full bg-pink-500 blur-2xl opacity-40 transition-opacity"
+                    style="opacity: {0.4 + bass * 0.3}"
                 ></div>
 
                 <!-- Sun Core -->
                 <div
-                    class="absolute inset-0 rounded-full bg-gradient-to-b from-yellow-400 to-pink-600 shadow-[0_0_50px_rgba(236,72,153,0.5)]"
+                    class="absolute inset-0 rounded-full bg-gradient-to-b from-yellow-400 to-pink-600 shadow-lg"
                 ></div>
             </div>
 
             <!-- Grid Floor -->
             <div
                 class="absolute bottom-0 w-[200%] -left-[50%] h-[50vh] bg-grid perspective-grid animate-grid-move"
-                style="opacity: {0.6 + bass * 0.4}"
+                style="opacity: {0.6 + bass * 0.3}"
             ></div>
             <div
                 class="absolute inset-0 bg-gradient-to-t from-[#050510] via-transparent to-transparent"
@@ -220,11 +220,11 @@
             <!-- Reactive Core -->
             <div
                 class="absolute inset-0 bg-indigo-500/10 mix-blend-screen transition-opacity duration-75"
-                style="opacity: {bass * 0.4}"
+                style="opacity: {bass * 0.3}"
             ></div>
 
-            <!-- Stars -->
-            {#each Array(40) as _, i}
+            <!-- Stars (Reduced to 20) -->
+            {#each Array(20) as _, i}
                 <div
                     class="absolute bg-white rounded-full animate-twinkle"
                     style="width: {Math.random() *
@@ -234,13 +234,13 @@
                         100}%; animation-duration: {1 + Math.random() * 3}s;"
                 ></div>
             {/each}
-            <!-- Nebula (Reactive) -->
+            <!-- Nebula (Reactive) - Reduced size and blur radius -->
             <div
-                class="absolute top-0 right-0 w-[800px] h-[800px] bg-purple-500/10 rounded-full blur-3xl mix-blend-screen animate-pulse-slow transition-transform duration-100"
+                class="absolute top-0 right-0 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-2xl mix-blend-screen animate-pulse-slow transition-transform duration-100"
                 style="transform: scale({pulseScale})"
             ></div>
             <div
-                class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-3xl mix-blend-screen animate-pulse-slow transition-transform duration-100"
+                class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-2xl mix-blend-screen animate-pulse-slow transition-transform duration-100"
                 style="animation-delay: 2s; transform: scale({pulseScale})"
             ></div>
         </div>
@@ -253,7 +253,7 @@
             transition:fade={{ duration: 1000 }}
         >
             <div
-                class="w-64 h-64 bg-primary-500/30 rounded-full blur-3xl animate-breathe"
+                class="w-48 h-48 bg-primary-500/30 rounded-full blur-2xl animate-breathe"
             ></div>
             <div
                 class="absolute text-primary-200 font-mono tracking-widest text-sm opacity-50"
