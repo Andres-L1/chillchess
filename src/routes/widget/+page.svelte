@@ -179,30 +179,40 @@
         position: relative;
         display: flex;
         align-items: center;
-        gap: 16px;
+        gap: 20px; /* More space */
         padding: 20px;
-        background: rgba(15, 23, 42, 0.95);
-        backdrop-filter: blur(20px);
-        border-radius: 20px;
-        border: 2px solid rgba(255, 123, 61, 0.3);
+
+        /* Premium Glassmorphism */
+        background: rgba(13, 17, 26, 0.6); /* Darker but transparent */
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.08); /* Subtle border */
+
         box-shadow:
-            0 8px 32px rgba(0, 0, 0, 0.4),
-            0 0 40px rgba(255, 123, 61, 0.2),
-            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            0 25px 50px -12px rgba(0, 0, 0, 0.5),
+            /* Deep shadow */ inset 0 1px 0 rgba(255, 255, 255, 0.1); /* Top highlight */
+
         overflow: hidden;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
+    /* Ambient Glow */
     .glow-bg {
         position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        opacity: 0.1;
-        filter: blur(40px);
-        animation: rotate 20s linear infinite;
+        width: 150%;
+        height: 150%;
+        top: -25%;
+        left: -25%;
+        background: radial-gradient(
+            circle at 30% 50%,
+            rgba(99, 102, 241, 0.15),
+            transparent 60%
+        );
+        animation: pulse-glow 8s ease-in-out infinite alternate;
         pointer-events: none;
+        z-index: 0;
     }
 
     .album-container {
@@ -211,111 +221,104 @@
         z-index: 2;
     }
 
-    .album-border {
-        position: absolute;
-        inset: -3px;
-        border-radius: 16px;
-        background: linear-gradient(135deg, #ff7b3d, #6366f1, #06b6d4);
-        animation: rotate 3s linear infinite;
-        z-index: -1;
-    }
-
+    /* Clean Cover without heavy borders */
     .album-img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        border-radius: 12px;
-        position: relative;
-        z-index: 1;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        border-radius: 16px;
+        box-shadow:
+            0 15px 35px -5px rgba(0, 0, 0, 0.6),
+            /* Lifting shadow */ 0 0 0 1px rgba(255, 255, 255, 0.05);
     }
 
-    .vinyl-spin {
-        position: absolute;
-        inset: 10%;
-        border-radius: 50%;
-        border: 2px solid rgba(255, 255, 255, 0.2);
-        animation: spin 3s linear infinite;
-        pointer-events: none;
-    }
+    /* Removed .album-border and .vinyl-spin for cleaner look */
 
     .track-info {
         flex: 1;
         min-width: 0;
         z-index: 2;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
 
     .track-title {
-        font-weight: 700;
+        font-weight: 800; /* Bolder */
         color: white;
-        line-height: 1.2;
-        margin-bottom: 4px;
+        line-height: 1.1;
+        margin-bottom: 6px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        letter-spacing: -0.02em;
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
     }
 
     .artist-name {
-        color: rgba(255, 255, 255, 0.7);
-        margin-bottom: 8px;
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.9em;
+        margin-bottom: 12px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
         font-weight: 500;
+        letter-spacing: 0.01em;
     }
 
     .progress-container {
         width: 100%;
         height: 4px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 2px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 4px;
         overflow: hidden;
-        margin-bottom: 8px;
+        margin-bottom: 10px;
     }
 
     .progress-bar {
         height: 100%;
-        background: linear-gradient(90deg, #ff7b3d, #6366f1);
-        border-radius: 2px;
+        background: linear-gradient(
+            90deg,
+            #6366f1,
+            #a855f7
+        ); /* Vibrant Gradient */
+        border-radius: 4px;
         transition: width 0.3s ease;
-        box-shadow: 0 0 10px rgba(255, 123, 61, 0.5);
+        box-shadow: 0 0 15px rgba(99, 102, 241, 0.4); /* Neon Glow */
     }
 
     .logo-container {
-        margin-top: 4px;
-    }
-
-    .logo-svg {
-        width: 140px;
-        height: auto;
+        display: flex;
+        align-items: center;
         opacity: 0.6;
-        color: white;
+        transition: opacity 0.3s;
     }
 
     .equalizer {
         display: flex;
         gap: 4px;
         align-items: flex-end;
-        height: 40px;
+        height: 32px;
         z-index: 2;
+        padding-left: 10px;
     }
 
     .bar {
-        width: 5px;
-        background: linear-gradient(to top, #ff7b3d, #6366f1);
-        border-radius: 3px;
-        animation: bounce 0.6s ease-in-out infinite alternate;
-        box-shadow: 0 0 10px rgba(255, 123, 61, 0.5);
+        width: 4px;
+        background: #a855f7;
+        border-radius: 2px;
+        animation: bounce 0.8s ease-in-out infinite alternate;
+        opacity: 0.8;
     }
 
+    /* Idle State */
     .widget-idle {
         background: transparent;
         padding: 20px;
     }
 
     .animate-float {
-        animation: float 3s ease-in-out infinite;
+        animation: float 4s ease-in-out infinite;
     }
 
     @keyframes float {
@@ -324,46 +327,27 @@
             transform: translateY(0px);
         }
         50% {
-            transform: translateY(-8px);
+            transform: translateY(-10px);
         }
     }
 
     @keyframes bounce {
         0% {
-            height: 8px;
+            height: 6px;
         }
         100% {
-            height: 40px;
+            height: 32px;
         }
     }
 
-    @keyframes rotate {
-        from {
-            transform: rotate(0deg);
-        }
-        to {
-            transform: rotate(360deg);
-        }
-    }
-
-    @keyframes spin {
-        from {
-            transform: rotate(0deg);
-        }
-        to {
-            transform: rotate(360deg);
-        }
-    }
-
-    @keyframes pulse {
-        0%,
-        100% {
+    @keyframes pulse-glow {
+        0% {
+            opacity: 0.3;
             transform: scale(1);
-            opacity: 0.6;
         }
-        50% {
+        100% {
+            opacity: 0.6;
             transform: scale(1.1);
-            opacity: 1;
         }
     }
 </style>
