@@ -234,12 +234,18 @@
             );
 
             const snap = await getDocs(q);
-            verifiedArtists = snap.docs.map((d) => ({
-                uid: d.id,
-                displayName:
-                    d.data().displayName || d.data().username || "Sin Nombre",
-                photoURL: d.data().photoURL,
-            }));
+            verifiedArtists = snap.docs.map((d) => {
+                const data = d.data();
+                return {
+                    uid: d.id,
+                    displayName:
+                        data.displayName || data.username || "Sin Nombre",
+                    photoURL: data.photoURL,
+                    isFounder:
+                        data.subscriptionTier === "pro" ||
+                        data.subscriptionTier === "premium",
+                };
+            });
 
             console.log("Verified Artists loaded:", verifiedArtists.length);
         } catch (e) {
@@ -462,9 +468,12 @@
                                             >-- Selecciona un Artista --</option
                                         >
                                         {#each verifiedArtists as artist}
-                                            <option value={artist.uid}
-                                                >{artist.displayName}</option
-                                            >
+                                            <option value={artist.uid}>
+                                                {artist.displayName}
+                                                {artist.isFounder
+                                                    ? "(Fundador 🏆)"
+                                                    : ""}
+                                            </option>
                                         {/each}
                                     </select>
                                     <div
