@@ -146,7 +146,7 @@
     >
         <!-- Status Bar -->
         <div
-            class="flex justify-between items-center mb-8 px-2"
+            class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 px-2"
             in:fly={{ y: -20, duration: 800 }}
         >
             <div class="flex flex-col">

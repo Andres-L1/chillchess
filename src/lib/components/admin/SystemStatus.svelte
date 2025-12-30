@@ -57,9 +57,9 @@
 </script>
 
 <div
-    class="flex items-center gap-4 px-4 py-2 bg-white/5 rounded-full border border-white/10 backdrop-blur-md"
+    class="flex items-center gap-2 md:gap-4 px-3 py-2 bg-white/5 rounded-full border border-white/10 backdrop-blur-md"
 >
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-2" title="Firebase Status">
         <div
             class="w-2 h-2 rounded-full {status.firebase === 'connected'
                 ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse'
@@ -67,14 +67,18 @@
                   ? 'bg-yellow-500'
                   : 'bg-red-500'}"
         ></div>
-        <span class="text-xs font-mono text-slate-400 font-bold tracking-wide"
+        <span
+            class="hidden md:block text-xs font-mono text-slate-400 font-bold tracking-wide"
             >FIREBASE</span
+        >
+        <span class="md:hidden text-xs font-mono text-slate-400 font-bold"
+            >FB</span
         >
     </div>
 
     <div class="w-px h-4 bg-white/10"></div>
 
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-2" title="R2 Status">
         <div
             class="w-2 h-2 rounded-full {status.r2 === 'connected'
                 ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)] animate-pulse'
@@ -82,8 +86,12 @@
                   ? 'bg-yellow-500'
                   : 'bg-red-500'}"
         ></div>
-        <span class="text-xs font-mono text-slate-400 font-bold tracking-wide"
+        <span
+            class="hidden md:block text-xs font-mono text-slate-400 font-bold tracking-wide"
             >CLOUDFLARE R2</span
+        >
+        <span class="md:hidden text-xs font-mono text-slate-400 font-bold"
+            >R2</span
         >
     </div>
 
@@ -92,9 +100,10 @@
     <button
         on:click={cleanTempFiles}
         disabled={cleaning}
-        class="text-xs text-slate-400 hover:text-white transition-colors disabled:opacity-50"
+        class="text-xs text-slate-400 hover:text-white transition-colors disabled:opacity-50 flex items-center gap-1"
         title="Eliminar archivos temporales > 3 días"
     >
-        {cleaning ? "🧹..." : "🧹 Limpiar Temp"}
+        <span>🧹</span>
+        <span class="hidden sm:inline">Limpiar Temp</span>
     </button>
 </div>
