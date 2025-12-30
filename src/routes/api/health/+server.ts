@@ -1,7 +1,9 @@
 import { json } from '@sveltejs/kit';
 import { db } from '$lib/firebase'; // Client SDK, but works for basic check if initialized on server or we use admin
 import { S3Client, ListBucketsCommand } from '@aws-sdk/client-s3';
-import { R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, PUBLIC_R2_ACCOUNT_ID } from '$env/static/private';
+// @ts-ignore
+import { R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY } from '$env/static/private';
+import { PUBLIC_R2_ACCOUNT_ID } from '$env/static/public';
 import { getDocs, collection, limit, query } from 'firebase/firestore';
 
 export async function GET() {
