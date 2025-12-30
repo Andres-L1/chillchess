@@ -490,11 +490,11 @@
                                     <span class="text-blue-400">💡</span>
                                     <span
                                         >¿Sin cuenta? Usa <a
-                                            href="https://wetransfer.com"
+                                            href="https://transfer.it"
                                             target="_blank"
                                             class="text-primary-400 hover:text-primary-300 font-bold hover:underline"
-                                            >WeTransfer</a
-                                        > (no necesitas registrarte).</span
+                                            >Transfer.it</a
+                                        > (servicio gratuito de MEGA).</span
                                     >
                                 </div>
                             </div>

@@ -74,7 +74,8 @@
             domain.includes("mega.nz") ||
             domain.includes("drive.google.com") ||
             domain.includes("dropbox.com") ||
-            domain.includes("wetransfer.com")
+            domain.includes("wetransfer.com") ||
+            domain.includes("transfer.it")
         );
     }
 
