@@ -559,9 +559,9 @@
                 </h3>
 
                 <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm text-slate-400 mb-1"
-                            >Título</label
+                    <label class="block">
+                        <span class="block text-sm text-slate-400 mb-1"
+                            >Título</span
                         >
                         <input
                             type="text"
@@ -569,48 +569,52 @@
                             placeholder="Ej. Midnight Vibes"
                             class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-purple-500 outline-none"
                         />
-                    </div>
-                    <div>
-                        <label class="block text-sm text-slate-400 mb-1"
-                            >Artista</label
+                    </label>
+                    <label class="block">
+                        <span class="block text-sm text-slate-400 mb-1"
+                            >Artista</span
                         >
                         <input
                             type="text"
                             bind:value={newTrackArtist}
                             class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-purple-500 outline-none"
                         />
+                    </label>
+
+                    <div
+                        class="bg-black/20 p-4 rounded-lg border border-white/5 border-dashed"
+                    >
+                        <label class="block w-full cursor-pointer">
+                            <span class="block text-sm text-slate-400 mb-2"
+                                >Archivo de Audio (MP3)</span
+                            >
+                            <input
+                                type="file"
+                                accept="audio/mpeg"
+                                on:change={(e) =>
+                                    (newTrackFile =
+                                        e.currentTarget.files?.[0] || null)}
+                                class="w-full text-sm text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-purple-500/20 file:text-purple-400 hover:file:bg-purple-500/30"
+                            />
+                        </label>
                     </div>
 
                     <div
                         class="bg-black/20 p-4 rounded-lg border border-white/5 border-dashed"
                     >
-                        <label class="block text-sm text-slate-400 mb-2"
-                            >Archivo de Audio (MP3)</label
-                        >
-                        <input
-                            type="file"
-                            accept="audio/mpeg"
-                            on:change={(e) =>
-                                (newTrackFile =
-                                    e.currentTarget.files?.[0] || null)}
-                            class="text-sm text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-purple-500/20 file:text-purple-400 hover:file:bg-purple-500/30"
-                        />
-                    </div>
-
-                    <div
-                        class="bg-black/20 p-4 rounded-lg border border-white/5 border-dashed"
-                    >
-                        <label class="block text-sm text-slate-400 mb-2"
-                            >Portada (Opcional)</label
-                        >
-                        <input
-                            type="file"
-                            accept="image/*"
-                            on:change={(e) =>
-                                (newTrackCover =
-                                    e.currentTarget.files?.[0] || null)}
-                            class="text-sm text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-slate-500/20 file:text-slate-400 hover:file:bg-slate-500/30"
-                        />
+                        <label class="block w-full cursor-pointer">
+                            <span class="block text-sm text-slate-400 mb-2"
+                                >Portada (Opcional)</span
+                            >
+                            <input
+                                type="file"
+                                accept="image/*"
+                                on:change={(e) =>
+                                    (newTrackCover =
+                                        e.currentTarget.files?.[0] || null)}
+                                class="w-full text-sm text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-slate-500/20 file:text-slate-400 hover:file:bg-slate-500/30"
+                            />
+                        </label>
                     </div>
 
                     <button
