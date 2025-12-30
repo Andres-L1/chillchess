@@ -118,7 +118,11 @@
 
         // If host, sync local state to Firestore
         if (isHost) {
+            resetInactivityTimer(); // Start timer
+
             const unsubscribeStore = audioStore.subscribe(async (state) => {
+                resetInactivityTimer(); // Reset on activity
+
                 if (!state.currentAlbumId) return;
 
                 const currentTrack = state.playlist[state.currentTrackIndex];
@@ -141,6 +145,7 @@
             // Clean up store subscription on unmount
             onDestroy(() => {
                 unsubscribeStore();
+                if (inactivityTimer) clearTimeout(inactivityTimer);
             });
         }
     });
@@ -169,7 +174,47 @@
     function copyRoomLink() {
         const link = `${window.location.origin}/rooms/${roomId}`;
         navigator.clipboard.writeText(link);
-        alert("✅ Enlace copiado al portapapeles");
+        toast.success("Enlace copiado al portapapeles");
+    }
+
+    async function closeRoom(isAuto = false) {
+        if (
+            !isAuto &&
+            !confirm(
+                "¿Estás seguro de que quieres cerrar esta sala permanentemente? Todos los participantes serán desconectados.",
+            )
+        )
+            return;
+
+        try {
+            const { doc, deleteDoc } = await import("firebase/firestore");
+            const { db } = await import("$lib/firebase");
+            await deleteDoc(doc(db, "listeningRooms", roomId));
+            toast.success(
+                isAuto
+                    ? "Sala cerrada por inactividad (15 min)"
+                    : "Sala cerrada exitosamente",
+            );
+            goto("/rooms");
+        } catch (err) {
+            console.error("Error closing room:", err);
+            toast.error("Error al cerrar la sala");
+        }
+    }
+
+    let inactivityTimer: any;
+    const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 min
+
+    function resetInactivityTimer() {
+        if (inactivityTimer) clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(() => {
+            // Check if music is playing. If so, don't close.
+            if ($audioStore.isPlaying) {
+                resetInactivityTimer();
+                return;
+            }
+            closeRoom(true);
+        }, INACTIVITY_LIMIT);
     }
 </script>
 
@@ -221,12 +266,22 @@
                             {/if}
                         </p>
                     </div>
-                    <button
-                        on:click={copyRoomLink}
-                        class="w-full md:w-auto px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium"
-                    >
-                        📋 Copiar Enlace
-                    </button>
+                    <div class="flex items-center gap-3 w-full md:w-auto">
+                        {#if isHost}
+                            <button
+                                on:click={() => closeRoom(false)}
+                                class="flex-1 md:flex-none px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-all text-sm font-medium border border-red-500/20 whitespace-nowrap"
+                            >
+                                Cerrar Sala
+                            </button>
+                        {/if}
+                        <button
+                            on:click={copyRoomLink}
+                            class="flex-1 md:flex-none px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium whitespace-nowrap"
+                        >
+                            📋 Copiar Enlace
+                        </button>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
