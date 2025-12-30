@@ -90,16 +90,17 @@
     >
         <!-- Background Glow removed for cleaner look -->
 
-        <!-- Vinilo Giratorio -->
+        <!-- Vinilo Giratorio (Estabilizado) -->
         <div
             class="album-container"
             style="width: {config.imgSize}; height: {config.imgSize};"
         >
-            <div class="relative w-full h-full">
+            <!-- La animación de giro va AQUÍ, en el contenedor, para no reiniciarse con updates de datos -->
+            <div class="relative w-full h-full animate-spin-slow">
                 <img
                     src={activeTrack.cover || "/logo-mobile.png"}
                     alt={activeTrack.title}
-                    class="w-full h-full object-cover rounded-full shadow-2xl animate-spin-slow border-[3px] border-white/10"
+                    class="w-full h-full object-cover rounded-full shadow-2xl border-[3px] border-white/10"
                 />
                 <!-- Centro del vinilo -->
                 <div
@@ -133,13 +134,13 @@
                 <div class="progress-bar" style="width: {progress}%"></div>
             </div>
 
-            <!-- Logo (if enabled) -->
+            <!-- Logo (if enabled) - INCREASED SIZE -->
             {#if showLogo}
-                <div class="logo-container mt-1">
+                <div class="logo-container mt-2">
                     <img
                         src="/logo-desktop.png"
                         alt="ChillChess"
-                        class="h-10 w-auto object-contain opacity-100"
+                        class="h-14 w-auto object-contain opacity-100"
                     />
                 </div>
             {/if}
