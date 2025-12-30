@@ -451,8 +451,16 @@
                             <span class="text-2xl">🔗</span> Enlace de Descarga
                         </h2>
                         <p class="text-sm text-slate-400">
-                            Sube tu música usando Transfer.it (recomendado) y
-                            pega el enlace aquí.
+                            Sube tu música a <a
+                                href="https://transfer.it"
+                                target="_blank"
+                                class="text-primary-400 hover:underline font-bold"
+                                >Transfer.it</a
+                            >
+                            enviándola a:
+                            <span class="text-primary-400 font-mono font-bold"
+                                >chessnetappweb@gmail.com</span
+                            >
                         </p>
                     </div>
 
@@ -478,21 +486,40 @@
                                     class="w-full bg-[#0B1120] border border-white/10 rounded-xl pl-10 pr-4 py-3 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all font-mono text-sm text-primary-300"
                                 />
                             </div>
-                            <!-- Security Tip -->
+                            <!-- Instructions -->
                             <div
-                                class="mt-2 flex flex-col gap-1 text-xs text-slate-500"
+                                class="mt-3 p-4 bg-primary-500/10 border border-primary-500/20 rounded-lg"
                             >
-                                <div class="flex items-center gap-2">
-                                    <span class="text-primary-400">⚡</span>
-                                    <span
-                                        >Recomendamos exclusivamente <a
+                                <p
+                                    class="text-xs font-bold text-primary-400 mb-2"
+                                >
+                                    📧 Instrucciones para Transfer.it:
+                                </p>
+                                <ol
+                                    class="text-xs text-slate-300 space-y-1 list-decimal list-inside"
+                                >
+                                    <li>
+                                        Ve a <a
                                             href="https://transfer.it"
                                             target="_blank"
-                                            class="text-primary-400 hover:text-primary-300 font-bold hover:underline"
-                                            >Transfer.it</a
-                                        > por su velocidad y fiabilidad.</span
-                                    >
-                                </div>
+                                            class="text-primary-400 hover:underline"
+                                            >transfer.it</a
+                                        >
+                                    </li>
+                                    <li>
+                                        Sube tu carpeta con los archivos de
+                                        audio
+                                    </li>
+                                    <li>
+                                        En "Enviar a email" pon: <span
+                                            class="text-primary-400 font-mono font-bold"
+                                            >chessnetappweb@gmail.com</span
+                                        >
+                                    </li>
+                                    <li>
+                                        Copia el link que genera y pégalo arriba
+                                    </li>
+                                </ol>
                             </div>
                         </div>
 
