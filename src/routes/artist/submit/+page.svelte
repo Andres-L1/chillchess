@@ -451,8 +451,8 @@
                             <span class="text-2xl">🔗</span> Enlace de Descarga
                         </h2>
                         <p class="text-sm text-slate-400">
-                            Sube tu música a Mega, Google Drive, Dropbox o
-                            WeTransfer y pega el enlace aquí.
+                            Sube tu música usando Transfer.it (recomendado) y
+                            pega el enlace aquí.
                         </p>
                     </div>
 
@@ -474,7 +474,7 @@
                                     id="download-link"
                                     type="url"
                                     bind:value={downloadLink}
-                                    placeholder="https://mega.nz/..."
+                                    placeholder="https://transfer.it/..."
                                     class="w-full bg-[#0B1120] border border-white/10 rounded-xl pl-10 pr-4 py-3 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all font-mono text-sm text-primary-300"
                                 />
                             </div>
@@ -483,18 +483,14 @@
                                 class="mt-2 flex flex-col gap-1 text-xs text-slate-500"
                             >
                                 <div class="flex items-center gap-2">
-                                    <span class="text-green-400">🛡️</span>
-                                    Recomendamos Mega, Drive o Dropbox.
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="text-blue-400">💡</span>
+                                    <span class="text-primary-400">⚡</span>
                                     <span
-                                        >¿Sin cuenta? Usa <a
+                                        >Recomendamos exclusivamente <a
                                             href="https://transfer.it"
                                             target="_blank"
                                             class="text-primary-400 hover:text-primary-300 font-bold hover:underline"
                                             >Transfer.it</a
-                                        > (servicio gratuito de MEGA).</span
+                                        > por su velocidad y fiabilidad.</span
                                     >
                                 </div>
                             </div>
