@@ -31,6 +31,37 @@
         tracks: [] as File[],
     };
 
+    // --- R2 UPLOAD HELPER ---
+    async function uploadToR2(file: File, folderPath: string) {
+        // 1. Get Signed URL
+        const res = await fetch("/api/r2/sign-url", {
+            method: "POST",
+            body: JSON.stringify({
+                fileName: file.name,
+                fileType: file.type,
+                folder: folderPath,
+            }),
+        });
+        if (!res.ok) throw new Error("Failed to get upload URL");
+        const { uploadUrl, key } = await res.json();
+
+        // 2. Upload File (PUT to Signed URL)
+        const upload = await fetch(uploadUrl, {
+            method: "PUT",
+            body: file,
+            headers: { "Content-Type": file.type },
+        });
+        if (!upload.ok) throw new Error("Failed to upload file to R2");
+
+        // 3. Return Public URL (Assuming R2 dev domain or configured custom domain)
+        // Since we don't have the custom domain available here securely, we construct using the R2 dev domain pattern
+        // known from the project context or use the key.
+        // For now, we return the key prefixed with a standard domain.
+        const PUBLIC_R2_DOMAIN = "https://pub-68b007968c59b47aa64fadcf.r2.dev";
+        return `${PUBLIC_R2_DOMAIN}/${key}`;
+    }
+
+    // Handlers
     function handleCoverSelect(e: any) {
         newAlbumData.coverFile = e.target.files[0];
     }
@@ -50,34 +81,34 @@
         }
         isCreatingAlbum = true;
         try {
-            const timestamp = Date.now();
-
-            // 1. Upload Cover
-            const coverRef = ref(
-                storage,
-                `albums/${timestamp}_${newAlbumData.coverFile.name}`,
+            // Sanitized folder names for R2 structure
+            const safeArtist = newAlbumData.artist.replace(
+                /[^a-zA-Z0-9]/g,
+                "_",
             );
-            await uploadBytes(coverRef, newAlbumData.coverFile);
-            const coverUrl = await getDownloadURL(coverRef);
+            const safeAlbum = newAlbumData.title.replace(/[^a-zA-Z0-9]/g, "_");
+            const folderPath = `artists/${safeArtist}/${safeAlbum}`;
 
-            // 2. Upload Tracks loop
+            // 1. Upload Cover to R2
+            const coverUrl = await uploadToR2(
+                newAlbumData.coverFile,
+                folderPath,
+            );
+
+            // 2. Upload Tracks loop to R2
             const uploadedTracks = [];
             for (const file of newAlbumData.tracks) {
-                const trackRef = ref(
-                    storage,
-                    `albums/tracks/${timestamp}_${file.name}`,
-                );
-                await uploadBytes(trackRef, file);
-                const url = await getDownloadURL(trackRef);
+                const trackUrl = await uploadToR2(file, folderPath);
                 uploadedTracks.push({
                     title: file.name.replace(/\.[^/.]+$/, ""), // Remove extension
                     artist: newAlbumData.artist,
-                    file: url,
+                    file: trackUrl,
                     id: crypto.randomUUID(),
+                    duration: 0, // Placeholder
                 });
             }
 
-            // 3. Save Album Doc
+            // 3. Save Album Doc to Firestore
             await addDoc(collection(db, "albums"), {
                 title: newAlbumData.title,
                 artist: newAlbumData.artist,
@@ -85,14 +116,14 @@
                 cover: coverUrl,
                 tracks: uploadedTracks,
                 createdAt: serverTimestamp(),
-                vibeId: "custom", // Default
+                vibeId: "custom",
                 price: "Free",
                 tag: "New",
-                description: "Uploaded by Admin",
+                description: "Uploaded via Admin R2",
                 isPremium: false,
             });
 
-            alert("✅ Álbum creado exitosamente");
+            alert("✅ Álbum creado y subido a R2 exitosamente");
             showCreateAlbumForm = false;
             // Reset fields
             newAlbumData = {
@@ -348,29 +379,29 @@
                 <h3 class="text-xl font-bold mb-4">Crear Nuevo Álbum</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm text-slate-400 mb-1"
-                                >Título del Álbum</label
+                        <label class="block">
+                            <span class="block text-sm text-slate-400 mb-1"
+                                >Título del Álbum</span
                             >
                             <input
                                 type="text"
                                 bind:value={newAlbumData.title}
                                 class="w-full bg-black/30 border border-white/10 rounded-lg p-2 text-white"
                             />
-                        </div>
-                        <div>
-                            <label class="block text-sm text-slate-400 mb-1"
-                                >Nombre del Artista</label
+                        </label>
+                        <label class="block">
+                            <span class="block text-sm text-slate-400 mb-1"
+                                >Nombre del Artista</span
                             >
                             <input
                                 type="text"
                                 bind:value={newAlbumData.artist}
                                 class="w-full bg-black/30 border border-white/10 rounded-lg p-2 text-white"
                             />
-                        </div>
-                        <div>
-                            <label class="block text-sm text-slate-400 mb-1"
-                                >Categoría</label
+                        </label>
+                        <label class="block">
+                            <span class="block text-sm text-slate-400 mb-1"
+                                >Categoría</span
                             >
                             <select
                                 bind:value={newAlbumData.category}
@@ -380,10 +411,10 @@
                                 <option value="juegos">Juegos / Focus</option>
                                 <option value="ambiente">Ambiente</option>
                             </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm text-slate-400 mb-1"
-                                >Portada</label
+                        </label>
+                        <label class="block">
+                            <span class="block text-sm text-slate-400 mb-1"
+                                >Portada</span
                             >
                             <input
                                 type="file"
@@ -391,19 +422,21 @@
                                 on:change={handleCoverSelect}
                                 class="w-full text-sm text-slate-400"
                             />
-                        </div>
+                        </label>
                     </div>
                     <div class="space-y-4">
-                        <label class="block text-sm text-slate-400 mb-1"
-                            >Tracks (Selección múltiple)</label
-                        >
-                        <input
-                            type="file"
-                            multiple
-                            accept="audio/*"
-                            on:change={handleTracksSelect}
-                            class="w-full text-sm text-slate-400 border border-white/10 rounded-lg p-2 bg-black/20"
-                        />
+                        <label class="block">
+                            <span class="block text-sm text-slate-400 mb-1"
+                                >Tracks (Selección múltiple)</span
+                            >
+                            <input
+                                type="file"
+                                multiple
+                                accept="audio/*"
+                                on:change={handleTracksSelect}
+                                class="w-full text-sm text-slate-400 border border-white/10 rounded-lg p-2 bg-black/20"
+                            />
+                        </label>
 
                         {#if newAlbumData.tracks.length > 0}
                             <div
