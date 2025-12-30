@@ -19,6 +19,10 @@
     import ChillBackground from "$lib/components/ChillBackground.svelte";
     import PaywallModal from "$lib/components/PaywallModal.svelte";
     import EyeIcon from "$lib/components/icons/EyeIcon.svelte";
+    import BackIcon from "$lib/components/icons/BackIcon.svelte";
+    import HeadphonesIcon from "$lib/components/icons/HeadphonesIcon.svelte";
+    import SettingsIcon from "$lib/components/icons/SettingsIcon.svelte";
+    import MusicIcon from "$lib/components/icons/MusicIcon.svelte";
     import Clock from "$lib/components/Clock.svelte";
     import WhiteNoiseControls from "$lib/components/WhiteNoiseControls.svelte";
     import { vibeStore } from "$lib/stores/vibeStore";
@@ -209,64 +213,50 @@
         >
             <a
                 href="/"
-                class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-opacity z-50 text-white p-2 -ml-2"
+                class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-opacity z-50 text-white p-2 -ml-2 group"
+                title="Salir"
             >
-                <span class="text-xl">←</span>
-                <span class="text-sm font-medium">Salir</span>
+                <BackIcon size="md" />
             </a>
 
-            <button
-                on:click={() => (showVibeStudio = !showVibeStudio)}
-                class="flex items-center gap-2 bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/10 hover:border-white/20 shadow-lg transition-all group"
-            >
-                <span
-                    class="w-2 h-2 rounded-full bg-orange-400 group-hover:scale-125 transition-transform"
-                ></span>
-                <span
-                    class="text-xs font-bold text-slate-300 group-hover:text-white font-mono tracking-wider uppercase"
+            <div class="flex items-center gap-2">
+                <button
+                    on:click={() => (showVibeStudio = !showVibeStudio)}
+                    class="flex items-center gap-2 bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-full px-3 py-2 border border-white/10 hover:border-white/20 shadow-lg transition-all group"
+                    title="Vibe Studio"
                 >
-                    Vibe Studio
-                </span>
-            </button>
+                    <SettingsIcon size="sm" />
+                </button>
 
-            <!-- White Noise Button -->
-            <button
-                on:click={() => (showWhiteNoise = !showWhiteNoise)}
-                class="flex items-center gap-2 bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/10 hover:border-white/20 shadow-lg transition-all group ml-2"
-                title="Sonidos Ambientales"
-            >
-                <span class="text-sm">🎧</span>
-                <span
-                    class="text-xs font-bold text-slate-300 group-hover:text-white font-mono tracking-wider uppercase"
+                <!-- White Noise Button -->
+                <button
+                    on:click={() => (showWhiteNoise = !showWhiteNoise)}
+                    class="flex items-center gap-2 bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-full px-3 py-2 border border-white/10 hover:border-white/20 shadow-lg transition-all group"
+                    title="Sonidos Ambientales"
                 >
-                    White Noise
-                </span>
-            </button>
+                    <HeadphonesIcon size="sm" />
+                </button>
 
-            <!-- Immersive Toggle (PRO) -->
-            <button
-                on:click={toggleImmersive}
-                class="flex items-center gap-2 bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-full px-3 py-2 border border-white/10 hover:border-white/20 shadow-lg transition-all group ml-2"
-                title="Modo Inmersivo (PRO)"
-            >
-                <EyeIcon
-                    size="md"
-                    open={!immersiveMode}
-                    gradient={immersiveMode}
-                />
-                {#if immersiveMode}
-                    <span
-                        class="text-xs font-bold text-orange-400 font-mono tracking-wider ml-1"
-                        >ON</span
-                    >
-                {/if}
-            </button>
+                <!-- Immersive Toggle (PRO) -->
+                <button
+                    on:click={toggleImmersive}
+                    class="flex items-center gap-2 bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-full px-3 py-2 border border-white/10 hover:border-white/20 shadow-lg transition-all group"
+                    title="Modo Inmersivo (PRO)"
+                >
+                    <EyeIcon
+                        size="sm"
+                        open={!immersiveMode}
+                        gradient={immersiveMode}
+                    />
+                </button>
+            </div>
 
             <button
                 on:click={toggleMusicExplorer}
                 class="p-2 opacity-50 hover:opacity-100 transition-opacity z-50 text-white"
+                title="Explorar Música"
             >
-                <span class="text-xl">🎵</span>
+                <MusicIcon size="lg" />
             </button>
         </header>
 

@@ -9,6 +9,14 @@
     import MusicTab from "$lib/components/admin/MusicTab.svelte";
     import LogsTab from "$lib/components/admin/LogsTab.svelte";
 
+    // Icons
+    import BackIcon from "$lib/components/icons/BackIcon.svelte";
+    import UsersIcon from "$lib/components/icons/UsersIcon.svelte";
+    import BulbIcon from "$lib/components/icons/BulbIcon.svelte";
+    import MusicIcon from "$lib/components/icons/MusicIcon.svelte";
+    import CollectionIcon from "$lib/components/icons/CollectionIcon.svelte";
+    import AlertIcon from "$lib/components/icons/AlertIcon.svelte";
+
     type Tab =
         | "dashboard"
         | "users"
@@ -149,9 +157,10 @@
                     <h1 class="text-2xl font-bold">Hola, Admin 👋</h1>
                     <a
                         href="/app"
-                        class="px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-medium text-slate-300 transition-colors flex items-center gap-2"
+                        class="px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-medium text-slate-300 transition-colors flex items-center gap-2 group"
                     >
-                        <span>⬅️ Volver a App</span>
+                        <BackIcon size="sm" />
+                        <span>Volver a App</span>
                     </a>
                 </div>
             </div>
@@ -271,12 +280,24 @@
                         class="flex flex-col items-center gap-3 p-4 rounded-3xl hover:bg-white/5 transition-colors group"
                     >
                         <div
-                            class="w-16 h-16 rounded-2xl bg-gradient-to-b from-slate-700 to-slate-800 border-t border-white/20 shadow-lg flex items-center justify-center text-3xl group-hover:scale-110 transition-transform duration-300 relative"
+                            class="w-16 h-16 rounded-2xl bg-gradient-to-b from-slate-700 to-slate-800 border-t border-white/20 shadow-lg flex items-center justify-center text-white/80 group-hover:scale-110 transition-transform duration-300 relative"
                         >
-                            {app.icon}
+                            <!-- Render icon based on app.id -->
+                            {#if app.id === "users"}
+                                <UsersIcon size="lg" />
+                            {:else if app.id === "proposals"}
+                                <BulbIcon size="lg" />
+                            {:else if app.id === "submissions"}
+                                <MusicIcon size="lg" />
+                            {:else if app.id === "music"}
+                                <CollectionIcon size="lg" />
+                            {:else if app.id === "logs"}
+                                <AlertIcon size="lg" />
+                            {/if}
+
                             {#if app.badge && app.badge > 0}
                                 <div
-                                    class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full border-2 border-[#0B1120] flex items-center justify-center text-[10px] font-bold"
+                                    class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full border-2 border-[#0B1120] flex items-center justify-center text-[10px] font-bold text-white"
                                 >
                                     {app.badge}
                                 </div>

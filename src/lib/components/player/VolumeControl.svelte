@@ -1,8 +1,6 @@
 <script lang="ts">
     import { audioStore, setMusicVolume } from "$lib/audio/store";
 
-    export let showVolumeSlider = false;
-
     let volumeTimeout: number;
     function handleVolumeChange(e: Event) {
         const input = e.target as HTMLInputElement;
@@ -19,11 +17,14 @@
 <div class="flex w-auto md:w-1/3 justify-end items-center gap-2 md:gap-4">
     <slot name="minimize-button" />
 
-    <div class="hidden md:flex items-center gap-2 relative">
+    <div class="hidden lg:flex items-center gap-3">
         <button
-            on:click={() => (showVolumeSlider = !showVolumeSlider)}
-            class="text-white/70 hover:text-white transition-colors"
-            title="Volumen"
+            on:click={() =>
+                setMusicVolume($audioStore.musicVolume === 0 ? 0.5 : 0)}
+            class="text-slate-400 hover:text-white transition-colors"
+            title={$audioStore.musicVolume === 0
+                ? "Activar Sonido"
+                : "Silenciar"}
         >
             {#if $audioStore.musicVolume === 0 || $audioStore.isMuted}
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"
@@ -44,31 +45,24 @@
             {/if}
         </button>
 
-        {#if showVolumeSlider}
+        <div class="group relative flex items-center w-24">
+            <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={$audioStore.musicVolume}
+                on:input={handleVolumeChange}
+                class="w-full h-1 bg-white/20 rounded-full appearance-none cursor-pointer hover:bg-white/30 transition-colors
+                       [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-125
+                       [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0"
+            />
+            <!-- Tooltip with percentage on hover -->
             <div
-                class="absolute bottom-full right-0 mb-4 bg-[#0F172A]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl flex gap-4 z-50"
+                class="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/80 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
             >
-                <!-- Music Slider ONLY -->
-                <div class="flex flex-col items-center gap-3 h-32">
-                    <input
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.01"
-                        value={$audioStore.musicVolume}
-                        on:input={handleVolumeChange}
-                        class="flex-1 w-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer hover:bg-white/20 transition-colors
-                                    [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-[0_0_10px_rgba(255,255,255,0.5)] [&::-webkit-slider-thumb]:hover:scale-110 [&::-webkit-slider-thumb]:transition-transform
-                                    [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-0"
-                        style="writing-mode: bt-lr; -webkit-appearance: slider-vertical;"
-                    />
-                    <div
-                        class="text-xs font-bold text-white tabular-nums w-8 text-center bg-white/5 rounded px-1"
-                    >
-                        {Math.round($audioStore.musicVolume * 100)}%
-                    </div>
-                </div>
+                {Math.round($audioStore.musicVolume * 100)}%
             </div>
-        {/if}
+        </div>
     </div>
 </div>

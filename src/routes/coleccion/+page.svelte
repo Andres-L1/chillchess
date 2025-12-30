@@ -23,6 +23,7 @@
     import SearchIcon from "$lib/components/icons/SearchIcon.svelte";
     import { fade, fly } from "svelte/transition";
     import { userSubscription } from "$lib/subscription/userSubscription";
+    import BackIcon from "$lib/components/icons/BackIcon.svelte";
 
     const categoryLabelMap = CATEGORY_LABELS.reduce(
         (acc, curr) => {
@@ -134,6 +135,15 @@
                 class="absolute inset-0 bg-gradient-to-b from-[#0B1120]/20 via-[#0B1120]/60 to-[#0B1120] z-0"
             ></div>
         {/if}
+
+        <!-- Back Button -->
+        <a
+            href="/app"
+            class="absolute top-6 left-6 z-50 p-3 bg-white/5 hover:bg-black/40 backdrop-blur-md border border-white/10 rounded-full text-white/70 hover:text-white transition-all hover:scale-105 active:scale-95 group"
+            title="Volver a la App"
+        >
+            <BackIcon size="lg" />
+        </a>
 
         <!-- Hero Content -->
         <div
