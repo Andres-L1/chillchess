@@ -74,6 +74,17 @@
     ></div>
 
     <div class="max-w-6xl mx-auto relative z-10">
+        <!-- Back Button -->
+        <div class="mb-8">
+            <a
+                href="/"
+                class="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors hover:-translate-x-1 duration-300"
+            >
+                <span class="text-xl">←</span>
+                <span class="font-bold">Volver al Inicio</span>
+            </a>
+        </div>
+
         <!-- Header -->
         <div
             class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6"
