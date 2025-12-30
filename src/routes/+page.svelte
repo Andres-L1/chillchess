@@ -231,6 +231,13 @@
                                 <span>Mi Perfil</span>
                             </a>
                             <a
+                                href="/creators"
+                                class="px-4 py-2 text-slate-300 hover:text-white hover:bg-white/5 text-left flex items-center gap-2"
+                            >
+                                <span class="text-sm">✨</span>
+                                <span>Creators Catalog</span>
+                            </a>
+                            <a
                                 href="/favorites"
                                 class="px-4 py-2 text-slate-300 hover:text-white hover:bg-white/5 text-left flex items-center gap-2"
                             >
@@ -446,6 +453,14 @@
                                         Configurar Perfil >
                                     </span>
                                 </div>
+                            </a>
+                            <a
+                                href="/creators"
+                                class="flex items-center gap-3 mb-3 text-sm font-bold text-slate-300 hover:text-white px-1"
+                                on:click={() => (mobileMenuOpen = false)}
+                            >
+                                <span class="text-lg">✨</span>
+                                <span>Creators Catalog</span>
                             </a>
                             <a
                                 href="/favorites"
