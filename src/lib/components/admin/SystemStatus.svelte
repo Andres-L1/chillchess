@@ -27,6 +27,24 @@
         }
     }
 
+    let cleaning = false;
+    async function cleanTempFiles() {
+        if (!confirm("¿Limpiar archivos temporales de R2 (más de 3 días)?"))
+            return;
+        cleaning = true;
+        try {
+            const res = await fetch("/api/admin/cleanup-r2", {
+                method: "POST",
+            });
+            const data = await res.json();
+            alert(data.message || "Limpieza completada");
+        } catch (e) {
+            alert("Error en limpieza");
+        } finally {
+            cleaning = false;
+        }
+    }
+
     onMount(() => {
         checkHealth();
         // Check every 30 seconds
@@ -68,4 +86,15 @@
             >CLOUDFLARE R2</span
         >
     </div>
+
+    <div class="w-px h-4 bg-white/10"></div>
+
+    <button
+        on:click={cleanTempFiles}
+        disabled={cleaning}
+        class="text-xs text-slate-400 hover:text-white transition-colors disabled:opacity-50"
+        title="Eliminar archivos temporales > 3 días"
+    >
+        {cleaning ? "🧹..." : "🧹 Limpiar Temp"}
+    </button>
 </div>
