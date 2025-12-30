@@ -158,22 +158,13 @@
         <!-- Logo Animado -->
         <div class="relative mb-2">
             <div
-                class="absolute inset-0 bg-primary-500 rounded-full blur-2xl opacity-30 animate-pulse"
+                class="absolute inset-0 bg-primary-500/20 rounded-full blur-2xl opacity-30 animate-pulse"
             ></div>
             <img
-                src="/logo-mobile.png"
+                src="/logo-desktop.png"
                 alt="ChillChess"
-                class="w-14 h-14 relative z-10 drop-shadow-xl animate-float"
+                class="h-20 w-auto relative z-10 drop-shadow-xl animate-float object-contain"
             />
-        </div>
-
-        <!-- Texto Minimalista -->
-        <div class="text-center">
-            <h1
-                class="text-xl font-bold text-white tracking-[0.2em] opacity-90 drop-shadow-md"
-            >
-                CHILLCHESS
-            </h1>
         </div>
     </div>
 {/if}
