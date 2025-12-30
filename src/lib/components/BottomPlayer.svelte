@@ -63,9 +63,10 @@
         -->
     {:else}
         <!-- FLOATING DOCK PLAYER -->
+        <!-- FLOATING DOCK PLAYER -->
         <div
             transition:slide={{ duration: 400, axis: "y" }}
-            class="fixed bottom-2 md:bottom-6 left-1/2 -translate-x-1/2 w-[95%] md:w-auto md:min-w-[700px] max-w-5xl z-[50] flex flex-col items-center"
+            class="fixed bottom-2 md:bottom-6 left-1/2 -translate-x-1/2 w-[95%] md:w-auto md:min-w-[700px] max-w-5xl z-[100] flex flex-col items-center"
         >
             <!-- Control Handle (Minimize & Close) -->
             <div class="flex items-end gap-1 -mb-[1px] z-10">
@@ -99,40 +100,50 @@
                 </button>
             </div>
 
-            <div
-                class="w-full bg-[#0F172A]/90 backdrop-blur-2xl border border-white/10 rounded-2xl md:rounded-3xl p-3 md:px-6 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex items-center justify-between gap-3 md:gap-12 relative overflow-hidden group"
-            >
-                <!-- Shine Effect -->
+            <!-- Main Player Container Wrapper -->
+            <div class="relative w-full group">
+                <!-- 1. Background Layer (With Overflow Hidden + Shine) -->
                 <div
-                    class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[2s] pointer-events-none"
-                ></div>
-
-                <!-- Left: Track Info & Favorite -->
-                <div class="flex-shrink-0">
-                    <TrackInfo
-                        {currentTrack}
-                        isFavorite={isTrackFavorite}
-                        onFavoriteClick={() =>
-                            currentTrack?.id && toggleFavorite(currentTrack.id)}
-                        onShowTracks={() => dispatch("showTracks")}
-                    />
-                </div>
-
-                <!-- Center: Controls & Progress -->
-                <div
-                    class="flex-1 flex flex-col justify-center max-w-md w-full"
+                    class="absolute inset-0 bg-[#0F172A]/90 backdrop-blur-2xl border border-white/10 rounded-2xl md:rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-hidden"
                 >
-                    <div class="flex items-center justify-center mb-2">
-                        <PlaybackControls />
-                    </div>
-                    <div class="w-full px-2">
-                        <ProgressBar />
-                    </div>
+                    <!-- Shine Effect -->
+                    <div
+                        class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[2s] pointer-events-none"
+                    ></div>
                 </div>
 
-                <!-- Right: Volume Control - Always visible on desktop -->
-                <div class="flex-shrink-0 hidden lg:flex items-center">
-                    <VolumeControl />
+                <!-- 2. Content Layer (Visible Overflow for Popups) -->
+                <div
+                    class="relative z-10 w-full p-3 md:px-6 flex items-center justify-between gap-3 md:gap-12"
+                >
+                    <!-- Left: Track Info & Favorite -->
+                    <div class="flex-shrink-0">
+                        <TrackInfo
+                            {currentTrack}
+                            isFavorite={isTrackFavorite}
+                            onFavoriteClick={() =>
+                                currentTrack?.id &&
+                                toggleFavorite(currentTrack.id)}
+                            onShowTracks={() => dispatch("showTracks")}
+                        />
+                    </div>
+
+                    <!-- Center: Controls & Progress -->
+                    <div
+                        class="flex-1 flex flex-col justify-center max-w-md w-full"
+                    >
+                        <div class="flex items-center justify-center mb-2">
+                            <PlaybackControls />
+                        </div>
+                        <div class="w-full px-2">
+                            <ProgressBar />
+                        </div>
+                    </div>
+
+                    <!-- Right: Volume Control - Always visible on desktop -->
+                    <div class="flex-shrink-0 hidden lg:flex items-center">
+                        <VolumeControl />
+                    </div>
                 </div>
             </div>
         </div>
