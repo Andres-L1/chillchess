@@ -213,7 +213,7 @@
         >
             <a
                 href="/"
-                class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-opacity z-50 text-white"
+                class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-opacity z-50 text-white p-2 -ml-2"
             >
                 <span class="text-xl">←</span>
                 <span class="text-sm font-medium">Salir</span>

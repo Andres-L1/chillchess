@@ -163,7 +163,7 @@
                 <div>
                     <a
                         href="/artist"
-                        class="text-slate-400 hover:text-white mb-2 inline-flex items-center gap-2 text-sm"
+                        class="text-slate-400 hover:text-white mb-2 inline-flex items-center gap-2 text-sm py-2 px-1 -ml-1"
                     >
                         <span>←</span> Volver al Panel
                     </a>

@@ -75,10 +75,10 @@
 
     <div class="max-w-6xl mx-auto relative z-10">
         <!-- Back Button -->
-        <div class="mb-8">
+        <div class="mb-6 md:mb-8">
             <a
                 href="/"
-                class="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors hover:-translate-x-1 duration-300"
+                class="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors hover:-translate-x-1 duration-300 py-2 px-1 -ml-1 md:ml-0"
             >
                 <span class="text-xl">←</span>
                 <span class="font-bold">Volver al Inicio</span>
