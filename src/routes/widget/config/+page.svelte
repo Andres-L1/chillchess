@@ -14,9 +14,13 @@
         ? `${window.location.origin}/widget?theme=${theme}&size=${size}&showLogo=${showLogo}&opacity=${opacity}&uid=${$userStore.user?.uid || ""}`
         : "";
 
-    function copyToClipboard() {
-        navigator.clipboard.writeText(widgetUrl);
-        toast.success("URL copiada al portapapeles");
+    async function copyToClipboard() {
+        try {
+            await navigator.clipboard.writeText(widgetUrl);
+            toast.success("URL copiada al portapapeles");
+        } catch (err) {
+            toast.error("Error al copiar. Por favor copia manualmente.");
+        }
     }
 </script>
 
@@ -155,11 +159,17 @@
                 >
                     <h2 class="text-xl font-bold mb-4">📋 URL del Widget</h2>
                     <div
-                        class="bg-black/40 p-4 rounded-lg mb-4 overflow-x-auto"
+                        class="bg-black/40 rounded-lg mb-4 overflow-hidden border border-white/10"
                     >
-                        <code class="text-xs text-green-400 break-all"
-                            >{widgetUrl}</code
-                        >
+                        <!-- svelte-ignore a11y-click-events-have-key-events -->
+                        <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+                        <input
+                            type="text"
+                            readonly
+                            value={widgetUrl}
+                            class="w-full bg-transparent p-4 text-xs text-green-400 font-mono outline-none cursor-text"
+                            on:click={(e) => e.currentTarget.select()}
+                        />
                     </div>
                     <button
                         on:click={copyToClipboard}
