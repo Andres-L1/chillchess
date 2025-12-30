@@ -20,6 +20,8 @@
     class="relative flex items-center justify-center p-2"
     on:mouseenter={() => (isHovering = true)}
     on:mouseleave={() => (isHovering = false)}
+    role="group"
+    aria-label="Control de volumen"
 >
     <!-- Mute/Unmute Button -->
     <button
@@ -72,7 +74,6 @@
                     min="0"
                     max="1"
                     step="0.01"
-                    orient="vertical"
                     value={$audioStore.musicVolume}
                     on:input={handleVolumeChange}
                     class="absolute inset-0 w-full h-full opacity-0 cursor-pointer appearance-none z-10"

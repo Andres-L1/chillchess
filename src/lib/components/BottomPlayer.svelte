@@ -132,7 +132,7 @@
 
                 <!-- Right: Volume Control - Always visible on desktop -->
                 <div class="flex-shrink-0 hidden lg:flex items-center">
-                    <VolumeControl bind:showVolumeSlider />
+                    <VolumeControl />
                 </div>
             </div>
         </div>
