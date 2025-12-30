@@ -12,11 +12,7 @@
     }
 
     function upgradeToPro() {
-        // TODO: Integrate Stripe checkout
-        console.log("Upgrade to Pro clicked");
-        alert(
-            "Integración con Stripe próximamente. Por ahora, contacta con soporte@chillchess.app",
-        );
+        window.location.href = "/pricing";
     }
 
     $: featureText =

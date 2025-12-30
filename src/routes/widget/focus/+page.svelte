@@ -51,7 +51,7 @@
                 );
                 timerState.timeLeft = remaining;
             }
-        }, 100); // 100ms for responsiveness
+        }, 1000); // 1s is sufficient for timer updates
 
         return () => {
             unsub();

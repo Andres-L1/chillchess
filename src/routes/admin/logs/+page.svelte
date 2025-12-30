@@ -1,7 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { userSubscription } from "$lib/subscription/userSubscription";
-    // @ts-ignore
     import { goto } from "$app/navigation";
     import { db } from "$lib/firebase";
     import {
