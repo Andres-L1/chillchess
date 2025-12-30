@@ -180,6 +180,11 @@
 {/if}
 
 <style>
+    :global(html),
+    :global(body) {
+        background: transparent !important;
+    }
+
     * {
         user-select: none;
         -webkit-user-select: none;
@@ -192,14 +197,10 @@
         gap: 24px;
         padding: 16px 24px;
 
-        /* True Glass Effect */
-        background: linear-gradient(
-            135deg,
-            rgba(15, 15, 20, 0.4),
-            rgba(5, 5, 8, 0.6)
-        );
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
+        /* True Glass Effect - Neutral Black Tint */
+        background: rgba(0, 0, 0, 0.3); /* Just a dark tint */
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
 
         border-radius: 16px;
         border: 1px solid rgba(255, 255, 255, 0.1);
