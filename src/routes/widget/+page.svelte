@@ -96,18 +96,26 @@
                 : '#ff7b3d, #6366f1'});"
         ></div>
 
-        <!-- Album Art with Animated Border -->
+        <!-- Vinilo Giratorio -->
         <div
             class="album-container"
             style="width: {config.imgSize}; height: {config.imgSize};"
         >
-            <div class="album-border"></div>
-            <img
-                src={activeTrack.cover || "/logo-mobile.png"}
-                alt={activeTrack.title}
-                class="album-img"
-            />
-            <div class="vinyl-spin"></div>
+            <div class="relative w-full h-full">
+                <img
+                    src={activeTrack.cover || "/logo-mobile.png"}
+                    alt={activeTrack.title}
+                    class="w-full h-full object-cover rounded-full shadow-2xl animate-spin-slow border-[3px] border-white/10"
+                />
+                <!-- Centro del vinilo -->
+                <div
+                    class="absolute inset-0 flex items-center justify-center pointer-events-none"
+                >
+                    <div
+                        class="w-[25%] h-[25%] bg-[#0B1120] rounded-full border border-white/20 backdrop-blur-sm shadow-inner"
+                    ></div>
+                </div>
+            </div>
         </div>
 
         <!-- Track Info -->
@@ -133,20 +141,27 @@
 
             <!-- Logo (if enabled) -->
             {#if showLogo}
-                <div class="logo-container">
+                <div class="logo-container mt-1">
                     <img
                         src="/logo-desktop.png"
                         alt="ChillChess"
-                        class="h-8 object-contain opacity-80"
+                        class="h-10 w-auto object-contain opacity-100"
                     />
                 </div>
             {/if}
         </div>
 
-        <!-- Animated Equalizer -->
+        <!-- Animated Equalizer (Chaotic) -->
         <div class="equalizer">
-            {#each Array(4) as _, i}
-                <div class="bar" style="animation-delay: {i * 0.15}s;"></div>
+            {#each Array(6) as _, i}
+                <div
+                    class="bar"
+                    style="
+                        animation-duration: {0.4 + ((i * 0.3) % 0.8)}s; 
+                        animation-delay: -{i * 0.2}s;
+                        height: {10 + i * 5}px;
+                    "
+                ></div>
             {/each}
         </div>
     </div>
@@ -226,10 +241,10 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        border-radius: 16px;
+        border-radius: 50%;
         box-shadow:
             0 15px 35px -5px rgba(0, 0, 0, 0.6),
-            /* Lifting shadow */ 0 0 0 1px rgba(255, 255, 255, 0.05);
+            0 0 0 1px rgba(255, 255, 255, 0.05);
     }
 
     /* Removed .album-border and .vinyl-spin for cleaner look */
@@ -349,5 +364,18 @@
             opacity: 0.6;
             transform: scale(1.1);
         }
+    }
+
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .animate-spin-slow {
+        animation: spin 8s linear infinite;
     }
 </style>
