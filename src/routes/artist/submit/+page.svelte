@@ -480,11 +480,23 @@
                             </div>
                             <!-- Security Tip -->
                             <div
-                                class="mt-2 flex items-center gap-2 text-xs text-slate-500"
+                                class="mt-2 flex flex-col gap-1 text-xs text-slate-500"
                             >
-                                <span class="text-green-400">🛡️</span>
-                                Recomendamos usar servicios encriptados como Mega
-                                o protegidos con contraseña.
+                                <div class="flex items-center gap-2">
+                                    <span class="text-green-400">🛡️</span>
+                                    Recomendamos Mega, Drive o Dropbox.
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-blue-400">💡</span>
+                                    <span
+                                        >¿Sin cuenta? Usa <a
+                                            href="https://wetransfer.com"
+                                            target="_blank"
+                                            class="text-primary-400 hover:text-primary-300 font-bold hover:underline"
+                                            >WeTransfer</a
+                                        > (no necesitas registrarte).</span
+                                    >
+                                </div>
                             </div>
                         </div>
 
