@@ -1,0 +1,28 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // ============================================
+    // DEFAULT DENY
+    // ============================================
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    // ============================================
+    // MUSIC SUBMISSIONS
+    // ============================================
+    // Path structure used in code: submissions/{userId}/{timestamp}/{filename}
+    match /submissions/{userId}/{allPaths=**} {
+       // Permite escribir solo al dueño de la carpeta
+       // Limita el tamaño de archivo a 50MB para evitar abusos
+       allow write: if request.auth != null 
+                    && request.auth.uid == userId
+                    && request.resource.size < 50 * 1024 * 1024;
+       
+       // Permite leer al dueño (para verificar subida)
+       // El Admin accederá a los archivos mediante DownloadURLs firmadas, que no requieren reglas de lectura pública
+       allow read: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
