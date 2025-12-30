@@ -146,18 +146,11 @@
             {/if}
         </div>
 
-        <!-- Animated Equalizer (Chaotic) -->
-        <div class="equalizer">
-            {#each Array(6) as _, i}
-                <div
-                    class="bar"
-                    style="
-                        animation-duration: {0.4 + ((i * 0.3) % 0.8)}s; 
-                        animation-delay: -{i * 0.2}s;
-                        height: {10 + i * 5}px;
-                    "
-                ></div>
-            {/each}
+        <!-- Minimal Discreet Equalizer -->
+        <div class="equalizer-minimal">
+            <div class="bar-min bar-1"></div>
+            <div class="bar-min bar-2"></div>
+            <div class="bar-min bar-3"></div>
         </div>
     </div>
 {:else}
@@ -277,12 +270,12 @@
         height: 100%;
         background: linear-gradient(
             90deg,
-            #6366f1,
-            #a855f7
-        ); /* Vibrant Gradient */
+            #ff7b3d,
+            #fb923c
+        ); /* Brand Orange Gradient */
         border-radius: 4px;
         transition: width 0.3s ease;
-        box-shadow: 0 0 15px rgba(99, 102, 241, 0.4); /* Neon Glow */
+        box-shadow: 0 0 15px rgba(255, 123, 61, 0.5); /* Orange Glow */
     }
 
     .logo-container {
@@ -292,21 +285,43 @@
         transition: opacity 0.3s;
     }
 
-    .equalizer {
+    .equalizer-minimal {
         display: flex;
-        gap: 4px;
         align-items: flex-end;
-        height: 32px;
-        z-index: 2;
-        padding-left: 10px;
+        gap: 4px;
+        height: 20px;
+        padding-left: 16px;
     }
 
-    .bar {
-        width: 4px;
-        background: #a855f7;
-        border-radius: 2px;
-        animation: bounce 0.8s ease-in-out infinite alternate;
-        opacity: 0.8;
+    .bar-min {
+        width: 6px;
+        background: #ff7b3d;
+        border-radius: 2px 2px 0 0;
+        animation: bounce-min 0.8s ease-in-out infinite alternate;
+    }
+
+    .bar-1 {
+        height: 60%;
+        animation-duration: 0.8s;
+    }
+    .bar-2 {
+        height: 100%;
+        animation-duration: 0.9s;
+    }
+    .bar-3 {
+        height: 40%;
+        animation-duration: 0.7s;
+    }
+
+    @keyframes bounce-min {
+        0% {
+            height: 30%;
+            opacity: 0.7;
+        }
+        100% {
+            height: 100%;
+            opacity: 1;
+        }
     }
 
     /* Idle State */
