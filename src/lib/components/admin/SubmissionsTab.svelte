@@ -320,8 +320,7 @@
     <div class="mb-6">
         <h2 class="text-2xl font-bold text-white mb-2">Envíos Musicales</h2>
         <p class="text-slate-400">
-            Revisa enlaces de descarga y verifica artistas. Analiza la seguridad
-            antes de descargar.
+            Escucha y verifica el material subido directamente a Cloudflare R2.
         </p>
     </div>
 
@@ -350,7 +349,15 @@
                 <div
                     class="bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors relative overflow-hidden"
                 >
-                    <div class="absolute top-4 right-4">
+                    <div class="absolute top-4 right-4 flex gap-2">
+                        {#if sub.submissionType === "r2_direct"}
+                            <span
+                                class="px-2 py-1 bg-blue-500/20 text-blue-300 rounded-lg text-xs font-bold border border-blue-500/30 flex items-center gap-1"
+                            >
+                                ☁️ R2 Direct
+                            </span>
+                        {/if}
+
                         {#if sub.status === "pending"}
                             <span
                                 class="px-3 py-1 bg-yellow-500/20 text-yellow-300 rounded-full text-xs font-bold uppercase tracking-wider"
@@ -379,6 +386,14 @@
                                     alt={sub.releaseTitle}
                                     class="w-full h-full object-cover"
                                 />
+                            {:else if sub.r2CoverKey}
+                                <!-- Placeholder for R2 Cover (would need signed URL to view) -->
+                                <div
+                                    class="w-full h-full flex flex-col items-center justify-center bg-slate-800 text-slate-500 p-2 text-center"
+                                >
+                                    <span class="text-2xl mb-1">🖼️</span>
+                                    <span class="text-[10px]">Cover en R2</span>
+                                </div>
                             {:else}
                                 <div
                                     class="w-full h-full flex items-center justify-center text-4xl"
@@ -436,20 +451,7 @@
                         <h4
                             class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center justify-between"
                         >
-                            <span>Archivos de Audio</span>
-                            {#if sub.submissionType === "r2_direct"}
-                                <span
-                                    class="text-blue-400 text-xs flex items-center gap-1 border border-blue-500/30 px-2 py-1 rounded bg-blue-500/10"
-                                >
-                                    ☁️ Cloudflare R2
-                                </span>
-                            {:else}
-                                <span
-                                    class="text-yellow-400 text-xs flex items-center gap-1 border border-yellow-500/30 px-2 py-1 rounded bg-yellow-500/10"
-                                >
-                                    🔗 Enlace Externo
-                                </span>
-                            {/if}
+                            <span>Material de Audio</span>
                         </h4>
 
                         {#if sub.submissionType === "r2_direct" && sub.r2AudioKeys}
