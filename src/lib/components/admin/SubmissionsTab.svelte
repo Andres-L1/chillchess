@@ -139,6 +139,37 @@
                 } else {
                     statusMessage = `✅ Envío aprobado (${newApprovedCount}/2 para verificación automática)`;
                 }
+
+                // ✨ CREATE ALBUM IN COLLECTION (Auto-publish)
+                const { addDoc, collection } = await import(
+                    "firebase/firestore"
+                );
+
+                const albumData = {
+                    title: submission.releaseTitle,
+                    artist: submission.artistName,
+                    artistId: submission.artistId,
+                    cover: submission.coverUrl,
+                    category: submission.genre || "Chill",
+                    tracks: submission.tracklist
+                        ? submission.tracklist
+                              .split("\n")
+                              .filter((t) => t.trim())
+                              .map((line, idx) => ({
+                                  id: `track-${idx + 1}`,
+                                  title: line.replace(/^\d+\.\s*/, "").trim(), // Remove "1. " prefix
+                                  url: submission.downloadLink, // Placeholder until you upload individual tracks
+                              }))
+                        : [],
+                    downloadLink: submission.downloadLink,
+                    releaseDate: Date.now(),
+                    createdAt: Date.now(),
+                    submissionId: submission.id,
+                };
+
+                await addDoc(collection(db, "albums"), albumData);
+
+                statusMessage += ` 🎵 | Álbum publicado en colección`;
             }
 
             submission.status = "approved";
@@ -146,7 +177,7 @@
 
             dispatch("approved");
 
-            setTimeout(() => (statusMessage = ""), 5000);
+            setTimeout(() => (statusMessage = ""), 6000);
         } catch (e: any) {
             statusMessage = "❌ Error: " + e.message;
         }
