@@ -8,7 +8,6 @@
     }
 
     const roadmapItems: RoadmapItem[] = [
-    const roadmapItems: RoadmapItem[] = [
         // Completado Recientemente (Hot Fixes & Features)
         {
             title: "Integración de Fundadores & Artistas",
