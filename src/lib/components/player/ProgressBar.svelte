@@ -18,7 +18,7 @@
     <span class="w-10 text-right">{formatTime($audioStore.currentTime)}</span>
 
     <div
-        class="relative flex-1 h-1 bg-white/10 rounded-full group cursor-pointer group"
+        class="relative flex-1 h-3 bg-white/5 rounded-full group cursor-pointer flex items-center"
     >
         <input
             type="range"
@@ -28,12 +28,23 @@
             on:input={handleSeek}
             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
         />
+        <!-- Background Track -->
         <div
-            class="absolute top-0 left-0 h-full bg-white rounded-full group-hover:bg-green-500 transition-colors pointer-events-none"
+            class="absolute w-full h-1 bg-white/10 rounded-full pointer-events-none"
+        ></div>
+
+        <!-- Active Progress -->
+        <div
+            class="absolute h-1 bg-primary-500 rounded-full pointer-events-none group-hover:bg-primary-400 transition-colors shadow-[0_0_8px_rgba(249,115,22,0.5)]"
             style="width: {($audioStore.currentTime /
                 ($audioStore.duration || 1)) *
                 100}%"
-        ></div>
+        >
+            <!-- Handle (Visible on hover) -->
+            <div
+                class="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity transform scale-0 group-hover:scale-110"
+            ></div>
+        </div>
     </div>
 
     <span class="w-10">{formatTime($audioStore.duration)}</span>

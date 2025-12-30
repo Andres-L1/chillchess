@@ -122,7 +122,7 @@
                 <div
                     class="flex-1 flex flex-col justify-center max-w-md w-full"
                 >
-                    <div class="flex items-center justify-center -mb-1">
+                    <div class="flex items-center justify-center mb-2">
                         <PlaybackControls />
                     </div>
                     <div class="w-full px-2">
