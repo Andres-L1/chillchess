@@ -152,13 +152,28 @@
     </div>
 {:else}
     <div
-        class="widget-container widget-idle font-poppins"
+        class="widget-idle font-poppins flex flex-col items-center justify-center transition-all duration-500"
         style="width: {config.width}; opacity: {opacity};"
     >
-        <div class="idle-content">
-            <div class="pulse-circle"></div>
-            <p class="idle-text">🎵 Esperando música...</p>
-            <p class="idle-subtext">ChillChess.app</p>
+        <!-- Logo Animado -->
+        <div class="relative mb-2">
+            <div
+                class="absolute inset-0 bg-primary-500 rounded-full blur-2xl opacity-30 animate-pulse"
+            ></div>
+            <img
+                src="/logo-mobile.png"
+                alt="ChillChess"
+                class="w-14 h-14 relative z-10 drop-shadow-xl animate-float"
+            />
+        </div>
+
+        <!-- Texto Minimalista -->
+        <div class="text-center">
+            <h1
+                class="text-xl font-bold text-white tracking-[0.2em] opacity-90 drop-shadow-md"
+            >
+                CHILLCHESS
+            </h1>
         </div>
     </div>
 {/if}
@@ -304,36 +319,22 @@
     }
 
     .widget-idle {
-        justify-content: center;
-        padding: 40px;
-        background: rgba(15, 23, 42, 0.8);
-        border-color: rgba(255, 255, 255, 0.1);
+        background: transparent;
+        padding: 20px;
     }
 
-    .idle-content {
-        text-align: center;
+    .animate-float {
+        animation: float 3s ease-in-out infinite;
     }
 
-    .pulse-circle {
-        width: 60px;
-        height: 60px;
-        margin: 0 auto 16px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #ff7b3d, #6366f1);
-        animation: pulse 2s ease-in-out infinite;
-    }
-
-    .idle-text {
-        font-size: 16px;
-        color: rgba(255, 255, 255, 0.8);
-        margin-bottom: 8px;
-        font-weight: 600;
-    }
-
-    .idle-subtext {
-        font-size: 12px;
-        color: rgba(255, 255, 255, 0.4);
-        font-weight: 500;
+    @keyframes float {
+        0%,
+        100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-8px);
+        }
     }
 
     @keyframes bounce {

@@ -41,7 +41,9 @@
 <!-- App Shell -->
 <div class="min-h-screen w-full relative">
     <!-- Dynamic Background Layer -->
-    <DynamicBackground />
+    {#if !$page.url.pathname.startsWith("/widget")}
+        <DynamicBackground />
+    {/if}
 
     <!-- Content -->
     <div
@@ -54,13 +56,17 @@
         <slot />
     </div>
 
-    <AudioPlayer />
-    {#if !$page.url.pathname.startsWith("/app") && !$page.url.pathname.match(/^\/rooms\/[a-zA-Z0-9]+$/)}
-        <BottomPlayer />
+    <!-- Global Components (Excluded from Widget) -->
+    {#if !$page.url.pathname.startsWith("/widget")}
+        <AudioPlayer />
+        {#if !$page.url.pathname.startsWith("/app") && !$page.url.pathname.match(/^\/rooms\/[a-zA-Z0-9]+$/)}
+            <BottomPlayer />
+        {/if}
+        <MusicToast />
+        <ToastContainer />
+        <CookieConsent />
+        <AudioSync />
     {/if}
-    <MusicToast />
-    <ToastContainer />
-    <CookieConsent />
 </div>
 
 <style>
