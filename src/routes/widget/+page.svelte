@@ -3,32 +3,67 @@
     import { onMount } from "svelte";
     import { page } from "$app/stores";
 
+    import { db } from "$lib/firebase";
+    import { doc, onSnapshot } from "firebase/firestore";
+
     // Query params for customization
     $: theme = $page.url.searchParams.get("theme") || "dark";
     $: size = $page.url.searchParams.get("size") || "medium";
     $: showLogo = $page.url.searchParams.get("showLogo") !== "false";
     $: opacity = parseFloat($page.url.searchParams.get("opacity") || "0.9");
+    $: uid = $page.url.searchParams.get("uid");
 
-    // Derive current track from store
+    // Local Store Data
     $: playlist = $audioStore.playlist;
     $: currentTrackIndex = $audioStore.currentTrackIndex;
     $: currentAlbumId = $audioStore.currentAlbumId;
-    $: isPlaying = $audioStore.isPlaying;
+    $: localIsPlaying = $audioStore.isPlaying;
 
     $: currentTrack = playlist && playlist[currentTrackIndex];
     $: currentAlbum = $audioStore.availableAlbums.find(
         (a) => a.id === currentAlbumId,
     );
 
-    // Combine track and album info
-    $: trackInfo =
+    // Derived Local Info
+    $: localTrackInfo =
         currentTrack && currentAlbum
             ? {
                   title: currentTrack.title,
                   artist: currentTrack.artist || currentAlbum.artist,
-                  cover: currentAlbum.cover,
+                  cover:
+                      (currentTrack as any).coverUrl ||
+                      (currentTrack as any).cover ||
+                      currentAlbum.cover,
               }
             : null;
+
+    // Remote Data Sync
+    let remoteData: any = null;
+
+    onMount(() => {
+        if (uid) {
+            const unsub = onSnapshot(doc(db, "nowPlaying", uid), (snap) => {
+                if (snap.exists()) {
+                    remoteData = snap.data();
+                }
+            });
+            return () => unsub();
+        }
+    });
+
+    // Unified State (Remote takes precedence if UID is present)
+    $: activeTrack = uid ? remoteData?.track : localTrackInfo;
+    $: isPlaying = uid ? remoteData?.isPlaying : localIsPlaying;
+
+    // Progress calculation for remote
+    $: progress =
+        uid && remoteData
+            ? ((remoteData.track.currentTime || 0) /
+                  (remoteData.track.duration || 1)) *
+              100
+            : $audioStore.duration > 0
+              ? ($audioStore.currentTime / $audioStore.duration) * 100
+              : 0;
 
     // Size configurations
     const sizes = {
@@ -45,7 +80,7 @@
     <meta name="robots" content="noindex" />
 </svelte:head>
 
-{#if trackInfo && isPlaying}
+{#if activeTrack && isPlaying}
     <div
         class="widget-container font-poppins"
         style="
@@ -68,8 +103,8 @@
         >
             <div class="album-border"></div>
             <img
-                src={trackInfo.cover || "/default-cover.jpg"}
-                alt={trackInfo.title}
+                src={activeTrack.cover || "/logo-mobile.png"}
+                alt={activeTrack.title}
                 class="album-img"
             />
             <div class="vinyl-spin"></div>
@@ -78,7 +113,7 @@
         <!-- Track Info -->
         <div class="track-info">
             <div class="track-title {config.fontSize}">
-                {trackInfo.title}
+                {activeTrack.title}
             </div>
             <div
                 class="artist-name"
@@ -88,61 +123,22 @@
                       ? '12px'
                       : '10px'};"
             >
-                {trackInfo.artist}
+                {activeTrack.artist}
             </div>
 
             <!-- Progress Bar -->
             <div class="progress-container">
-                <div
-                    class="progress-bar"
-                    style="width: {$audioStore.duration > 0
-                        ? ($audioStore.currentTime / $audioStore.duration) * 100
-                        : 0}%"
-                ></div>
+                <div class="progress-bar" style="width: {progress}%"></div>
             </div>
 
             <!-- Logo (if enabled) -->
             {#if showLogo}
                 <div class="logo-container">
-                    <svg viewBox="0 0 1024 300" class="logo-svg">
-                        <!-- Crown with headphones icon -->
-                        <g transform="translate(20, 50)">
-                            <!-- Headphones -->
-                            <path
-                                d="M 80 100 Q 80 40 120 40 Q 160 40 160 100"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="8"
-                                stroke-linecap="round"
-                            />
-                            <circle
-                                cx="80"
-                                cy="110"
-                                r="15"
-                                fill="currentColor"
-                            />
-                            <circle
-                                cx="160"
-                                cy="110"
-                                r="15"
-                                fill="currentColor"
-                            />
-                            <!-- Crown -->
-                            <path
-                                d="M 120 20 L 125 40 L 135 35 L 130 50 L 145 48 L 138 65 L 102 65 L 95 48 L 110 50 L 105 35 L 115 40 Z"
-                                fill="currentColor"
-                            />
-                        </g>
-                        <!-- ChillChess Text -->
-                        <text
-                            x="200"
-                            y="120"
-                            font-family="Poppins, sans-serif"
-                            font-size="80"
-                            font-weight="700"
-                            fill="currentColor">ChillChess</text
-                        >
-                    </svg>
+                    <img
+                        src="/logo-desktop.png"
+                        alt="ChillChess"
+                        class="h-8 object-contain opacity-80"
+                    />
                 </div>
             {/if}
         </div>

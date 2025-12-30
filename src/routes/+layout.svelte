@@ -18,6 +18,7 @@
     import MusicToast from "$lib/components/MusicToast.svelte";
     import CookieConsent from "$lib/components/CookieConsent.svelte";
     import ToastContainer from "$lib/components/ToastContainer.svelte";
+    import AudioSync from "$lib/components/AudioSync.svelte";
 
     storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 

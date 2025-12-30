@@ -2,6 +2,7 @@
     import { goto } from "$app/navigation";
     import { browser } from "$app/environment";
 
+    import { userStore } from "$lib/auth/userStore";
     import { toast } from "$lib/stores/notificationStore";
 
     let theme: "dark" | "light" = "dark";
@@ -10,7 +11,7 @@
     let opacity = 0.9;
 
     $: widgetUrl = browser
-        ? `${window.location.origin}/widget?theme=${theme}&size=${size}&showLogo=${showLogo}&opacity=${opacity}`
+        ? `${window.location.origin}/widget?theme=${theme}&size=${size}&showLogo=${showLogo}&opacity=${opacity}&uid=${$userStore.user?.uid || ""}`
         : "";
 
     function copyToClipboard() {
