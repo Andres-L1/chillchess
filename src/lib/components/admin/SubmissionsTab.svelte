@@ -106,22 +106,44 @@
             const userSnap = await getDoc(userRef);
 
             if (userSnap.exists()) {
+                const userData = userSnap.data();
+                const currentApprovedCount =
+                    userData.approvedSubmissionsCount || 0;
+                const newApprovedCount = currentApprovedCount + 1;
+
+                // Update approved count
                 await updateDoc(userRef, {
-                    isVerified: true,
+                    approvedSubmissionsCount: newApprovedCount,
                     updatedAt: Date.now(),
                 });
 
-                const artistRef = doc(db, "artists", submission.artistId);
-                const artistSnap = await getDoc(artistRef);
-                if (artistSnap.exists()) {
-                    await updateDoc(artistRef, { isVerified: true });
+                // Auto-verify after 2nd approval
+                if (newApprovedCount >= 2 && !userData.isVerified) {
+                    await updateDoc(userRef, {
+                        isVerified: true,
+                        verifiedAt: Date.now(),
+                    });
+
+                    const artistRef = doc(db, "artists", submission.artistId);
+                    const artistSnap = await getDoc(artistRef);
+                    if (artistSnap.exists()) {
+                        await updateDoc(artistRef, {
+                            isVerified: true,
+                            verifiedAt: Date.now(),
+                        });
+                    }
+
+                    statusMessage = `✅ Envío aprobado. ${submission.artistName} ahora es VERIFICADO ✓ (${newApprovedCount} aprobaciones)`;
+                } else if (newApprovedCount >= 2) {
+                    statusMessage = `✅ Envío aprobado (artista ya verificado, ${newApprovedCount} aprobaciones totales)`;
+                } else {
+                    statusMessage = `✅ Envío aprobado (${newApprovedCount}/2 para verificación automática)`;
                 }
             }
 
             submission.status = "approved";
             submissions = submissions;
 
-            statusMessage = `✅ Envío aprobado y artista ${submission.artistName} verificado`;
             dispatch("approved");
 
             setTimeout(() => (statusMessage = ""), 5000);
@@ -314,6 +336,22 @@
                                         class="flex-1 sm:flex-none px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-xs font-bold whitespace-nowrap transition-colors flex items-center justify-center gap-2"
                                     >
                                         🔍 Analizar (Google Safety)
+                                    </button>
+                                    <button
+                                        on:click={() => {
+                                            navigator.clipboard.writeText(
+                                                sub.downloadLink || "",
+                                            );
+                                            statusMessage = `📋 URL copiada. Pégala en MEGA Cloud para subir directamente sin descargar a tu PC.`;
+                                            setTimeout(
+                                                () => (statusMessage = ""),
+                                                4000,
+                                            );
+                                        }}
+                                        class="flex-1 sm:flex-none px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-bold whitespace-nowrap transition-colors shadow-lg flex items-center justify-center gap-2"
+                                        title="Copiar URL para subir a MEGA Cloud"
+                                    >
+                                        📥 Copiar para MEGA
                                     </button>
                                     <a
                                         href={sub.downloadLink}
