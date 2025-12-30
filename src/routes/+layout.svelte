@@ -19,6 +19,7 @@
     import CookieConsent from "$lib/components/CookieConsent.svelte";
     import ToastContainer from "$lib/components/ToastContainer.svelte";
     import AudioSync from "$lib/components/AudioSync.svelte";
+    import TimerSync from "$lib/components/TimerSync.svelte";
 
     storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 
@@ -84,6 +85,7 @@
         <ToastContainer />
         <CookieConsent />
         <AudioSync />
+        <TimerSync />
     {/if}
 </div>
 

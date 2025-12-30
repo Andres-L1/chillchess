@@ -1,0 +1,1 @@
+import{w as o}from"./BRP6Yj6K.js";import{a as t,o as s,h as i}from"./5dAqgG7A.js";const n={user:null,loading:!0,isLoggedIn:!1},e=o(n);typeof window<"u"&&t?s(t,a=>{e.set({user:a,loading:!1,isLoggedIn:!!a})}):e.update(a=>({...a,loading:!1}));const g=async()=>{t&&await i(t)};export{g as l,e as u};

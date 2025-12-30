@@ -22,6 +22,7 @@
     import Clock from "$lib/components/Clock.svelte";
     import WhiteNoiseControls from "$lib/components/WhiteNoiseControls.svelte";
     import { vibeStore } from "$lib/stores/vibeStore";
+    import { timerStore } from "$lib/stores/timerStore";
 
     let showMusicExplorer = false;
     let showVibeStudio = false;
@@ -68,11 +69,13 @@
     }
 
     // --- FOCUS TIMER LOGIC ---
-    let timerRunning = false;
-    let focusDuration = 25 * 60; // 25 min default
-    let timeLeft = focusDuration;
+    // --- FOCUS TIMER LOGIC (Connected to Store) ---
+    $: timeLeft = $timerStore.timeLeft;
+    $: timerRunning = $timerStore.isRunning;
+    $: timerMode = $timerStore.mode;
+    $: focusDuration = $timerStore.duration;
+
     let timerInterval: any;
-    let timerMode: "focus" | "short" | "long" | "custom" = "focus";
 
     function formatTime(seconds: number) {
         const m = Math.floor(seconds / 60);
@@ -81,49 +84,42 @@
     }
 
     function setTimerMode(mode: "focus" | "short" | "long") {
-        stopTimer();
-        timerMode = mode;
-        if (mode === "focus") focusDuration = 25 * 60;
-        if (mode === "short") focusDuration = 5 * 60;
-        if (mode === "long") focusDuration = 15 * 60;
-        timeLeft = focusDuration;
+        stopTimer(false);
+        timerStore.setMode(mode);
     }
 
     function toggleTimer() {
-        if (timerRunning) {
+        if ($timerStore.isRunning) {
             stopTimer();
         } else {
-            // Ensure audio is unlocked on first interaction
             unlockAudio();
             startTimer();
         }
     }
 
     function startTimer() {
-        if (timeLeft <= 0) timeLeft = focusDuration; // Reset if finished
-        timerRunning = true;
+        if (!$timerStore.isRunning) {
+            timerStore.toggle();
+        }
+
+        if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
-            if (timeLeft > 0) {
-                timeLeft--;
+            if ($timerStore.timeLeft > 0) {
+                timerStore.tick();
             } else {
                 completeTimer();
             }
         }, 1000);
     }
 
-    function stopTimer() {
-        timerRunning = false;
+    function stopTimer(updateStore = true) {
         clearInterval(timerInterval);
+        if (updateStore) timerStore.stop();
     }
 
     function resetTimer() {
         stopTimer();
-        // Reset to default of current mode
-        if (timerMode === "focus") focusDuration = 25 * 60;
-        if (timerMode === "short") focusDuration = 5 * 60;
-        if (timerMode === "long") focusDuration = 15 * 60;
-        // If custom, keep current focusDuration as base
-        timeLeft = focusDuration;
+        timerStore.reset();
     }
 
     function completeTimer() {
