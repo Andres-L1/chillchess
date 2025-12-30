@@ -172,7 +172,9 @@
             if (ambienceSrc) {
                 ambienceEl.src = ambienceSrc;
                 if ($audioStore.isPlaying) {
-                    ambienceEl.play().catch(console.error);
+                    ambienceEl.play().catch(() => {
+                        /* Autoplay blocked */
+                    });
                 }
             } else {
                 ambienceEl.pause();
@@ -187,7 +189,9 @@
             ambienceEl.paused &&
             ambienceEl.readyState >= 2
         ) {
-            ambienceEl.play().catch(console.error);
+            ambienceEl.play().catch(() => {
+                /* Autoplay blocked */
+            });
         } else if (!$audioStore.isPlaying && !ambienceEl.paused) {
             ambienceEl.pause();
         }
@@ -204,7 +208,9 @@
         if (whiteNoiseEl.getAttribute("src") !== whiteNoiseSrc) {
             if (whiteNoiseSrc) {
                 whiteNoiseEl.src = whiteNoiseSrc;
-                whiteNoiseEl.play().catch(console.error);
+                whiteNoiseEl.play().catch(() => {
+                    /* Autoplay blocked */
+                });
             } else {
                 whiteNoiseEl.pause();
                 whiteNoiseEl.src = "";
@@ -217,7 +223,9 @@
             whiteNoiseEl.paused &&
             whiteNoiseEl.readyState >= 2
         ) {
-            whiteNoiseEl.play().catch(console.error);
+            whiteNoiseEl.play().catch(() => {
+                /* Autoplay blocked */
+            });
         }
     }
 
@@ -231,7 +239,9 @@
             // Repeat current track
             if (musicEl) {
                 musicEl.currentTime = 0;
-                musicEl.play().catch(console.error);
+                musicEl.play().catch(() => {
+                    /* Autoplay blocked */
+                });
             }
         } else if (repeatMode === "all") {
             // Go to next track, loop back to start if at end

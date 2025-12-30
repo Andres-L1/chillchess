@@ -73,7 +73,12 @@ export const audioStore = writable<AudioState>(initialState);
 
 // --- Initialization ---
 
+let isInitialized = false;
+
 export async function initAudioLibrary() {
+    if (isInitialized) return;
+    isInitialized = true;
+
     // 1. FAST LOAD: Try to load from LocalStorage first
     if (typeof localStorage !== 'undefined') {
         const cached = localStorage.getItem('chillchess_albums_cache');
