@@ -2,6 +2,7 @@
     import { goto } from "$app/navigation";
     import { onMount, onDestroy } from "svelte";
     import { userStore } from "$lib/auth/userStore";
+    import BackIcon from "$lib/components/icons/BackIcon.svelte";
 
     interface Room {
         id: string;
@@ -65,12 +66,15 @@
             class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8"
         >
             <div>
-                <button
-                    on:click={() => goto("/app")}
-                    class="text-slate-400 hover:text-white mb-2 flex items-center gap-2 text-sm"
+                <a
+                    href="/"
+                    class="text-slate-400 hover:text-white mb-2 flex items-center gap-2 text-sm group transition-colors"
                 >
-                    ← Volver al Ambiente
-                </button>
+                    <BackIcon size="sm" />
+                    <span class="group-hover:translate-x-1 transition-transform"
+                        >Volver al Inicio</span
+                    >
+                </a>
                 <h1 class="text-3xl md:text-4xl font-bold">Salas de Escucha</h1>
                 <p class="text-slate-400 mt-2 text-sm md:text-base">
                     Escucha música sincronizada con amigos en tiempo real

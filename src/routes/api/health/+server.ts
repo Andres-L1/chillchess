@@ -3,6 +3,7 @@ import { db } from '$lib/firebase'; // Client SDK, but works for basic check if 
 import { S3Client, ListBucketsCommand } from '@aws-sdk/client-s3';
 // @ts-ignore
 import { R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY } from '$env/static/private';
+// @ts-ignore
 import { PUBLIC_R2_ACCOUNT_ID } from '$env/static/public';
 import { getDocs, collection, limit, query } from 'firebase/firestore';
 
