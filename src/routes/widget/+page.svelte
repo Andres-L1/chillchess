@@ -192,15 +192,19 @@
         gap: 24px;
         padding: 16px 24px;
 
-        /* Modern Minimalist Dark - Complementary Style */
-        background: rgba(10, 10, 12, 0.75);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
+        /* True Glass Effect */
+        background: linear-gradient(
+            135deg,
+            rgba(15, 15, 20, 0.4),
+            rgba(5, 5, 8, 0.6)
+        );
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
 
         border-radius: 16px;
-        border: 1px solid rgba(255, 255, 255, 0.05); /* Very subtle */
+        border: 1px solid rgba(255, 255, 255, 0.1);
 
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
 
         overflow: hidden;
         transition: all 0.3s ease;
@@ -245,11 +249,11 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         letter-spacing: -0.02em;
-        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8); /* Sharper shadow for glass */
     }
 
     .artist-name {
-        color: rgba(255, 255, 255, 0.6);
+        color: rgba(255, 255, 255, 0.9); /* Higher contrast */
         font-size: 0.9em;
         margin-bottom: 12px;
         overflow: hidden;
@@ -283,7 +287,7 @@
     .logo-container {
         display: flex;
         align-items: center;
-        opacity: 0.6;
+        opacity: 0.95;
         transition: opacity 0.3s;
     }
 
