@@ -226,19 +226,13 @@
 
     async function loadVerifiedArtists() {
         try {
-            // Fetch users who are verified OR have role='artist'
-            // Since we can't do OR query on different fields easily without composite index,
-            // we'll try fetching verified users first.
-            // Adjust this query based on your actual schema.
-            // Assuming 'isVerified' boolean field exists.
-            // If not, we might need to fetch all and filter, or fetch by role.
+            // Updated Query: Filter by 'isVerified' boolean flag
+            // This matches the logic in VerifyTab.svelte
             const q = query(
                 collection(db, "users"),
-                where("role", "in", ["artist", "verified", "admin"]),
+                where("isVerified", "==", true),
             );
-            // Fallback: if role isn't used, try isVerified.
-            // Let's try to get a broad list.
-            // If this fails (index missing), we catch and log.
+
             const snap = await getDocs(q);
             verifiedArtists = snap.docs.map((d) => ({
                 uid: d.id,
@@ -247,10 +241,9 @@
                 photoURL: d.data().photoURL,
             }));
 
-            console.log("Artists loaded:", verifiedArtists);
+            console.log("Verified Artists loaded:", verifiedArtists.length);
         } catch (e) {
-            console.warn("Could not load verified artists (check indexes):", e);
-            // Fallback: Empty list, user might have to type manually if we allow it.
+            console.warn("Error loading verified artists:", e);
         }
     }
 
