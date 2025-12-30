@@ -8,7 +8,24 @@
     }
 
     const roadmapItems: RoadmapItem[] = [
+    const roadmapItems: RoadmapItem[] = [
         // Completado Recientemente (Hot Fixes & Features)
+        {
+            title: "Integración de Fundadores & Artistas",
+            description:
+                "Sistema inteligente para asignar lanzamientos musicales a perfiles Fundadores y Verificados, con distintivos especiales.",
+            status: "done",
+            date: "Diciembre 2025",
+            category: "community",
+        },
+        {
+            title: "App Nativa (iOS & Android)",
+            description:
+                "Desarrollo de una aplicación móvil nativa para llevar la experiencia ChillChess en tu bolsillo con reproducción offline.",
+            status: "planned",
+            date: "Mediados 2026",
+            category: "tech",
+        },
         {
             title: "Panel de Administración 2.0",
             description:

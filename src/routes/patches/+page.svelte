@@ -9,6 +9,19 @@
 
     const patches: Patch[] = [
         {
+            version: "v0.7",
+            date: "30 Dic 2025",
+            title: "The Founder Update",
+            type: "major",
+            changes: [
+                "💎 Soporte para Fundadores: Reconocimiento especial para perfiles Fundadores y Verificados en la asignación de música.",
+                "📱 Creator Studio Móvil: Nueva experiencia de subida de música simplificada con modal flotante optimizado para smarphones.",
+                "🔊 Reproductor Clásico: Restaurado el control de volumen vertical y la estética naranja icónica de la marca.",
+                "🧹 Admin R2 Tools: Nuevas herramientas de mantenimiento para limpiar archivos temporales y optimizar el almacenamiento.",
+                "🐛 Correcciones en selectores de artistas y lógica de verificación.",
+            ],
+        },
+        {
             version: "v0.6",
             date: "30 Dic 2025",
             title: "Community & Streaming Features",
