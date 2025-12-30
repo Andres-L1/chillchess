@@ -41,7 +41,7 @@
 <!-- App Shell -->
 <div class="min-h-screen w-full relative">
     <!-- Dynamic Background Layer -->
-    {#if !$page.url.pathname.startsWith("/widget")}
+    {#if $page.url.pathname !== "/widget"}
         <DynamicBackground />
     {/if}
 
@@ -56,8 +56,9 @@
         <slot />
     </div>
 
-    <!-- Global Components (Excluded from Widget) -->
-    {#if !$page.url.pathname.startsWith("/widget")}
+    <!-- Global Components (Excluded ONLY from Widget View, stored in /widget) -->
+    <!-- We use strict equality to allow /widget/config to have these components -->
+    {#if $page.url.pathname !== "/widget"}
         <AudioPlayer />
         {#if !$page.url.pathname.startsWith("/app") && !$page.url.pathname.match(/^\/rooms\/[a-zA-Z0-9]+$/)}
             <BottomPlayer />
