@@ -156,11 +156,11 @@
                 <div class="flex items-center gap-4">
                     <h1 class="text-2xl font-bold">Hola, Admin 👋</h1>
                     <a
-                        href="/app"
+                        href="/"
                         class="px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-medium text-slate-300 transition-colors flex items-center gap-2 group"
                     >
                         <BackIcon size="sm" />
-                        <span>Volver a App</span>
+                        <span>Volver al Inicio</span>
                     </a>
                 </div>
             </div>

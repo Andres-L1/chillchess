@@ -138,9 +138,9 @@
 
         <!-- Back Button -->
         <a
-            href="/app"
+            href="/"
             class="absolute top-6 left-6 z-50 p-3 bg-white/5 hover:bg-black/40 backdrop-blur-md border border-white/10 rounded-full text-white/70 hover:text-white transition-all hover:scale-105 active:scale-95 group"
-            title="Volver a la App"
+            title="Volver al Inicio"
         >
             <BackIcon size="lg" />
         </a>
