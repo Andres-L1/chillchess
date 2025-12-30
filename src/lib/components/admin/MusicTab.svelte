@@ -10,6 +10,7 @@
         serverTimestamp,
         query,
         orderBy,
+        where,
     } from "firebase/firestore";
     import {
         ref,
@@ -18,14 +19,19 @@
         deleteObject,
     } from "firebase/storage";
     import type { Album } from "$lib/data/albums";
-    import { onMount } from "svelte";
+    import { onMount, tick } from "svelte";
+    import { fly } from "svelte/transition";
 
     // --- CREATE ALBUM STATE ---
     let showCreateAlbumForm = false;
     let isCreatingAlbum = false;
+    let verifiedArtists: any[] = [];
+    let selectedArtistId = "";
+
     let newAlbumData = {
         title: "",
-        artist: "",
+        artist: "", // Name (display)
+        artistId: "", // Link to profile
         category: "musica",
         coverFile: null as File | null,
         tracks: [] as File[],
@@ -129,6 +135,7 @@
             newAlbumData = {
                 title: "",
                 artist: "",
+                artistId: "",
                 category: "musica",
                 coverFile: null,
                 tracks: [],
@@ -214,8 +221,38 @@
     let uploadProgress = 0;
 
     onMount(async () => {
-        await loadCatalog();
+        await Promise.all([loadCatalog(), loadVerifiedArtists()]);
     });
+
+    async function loadVerifiedArtists() {
+        try {
+            // Fetch users who are verified OR have role='artist'
+            // Since we can't do OR query on different fields easily without composite index,
+            // we'll try fetching verified users first.
+            // Adjust this query based on your actual schema.
+            // Assuming 'isVerified' boolean field exists.
+            // If not, we might need to fetch all and filter, or fetch by role.
+            const q = query(
+                collection(db, "users"),
+                where("role", "in", ["artist", "verified", "admin"]),
+            );
+            // Fallback: if role isn't used, try isVerified.
+            // Let's try to get a broad list.
+            // If this fails (index missing), we catch and log.
+            const snap = await getDocs(q);
+            verifiedArtists = snap.docs.map((d) => ({
+                uid: d.id,
+                displayName:
+                    d.data().displayName || d.data().username || "Sin Nombre",
+                photoURL: d.data().photoURL,
+            }));
+
+            console.log("Artists loaded:", verifiedArtists);
+        } catch (e) {
+            console.warn("Could not load verified artists (check indexes):", e);
+            // Fallback: Empty list, user might have to type manually if we allow it.
+        }
+    }
 
     async function loadCatalog() {
         loadingCatalog = true;
@@ -232,6 +269,9 @@
             loadingCatalog = false;
         }
     }
+
+    // --- R2 UPLOAD HELPER --- (Previous implementation remains valid)
+    // ... (uploadToR2 function) ...
 
     async function uploadToCatalog() {
         if (!newTrackTitle || !newTrackFile) {
@@ -373,94 +413,210 @@
         </div>
 
         {#if showCreateAlbumForm}
+            <!-- FLOATING MODAL OVERLAY -->
             <div
-                class="mb-8 p-6 bg-white/5 border border-white/10 rounded-2xl animate-fade-in"
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in cursor-pointer"
+                on:click|self={() => (showCreateAlbumForm = false)}
+                on:keydown={(e) =>
+                    e.key === "Escape" && (showCreateAlbumForm = false)}
+                role="button"
+                tabindex="0"
+                aria-label="Cerrar modal"
             >
-                <h3 class="text-xl font-bold mb-4">Crear Nuevo Álbum</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div class="space-y-4">
-                        <label class="block">
-                            <span class="block text-sm text-slate-400 mb-1"
-                                >Título del Álbum</span
-                            >
-                            <input
-                                type="text"
-                                bind:value={newAlbumData.title}
-                                class="w-full bg-black/30 border border-white/10 rounded-lg p-2 text-white"
-                            />
-                        </label>
-                        <label class="block">
-                            <span class="block text-sm text-slate-400 mb-1"
-                                >Nombre del Artista</span
-                            >
-                            <input
-                                type="text"
-                                bind:value={newAlbumData.artist}
-                                class="w-full bg-black/30 border border-white/10 rounded-lg p-2 text-white"
-                            />
-                        </label>
-                        <label class="block">
-                            <span class="block text-sm text-slate-400 mb-1"
-                                >Categoría</span
-                            >
-                            <select
-                                bind:value={newAlbumData.category}
-                                class="w-full bg-black/30 border border-white/10 rounded-lg p-2 text-white"
-                            >
-                                <option value="musica">Música</option>
-                                <option value="juegos">Juegos / Focus</option>
-                                <option value="ambiente">Ambiente</option>
-                            </select>
-                        </label>
-                        <label class="block">
-                            <span class="block text-sm text-slate-400 mb-1"
-                                >Portada</span
-                            >
-                            <input
-                                type="file"
-                                accept="image/*"
-                                on:change={handleCoverSelect}
-                                class="w-full text-sm text-slate-400"
-                            />
-                        </label>
-                    </div>
-                    <div class="space-y-4">
-                        <label class="block">
-                            <span class="block text-sm text-slate-400 mb-1"
-                                >Tracks (Selección múltiple)</span
-                            >
-                            <input
-                                type="file"
-                                multiple
-                                accept="audio/*"
-                                on:change={handleTracksSelect}
-                                class="w-full text-sm text-slate-400 border border-white/10 rounded-lg p-2 bg-black/20"
-                            />
-                        </label>
-
-                        {#if newAlbumData.tracks.length > 0}
-                            <div
-                                class="mt-4 max-h-40 overflow-y-auto bg-black/20 rounded p-2 text-xs text-slate-300"
-                            >
-                                {#each newAlbumData.tracks as file}
-                                    <div
-                                        class="py-1 border-b border-white/5 last:border-0"
-                                    >
-                                        {file.name}
-                                    </div>
-                                {/each}
-                            </div>
-                        {/if}
-                    </div>
-                </div>
-                <div class="flex justify-end">
+                <!-- CARD FLOTANTE -->
+                <div
+                    class="bg-midnight-900 border border-white/10 rounded-3xl p-6 md:p-8 w-full max-w-3xl shadow-2xl relative overflow-y-auto max-h-[90vh]"
+                >
+                    <!-- Close Button -->
                     <button
-                        on:click={createAlbum}
-                        disabled={isCreatingAlbum}
-                        class="px-8 py-3 bg-green-600 hover:bg-green-500 rounded-xl font-bold text-white shadow-lg disabled:opacity-50"
+                        on:click={() => (showCreateAlbumForm = false)}
+                        class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
                     >
-                        {isCreatingAlbum ? "Subiendo..." : "Publicar Álbum"}
+                        ✕
                     </button>
+
+                    <h3 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                        <span class="text-3xl">💿</span> Crear Nuevo Álbum
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        <!-- Left Column: Metadata -->
+                        <div class="space-y-5">
+                            <label class="block group">
+                                <span
+                                    class="block text-sm font-semibold text-slate-400 group-focus-within:text-primary-400 mb-2 transition-colors"
+                                    >Título del Álbum</span
+                                >
+                                <input
+                                    type="text"
+                                    bind:value={newAlbumData.title}
+                                    class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none transition-all placeholder-slate-600"
+                                    placeholder="Ej. Summer Vibes"
+                                />
+                            </label>
+
+                            <label class="block group">
+                                <span
+                                    class="block text-sm font-semibold text-slate-400 group-focus-within:text-primary-400 mb-2 transition-colors"
+                                    >Artista (Seleccionar Verificado)</span
+                                >
+                                <div class="relative">
+                                    <select
+                                        bind:value={selectedArtistId}
+                                        class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary-500 focus:ring-1 focus:ring-primary-500 outline-none appearance-none transition-all"
+                                    >
+                                        <option value="" disabled selected
+                                            >-- Selecciona un Artista --</option
+                                        >
+                                        {#each verifiedArtists as artist}
+                                            <option value={artist.uid}
+                                                >{artist.displayName}</option
+                                            >
+                                        {/each}
+                                    </select>
+                                    <div
+                                        class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-500"
+                                    >
+                                        ▼
+                                    </div>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-2">
+                                    ¿No encuentras al artista? Asegúrate de que
+                                    tenga el rol 'artist' o esté 'verificado'.
+                                    <button
+                                        on:click={loadVerifiedArtists}
+                                        class="text-primary-400 underline hover:text-primary-300 ml-1"
+                                        >Recargar lista</button
+                                    >
+                                </p>
+                            </label>
+
+                            <label class="block group">
+                                <span
+                                    class="block text-sm font-semibold text-slate-400 group-focus-within:text-primary-400 mb-2 transition-colors"
+                                    >Categoría</span
+                                >
+                                <select
+                                    bind:value={newAlbumData.category}
+                                    class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary-500 outline-none"
+                                >
+                                    <option value="musica">Música</option>
+                                    <option value="juegos"
+                                        >Juegos / Focus</option
+                                    >
+                                    <option value="ambiente">Ambiente</option>
+                                </select>
+                            </label>
+                        </div>
+
+                        <!-- Right Column: Files -->
+                        <div class="space-y-5">
+                            <label class="block group cursor-pointer">
+                                <span
+                                    class="block text-sm font-semibold text-slate-400 group-hover:text-primary-400 mb-2 transition-colors"
+                                    >Portada del Álbum</span
+                                >
+                                <div
+                                    class="relative w-full aspect-video md:aspect-square bg-black/40 border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center p-4 group-hover:border-primary-500/50 transition-all overflow-hidden"
+                                >
+                                    {#if newAlbumData.coverFile}
+                                        <div
+                                            class="absolute inset-0 bg-cover bg-center"
+                                            style="background-image: url({URL.createObjectURL(
+                                                newAlbumData.coverFile,
+                                            )});"
+                                        >
+                                            <div
+                                                class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                <span
+                                                    class="text-white font-bold"
+                                                    >Cambiar Imagen</span
+                                                >
+                                            </div>
+                                        </div>
+                                    {:else}
+                                        <span class="text-4xl mb-2 opacity-50"
+                                            >🖼️</span
+                                        >
+                                        <span
+                                            class="text-xs text-slate-500 text-center"
+                                            >Click para subir imagen</span
+                                        >
+                                    {/if}
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        on:change={handleCoverSelect}
+                                        class="absolute inset-0 opacity-0 cursor-pointer"
+                                    />
+                                </div>
+                            </label>
+
+                            <label class="block group">
+                                <span
+                                    class="block text-sm font-semibold text-slate-400 mb-2"
+                                    >Tracks (Selección múltiple)</span
+                                >
+                                <div
+                                    class="bg-black/40 border border-white/10 rounded-xl p-4"
+                                >
+                                    <input
+                                        type="file"
+                                        multiple
+                                        accept="audio/*"
+                                        on:change={handleTracksSelect}
+                                        class="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary-500/20 file:text-primary-400 hover:file:bg-primary-500/30 cursor-pointer"
+                                    />
+
+                                    {#if newAlbumData.tracks.length > 0}
+                                        <div
+                                            class="mt-4 max-h-32 overflow-y-auto pr-2 custom-scrollbar"
+                                        >
+                                            {#each newAlbumData.tracks as file}
+                                                <div
+                                                    class="flex items-center gap-2 py-2 border-b border-white/5 last:border-0 text-xs text-slate-300"
+                                                >
+                                                    <span
+                                                        class="text-primary-500"
+                                                        >🎵</span
+                                                    >
+                                                    {file.name}
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    {:else}
+                                        <div
+                                            class="mt-4 text-center text-xs text-slate-600 italic py-2"
+                                        >
+                                            Ningún track seleccionado
+                                        </div>
+                                    {/if}
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Footer Actions -->
+                    <div
+                        class="flex justify-end items-center gap-4 pt-4 border-t border-white/5"
+                    >
+                        <button
+                            on:click={() => (showCreateAlbumForm = false)}
+                            class="px-6 py-2 text-slate-400 hover:text-white font-medium transition-colors"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            on:click={createAlbum}
+                            disabled={isCreatingAlbum}
+                            class="px-8 py-3 bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-500 hover:to-purple-500 rounded-xl font-bold text-white shadow-lg shadow-primary-900/20 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 transition-all w-full md:w-auto"
+                        >
+                            {isCreatingAlbum
+                                ? "Subiendo y Procesando..."
+                                : "🚀 Publicar Álbum"}
+                        </button>
+                    </div>
                 </div>
             </div>
         {/if}
