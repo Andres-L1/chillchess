@@ -16,6 +16,7 @@
     import MusicIcon from "$lib/components/icons/MusicIcon.svelte";
     import CollectionIcon from "$lib/components/icons/CollectionIcon.svelte";
     import AlertIcon from "$lib/components/icons/AlertIcon.svelte";
+    import SystemStatus from "$lib/components/admin/SystemStatus.svelte";
 
     type Tab =
         | "dashboard"
@@ -164,14 +165,7 @@
                     </a>
                 </div>
             </div>
-            <div
-                class="flex items-center gap-3 px-4 py-2 bg-white/5 rounded-full border border-white/10 backdrop-blur-md"
-            >
-                <div
-                    class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
-                ></div>
-                <span class="text-xs font-bold text-slate-300">Online</span>
-            </div>
+            <SystemStatus />
         </div>
 
         <!-- Dashboard Widgets (Apps) -->

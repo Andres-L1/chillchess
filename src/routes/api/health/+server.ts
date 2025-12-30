@@ -1,0 +1,46 @@
+import { json } from '@sveltejs/kit';
+import { db } from '$lib/firebase'; // Client SDK, but works for basic check if initialized on server or we use admin
+import { S3Client, ListBucketsCommand } from '@aws-sdk/client-s3';
+import { R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, PUBLIC_R2_ACCOUNT_ID } from '$env/static/private';
+import { getDocs, collection, limit, query } from 'firebase/firestore';
+
+export async function GET() {
+    const status = {
+        firebase: 'unknown',
+        r2: 'unknown',
+        timestamp: Date.now()
+    };
+
+    // 1. Check Firebase (Using the client SDK instance available in app, or generic ping)
+    // Since we are server-side, ideally we use firebase-admin, but if $lib/firebase exports client, we can try a simple read
+    try {
+        // Try to read 1 document from 'albums' just to check connectivity
+        const q = query(collection(db, 'albums'), limit(1));
+        await getDocs(q);
+        status.firebase = 'connected';
+    } catch (e) {
+        console.error('Firebase Health Check Failed:', e);
+        status.firebase = 'disconnected';
+    }
+
+    // 2. Check Cloudflare R2
+    try {
+        const R2 = new S3Client({
+            region: 'auto',
+            endpoint: `https://${PUBLIC_R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+            credentials: {
+                accessKeyId: R2_ACCESS_KEY_ID,
+                secretAccessKey: R2_SECRET_ACCESS_KEY,
+            },
+        });
+
+        const command = new ListBucketsCommand({});
+        await R2.send(command);
+        status.r2 = 'connected';
+    } catch (e) {
+        console.error('R2 Health Check Failed:', e);
+        status.r2 = 'disconnected';
+    }
+
+    return json(status);
+}
