@@ -162,11 +162,30 @@
                             ? "(Música)"
                             : "(Foco)"}
                     </button>
-                    {#if !$userStore.user}
-                        <p class="text-xs text-red-400 mt-2 text-center">
-                            ⚠️ Debes iniciar sesión para que el widget se
-                            sincronice.
+
+                    {#if $userStore.loading}
+                        <p
+                            class="text-xs text-slate-400 mt-2 text-center animate-pulse flex items-center justify-center gap-2"
+                        >
+                            <span>🔄</span> Verificando sesión...
                         </p>
+                    {:else if !$userStore.user}
+                        <div
+                            class="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-center"
+                        >
+                            <p class="text-xs text-red-400 font-bold mb-1">
+                                ⚠️ No detectamos tu sesión
+                            </p>
+                            <p class="text-xs text-slate-400 mb-2">
+                                Para sincronizar, necesitas estar logueado.
+                            </p>
+                            <button
+                                on:click={() => goto("/login")}
+                                class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1 rounded text-white transition-colors"
+                            >
+                                Iniciar Sesión →
+                            </button>
+                        </div>
                     {/if}
                 </div>
 

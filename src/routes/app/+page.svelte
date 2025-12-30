@@ -942,7 +942,7 @@
             aria-label="Close modal"
         >
             <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <!-- svelte-ignore a11y-no-static-element-interactions -->
+            <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
             <div
                 class="bg-[#0f1729]/95 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 max-w-md w-full shadow-2xl"
                 on:click|stopPropagation
