@@ -11,7 +11,7 @@ export async function POST({ request }) {
     }
 
     // Default to a 'temp' folder if not specified, but restrict to allowed paths
-    const allowedFolders = ['submissions'];
+    const allowedFolders = ['submissions', 'artists'];
     const targetFolder = folder ? folder.split('/')[0] : 'temp'; // simplistic check
 
     if (!allowedFolders.includes(targetFolder)) {
