@@ -10,8 +10,21 @@ export async function POST({ request }) {
         return json({ error: 'Missing identifying information' }, { status: 400 });
     }
 
-    // Default to a 'temp' folder if not specified
-    const key = `${folder || 'temp'}/${Date.now()}_${fileName}`;
+    // Default to a 'temp' folder if not specified, but restrict to allowed paths
+    const allowedFolders = ['submissions'];
+    const targetFolder = folder ? folder.split('/')[0] : 'temp'; // simplistic check
+
+    if (!allowedFolders.includes(targetFolder)) {
+        return json({ error: 'Invalid upload folder' }, { status: 403 });
+    }
+
+    // Validate File Type
+    const allowedTypes = ['audio/mpeg', 'audio/wav', 'audio/x-m4a', 'image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(fileType)) {
+        return json({ error: 'Invalid file type' }, { status: 400 });
+    }
+
+    const key = `${folder || 'submissions/temp'}/${Date.now()}_${fileName.replace(/[^a-zA-Z0-9.\-_]/g, '')}`;
 
     const command = new PutObjectCommand({
         Bucket: R2_BUCKET,

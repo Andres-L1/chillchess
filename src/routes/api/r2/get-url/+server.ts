@@ -6,8 +6,18 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 export async function POST({ request }) {
     const { key } = await request.json();
 
-    if (!key) {
+    if (!key || typeof key !== 'string') {
         return json({ error: 'No key provided' }, { status: 400 });
+    }
+
+    // Prevent directory traversal
+    if (key.includes('..')) {
+        return json({ error: 'Invalid key' }, { status: 400 });
+    }
+
+    // Restrict access to known folders
+    if (!key.startsWith('submissions/') && !key.startsWith('music/')) {
+        return json({ error: 'Access denied' }, { status: 403 });
     }
 
     const command = new GetObjectCommand({

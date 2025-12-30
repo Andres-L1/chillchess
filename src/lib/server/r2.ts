@@ -1,8 +1,9 @@
 import { S3Client } from "@aws-sdk/client-s3";
 import { env } from "$env/dynamic/private";
+import { env as publicEnv } from "$env/dynamic/public";
 
-// Fallback to process.env if $env/dynamic/private is not populated (e.g. locally with .env)
-const R2_ACCOUNT_ID = env.PUBLIC_R2_ACCOUNT_ID || process.env.PUBLIC_R2_ACCOUNT_ID;
+// Fallback logic adjusted to check publicEnv for PUBLIC_ prefixed vars
+const R2_ACCOUNT_ID = publicEnv.PUBLIC_R2_ACCOUNT_ID || env.PUBLIC_R2_ACCOUNT_ID || process.env.PUBLIC_R2_ACCOUNT_ID;
 const ACCESS_KEY_ID = env.R2_ACCESS_KEY_ID || process.env.R2_ACCESS_KEY_ID;
 const SECRET_ACCESS_KEY = env.R2_SECRET_ACCESS_KEY || process.env.R2_SECRET_ACCESS_KEY;
 

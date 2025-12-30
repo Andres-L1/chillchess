@@ -308,5 +308,31 @@ netlify logs --live
 
 ---
 
-**Última actualización**: 2025-12-29  
-**Próxima revisión**: Después de arreglar error 500
+**Última actualización**: 2025-12-30
+**Próxima revisión**: Seguimiento post-lanzamiento
+
+---
+
+## 🛠️ ANEXO: FIX LOG (2025-12-30)
+
+### 1. Limpieza y Pivote (No-Chess) ♟️❌
+- **Acción**: Se eliminó por completo el componente `ChessBoard.svelte` y el código legacy asociado en `/app`.
+- **Resultado**: Resolución del Error 500 crítico causado por dependencias faltantes/rotas del módulo de ajedrez.
+- **Estado**: ✅ Completado. El proyecto es ahora oficialmente una plataforma de Focus y Música.
+
+### 2. Infraestructura R2 (Uploads) ☁️
+- **Problema**: Las subidas fallaban porque la API de firma (`sign-url`) devolvía URLs con `undefined` (falta de Account ID).
+- **Diagnóstico**: Las variables de entorno `PUBLIC_R2_ACCOUNT_ID` no eran accesibles desde el servidor debido a una importación incorrecta (`$env/dynamic/private` vs `public`).
+- **Solución**: Se corrigió `src/lib/server/r2.ts` para importar variables públicas del módulo correcto.
+- **Estado**: ✅ Corregido y Validado. Las URLs firmadas ahora son válidas para subida directa.
+
+### 3. Panel de Administración (Tiempo Real) ⚡
+- **Mejora**: Se actualizó `SubmissionsTab.svelte` para usar `onSnapshot` de Firestore.
+- **Impacto**: Los administradores ahora ven nuevos envíos instantáneamente sin recargar la página.
+- **Estado**: ✅ Implementado y libre de errores de TypeScript.
+
+### 4. Estado Final del Sistema
+- **Frontend**: Estable y seguro (Auth Guards reactivados).
+- **Backend**: Endpoints de R2 operativos.
+- **Configuración**: `.env.example` actualizado con las claves requeridas de Cloudflare.
+

@@ -18,6 +18,12 @@ export async function POST({ request }) {
 
     try {
         for (const file of files) {
+            // SECURITY: Ensure we are only moving things FROM submissions (temp)
+            if (!file.key.startsWith('submissions/')) {
+                console.warn(`Skipping invalid file source: ${file.key}`);
+                continue;
+            }
+
             // file.key is the current path in 'submissions/...'
             // We want to move it to 'music/Artist/Album/...'
             const fileName = file.name || file.key.split('/').pop();

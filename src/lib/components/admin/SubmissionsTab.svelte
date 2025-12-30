@@ -1,14 +1,16 @@
 <script lang="ts">
-    import { onMount, createEventDispatcher } from "svelte";
+    import { onMount, onDestroy, createEventDispatcher } from "svelte";
     import { db } from "$lib/firebase";
     import {
         collection,
         query,
-        getDocs,
+        orderBy,
+        onSnapshot,
         doc,
         updateDoc,
-        orderBy,
         getDoc,
+        getDocs,
+        limit,
     } from "firebase/firestore";
 
     const dispatch = createEventDispatcher();
@@ -39,6 +41,7 @@
     let statusMessage = "";
     let playingAudio: HTMLAudioElement | null = null;
     let playingKey = "";
+    let unsubscribe: () => void;
 
     async function playR2Audio(key: string) {
         if (playingKey === key && playingAudio) {
@@ -67,28 +70,51 @@
         }
     }
 
-    onMount(async () => {
-        await loadSubmissions();
+    onMount(() => {
+        subscribeToSubmissions();
     });
 
-    async function loadSubmissions() {
+    onDestroy(() => {
+        if (unsubscribe) unsubscribe();
+        if (playingAudio) {
+            playingAudio.pause();
+            playingAudio = null;
+        }
+    });
+
+    function subscribeToSubmissions() {
         loading = true;
         try {
             const submissionsRef = collection(db, "musicSubmissions");
-            const q = query(submissionsRef, orderBy("submittedAt", "desc"));
-            const snapshot = await getDocs(q);
+            const q = query(
+                submissionsRef,
+                orderBy("submittedAt", "desc"),
+                limit(50),
+            );
 
-            submissions = snapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            })) as Submission[];
+            unsubscribe = onSnapshot(
+                q,
+                (snapshot) => {
+                    submissions = snapshot.docs.map((doc) => ({
+                        id: doc.id,
+                        ...doc.data(),
+                    })) as Submission[];
+                    loading = false;
+                },
+                (error) => {
+                    console.error("Error realtime:", error);
+                    statusMessage = "❌ Error en conexión tiempo real";
+                    loading = false;
+                },
+            );
         } catch (e: any) {
             console.error(e);
-            statusMessage = "❌ Error al cargar envíos: " + e.message;
-        } finally {
+            statusMessage = "❌ Error al iniciar listener: " + e.message;
             loading = false;
         }
     }
+
+    // Removed manual loadSubmissions as it's replaced by snapshot logic
 
     function getDomain(url: string) {
         try {
@@ -188,7 +214,7 @@
                             key: submission.r2CoverKey,
                             name: `cover_${Date.now()}.jpg`,
                         },
-                        ...submission.r2AudioKeys.map((f) => ({
+                        ...(submission.r2AudioKeys || []).map((f) => ({
                             key: f.key,
                             name: f.name,
                         })),
@@ -214,7 +240,7 @@
                     secureCoverKey = newCover.key;
 
                     const audioFiles = migratedFiles.slice(1);
-                    tracksForAlbum = audioFiles.map((f, idx) => ({
+                    tracksForAlbum = audioFiles.map((f: any, idx: number) => ({
                         id: `track-${idx + 1}`,
                         title: f.name.replace(/\.(mp3|wav|m4a)$/i, ""),
                         r2Key: f.key, // Store Private Key
@@ -310,7 +336,9 @@
             <div
                 class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-white/20 border-t-white"
             ></div>
-            <p class="mt-4 text-slate-400">Cargando envíos...</p>
+            <p class="mt-4 text-slate-400">
+                Cargando envíos recientes (max 50)...
+            </p>
         </div>
     {:else if submissions.length === 0}
         <div class="text-center py-12 text-slate-400">

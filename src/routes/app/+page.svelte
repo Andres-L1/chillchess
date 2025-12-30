@@ -275,10 +275,23 @@
             class="flex-1 flex flex-col items-center justify-evenly p-4 min-h-0"
         >
             <!-- Timer Container -->
-            <div class="relative group flex items-center justify-center">
+            <div
+                class="relative group flex items-center justify-center {immersiveMode
+                    ? 'opacity-0 pointer-events-none'
+                    : ''} transition-opacity duration-700"
+            >
+                <!-- Toggle View Button (Timer vs Board) -->
+                <!-- For now, we show Board BEHIND timer or replaced? 
+                     User said passive visualization. Let's make it the main view and timer overlay? 
+                     Or put it side by side? 
+                     Let's add it below the timer for now, or replace the timer SVGs with the Board if a flag is set.
+                     Actually, let's put it absolute centered behind the timer, but that might obscure it.
+                     Let's adding it as a sibling for now to see it render.
+                -->
+
                 <!-- Circular Progress SVG (Responsive to Height & Width) -->
                 <svg
-                    class="w-auto h-auto max-w-[80vw] max-h-[40vh] md:max-h-[50vh] aspect-square transform -rotate-90 drop-shadow-2xl text-white"
+                    class="w-auto h-auto max-w-[80vw] max-h-[40vh] md:max-h-[50vh] aspect-square transform -rotate-90 drop-shadow-2xl text-white relative z-10"
                     viewBox="0 0 100 100"
                 >
                     <!-- Track -->
