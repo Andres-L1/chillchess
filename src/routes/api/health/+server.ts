@@ -1,8 +1,8 @@
 import { json } from '@sveltejs/kit';
 import { db } from '$lib/firebase'; // Client SDK, but works for basic check if initialized on server or we use admin
-import { S3Client, ListBucketsCommand } from '@aws-sdk/client-s3';
+import { S3Client, ListObjectsCommand } from '@aws-sdk/client-s3';
 // @ts-ignore
-import { R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY } from '$env/static/private';
+import { R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME } from '$env/static/private';
 // @ts-ignore
 import { PUBLIC_R2_ACCOUNT_ID } from '$env/static/public';
 import { getDocs, collection, limit, query } from 'firebase/firestore';
@@ -14,10 +14,8 @@ export async function GET() {
         timestamp: Date.now()
     };
 
-    // 1. Check Firebase (Using the client SDK instance available in app, or generic ping)
-    // Since we are server-side, ideally we use firebase-admin, but if $lib/firebase exports client, we can try a simple read
+    // 1. Check Firebase
     try {
-        // Try to read 1 document from 'albums' just to check connectivity
         const q = query(collection(db, 'albums'), limit(1));
         await getDocs(q);
         status.firebase = 'connected';
@@ -26,7 +24,7 @@ export async function GET() {
         status.firebase = 'disconnected';
     }
 
-    // 2. Check Cloudflare R2
+    // 2. Check Cloudflare R2 (Check specific bucket access instead of account-wide list)
     try {
         const R2 = new S3Client({
             region: 'auto',
@@ -37,7 +35,12 @@ export async function GET() {
             },
         });
 
-        const command = new ListBucketsCommand({});
+        // Use ListObjectsV2 on the specific bucket which is more likely to be allowed
+        const command = new ListObjectsCommand({
+            Bucket: R2_BUCKET_NAME,
+            MaxKeys: 1
+        });
+
         await R2.send(command);
         status.r2 = 'connected';
     } catch (e) {
