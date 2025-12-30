@@ -35,6 +35,37 @@
         showMusicSelector = false;
     }
 
+    // Reactive Sync Logic (Robust for guests)
+    $: if (
+        room &&
+        !isHost &&
+        room.currentTrack &&
+        $audioStore.availableAlbums.length > 0
+    ) {
+        const remote = room.currentTrack;
+        const local = $audioStore;
+
+        // 1. Sync Album/Track
+        if (remote.albumId !== local.currentAlbumId) {
+            playAlbum(remote.albumId);
+            // Force track index immediately
+            audioStore.update((s) => ({
+                ...s,
+                currentTrackIndex: remote.trackIndex,
+            }));
+        } else if (remote.trackIndex !== local.currentTrackIndex) {
+            audioStore.update((s) => ({
+                ...s,
+                currentTrackIndex: remote.trackIndex,
+            }));
+        }
+
+        // 2. Sync Playback State
+        if (remote.isPlaying !== local.isPlaying) {
+            audioStore.update((s) => ({ ...s, isPlaying: remote.isPlaying }));
+        }
+    }
+
     onMount(async () => {
         if (!$userStore.isLoggedIn) {
             goto("/");
@@ -67,33 +98,6 @@
                     name: info.displayName,
                 }),
             );
-
-            // If not host, sync playback
-            if (!isHost && data.currentTrack) {
-                if (
-                    data.currentTrack.albumId !== $audioStore.currentAlbumId ||
-                    data.currentTrack.trackIndex !==
-                        $audioStore.currentTrackIndex
-                ) {
-                    // Sync track
-                    playAlbum(data.currentTrack.albumId);
-                    // Manually set track index
-                    audioStore.update((s) => ({
-                        ...s,
-                        currentTrackIndex: data.currentTrack!.trackIndex,
-                    }));
-                }
-
-                // Sync play/pause
-                if (data.currentTrack.isPlaying && !$audioStore.isPlaying) {
-                    audioStore.update((s) => ({ ...s, isPlaying: true }));
-                } else if (
-                    !data.currentTrack.isPlaying &&
-                    $audioStore.isPlaying
-                ) {
-                    audioStore.update((s) => ({ ...s, isPlaying: false }));
-                }
-            }
 
             loading = false;
         });

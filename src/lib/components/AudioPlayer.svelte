@@ -367,14 +367,25 @@
     on:ended={handleTrackEnd}
     on:timeupdate={handleTimeUpdate}
     on:durationchange={handleDurationChange}
+    on:error={(e) => console.warn("Audio Error (Music):", e)}
     preload="auto"
     crossorigin="anonymous"
 ></audio>
 
 <!-- Ambience Player (Loop) -->
-<audio bind:this={ambienceEl} loop preload="auto" crossorigin="anonymous"
+<audio
+    bind:this={ambienceEl}
+    loop
+    preload="auto"
+    crossorigin="anonymous"
+    on:error={(e) => console.warn("Audio Error (Ambience):", e)}
 ></audio>
 
 <!-- White Noise Player (Loop) -->
-<audio bind:this={whiteNoiseEl} loop preload="auto" crossorigin="anonymous"
+<audio
+    bind:this={whiteNoiseEl}
+    loop
+    preload="auto"
+    crossorigin="anonymous"
+    on:error={(e) => console.warn("Audio Error (White Noise):", e)}
 ></audio>

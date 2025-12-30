@@ -33,7 +33,7 @@
 </script>
 
 <div
-    class="fixed top-24 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-3 w-full max-w-sm px-4 pointer-events-none"
+    class="fixed top-32 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-3 w-full max-w-sm px-4 pointer-events-none"
 >
     {#each $notifications as note (note.id)}
         <div

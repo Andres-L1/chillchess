@@ -43,12 +43,18 @@
     <DynamicBackground />
 
     <!-- Content -->
-    <div class="relative z-10">
+    <div
+        class="relative z-10 {$page.url.pathname !== '/' &&
+        !$page.url.pathname.startsWith('/app') &&
+        !$page.url.pathname.match(/^\/rooms\/[a-zA-Z0-9]+$/)
+            ? 'pb-32'
+            : ''}"
+    >
         <slot />
     </div>
 
     <AudioPlayer />
-    {#if !$page.url.pathname.startsWith("/app")}
+    {#if !$page.url.pathname.startsWith("/app") && !$page.url.pathname.match(/^\/rooms\/[a-zA-Z0-9]+$/)}
         <BottomPlayer />
     {/if}
     <MusicToast />
