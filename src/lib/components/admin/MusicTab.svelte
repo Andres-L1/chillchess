@@ -20,6 +20,96 @@
     import type { Album } from "$lib/data/albums";
     import { onMount } from "svelte";
 
+    // --- CREATE ALBUM STATE ---
+    let showCreateAlbumForm = false;
+    let isCreatingAlbum = false;
+    let newAlbumData = {
+        title: "",
+        artist: "",
+        category: "musica",
+        coverFile: null as File | null,
+        tracks: [] as File[],
+    };
+
+    function handleCoverSelect(e: any) {
+        newAlbumData.coverFile = e.target.files[0];
+    }
+    function handleTracksSelect(e: any) {
+        newAlbumData.tracks = Array.from(e.target.files);
+    }
+
+    async function createAlbum() {
+        if (
+            !newAlbumData.title ||
+            !newAlbumData.artist ||
+            !newAlbumData.coverFile ||
+            newAlbumData.tracks.length === 0
+        ) {
+            alert("Completa todos los campos (Portada y Tracks obligatorios)");
+            return;
+        }
+        isCreatingAlbum = true;
+        try {
+            const timestamp = Date.now();
+
+            // 1. Upload Cover
+            const coverRef = ref(
+                storage,
+                `albums/${timestamp}_${newAlbumData.coverFile.name}`,
+            );
+            await uploadBytes(coverRef, newAlbumData.coverFile);
+            const coverUrl = await getDownloadURL(coverRef);
+
+            // 2. Upload Tracks loop
+            const uploadedTracks = [];
+            for (const file of newAlbumData.tracks) {
+                const trackRef = ref(
+                    storage,
+                    `albums/tracks/${timestamp}_${file.name}`,
+                );
+                await uploadBytes(trackRef, file);
+                const url = await getDownloadURL(trackRef);
+                uploadedTracks.push({
+                    title: file.name.replace(/\.[^/.]+$/, ""), // Remove extension
+                    artist: newAlbumData.artist,
+                    file: url,
+                    id: crypto.randomUUID(),
+                });
+            }
+
+            // 3. Save Album Doc
+            await addDoc(collection(db, "albums"), {
+                title: newAlbumData.title,
+                artist: newAlbumData.artist,
+                category: newAlbumData.category,
+                cover: coverUrl,
+                tracks: uploadedTracks,
+                createdAt: serverTimestamp(),
+                vibeId: "custom", // Default
+                price: "Free",
+                tag: "New",
+                description: "Uploaded by Admin",
+                isPremium: false,
+            });
+
+            alert("✅ Álbum creado exitosamente");
+            showCreateAlbumForm = false;
+            // Reset fields
+            newAlbumData = {
+                title: "",
+                artist: "",
+                category: "musica",
+                coverFile: null,
+                tracks: [],
+            };
+        } catch (e: any) {
+            console.error(e);
+            alert("Error: " + e.message);
+        } finally {
+            isCreatingAlbum = false;
+        }
+    }
+
     let activeSection: "library" | "creators" = "library";
 
     // --- LIBRARY LOGIC ---
@@ -234,17 +324,116 @@
 
     {#if activeSection === "library"}
         <!-- LIBRARY VIEW (EXISTING CODE) -->
-        <div class="mb-6">
+        <div
+            class="mb-6 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center"
+        >
             <input
                 type="text"
                 bind:value={searchTerm}
                 placeholder="Buscar por álbum o artista..."
-                class="w-full bg-midnight-800 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary-500"
+                class="flex-1 w-full bg-midnight-800 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary-500"
             />
+            <button
+                on:click={() => (showCreateAlbumForm = !showCreateAlbumForm)}
+                class="px-6 py-3 bg-primary-500 hover:bg-primary-600 rounded-xl font-bold transition-all shadow-lg flex items-center gap-2"
+            >
+                {#if showCreateAlbumForm}✕ Cancelar{:else}＋ Nuevo Álbum{/if}
+            </button>
         </div>
 
+        {#if showCreateAlbumForm}
+            <div
+                class="mb-8 p-6 bg-white/5 border border-white/10 rounded-2xl animate-fade-in"
+            >
+                <h3 class="text-xl font-bold mb-4">Crear Nuevo Álbum</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1"
+                                >Título del Álbum</label
+                            >
+                            <input
+                                type="text"
+                                bind:value={newAlbumData.title}
+                                class="w-full bg-black/30 border border-white/10 rounded-lg p-2 text-white"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1"
+                                >Nombre del Artista</label
+                            >
+                            <input
+                                type="text"
+                                bind:value={newAlbumData.artist}
+                                class="w-full bg-black/30 border border-white/10 rounded-lg p-2 text-white"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1"
+                                >Categoría</label
+                            >
+                            <select
+                                bind:value={newAlbumData.category}
+                                class="w-full bg-black/30 border border-white/10 rounded-lg p-2 text-white"
+                            >
+                                <option value="musica">Música</option>
+                                <option value="juegos">Juegos / Focus</option>
+                                <option value="ambiente">Ambiente</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1"
+                                >Portada</label
+                            >
+                            <input
+                                type="file"
+                                accept="image/*"
+                                on:change={handleCoverSelect}
+                                class="w-full text-sm text-slate-400"
+                            />
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <label class="block text-sm text-slate-400 mb-1"
+                            >Tracks (Selección múltiple)</label
+                        >
+                        <input
+                            type="file"
+                            multiple
+                            accept="audio/*"
+                            on:change={handleTracksSelect}
+                            class="w-full text-sm text-slate-400 border border-white/10 rounded-lg p-2 bg-black/20"
+                        />
+
+                        {#if newAlbumData.tracks.length > 0}
+                            <div
+                                class="mt-4 max-h-40 overflow-y-auto bg-black/20 rounded p-2 text-xs text-slate-300"
+                            >
+                                {#each newAlbumData.tracks as file}
+                                    <div
+                                        class="py-1 border-b border-white/5 last:border-0"
+                                    >
+                                        {file.name}
+                                    </div>
+                                {/each}
+                            </div>
+                        {/if}
+                    </div>
+                </div>
+                <div class="flex justify-end">
+                    <button
+                        on:click={createAlbum}
+                        disabled={isCreatingAlbum}
+                        class="px-8 py-3 bg-green-600 hover:bg-green-500 rounded-xl font-bold text-white shadow-lg disabled:opacity-50"
+                    >
+                        {isCreatingAlbum ? "Subiendo..." : "Publicar Álbum"}
+                    </button>
+                </div>
+            </div>
+        {/if}
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {#each filteredAlbums as album}
+            {#each filteredAlbums.slice(0, 50) as album (album.id)}
                 <div
                     class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors group"
                 >
