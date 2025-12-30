@@ -103,6 +103,25 @@ service cloud.firestore {
     }
     
     // ============================================
+    // WIDGET SYNC (Real-time OBS)
+    // ============================================
+    match /nowPlaying/{userId} {
+      // Público: El widget (página web no auth) necesita leer esto
+      allow read: if true;
+      
+      // Escritura: Solo el usuario dueño de la sesión actualiza su "now playing"
+      allow write: if isOwner(userId);
+    }
+
+    // ============================================
+    // CREATOR CATALOG (Music for Streamers)
+    // ============================================
+    match /creatorCatalog/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // ============================================
     // DEFAULT DENY
     // ============================================
     match /{document=**} {
