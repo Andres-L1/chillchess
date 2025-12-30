@@ -59,9 +59,11 @@ service cloud.firestore {
     }
 
     match /proposals/{proposalId} {
-        allow create: if request.auth != null; // Pro check done in UI, strictly backend should verify claim but for MVP rule is ok
+        allow create: if request.auth != null; 
         allow read: if true; 
-        allow update: if isAdmin() || (request.auth != null && resource.data.userId == request.auth.uid); // Vote logic might need subcollection
+        allow update: if isAdmin() || 
+                      (request.auth != null && resource.data.authorUid == request.auth.uid) ||
+                      (request.auth != null && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votes', 'votersUp', 'votersDown']));
     }
 
     // ============================================
