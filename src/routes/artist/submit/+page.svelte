@@ -162,10 +162,10 @@
             <div class="flex items-center justify-between mb-8">
                 <div>
                     <a
-                        href="/"
+                        href="/artist"
                         class="text-slate-400 hover:text-white mb-2 inline-flex items-center gap-2 text-sm"
                     >
-                        <span>←</span> Volver
+                        <span>←</span> Volver al Panel
                     </a>
                     <h1
                         class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent"
