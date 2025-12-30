@@ -23,8 +23,8 @@
     let coverFile: File | null = null;
     let coverPreview: string | null = null;
 
-    // New Fields
-    let downloadLink = "";
+    // Audio Files (Direct Upload)
+    let audioFiles: File[] = [];
     let tracklist = "";
 
     onMount(() => {
@@ -49,6 +49,20 @@
         }
     }
 
+    function handleAudioSelect(e: Event) {
+        const input = e.target as HTMLInputElement;
+        if (input.files) {
+            audioFiles = Array.from(input.files);
+            // Auto-generate tracklist from filenames
+            tracklist = audioFiles
+                .map(
+                    (file, idx) =>
+                        `${idx + 1}. ${file.name.replace(/\.(mp3|wav|m4a)$/i, "")}`,
+                )
+                .join("\n");
+        }
+    }
+
     function canProceedToStep(step: number): boolean {
         if (step === 2) {
             const hasValidGenre =
@@ -59,12 +73,14 @@
         if (step === 3) {
             return coverFile !== null;
         }
-        return downloadLink.trim() !== "" && tracklist.trim() !== "";
+        return audioFiles.length > 0;
     }
 
     async function submitRelease() {
-        if (!releaseTitle.trim() || !coverFile || !downloadLink.trim()) {
-            alert("Por favor completa todos los campos");
+        if (!releaseTitle.trim() || !coverFile || audioFiles.length === 0) {
+            alert(
+                "Por favor completa todos los campos y sube al menos un archivo de audio",
+            );
             return;
         }
 
@@ -72,23 +88,40 @@
             return;
 
         uploading = true;
-        uploadProgress = 10;
+        uploadProgress = 5;
 
         try {
             const userId = $userStore.user?.uid;
             const timestamp = Date.now();
             const basePath = `submissions/${userId}/${timestamp}`;
 
-            // Upload Cover Only
+            // Upload Cover
             const coverRef = ref(
                 storage,
                 `${basePath}/cover_${coverFile.name}`,
             );
             await uploadBytes(coverRef, coverFile);
             const coverUrl = await getDownloadURL(coverRef);
-            uploadProgress = 50;
+            uploadProgress = 20;
 
-            // Save to Firestore with Link
+            // Upload Audio Files
+            const audioUrls: { name: string; url: string; size: number }[] = [];
+            const totalFiles = audioFiles.length;
+
+            for (let i = 0; i < audioFiles.length; i++) {
+                const file = audioFiles[i];
+                const audioRef = ref(storage, `${basePath}/audio_${file.name}`);
+                await uploadBytes(audioRef, file);
+                const url = await getDownloadURL(audioRef);
+                audioUrls.push({
+                    name: file.name,
+                    url,
+                    size: file.size,
+                });
+                uploadProgress = 20 + ((i + 1) / totalFiles) * 70; // 20% to 90%
+            }
+
+            // Save to Firestore
             await addDoc(collection(db, "musicSubmissions"), {
                 artistId: userId,
                 artistName: $userStore.user?.displayName || "Unknown Artist",
@@ -96,9 +129,9 @@
                 releaseTitle,
                 genre: genre === "Otra" ? customGenre : genre,
                 coverUrl,
-                downloadLink: downloadLink.trim(),
+                audioFiles: audioUrls,
                 tracklist: tracklist.trim(),
-                submissionType: "link", // Flag to identify new format
+                submissionType: "direct", // Direct upload
                 status: "pending",
                 submittedAt: serverTimestamp(),
             });
@@ -448,78 +481,61 @@
                 >
                     <div class="flex flex-col gap-2">
                         <h2 class="text-xl font-bold flex items-center gap-2">
-                            <span class="text-2xl">🔗</span> Enlace de Descarga
+                            <span class="text-2xl">🎵</span> Archivos de Audio
                         </h2>
                         <p class="text-sm text-slate-400">
-                            Sube tu música a <a
-                                href="https://transfer.it"
-                                target="_blank"
-                                class="text-primary-400 hover:underline font-bold"
-                                >Transfer.it</a
-                            >
-                            enviándola a:
-                            <span class="text-primary-400 font-mono font-bold"
-                                >chessnetappweb@gmail.com</span
-                            >
+                            Sube tus archivos de audio en formato MP3, WAV o M4A
                         </p>
                     </div>
 
                     <div class="space-y-6">
-                        <!-- Link Input -->
+                        <!-- Audio File Upload -->
                         <div>
                             <label
-                                for="download-link"
+                                for="audio-files"
                                 class="block text-sm font-medium mb-2 text-slate-300"
                             >
-                                URL de la Carpeta/Archivo
+                                Archivos de Audio (Arrastra o haz click)
                             </label>
-                            <div class="relative">
-                                <span
-                                    class="absolute left-4 top-3.5 text-slate-500"
-                                    >🌐</span
-                                >
-                                <input
-                                    id="download-link"
-                                    type="url"
-                                    bind:value={downloadLink}
-                                    placeholder="https://transfer.it/..."
-                                    class="w-full bg-[#0B1120] border border-white/10 rounded-xl pl-10 pr-4 py-3 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all font-mono text-sm text-primary-300"
-                                />
-                            </div>
-                            <!-- Instructions -->
                             <div
-                                class="mt-3 p-4 bg-primary-500/10 border border-primary-500/20 rounded-lg"
+                                class="relative border-2 border-dashed border-white/20 rounded-xl p-8 hover:border-primary-500 transition-all bg-[#0B1120]/50"
                             >
-                                <p
-                                    class="text-xs font-bold text-primary-400 mb-2"
-                                >
-                                    📧 Instrucciones para Transfer.it:
-                                </p>
-                                <ol
-                                    class="text-xs text-slate-300 space-y-1 list-decimal list-inside"
-                                >
-                                    <li>
-                                        Ve a <a
-                                            href="https://transfer.it"
-                                            target="_blank"
-                                            class="text-primary-400 hover:underline"
-                                            >transfer.it</a
+                                <input
+                                    id="audio-files"
+                                    type="file"
+                                    multiple
+                                    accept="audio/mpeg,audio/wav,audio/mp4,audio/x-m4a,.mp3,.wav,.m4a"
+                                    on:change={handleAudioSelect}
+                                    class="absolute inset-0 opacity-0 cursor-pointer"
+                                />
+                                <div class="text-center">
+                                    <span class="text-4xl mb-2 block">🎧</span>
+                                    {#if audioFiles.length > 0}
+                                        <p
+                                            class="text-primary-400 font-bold mb-2"
                                         >
-                                    </li>
-                                    <li>
-                                        Sube tu carpeta con los archivos de
-                                        audio
-                                    </li>
-                                    <li>
-                                        En "Enviar a email" pon: <span
-                                            class="text-primary-400 font-mono font-bold"
-                                            >chessnetappweb@gmail.com</span
+                                            ✓ {audioFiles.length} archivo(s) seleccionado(s)
+                                        </p>
+                                        <ul
+                                            class="text-xs text-slate-400 space-y-1"
                                         >
-                                    </li>
-                                    <li>
-                                        Copia el link que genera y pégalo arriba
-                                    </li>
-                                </ol>
+                                            {#each audioFiles as file}
+                                                <li>
+                                                    {file.name} ({(
+                                                        file.size /
+                                                        1024 /
+                                                        1024
+                                                    ).toFixed(2)} MB)
+                                                </li>
+                                            {/each}
+                                        </ul>
+                                    {:else}
+                                        <p class="text-sm text-slate-400">
+                                            Arrastra archivos aquí o haz clic
+                                            para seleccionar
+                                        </p>
+                                    {/if}
+                                </div>
                             </div>
                         </div>
 
@@ -553,7 +569,7 @@
                         </button>
                         <button
                             on:click={submitRelease}
-                            disabled={uploading || !downloadLink || !tracklist}
+                            disabled={uploading || audioFiles.length === 0}
                             class="flex-1 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg shadow-lg shadow-primary-900/20 transition-all flex items-center justify-center gap-3"
                         >
                             {#if uploading}
