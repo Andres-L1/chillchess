@@ -251,6 +251,13 @@
                                 📺
                                 <span>Widget OBS</span>
                             </a>
+                            <a
+                                href="/bugs"
+                                class="px-4 py-2 text-slate-300 hover:text-white hover:bg-white/5 text-left flex items-center gap-2"
+                            >
+                                🐛
+                                <span>Reportar Errores</span>
+                            </a>
                             {#if $userSubscription.tier === "pro"}
                                 <a
                                     href="/proposals"
@@ -469,6 +476,14 @@
                             >
                                 <HeartIcon size="sm" gradient={false} />
                                 <span>Mis Favoritos</span>
+                            </a>
+                            <a
+                                href="/bugs"
+                                class="flex items-center gap-3 mb-3 text-sm font-bold text-slate-300 hover:text-white px-1"
+                                on:click={() => (mobileMenuOpen = false)}
+                            >
+                                <span class="text-lg">🐛</span>
+                                <span>Reportar Errores</span>
                             </a>
                             {#if $userSubscription.tier === "pro"}
                                 <a

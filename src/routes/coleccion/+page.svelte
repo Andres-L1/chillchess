@@ -36,6 +36,19 @@
     let selectedCategory: AlbumCategory | "all" = "all";
     let selectedAlbum: Album | null = null;
     let searchQuery = "";
+    let debouncedSearchQuery = "";
+    let searchTimeout: ReturnType<typeof setTimeout>;
+
+    // Debounce search to improve performance
+    function handleSearchInput(e: Event) {
+        const target = e.target as HTMLInputElement;
+        searchQuery = target.value;
+
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            debouncedSearchQuery = searchQuery;
+        }, 300);
+    }
 
     // Derived filtered albums
     // Derived filtered albums (Deep Search)
@@ -48,9 +61,9 @@
         const matchesCategory =
             selectedCategory === "all" || a.category === selectedCategory;
 
-        if (searchQuery === "") return matchesCategory;
+        if (debouncedSearchQuery === "") return matchesCategory;
 
-        const lowQuery = searchQuery.toLowerCase();
+        const lowQuery = debouncedSearchQuery.toLowerCase();
 
         // 1. Match Album Title or Artist
         const matchesAlbumInfo =
@@ -191,7 +204,8 @@
                         </div>
                         <input
                             type="text"
-                            bind:value={searchQuery}
+                            value={searchQuery}
+                            on:input={handleSearchInput}
                             placeholder="Buscar artistas, álbumes o vibes..."
                             class="w-full bg-transparent border-none text-white py-4 px-4 focus:ring-0 placeholder-slate-400 font-medium"
                         />
@@ -357,6 +371,8 @@
                             <img
                                 src={album.cover}
                                 alt={album.title}
+                                loading="lazy"
+                                decoding="async"
                                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                             />
 

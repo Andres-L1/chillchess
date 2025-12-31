@@ -140,8 +140,8 @@
                         </div>
                     </div>
 
-                    <!-- Right: Volume Control - Always visible on desktop -->
-                    <div class="flex-shrink-0 hidden lg:flex items-center">
+                    <!-- Right: Volume Control - Now visible on mobile too -->
+                    <div class="flex-shrink-0 flex items-center">
                         <VolumeControl />
                     </div>
                 </div>

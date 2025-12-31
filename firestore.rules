@@ -1,131 +1,119 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
+    
     // ============================================
-    // HELPER FUNCTIONS
+    // Helper Functions
     // ============================================
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
     function isAdmin() {
-      // Check if the requesting user has isAdmin == true in their user document
-      return request.auth != null && 
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
     }
-
+    
     function isOwner(userId) {
-      return request.auth != null && request.auth.uid == userId;
+      return isSignedIn() && request.auth.uid == userId;
     }
-
+    
     // ============================================
-    // USERS COLLECTION - Secure
+    // Users Collection
     // ============================================
     match /users/{userId} {
-      // Leer: Dueño o Admin
-      allow read: if isOwner(userId) || isAdmin();
-      
-      // Crear: Solo el dueño, inicializa como free
-      allow create: if isOwner(userId)
-                    && request.resource.data.uid == userId
-                    && (
-                      !('subscriptionTier' in request.resource.data) || 
-                      request.resource.data.subscriptionTier == 'free'
-                    );
-
-      // Actualizar: Dueño (con restricciones) o Admin (total)
-      allow update: if isAdmin() || (
-                    isOwner(userId)
-                    && !request.resource.data.diff(resource.data).affectedKeys()
-                        .hasAny(['subscriptionTier', 'subscriptionStatus', 'stripeCustomerId', 'stripeSubscriptionId', 'isAdmin'])
-      );
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
     }
     
     // ============================================
-    // ARTISTS (Perfil público) - Antes artistProfiles
-    // ============================================
-    match /artists/{userId} {
-      // Público para leer
-      allow read: if true;
-      
-      // Escritura: Solo el dueño
-      allow write: if isOwner(userId);
-    }
-    
-    // ============================================
-    // ARTIST SUBMISSIONS & PROPOSALS
-    // ============================================
-    match /musicSubmissions/{submissionId} {
-        allow create: if request.auth != null;
-        allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
-        allow update: if isAdmin(); 
-    }
-
-    match /proposals/{proposalId} {
-        allow create: if request.auth != null; 
-        allow read: if true; 
-        allow update: if isAdmin() || 
-                      (request.auth != null && resource.data.authorUid == request.auth.uid) ||
-                      (request.auth != null && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votes', 'votersUp', 'votersDown']));
-    }
-
-    // ============================================
-    // ALBUMS - Public read, Admin write
+    // Albums Collection (Public Read)
     // ============================================
     match /albums/{albumId} {
-      allow read: if true;
-      allow write: if isAdmin(); 
-    }
-    
-    // ============================================
-    // LISTENING ROOMS - Real-time shared listening
-    // ============================================
-    match /listeningRooms/{roomId} {
-      // Allow anyone authenticated to read public rooms
-      allow read: if request.auth != null && (resource.data.isPublic == true || isAdmin());
-      
-      // Allow participants to read their room
-      allow read: if request.auth != null && 
-                     request.auth.uid in resource.data.participants;
-      
-      // Create
-      allow create: if request.auth != null &&
-                       request.resource.data.hostId == request.auth.uid;
-      
-      // Update: Host or Participant (self update) or Admin
-      allow update: if isAdmin() || (request.auth != null && (
-        resource.data.hostId == request.auth.uid ||
-        (
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['participants']) &&
-          request.resource.data.participants[request.auth.uid] != null
-        )
-      ));
-      
-      // Delete: Host or Admin
-      allow delete: if isAdmin() || (request.auth != null && resource.data.hostId == request.auth.uid);
-    }
-    
-    // ============================================
-    // WIDGET SYNC (Real-time OBS)
-    // ============================================
-    match /nowPlaying/{userId} {
-      // Público: El widget (página web no auth) necesita leer esto
-      allow read: if true;
-      
-      // Escritura: Solo el usuario dueño de la sesión actualiza su "now playing"
-      allow write: if isOwner(userId);
-    }
-
-    // ============================================
-    // CREATOR CATALOG (Music for Streamers)
-    // ============================================
-    match /creatorCatalog/{itemId} {
-      allow read: if true;
+      allow read: if true; // Public read
       allow write: if isAdmin();
     }
     
     // ============================================
-    // DEFAULT DENY
+    // Artists Collection
     // ============================================
-    match /{document=**} {
-      allow read, write: if false;
+    match /artists/{artistId} {
+      allow read: if true; // Public read for verified artists
+      allow create: if isSignedIn();
+      allow update: if isOwner(artistId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // Proposals Collection
+    // ============================================
+    match /proposals/{proposalId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() 
+                    && request.resource.data.authorUid == request.auth.uid
+                    && request.resource.data.status == 'pending'
+                    && request.resource.data.votes == 1
+                    && request.resource.data.votersUp == [request.auth.uid]
+                    && request.resource.data.votersDown == [];
+      allow update: if isAdmin(); // Voting is handled via increment in code
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // Bug Reports Collection (NEW)
+    // ============================================
+    match /bug_reports/{bugId} {
+      // Public read - anyone can see bug reports
+      allow read: if true;
+      
+      // Anyone can create bug reports (even anonymous users)
+      allow create: if request.resource.data.keys().hasAll(['title', 'description', 'severity', 'browser', 'os', 'status', 'createdAt'])
+                    && request.resource.data.title is string
+                    && request.resource.data.title.size() >= 5
+                    && request.resource.data.title.size() <= 100
+                    && request.resource.data.description is string
+                    && request.resource.data.description.size() >= 10
+                    && request.resource.data.description.size() <= 500
+                    && request.resource.data.severity in ['low', 'medium', 'high', 'critical']
+                    && request.resource.data.status == 'reported'
+                    && request.resource.data.createdAt == request.time;
+      
+      // Only admins can update (change status, add notes)
+      allow update: if isAdmin();
+      
+      // Only admins can delete
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // Music Submissions
+    // ============================================
+    match /musicSubmissions/{submissionId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // Listen Rooms (Shared Listening)
+    // ============================================
+    match /listenRooms/{roomId} {
+      allow read: if true; // Public rooms can be read by anyone
+      allow create: if isSignedIn();
+      allow update: if isSignedIn();
+      allow delete: if isAdmin() || (isSignedIn() && resource.data.hostId == request.auth.uid);
+    }
+    
+    // ============================================
+    // Favorites Collection
+    // ============================================
+    match /favorites/{favoriteId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
     }
   }
 }

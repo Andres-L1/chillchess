@@ -356,5 +356,96 @@ export const POST = async ({ request, locals }) => {
 
 ---
 
-**Mantenido por:** ChillChess Dev Team  
-**Última sesión AI:** 2025-12-31 03:11 UTC
+**Último sesión AI:** 2025-12-31 03:43 UTC
+
+---
+
+### 6. Renovación del Panel de Administración `/admin`
+**Requisito:** Mejorar rendimiento, usabilidad y estética del panel  
+**Problemas Actuales:**
+- ⚠️ Rendimiento lento al cargar datos
+- ⚠️ Interfaz no es cómoda de usar
+- ⚠️ No mantiene la estética visual de ChillChess
+- ⚠️ Falta de feedback visual en acciones
+- ⚠️ Navegación no intuitiva entre tabs
+
+**Propuestas de Mejora:**
+
+#### A. Performance
+- Implementar virtualización para listas largas (usuarios, bugs, proposals)
+- Lazy loading de tabs (solo cargar datos al abrir tab)
+- Paginación en lugar de cargar todo
+- Debouncing en búsquedas y filtros
+- Cache de datos con SWR pattern
+
+#### B. UX/UI
+- Rediseñar con glassmorphism consistente con ChillChess
+- Añadir animaciones suaves
+- Mejorar feedback: loaders, toasts, confirmaciones
+- Sidebar fijo con navegación más clara
+- Shortcuts de teclado para acciones comunes
+- Dark mode mejorado con colores ChillChess
+
+#### C. Funcionalidad
+- Dashboard con métricas en tiempo real
+- Búsqueda global en todo el admin
+- Acciones en bulk (aprobar múltiples, etc.)
+- Historial de acciones del admin (audit log)
+- Exportación de datos (CSV, JSON)
+
+**Estimación:** 12-15 horas  
+**Prioridad:** 🟡 MEDIA (mejora experiencia admin, no crítico)  
+**Impacto:** Alto (admins usan constantemente)
+
+---
+
+### 7. Optimización de `/coleccion`
+**Requisito:** Mejorar rendimiento de la página de colección de álbumes  
+**Problemas Actuales:**
+- ⚠️ Carga lenta con muchos álbumes
+- ⚠️ Renderiza todos los elementos a la vez
+- ⚠️ No hay lazy loading de imágenes
+- ⚠️ Búsqueda deep sin debouncing
+
+**Soluciones Propuestas:**
+
+#### A. Virtualización (Priority 1)
+```typescript
+// Usar svelte-virtual o svelte-tiny-virtual-list
+import VirtualList from '@sveltejs/svelte-virtual-list';
+
+// Renderizar solo elementos visibles en el viewport
+<VirtualList items={filteredAlbums} let:item>
+  <AlbumCard album={item} />
+</VirtualList>
+```
+
+#### B. Lazy Loading de Imágenes
+```html
+<img 
+  src={album.cover} 
+  loading="lazy" 
+  decoding="async"
+  alt={album.title}
+/>
+```
+
+#### C. Debouncing en Búsqueda
+```typescript
+import { debounce } from 'lodash-es';
+
+const handleSearch = debounce((query) => {
+  searchQuery = query;
+}, 300);
+```
+
+#### D. Paginación / Infinite Scroll
+- Mostrar 20 álbumes inicialmente
+- Cargar más al hacer scroll (intersection observer)
+- Botón "Cargar más" como fallback
+
+**Estimación:** 3-4 horas  
+**Prioridad:** 🟡 MEDIA  
+**Impacto:** Alto (página muy visitada)
+
+---
