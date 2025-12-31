@@ -9,6 +9,7 @@
     import MusicTab from "$lib/components/admin/MusicTab.svelte";
     import LogsTab from "$lib/components/admin/LogsTab.svelte";
     import BugsTab from "$lib/components/admin/BugsTab.svelte";
+    import BackupsTab from "$lib/components/admin/BackupsTab.svelte";
 
     // Icons
     import BackIcon from "$lib/components/icons/BackIcon.svelte";
@@ -26,6 +27,7 @@
         | "submissions"
         | "music"
         | "bugs"
+        | "backups"
         | "logs";
 
     interface TabDef {
@@ -135,6 +137,7 @@
             icon: "🐛",
             badge: stats.pendingBugs,
         },
+        { id: "backups", label: "Backups", icon: "💾" },
         { id: "logs", label: "Logs", icon: "📝" },
     ];
 </script>
@@ -415,6 +418,8 @@
                         <MusicTab />
                     {:else if activeTab === "bugs"}
                         <BugsTab />
+                    {:else if activeTab === "backups"}
+                        <BackupsTab />
                     {:else if activeTab === "logs"}
                         <LogsTab />
                     {/if}

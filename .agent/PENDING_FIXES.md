@@ -296,7 +296,25 @@ export const POST = async ({ request, locals }) => {
 
 **Prioridad:** 🔴 ALTA (protección de datos crítica)  
 **Estimación:** 5-6 horas total  
-**Beneficio:** Protección completa contra pérdida de datos
+**Beneficio:** Protección completa contra pérdida de datos  
+**Estado:** 🟡 **PARCIALMENTE IMPLEMENTADO** (2025-12-31)
+
+**✅ Completado:**
+- BackupsTab.svelte (dashboard de monitoreo)
+- API endpoint `/api/admin/cleanup-rejected` (limpieza de archivos temporales)
+- API endpoint `/api/admin/trigger-backup` (placeholder documentado)
+- Integración en admin panel con tab dedicado
+- Documentación completa en PENDING_FIXES.md
+
+**⏳ Pendiente (Requiere Configuración Externa):**
+- [ ] Configurar Cloud Scheduler en Google Cloud Platform
+- [ ] Configurar Cloud Function para backups automáticos
+- [ ] Habilitar R2 versioning en Cloudflare Dashboard
+- [ ] Configurar bucket GCS para almacenar backups
+- [ ] Testear backup y restore completo
+
+**Acceso:**
+- Admin: `/admin` → Tab "Backups 💾"
 
 ---
 
