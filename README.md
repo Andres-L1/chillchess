@@ -1,7 +1,8 @@
 # ChillChess ♟️
-> **El Santuario Visual del Ajedrecista**
+> **Música • Ambiente • Vibes**
 
-ChillChess no es para competir, es para estar. Un espacio digital diseñado para el "Deep Work", donde tableros estéticos reproducen partidas inmortales en bucle, acompañados de atmósferas sonoras Lo-Fi.
+Encuentra tu calma. Encuentra tu estilo.
+Música de todo tipo sin interrupciones, perfecta para tus **Streams** y sesiones de **Deep Work**. Olvídate del Copyright y los anuncios.
 
 🔗 **[chillchess.app](https://chillchess.app)**
 
