@@ -86,7 +86,7 @@ El objetivo principal para la versión 1.0 es alcanzar la **estabilidad total** 
 - [x] **Fase 1: El Santuario** (Visualización, Audio, Atmósfera)
 - [x] **Fase 2: La Comunidad** (Propuestas, Usuarios, Bug Reports)
 - [x] **Fase 3: La Fundación** (Admin Panel 2.0, Infraestructura de Código, Tooling)
-- [ ] **Fase 4: La Competición** (Torneos, Matchmaking, Sistema de ELO)
+- [ ] **Fase 4: La Expansión** (Apps Nativas, Modo TV, Integración IoT)
 - [ ] **Fase 5: v1.0 Release Candidate** (Auditoría de Seguridad, Performance Tuning, SEO)
 
 ## 📝 Changelog
