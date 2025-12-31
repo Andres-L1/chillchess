@@ -98,9 +98,14 @@
         ></button>
 
         <!-- Modal -->
+        <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
         <div
             class="relative w-full max-w-sm bg-[#1a1a1a]/95 border border-white/10 rounded-2xl shadow-2xl overflow-hidden glass-panel p-8 text-white pointer-events-auto z-10 flex flex-col items-center"
             on:click|stopPropagation
+            on:keydown={(e) => e.key === 'Escape' && close()}
+            role="dialog"
+            aria-modal="true"
+            tabindex="-1"
         >
             <!-- Close Button -->
             <button

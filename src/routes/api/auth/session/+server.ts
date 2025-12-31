@@ -1,9 +1,9 @@
 import { json } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
+import type { RequestEvent } from '@sveltejs/kit';
 import { adminAuth } from '$lib/server/admin';
 
 // POST: Create Session Cookie
-export const POST: RequestHandler = async ({ request, cookies }) => {
+export const POST = async ({ request, cookies }: RequestEvent) => {
     try {
         const { idToken } = await request.json();
 
@@ -39,7 +39,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 };
 
 // DELETE: Sign Out
-export const DELETE: RequestHandler = async ({ cookies }) => {
+export const DELETE = async ({ cookies }: RequestEvent) => {
     cookies.delete('session', { path: '/' });
     return json({ status: 'signed_out' });
 };
