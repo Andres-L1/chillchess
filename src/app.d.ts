@@ -10,6 +10,12 @@ declare global {
         // interface PageState {}
         // interface Platform {}
     }
+
+    namespace svelteHTML {
+        interface HTMLAttributes<T> {
+            "on:click_outside"?: (event: CustomEvent) => void;
+        }
+    }
 }
 
 declare module 'cm-chessboard/src/cm-chessboard/Chessboard.js' {

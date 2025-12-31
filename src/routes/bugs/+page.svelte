@@ -12,6 +12,8 @@
     } from "firebase/firestore";
     import { onMount, onDestroy } from "svelte";
     import { browser } from "$app/environment";
+    import { scale } from "svelte/transition";
+    import { clickOutside } from "$lib/actions/clickOutside";
 
     interface BugReport {
         id: string;
@@ -42,6 +44,26 @@
     let filterStatus: "all" | BugReport["status"] = "all";
     let filterSeverity: "all" | BugReport["severity"] = "all";
     let isSubmitting = false;
+
+    // Dropdown States
+    let openStatusMenu = false;
+    let openSeverityMenu = false;
+
+    // Typed Options
+    const statusOptions: (BugReport["status"] | "all")[] = [
+        "all",
+        "reported",
+        "reviewing",
+        "fixed",
+        "not-a-bug",
+    ];
+    const severityOptions: (BugReport["severity"] | "all")[] = [
+        "all",
+        "critical",
+        "high",
+        "medium",
+        "low",
+    ];
 
     $: currentUserId = $userStore.user?.uid || null;
     $: filteredBugs = bugs.filter((bug) => {
@@ -255,84 +277,137 @@
             class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8"
         >
             <!-- Filters -->
-            <div class="flex flex-wrap items-center gap-3">
-                <div class="relative group">
-                    <select
-                        bind:value={filterStatus}
-                        class="pl-4 pr-10 py-2.5 bg-[#131b2e] border border-white/10 rounded-xl text-slate-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none appearance-none cursor-pointer hover:bg-white/5 transition-colors"
+            <div class="flex flex-wrap items-center gap-3 relative z-20">
+                <!-- Status Filter -->
+                <div
+                    class="relative"
+                    use:clickOutside
+                    on:click_outside={() => (openStatusMenu = false)}
+                >
+                    <button
+                        on:click={() => (openStatusMenu = !openStatusMenu)}
+                        class="flex items-center gap-2 px-4 py-2.5 bg-[#131b2e] hover:bg-[#1e2a45] border border-white/10 rounded-xl transition-all min-w-[180px] justify-between group {openStatusMenu
+                            ? 'ring-1 ring-primary-500 border-primary-500'
+                            : ''}"
                     >
-                        <option value="all" class="bg-[#0f1524]"
-                            >Todos los Estados</option
-                        >
-                        <option value="reported" class="bg-[#0f1524]"
-                            >📝 Reportados</option
-                        >
-                        <option value="reviewing" class="bg-[#0f1524]"
-                            >🔍 En Revisión</option
-                        >
-                        <option value="fixed" class="bg-[#0f1524]"
-                            >✅ Solucionados</option
-                        >
-                        <option value="not-a-bug" class="bg-[#0f1524]"
-                            >❌ No es Bug</option
-                        >
-                    </select>
-                    <!-- Chevron Icon -->
-                    <div
-                        class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500"
-                    >
+                        <span class="text-sm font-medium text-slate-200">
+                            {filterStatus === "all"
+                                ? "Todos los Estados"
+                                : getStatusLabel(filterStatus)}
+                        </span>
                         <svg
-                            class="w-4 h-4"
+                            class="w-4 h-4 text-slate-500 transition-transform duration-300 {openStatusMenu
+                                ? 'rotate-180 text-primary-500'
+                                : ''}"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
-                            ><path
+                        >
+                            <path
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
                                 stroke-width="2"
                                 d="M19 9l-7 7-7-7"
-                            /></svg
+                            />
+                        </svg>
+                    </button>
+
+                    {#if openStatusMenu}
+                        <div
+                            transition:scale={{ duration: 150, start: 0.95 }}
+                            class="absolute top-full left-0 mt-2 w-full bg-[#131b2e]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden py-1 z-50 flex flex-col"
                         >
-                    </div>
+                            {#each statusOptions as status}
+                                <button
+                                    on:click={() => {
+                                        filterStatus = status;
+                                        openStatusMenu = false;
+                                    }}
+                                    class="text-left px-4 py-2.5 text-sm hover:bg-white/5 transition-colors flex items-center gap-2 {filterStatus ===
+                                    status
+                                        ? 'text-primary-400 bg-primary-500/10'
+                                        : 'text-slate-300'}"
+                                >
+                                    {#if status === "all"}
+                                        Todos los Estados
+                                    {:else}
+                                        {getStatusLabel(status)}
+                                    {/if}
+                                    {#if filterStatus === status}
+                                        <div
+                                            class="ml-auto w-1.5 h-1.5 rounded-full bg-primary-500"
+                                        ></div>
+                                    {/if}
+                                </button>
+                            {/each}
+                        </div>
+                    {/if}
                 </div>
 
-                <div class="relative group">
-                    <select
-                        bind:value={filterSeverity}
-                        class="pl-4 pr-10 py-2.5 bg-[#131b2e] border border-white/10 rounded-xl text-slate-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none appearance-none cursor-pointer hover:bg-white/5 transition-colors"
+                <!-- Severity Filter -->
+                <div
+                    class="relative"
+                    use:clickOutside
+                    on:click_outside={() => (openSeverityMenu = false)}
+                >
+                    <button
+                        on:click={() => (openSeverityMenu = !openSeverityMenu)}
+                        class="flex items-center gap-2 px-4 py-2.5 bg-[#131b2e] hover:bg-[#1e2a45] border border-white/10 rounded-xl transition-all min-w-[180px] justify-between group {openSeverityMenu
+                            ? 'ring-1 ring-primary-500 border-primary-500'
+                            : ''}"
                     >
-                        <option value="all" class="bg-[#0f1524]"
-                            >Todas las Severidades</option
-                        >
-                        <option value="critical" class="bg-[#0f1524]"
-                            >🔴 Crítico</option
-                        >
-                        <option value="high" class="bg-[#0f1524]"
-                            >🟠 Alto</option
-                        >
-                        <option value="medium" class="bg-[#0f1524]"
-                            >🟡 Medio</option
-                        >
-                        <option value="low" class="bg-[#0f1524]">🔵 Bajo</option
-                        >
-                    </select>
-                    <!-- Chevron Icon -->
-                    <div
-                        class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500"
-                    >
+                        <span class="text-sm font-medium text-slate-200">
+                            {filterSeverity === "all"
+                                ? "Todas las Severidades"
+                                : getSeverityLabel(filterSeverity)}
+                        </span>
                         <svg
-                            class="w-4 h-4"
+                            class="w-4 h-4 text-slate-500 transition-transform duration-300 {openSeverityMenu
+                                ? 'rotate-180 text-primary-500'
+                                : ''}"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
-                            ><path
+                        >
+                            <path
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
                                 stroke-width="2"
                                 d="M19 9l-7 7-7-7"
-                            /></svg
+                            />
+                        </svg>
+                    </button>
+
+                    {#if openSeverityMenu}
+                        <div
+                            transition:scale={{ duration: 150, start: 0.95 }}
+                            class="absolute top-full left-0 mt-2 w-full bg-[#131b2e]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden py-1 z-50 flex flex-col"
                         >
-                    </div>
+                            {#each severityOptions as severity}
+                                <button
+                                    on:click={() => {
+                                        filterSeverity = severity;
+                                        openSeverityMenu = false;
+                                    }}
+                                    class="text-left px-4 py-2.5 text-sm hover:bg-white/5 transition-colors flex items-center gap-2 {filterSeverity ===
+                                    severity
+                                        ? 'text-primary-400 bg-primary-500/10'
+                                        : 'text-slate-300'}"
+                                >
+                                    {#if severity === "all"}
+                                        Todas las Severidades
+                                    {:else}
+                                        {getSeverityLabel(severity)}
+                                    {/if}
+                                    {#if filterSeverity === severity}
+                                        <div
+                                            class="ml-auto w-1.5 h-1.5 rounded-full bg-primary-500"
+                                        ></div>
+                                    {/if}
+                                </button>
+                            {/each}
+                        </div>
+                    {/if}
                 </div>
             </div>
 
