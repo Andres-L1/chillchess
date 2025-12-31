@@ -22,9 +22,10 @@ export const TIERS: Record<SubscriptionTier, TierConfig> = {
         features: [
             'Acceso a selección rotativa',
             'Fondo Estándar',
+            'Salas de Escucha Privadas',
             'Perfil Básico',
         ],
-        maxGamesDaily: 3,
+        maxGamesDaily: Infinity, // Legacy concept removed
         canAccessPremiumVibes: false,
         canCustomizeBoard: false,
     },
@@ -36,12 +37,13 @@ export const TIERS: Record<SubscriptionTier, TierConfig> = {
         billing: 'año',
         features: [
             'Catálogo Musical Completo',
+            'Salas Públicas & Host Control',
+            'Widget Premium para OBS',
+            'Ambientes Sonoros (Lluvia, Fuego...)',
             'Descargas Ilimitadas (WAV/MP3)',
             'Artist Hub: Sube tu Música',
-            'Badge de Verificado (al aprobar)',
             'Vibe Studio: Personalización Total',
             'Interfaz Inmersiva (Ocultar UI)',
-            'Proponer & Votar en Roadmap',
             'Insignia de Fundador',
         ],
         maxGamesDaily: Infinity,
