@@ -256,27 +256,84 @@
         >
             <!-- Filters -->
             <div class="flex flex-wrap items-center gap-3">
-                <select
-                    bind:value={filterStatus}
-                    class="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:border-primary-500 focus:outline-none appearance-none cursor-pointer"
-                >
-                    <option value="all">Todos los Estados</option>
-                    <option value="reported">📝 Reportados</option>
-                    <option value="reviewing">🔍 En Revisión</option>
-                    <option value="fixed">✅ Solucionados</option>
-                    <option value="not-a-bug">❌ No es Bug</option>
-                </select>
+                <div class="relative group">
+                    <select
+                        bind:value={filterStatus}
+                        class="pl-4 pr-10 py-2.5 bg-[#131b2e] border border-white/10 rounded-xl text-slate-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none appearance-none cursor-pointer hover:bg-white/5 transition-colors"
+                    >
+                        <option value="all" class="bg-[#0f1524]"
+                            >Todos los Estados</option
+                        >
+                        <option value="reported" class="bg-[#0f1524]"
+                            >📝 Reportados</option
+                        >
+                        <option value="reviewing" class="bg-[#0f1524]"
+                            >🔍 En Revisión</option
+                        >
+                        <option value="fixed" class="bg-[#0f1524]"
+                            >✅ Solucionados</option
+                        >
+                        <option value="not-a-bug" class="bg-[#0f1524]"
+                            >❌ No es Bug</option
+                        >
+                    </select>
+                    <!-- Chevron Icon -->
+                    <div
+                        class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500"
+                    >
+                        <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            ><path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M19 9l-7 7-7-7"
+                            /></svg
+                        >
+                    </div>
+                </div>
 
-                <select
-                    bind:value={filterSeverity}
-                    class="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:border-primary-500 focus:outline-none appearance-none cursor-pointer"
-                >
-                    <option value="all">Todas las Severidades</option>
-                    <option value="critical">🔴 Crítico</option>
-                    <option value="high">🟠 Alto</option>
-                    <option value="medium">🟡 Medio</option>
-                    <option value="low">🔵 Bajo</option>
-                </select>
+                <div class="relative group">
+                    <select
+                        bind:value={filterSeverity}
+                        class="pl-4 pr-10 py-2.5 bg-[#131b2e] border border-white/10 rounded-xl text-slate-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none appearance-none cursor-pointer hover:bg-white/5 transition-colors"
+                    >
+                        <option value="all" class="bg-[#0f1524]"
+                            >Todas las Severidades</option
+                        >
+                        <option value="critical" class="bg-[#0f1524]"
+                            >🔴 Crítico</option
+                        >
+                        <option value="high" class="bg-[#0f1524]"
+                            >🟠 Alto</option
+                        >
+                        <option value="medium" class="bg-[#0f1524]"
+                            >🟡 Medio</option
+                        >
+                        <option value="low" class="bg-[#0f1524]">🔵 Bajo</option
+                        >
+                    </select>
+                    <!-- Chevron Icon -->
+                    <div
+                        class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500"
+                    >
+                        <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            ><path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M19 9l-7 7-7-7"
+                            /></svg
+                        >
+                    </div>
+                </div>
             </div>
 
             <!-- Submit Button -->
