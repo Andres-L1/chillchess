@@ -52,7 +52,7 @@
     {#if isHovering}
         <div
             transition:fly={{ y: 10, duration: 200 }}
-            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-10 h-32 bg-[#0F172A]/90 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col items-center justify-end p-3 shadow-2xl z-50"
+            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-10 h-32 bg-[#0F172A]/90 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col items-center justify-end p-3 shadow-2xl z-[200]"
         >
             <div
                 class="relative w-1.5 h-full bg-white/10 rounded-full flex items-end group"

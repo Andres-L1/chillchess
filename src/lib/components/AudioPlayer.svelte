@@ -377,7 +377,9 @@
     on:ended={handleTrackEnd}
     on:timeupdate={handleTimeUpdate}
     on:durationchange={handleDurationChange}
-    on:error={(e) => console.warn("Audio Error (Music):", e)}
+    on:error={() => {
+        /* Audio file may not exist or failed to load */
+    }}
     preload="auto"
     crossorigin="anonymous"
 ></audio>
@@ -388,7 +390,9 @@
     loop
     preload="auto"
     crossorigin="anonymous"
-    on:error={(e) => console.warn("Audio Error (Ambience):", e)}
+    on:error={() => {
+        /* Ambience file may not exist */
+    }}
 ></audio>
 
 <!-- White Noise Player (Loop) -->
@@ -397,5 +401,7 @@
     loop
     preload="auto"
     crossorigin="anonymous"
-    on:error={(e) => console.warn("Audio Error (White Noise):", e)}
+    on:error={() => {
+        /* White noise file may not exist */
+    }}
 ></audio>
