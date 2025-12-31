@@ -21,12 +21,12 @@ export const TIERS: Record<SubscriptionTier, TierConfig> = {
         billing: 'Para siempre',
         features: [
             'Acceso a selección rotativa',
-            'Widget Básico para OBS',
+            'Widget para OBS/Streaming',
             'Fondo Estándar',
             'Salas de Escucha Privadas',
             'Perfil Básico',
         ],
-        maxGamesDaily: Infinity, // Legacy concept removed
+        maxGamesDaily: Infinity,
         canAccessPremiumVibes: false,
         canCustomizeBoard: false,
     },
@@ -39,7 +39,6 @@ export const TIERS: Record<SubscriptionTier, TierConfig> = {
         features: [
             'Catálogo Musical Completo',
             'Salas Públicas & Host Control',
-            'Widget PRO (Personalizable)',
             'Ambientes Sonoros (Lluvia, Fuego...)',
             'Descargas Ilimitadas (WAV/MP3)',
             'Artist Hub: Sube tu Música',
