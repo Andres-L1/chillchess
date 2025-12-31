@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { db } from "$lib/firebase";
+    import { onMount } from 'svelte';
+    import { db } from '$lib/firebase';
     import {
         collection,
         query,
@@ -10,7 +10,7 @@
         deleteDoc,
         orderBy,
         limit,
-    } from "firebase/firestore";
+    } from 'firebase/firestore';
 
     interface User {
         uid: string;
@@ -25,9 +25,9 @@
     let users: User[] = [];
     let filteredUsers: User[] = [];
     let loading = true;
-    let searchTerm = "";
-    let filterType: "all" | "verified" | "unverified" | "pro" | "admin" = "all";
-    let statusMessage = "";
+    let searchTerm = '';
+    let filterType: 'all' | 'verified' | 'unverified' | 'pro' | 'admin' = 'all';
+    let statusMessage = '';
     let editingUser: User | null = null;
 
     onMount(async () => {
@@ -37,8 +37,8 @@
     async function loadUsers() {
         loading = true;
         try {
-            const usersRef = collection(db, "users");
-            const q = query(usersRef, orderBy("createdAt", "desc"), limit(200));
+            const usersRef = collection(db, 'users');
+            const q = query(usersRef, orderBy('createdAt', 'desc'), limit(200));
             const snapshot = await getDocs(q);
 
             users = snapshot.docs.map((doc) => ({
@@ -49,7 +49,7 @@
             applyFilters();
         } catch (e: any) {
             console.error(e);
-            statusMessage = "❌ Error al cargar usuarios: " + e.message;
+            statusMessage = '❌ Error al cargar usuarios: ' + e.message;
         } finally {
             loading = false;
         }
@@ -59,17 +59,15 @@
         filteredUsers = users.filter((user) => {
             const matchesSearch =
                 user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                user.displayName
-                    ?.toLowerCase()
-                    .includes(searchTerm.toLowerCase()) ||
+                user.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 user.uid.toLowerCase().includes(searchTerm.toLowerCase());
 
             const matchesFilter =
-                filterType === "all" ||
-                (filterType === "verified" && user.isVerified) ||
-                (filterType === "unverified" && !user.isVerified) ||
-                (filterType === "pro" && user.subscriptionTier === "pro") ||
-                (filterType === "admin" && user.isAdmin);
+                filterType === 'all' ||
+                (filterType === 'verified' && user.isVerified) ||
+                (filterType === 'unverified' && !user.isVerified) ||
+                (filterType === 'pro' && user.subscriptionTier === 'pro') ||
+                (filterType === 'admin' && user.isAdmin);
 
             return matchesSearch && matchesFilter;
         });
@@ -87,29 +85,29 @@
             const updates = [];
 
             // 1. Update User document
-            const userRef = doc(db, "users", user.uid);
+            const userRef = doc(db, 'users', user.uid);
             updates.push(
                 updateDoc(userRef, {
                     isVerified: newValue,
                     updatedAt: Date.now(),
-                }),
+                })
             );
 
             // 2. Try to update Artist document (if it exists)
             try {
-                const { getDoc } = await import("firebase/firestore");
-                const artistRef = doc(db, "artists", user.uid);
+                const { getDoc } = await import('firebase/firestore');
+                const artistRef = doc(db, 'artists', user.uid);
                 const artistSnap = await getDoc(artistRef);
 
                 if (artistSnap.exists()) {
                     updates.push(
                         updateDoc(artistRef, {
                             isVerified: newValue,
-                        }),
+                        })
                     );
                 }
             } catch (err) {
-                console.warn("Could not sync with artist profile:", err);
+                console.warn('Could not sync with artist profile:', err);
             }
 
             await Promise.all(updates);
@@ -117,24 +115,20 @@
             user.isVerified = newValue;
             users = users;
 
-            statusMessage = `✅ ${user.email} ${newValue ? "verificado" : "desverificado"} correctamente`;
-            setTimeout(() => (statusMessage = ""), 3000);
+            statusMessage = `✅ ${user.email} ${newValue ? 'verificado' : 'desverificado'} correctamente`;
+            setTimeout(() => (statusMessage = ''), 3000);
         } catch (e: any) {
             console.error(e);
-            statusMessage = "❌ Error: " + e.message;
+            statusMessage = '❌ Error: ' + e.message;
         }
     }
 
     async function toggleAdmin(user: User) {
-        if (
-            !confirm(
-                `¿${user.isAdmin ? "Quitar" : "Dar"} permisos de ADMIN a ${user.email}?`,
-            )
-        )
+        if (!confirm(`¿${user.isAdmin ? 'Quitar' : 'Dar'} permisos de ADMIN a ${user.email}?`))
             return;
 
         try {
-            const userRef = doc(db, "users", user.uid);
+            const userRef = doc(db, 'users', user.uid);
             const newValue = !user.isAdmin;
 
             await updateDoc(userRef, {
@@ -145,19 +139,18 @@
             user.isAdmin = newValue;
             users = users;
 
-            statusMessage = `✅ ${user.email} ${newValue ? "es" : "ya no es"} admin`;
-            setTimeout(() => (statusMessage = ""), 3000);
+            statusMessage = `✅ ${user.email} ${newValue ? 'es' : 'ya no es'} admin`;
+            setTimeout(() => (statusMessage = ''), 3000);
         } catch (e: any) {
-            statusMessage = "❌ Error: " + e.message;
+            statusMessage = '❌ Error: ' + e.message;
         }
     }
 
     async function changeTier(user: User, tier: string) {
-        if (!confirm(`¿Cambiar plan de ${user.email} a ${tier.toUpperCase()}?`))
-            return;
+        if (!confirm(`¿Cambiar plan de ${user.email} a ${tier.toUpperCase()}?`)) return;
 
         try {
-            const userRef = doc(db, "users", user.uid);
+            const userRef = doc(db, 'users', user.uid);
 
             await updateDoc(userRef, {
                 subscriptionTier: tier,
@@ -168,33 +161,33 @@
             users = users;
 
             statusMessage = `✅ Plan de ${user.email} cambiado a ${tier.toUpperCase()}`;
-            setTimeout(() => (statusMessage = ""), 3000);
+            setTimeout(() => (statusMessage = ''), 3000);
         } catch (e: any) {
-            statusMessage = "❌ Error: " + e.message;
+            statusMessage = '❌ Error: ' + e.message;
         }
     }
 
     async function deleteUser(user: User) {
         if (
             !confirm(
-                `⚠️ ¿ELIMINAR PERMANENTEMENTE a ${user.email}?\n\nEsta acción NO se puede deshacer.`,
+                `⚠️ ¿ELIMINAR PERMANENTEMENTE a ${user.email}?\n\nEsta acción NO se puede deshacer.`
             )
         )
             return;
         if (
             !confirm(
-                `¿Estás SEGURO? Esto eliminará:\n- Usuario\n- Sus datos\n- Su perfil de artista (si existe)`,
+                `¿Estás SEGURO? Esto eliminará:\n- Usuario\n- Sus datos\n- Su perfil de artista (si existe)`
             )
         )
             return;
 
         try {
             // Delete user document
-            await deleteDoc(doc(db, "users", user.uid));
+            await deleteDoc(doc(db, 'users', user.uid));
 
             // Try to delete artist profile if exists
             try {
-                await deleteDoc(doc(db, "artists", user.uid));
+                await deleteDoc(doc(db, 'artists', user.uid));
             } catch (e) {
                 // Artist profile may not exist, that's ok
             }
@@ -203,9 +196,9 @@
             applyFilters();
 
             statusMessage = `✅ Usuario ${user.email} eliminado permanentemente`;
-            setTimeout(() => (statusMessage = ""), 5000);
+            setTimeout(() => (statusMessage = ''), 5000);
         } catch (e: any) {
-            statusMessage = "❌ Error al eliminar: " + e.message;
+            statusMessage = '❌ Error al eliminar: ' + e.message;
         }
     }
 </script>
@@ -213,9 +206,7 @@
 <div class="animate-fade-in">
     <div class="mb-6">
         <h2 class="text-2xl font-bold text-white mb-2">Gestión de Usuarios</h2>
-        <p class="text-slate-400">
-            Ver, editar, verificar y gestionar todos los usuarios
-        </p>
+        <p class="text-slate-400">Ver, editar, verificar y gestionar todos los usuarios</p>
     </div>
 
     <!-- Status Message -->
@@ -226,12 +217,10 @@
     {/if}
 
     <!-- Filters -->
-    <div class="bg-white/5 border border-white/10 rounded-2xl p-6 mb-6">
+    <div class="bg-[#131b2e]/40 backdrop-blur-md border border-white/10 rounded-2xl p-6 mb-6">
         <div class="grid md:grid-cols-3 gap-4">
             <div class="md:col-span-2">
-                <label
-                    for="user-search-input"
-                    class="block text-sm font-medium mb-2 text-white"
+                <label for="user-search-input" class="block text-sm font-medium mb-2 text-white"
                     >Buscar Usuario</label
                 >
                 <input
@@ -239,26 +228,24 @@
                     type="text"
                     bind:value={searchTerm}
                     placeholder="Email, nombre o UID..."
-                    class="w-full bg-midnight-800 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary-500"
+                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary-500/50 focus:bg-white/10 transition-all placeholder:text-slate-500"
                 />
             </div>
 
             <div>
-                <label
-                    for="user-filter-select"
-                    class="block text-sm font-medium mb-2 text-white"
+                <label for="user-filter-select" class="block text-sm font-medium mb-2 text-white"
                     >Filtrar</label
                 >
                 <select
                     id="user-filter-select"
                     bind:value={filterType}
-                    class="w-full bg-midnight-800 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary-500"
+                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary-500/50 focus:bg-white/10 transition-all"
                 >
-                    <option value="all">Todos</option>
-                    <option value="verified">Solo Verificados</option>
-                    <option value="unverified">Solo No Verificados</option>
-                    <option value="pro">Solo PRO</option>
-                    <option value="admin">Solo Admins</option>
+                    <option value="all" class="bg-[#0B1120]">Todos</option>
+                    <option value="verified" class="bg-[#0B1120]">Solo Verificados</option>
+                    <option value="unverified" class="bg-[#0B1120]">Solo No Verificados</option>
+                    <option value="pro" class="bg-[#0B1120]">Solo PRO</option>
+                    <option value="admin" class="bg-[#0B1120]">Solo Admins</option>
                 </select>
             </div>
         </div>
@@ -274,9 +261,7 @@
         </div>
     {:else}
         <!-- Desktop Table (Hidden on Mobile) -->
-        <div
-            class="hidden md:block bg-white/5 border border-white/10 rounded-2xl overflow-hidden"
-        >
+        <div class="hidden md:block bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead class="bg-white/5 border-b border-white/10">
@@ -305,26 +290,20 @@
                                 <td class="px-6 py-4">
                                     <div>
                                         <p class="font-medium text-white">
-                                            {user.displayName || "Sin nombre"}
+                                            {user.displayName || 'Sin nombre'}
                                         </p>
                                         <p class="text-sm text-slate-400">
                                             {user.email}
                                         </p>
-                                        <p
-                                            class="text-xs text-slate-500 font-mono mt-1"
-                                        >
+                                        <p class="text-xs text-slate-500 font-mono mt-1">
                                             {user.uid}
                                         </p>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <select
-                                        on:change={(e) =>
-                                            changeTier(
-                                                user,
-                                                e.currentTarget.value,
-                                            )}
-                                        value={user.subscriptionTier || "free"}
+                                        on:change={(e) => changeTier(user, e.currentTarget.value)}
+                                        value={user.subscriptionTier || 'free'}
                                         class="px-3 py-1.5 rounded-lg text-xs font-bold bg-midnight-800 border border-white/20 text-white focus:outline-none focus:border-primary-500"
                                     >
                                         <option value="free">Free</option>
@@ -350,29 +329,24 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <div
-                                        class="flex items-center justify-end gap-2"
-                                    >
+                                    <div class="flex items-center justify-end gap-2">
                                         <button
-                                            on:click={() =>
-                                                toggleVerified(user)}
+                                            on:click={() => toggleVerified(user)}
                                             class="p-2 rounded-lg transition-colors {user.isVerified
                                                 ? 'bg-red-500/20 text-red-300'
                                                 : 'bg-green-500/20 text-green-300'}"
                                             title={user.isVerified
-                                                ? "Quitar verificado"
-                                                : "Verificar"}
+                                                ? 'Quitar verificado'
+                                                : 'Verificar'}
                                         >
-                                            {user.isVerified ? "✗" : "✓"}
+                                            {user.isVerified ? '✗' : '✓'}
                                         </button>
                                         <button
                                             on:click={() => toggleAdmin(user)}
                                             class="p-2 rounded-lg transition-colors {user.isAdmin
                                                 ? 'bg-orange-500/20 text-orange-300'
                                                 : 'bg-slate-500/20 text-slate-300'}"
-                                            title={user.isAdmin
-                                                ? "Quitar admin"
-                                                : "Hacer admin"}
+                                            title={user.isAdmin ? 'Quitar admin' : 'Hacer admin'}
                                         >
                                             👑
                                         </button>
@@ -395,14 +369,12 @@
         <!-- Mobile Cards (Visible on Mobile) -->
         <div class="md:hidden space-y-4">
             {#each filteredUsers as user}
-                <div
-                    class="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4"
-                >
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4">
                     <!-- Header -->
                     <div class="flex justify-between items-start">
                         <div class="flex-1 pr-4">
                             <p class="font-bold text-white text-lg break-all">
-                                {user.displayName || "Sin nombre"}
+                                {user.displayName || 'Sin nombre'}
                             </p>
                             <p class="text-sm text-slate-400 break-all">
                                 {user.email}
@@ -413,13 +385,10 @@
                                 {user.uid}
                             </p>
                         </div>
-                        <div
-                            class="flex flex-col gap-2 items-end flex-shrink-0"
-                        >
+                        <div class="flex flex-col gap-2 items-end flex-shrink-0">
                             <select
-                                on:change={(e) =>
-                                    changeTier(user, e.currentTarget.value)}
-                                value={user.subscriptionTier || "free"}
+                                on:change={(e) => changeTier(user, e.currentTarget.value)}
+                                value={user.subscriptionTier || 'free'}
                                 class="px-3 py-1 rounded-lg text-xs font-bold bg-midnight-800 border border-white/20 text-white"
                             >
                                 <option value="free">Free</option>
@@ -445,16 +414,14 @@
                     </div>
 
                     <!-- Actions -->
-                    <div
-                        class="grid grid-cols-3 gap-2 pt-4 border-t border-white/10"
-                    >
+                    <div class="grid grid-cols-3 gap-2 pt-4 border-t border-white/10">
                         <button
                             on:click={() => toggleVerified(user)}
                             class="py-2 px-3 rounded-lg font-medium text-xs flex items-center justify-center gap-1 transition-colors {user.isVerified
                                 ? 'bg-red-500/20 text-red-300'
                                 : 'bg-green-500/20 text-green-300'}"
                         >
-                            {user.isVerified ? "Quitar" : "Verificar"}
+                            {user.isVerified ? 'Quitar' : 'Verificar'}
                         </button>
                         <button
                             on:click={() => toggleAdmin(user)}

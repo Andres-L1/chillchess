@@ -1,34 +1,34 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { fade, scale } from "svelte/transition";
-    import { audioStore } from "$lib/audio/store";
+    import { onMount } from 'svelte';
+    import { fade, scale } from 'svelte/transition';
+    import { audioStore } from '$lib/audio/store';
 
     // Tabs Components
-    import UsersTab from "$lib/components/admin/UsersTab.svelte";
-    import ProposalsTab from "$lib/components/admin/ProposalsTab.svelte";
-    import SubmissionsTab from "$lib/components/admin/SubmissionsTab.svelte";
-    import MusicTab from "$lib/components/admin/MusicTab.svelte";
-    import LogsTab from "$lib/components/admin/LogsTab.svelte";
-    import BugsTab from "$lib/components/admin/BugsTab.svelte";
-    import BackupsTab from "$lib/components/admin/BackupsTab.svelte";
+    import UsersTab from '$lib/components/admin/UsersTab.svelte';
+    import ProposalsTab from '$lib/components/admin/ProposalsTab.svelte';
+    import SubmissionsTab from '$lib/components/admin/SubmissionsTab.svelte';
+    import MusicTab from '$lib/components/admin/MusicTab.svelte';
+    import LogsTab from '$lib/components/admin/LogsTab.svelte';
+    import BugsTab from '$lib/components/admin/BugsTab.svelte';
+    import BackupsTab from '$lib/components/admin/BackupsTab.svelte';
 
     // Icons
-    import BackIcon from "$lib/components/icons/BackIcon.svelte";
-    import UsersIcon from "$lib/components/icons/UsersIcon.svelte";
-    import BulbIcon from "$lib/components/icons/BulbIcon.svelte";
-    import MusicIcon from "$lib/components/icons/MusicIcon.svelte";
-    import AlertIcon from "$lib/components/icons/AlertIcon.svelte";
-    import SystemStatus from "$lib/components/admin/SystemStatus.svelte";
+    import BackIcon from '$lib/components/icons/BackIcon.svelte';
+    import UsersIcon from '$lib/components/icons/UsersIcon.svelte';
+    import BulbIcon from '$lib/components/icons/BulbIcon.svelte';
+    import MusicIcon from '$lib/components/icons/MusicIcon.svelte';
+    import AlertIcon from '$lib/components/icons/AlertIcon.svelte';
+    import SystemStatus from '$lib/components/admin/SystemStatus.svelte';
 
     type Tab =
-        | "dashboard"
-        | "users"
-        | "proposals"
-        | "submissions"
-        | "music"
-        | "bugs"
-        | "backups"
-        | "logs";
+        | 'dashboard'
+        | 'users'
+        | 'proposals'
+        | 'submissions'
+        | 'music'
+        | 'bugs'
+        | 'backups'
+        | 'logs';
 
     interface TabDef {
         id: Tab;
@@ -37,7 +37,7 @@
         badge?: number;
     }
 
-    let activeTab: Tab = "dashboard";
+    let activeTab: Tab = 'dashboard';
     let stats = {
         totalUsers: 0,
         proUsers: 0,
@@ -58,15 +58,13 @@
     async function loadStats() {
         loading = true;
         try {
-            const { collection, query, where, getCountFromServer } =
-                await import("firebase/firestore");
-            const { db } = await import("$lib/firebase");
+            const { collection, query, where, getCountFromServer } = await import(
+                'firebase/firestore'
+            );
+            const { db } = await import('$lib/firebase');
 
             // Helper for counts (much faster/cheaper than getDocs)
-            const getCount = async (
-                collName: string,
-                constraints: any[] = [],
-            ) => {
+            const getCount = async (collName: string, constraints: any[] = []) => {
                 const coll = collection(db, collName);
                 const q = query(coll, ...constraints);
                 const snapshot = await getCountFromServer(q);
@@ -83,15 +81,13 @@
                 pendingProposals,
                 pendingBugs,
             ] = await Promise.all([
-                getCount("users"),
-                getCount("users", [where("subscriptionTier", "==", "pro")]),
-                getCount("users", [where("subscriptionTier", "==", "premium")]),
-                getCount("artists", [where("isVerified", "==", true)]),
-                getCount("musicSubmissions", [
-                    where("status", "==", "pending"),
-                ]),
-                getCount("proposals", [where("status", "==", "pending")]),
-                getCount("bug_reports", [where("status", "==", "reported")]),
+                getCount('users'),
+                getCount('users', [where('subscriptionTier', '==', 'pro')]),
+                getCount('users', [where('subscriptionTier', '==', 'premium')]),
+                getCount('artists', [where('isVerified', '==', true)]),
+                getCount('musicSubmissions', [where('status', '==', 'pending')]),
+                getCount('proposals', [where('status', '==', 'pending')]),
+                getCount('bug_reports', [where('status', '==', 'reported')]),
             ]);
 
             stats = {
@@ -104,37 +100,39 @@
                 pendingBugs,
             };
         } catch (e) {
-            console.error("Error loading stats:", e);
+            console.error('Error loading stats:', e);
         } finally {
             loading = false;
         }
     }
 
     $: tabs = [
-        { id: "dashboard", label: "Dashboard", icon: "📊" },
-        { id: "users", label: "Usuarios", icon: "👥" },
+        { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+        { id: 'users', label: 'Usuarios', icon: '👥' },
         {
-            id: "proposals",
-            label: "Propuestas",
-            icon: "💡",
+            id: 'proposals',
+            label: 'Propuestas',
+            icon: '💡',
             badge: stats.pendingProposals,
         },
         {
-            id: "submissions",
-            label: "Envíos",
-            icon: "🎵",
+            id: 'submissions',
+            label: 'Envíos',
+            icon: '🎵',
             badge: stats.pendingSubmissions,
         },
-        { id: "music", label: "Música", icon: "🎼" },
+        { id: 'music', label: 'Música', icon: '🎼' },
         {
-            id: "bugs",
-            label: "Bugs",
-            icon: "🐛",
+            id: 'bugs',
+            label: 'Bugs',
+            icon: '🐛',
             badge: stats.pendingBugs,
         },
-        { id: "backups", label: "Backups", icon: "💾" },
-        { id: "logs", label: "Logs", icon: "📝" },
+        { id: 'backups', label: 'Backups', icon: '💾' },
+        { id: 'logs', label: 'Logs', icon: '📝' },
     ] as TabDef[];
+
+    let isMobileMenuOpen = false;
 </script>
 
 <svelte:head>
@@ -142,9 +140,7 @@
     <meta name="theme-color" content="#0B1120" />
 </svelte:head>
 
-<div
-    class="min-h-screen bg-[#0B1120] text-slate-200 font-poppins relative overflow-hidden"
->
+<div class="min-h-screen bg-[#0B1120] text-slate-200 font-poppins relative overflow-hidden">
     <!-- Ambient Background Glows -->
     <div
         class="absolute top-0 left-0 w-[500px] h-[500px] bg-primary-600/10 rounded-full blur-[120px] pointer-events-none"
@@ -154,12 +150,27 @@
     ></div>
 
     <div class="flex h-screen overflow-hidden relative z-10">
-        <!-- Sidebar -->
+        <!-- Mobile Menu Overlay -->
+        {#if isMobileMenuOpen}
+            <div
+                class="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
+                on:click={() => (isMobileMenuOpen = false)}
+                transition:fade
+            ></div>
+        {/if}
+
+        <!-- Sidebar (Responsive: Drawer on Mobile, Fixed on Desktop) -->
         <aside
-            class="w-72 bg-[#131b2e]/60 backdrop-blur-2xl border-r border-white/5 flex flex-col shadow-2xl z-20"
+            class="
+                fixed md:relative z-50 h-full w-72
+                bg-[#131b2e]/90 md:bg-[#131b2e]/60 backdrop-blur-2xl
+                border-r border-white/5 flex flex-col shadow-2xl
+                transition-transform duration-300 ease-in-out
+                {isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+            "
         >
             <!-- Logo Area -->
-            <div class="p-8 border-b border-white/5">
+            <div class="p-8 border-b border-white/5 flex justify-between items-center">
                 <div class="flex items-center gap-3">
                     <div
                         class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-orange-500 flex items-center justify-center shadow-lg shadow-primary-500/20"
@@ -167,26 +178,38 @@
                         <span class="text-xl">♛</span>
                     </div>
                     <div>
-                        <h1
-                            class="text-xl font-bold text-white tracking-tight leading-none"
-                        >
+                        <h1 class="text-xl font-bold text-white tracking-tight leading-none">
                             AdminOS
                         </h1>
-                        <span
-                            class="text-[10px] uppercase text-slate-500 font-bold tracking-widest"
+                        <span class="text-[10px] uppercase text-slate-500 font-bold tracking-widest"
                             >ChillChess</span
                         >
                     </div>
                 </div>
+                <!-- Close Button (Mobile Only) -->
+                <button
+                    class="md:hidden text-slate-400 hover:text-white"
+                    on:click={() => (isMobileMenuOpen = false)}
+                >
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        ><path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                        /></svg
+                    >
+                </button>
             </div>
 
             <!-- Navigation -->
-            <nav
-                class="flex-1 overflow-y-auto py-6 px-4 space-y-1 custom-scrollbar"
-            >
+            <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1 custom-scrollbar">
                 {#each tabs as tab}
                     <button
-                        on:click={() => (activeTab = tab.id)}
+                        on:click={() => {
+                            activeTab = tab.id;
+                            isMobileMenuOpen = false; // Close on select
+                        }}
                         class="w-full flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-200 group relative overflow-hidden {activeTab ===
                         tab.id
                             ? 'bg-primary-500/10 text-white shadow-lg shadow-primary-500/5 ring-1 ring-primary-500/50'
@@ -204,9 +227,7 @@
                                 class="text-xl opacity-80 group-hover:scale-110 transition-transform"
                                 >{tab.icon}</span
                             >
-                            <span class="font-medium text-sm tracking-wide"
-                                >{tab.label}</span
-                            >
+                            <span class="font-medium text-sm tracking-wide">{tab.label}</span>
                         </div>
 
                         {#if tab.badge && tab.badge > 0}
@@ -217,22 +238,6 @@
                             </span>
                         {/if}
                     </button>
-
-                    {#if tab.id === "dashboard"}
-                        <div class="h-px bg-white/5 my-4 mx-2"></div>
-                        <div
-                            class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 mt-6"
-                        >
-                            Gestión
-                        </div>
-                    {/if}
-                    {#if tab.id === "music"}
-                        <div
-                            class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 mt-6"
-                        >
-                            Sistema
-                        </div>
-                    {/if}
                 {/each}
             </nav>
 
@@ -257,42 +262,61 @@
 
         <!-- Main Content (Windowless Fullscreen Mode) -->
         <main
-            class="flex-1 overflow-y-auto bg-[#0B1120] relative custom-scrollbar flex flex-col"
+            class="flex-1 overflow-y-auto bg-[#0B1120] relative custom-scrollbar flex flex-col w-full"
         >
             <!-- Header Sticky -->
             <header
-                class="sticky top-0 z-30 bg-[#0B1120]/80 backdrop-blur-xl border-b border-white/5 px-8 flex-shrink-0"
+                class="sticky top-0 z-30 bg-[#0B1120]/80 backdrop-blur-xl border-b border-white/5 px-4 md:px-8 flex-shrink-0"
             >
                 <div class="flex items-center justify-between h-20">
-                    <div>
-                        <h2
-                            class="text-2xl font-bold text-white flex items-center gap-2"
-                        >
-                            {tabs.find((t) => t.id === activeTab)?.icon}
-                            {tabs.find((t) => t.id === activeTab)?.label}
-                        </h2>
-                        <p class="text-xs text-slate-400 mt-1">
-                            {#if loading}
-                                Actualizando métricas...
-                            {:else}
-                                Sistema operativo y funcionando
-                            {/if}
-                        </p>
-                    </div>
-
                     <div class="flex items-center gap-4">
-                        <SystemStatus />
+                        <!-- Mobile Burger Button -->
+                        <button
+                            class="md:hidden p-2 rounded-lg bg-white/5 text-slate-300 hover:text-white"
+                            on:click={() => (isMobileMenuOpen = true)}
+                        >
+                            <svg
+                                class="w-6 h-6"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                ><path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M4 6h16M4 12h16M4 18h16"
+                                /></svg
+                            >
+                        </button>
+
+                        <div>
+                            <h2
+                                class="text-lg md:text-2xl font-bold text-white flex items-center gap-2"
+                            >
+                                {tabs.find((t) => t.id === activeTab)?.icon}
+                                {tabs.find((t) => t.id === activeTab)?.label}
+                            </h2>
+
+                            <p class="text-xs text-slate-400 mt-1">
+                                {#if loading}
+                                    Actualizando métricas...
+                                {:else}
+                                    Sistema operativo y funcionando
+                                {/if}
+                            </p>
+                        </div>
+
+                        <div class="flex items-center gap-4">
+                            <SystemStatus />
+                        </div>
                     </div>
                 </div>
             </header>
 
             <div class="p-8 max-w-7xl mx-auto w-full space-y-8 pb-32 flex-1">
-                {#if activeTab === "dashboard"}
+                {#if activeTab === 'dashboard'}
                     <!-- Stats Grid -->
-                    <div
-                        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-                        in:fade
-                    >
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" in:fade>
                         <!-- Users Stat -->
                         <div
                             class="bg-[#131b2e]/60 backdrop-blur-xl p-6 rounded-2xl border border-white/5 relative overflow-hidden group hover:border-blue-500/30 transition-colors"
@@ -303,15 +327,11 @@
                                 <UsersIcon size="lg" />
                             </div>
                             <div class="relative z-10">
-                                <h3 class="text-slate-400 text-sm font-medium">
-                                    Usuarios Totales
-                                </h3>
+                                <h3 class="text-slate-400 text-sm font-medium">Usuarios Totales</h3>
                                 <p class="text-3xl font-bold text-white mt-1">
                                     {stats.totalUsers}
                                 </p>
-                                <div
-                                    class="mt-2 text-xs flex items-center gap-2"
-                                >
+                                <div class="mt-2 text-xs flex items-center gap-2">
                                     <span
                                         class="text-blue-400 bg-blue-400/10 px-1.5 py-0.5 rounded font-bold"
                                     >
@@ -331,15 +351,11 @@
                                 <MusicIcon size="lg" />
                             </div>
                             <div class="relative z-10">
-                                <h3 class="text-slate-400 text-sm font-medium">
-                                    Álbumes Activos
-                                </h3>
+                                <h3 class="text-slate-400 text-sm font-medium">Álbumes Activos</h3>
                                 <p class="text-3xl font-bold text-white mt-1">
                                     {stats.totalAlbums}
                                 </p>
-                                <div
-                                    class="mt-2 text-xs flex items-center gap-2"
-                                >
+                                <div class="mt-2 text-xs flex items-center gap-2">
                                     <span
                                         class="text-orange-400 bg-orange-400/10 px-1.5 py-0.5 rounded font-bold"
                                     >
@@ -352,7 +368,7 @@
                         <!-- Proposals Stat -->
                         <div
                             class="bg-[#131b2e]/60 backdrop-blur-xl p-6 rounded-2xl border border-white/5 relative overflow-hidden group hover:border-purple-500/30 transition-colors cursor-pointer"
-                            on:click={() => (activeTab = "proposals")}
+                            on:click={() => (activeTab = 'proposals')}
                         >
                             <div
                                 class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"
@@ -367,9 +383,7 @@
                                     {stats.pendingProposals}
                                 </p>
                                 {#if stats.pendingProposals > 0}
-                                    <div
-                                        class="mt-2 text-xs text-purple-400 font-bold"
-                                    >
+                                    <div class="mt-2 text-xs text-purple-400 font-bold">
                                         Requiere Revisión
                                     </div>
                                 {/if}
@@ -379,7 +393,7 @@
                         <!-- Bugs Stat (New) -->
                         <div
                             class="bg-[#131b2e]/60 backdrop-blur-xl p-6 rounded-2xl border border-white/5 relative overflow-hidden group hover:border-red-500/30 transition-colors cursor-pointer"
-                            on:click={() => (activeTab = "bugs")}
+                            on:click={() => (activeTab = 'bugs')}
                         >
                             <div
                                 class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"
@@ -387,35 +401,31 @@
                                 <AlertIcon size="lg" />
                             </div>
                             <div class="relative z-10">
-                                <h3 class="text-slate-400 text-sm font-medium">
-                                    Bugs Reportados
-                                </h3>
+                                <h3 class="text-slate-400 text-sm font-medium">Bugs Reportados</h3>
                                 <p class="text-3xl font-bold text-white mt-1">
                                     {stats.pendingBugs}
                                 </p>
                                 {#if stats.pendingBugs > 0}
-                                    <div
-                                        class="mt-2 text-xs text-red-400 font-bold animate-pulse"
-                                    >
+                                    <div class="mt-2 text-xs text-red-400 font-bold animate-pulse">
                                         Acción Requerida
                                     </div>
                                 {/if}
                             </div>
                         </div>
                     </div>
-                {:else if activeTab === "users"}
+                {:else if activeTab === 'users'}
                     <UsersTab />
-                {:else if activeTab === "proposals"}
+                {:else if activeTab === 'proposals'}
                     <ProposalsTab />
-                {:else if activeTab === "submissions"}
+                {:else if activeTab === 'submissions'}
                     <SubmissionsTab />
-                {:else if activeTab === "music"}
+                {:else if activeTab === 'music'}
                     <MusicTab />
-                {:else if activeTab === "bugs"}
+                {:else if activeTab === 'bugs'}
                     <BugsTab />
-                {:else if activeTab === "backups"}
+                {:else if activeTab === 'backups'}
                     <BackupsTab />
-                {:else if activeTab === "logs"}
+                {:else if activeTab === 'logs'}
                     <LogsTab />
                 {/if}
             </div>
