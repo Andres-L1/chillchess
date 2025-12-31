@@ -1,0 +1,92 @@
+{
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:svelte/recommended",
+        "prettier"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "parserOptions": {
+        "sourceType": "module",
+        "ecmaVersion": 2020,
+        "extraFileExtensions": [
+            ".svelte"
+        ]
+    },
+    "env": {
+        "browser": true,
+        "es2017": true,
+        "node": true
+    },
+    "overrides": [
+        {
+            "files": [
+                "*.svelte"
+            ],
+            "parser": "svelte-eslint-parser",
+            "parserOptions": {
+                "parser": "@typescript-eslint/parser"
+            },
+            "rules": {
+                "svelte/no-at-html-tags": "warn",
+                "svelte/no-unused-svelte-ignore": "warn",
+                "svelte/valid-compile": "error"
+            }
+        }
+    ],
+    "rules": {
+        // TypeScript Rules
+        "@typescript-eslint/no-explicit-any": "warn",
+        "@typescript-eslint/no-unused-vars": [
+            "warn",
+            {
+                "argsIgnorePattern": "^_",
+                "varsIgnorePattern": "^_"
+            }
+        ],
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/explicit-module-boundary-types": "off",
+        "@typescript-eslint/no-non-null-assertion": "warn",
+        // General Rules
+        "no-console": [
+            "warn",
+            {
+                "allow": [
+                    "warn",
+                    "error"
+                ]
+            }
+        ],
+        "no-debugger": "warn",
+        "prefer-const": "error",
+        "no-var": "error",
+        "eqeqeq": [
+            "error",
+            "always"
+        ],
+        "curly": [
+            "error",
+            "all"
+        ],
+        // Code Quality
+        "max-lines": [
+            "warn",
+            500
+        ],
+        "max-depth": [
+            "warn",
+            4
+        ],
+        "complexity": [
+            "warn",
+            15
+        ],
+        "max-params": [
+            "warn",
+            5
+        ]
+    }
+}
