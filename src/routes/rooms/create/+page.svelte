@@ -3,6 +3,8 @@
     import { userStore } from '$lib/auth/userStore';
     import { onMount } from 'svelte';
     import { toast } from '$lib/stores/notificationStore';
+    import { doc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+    import { db } from '$lib/firebase';
 
     let roomName = '';
     let isPublic = false;
@@ -16,9 +18,6 @@
         }
 
         try {
-            const { doc, getDoc } = await import('firebase/firestore');
-            const { db } = await import('$lib/firebase');
-
             if ($userStore.user?.uid) {
                 const snap = await getDoc(doc(db, 'users', $userStore.user.uid));
                 if (snap.exists()) {
@@ -41,9 +40,6 @@
 
         creating = true;
         try {
-            const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
-            const { db } = await import('$lib/firebase');
-
             const roomData = {
                 name: roomName.trim(),
                 hostId: $userStore.user?.uid,
