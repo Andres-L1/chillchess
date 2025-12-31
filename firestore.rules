@@ -117,23 +117,13 @@ service cloud.firestore {
     }
 
     // ============================================
-    // Widgets (OBS Overlays)
+    // Widget / OBS Overlay Sync (Unified)
     // ============================================
-    match /widgets/{widgetId} {
-      allow read: if true; // Public read needed for OBS browser source
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow update: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
-    }
-    
-    // ============================================
-    // Focus Timers
-    // ============================================
-    match /timers/{timerId} {
-      allow read: if true; // Public read if used in overlay
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow update: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    match /nowPlaying/{userId} {
+      allow read: if true; // Public read for OBS
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && request.auth.uid == userId;
+      allow delete: if isSignedIn() && request.auth.uid == userId;
     }
   }
 }
