@@ -21,6 +21,7 @@ export const TIERS: Record<SubscriptionTier, TierConfig> = {
         billing: 'Para siempre',
         features: [
             'Acceso a selección rotativa',
+            'Widget Básico para OBS',
             'Fondo Estándar',
             'Salas de Escucha Privadas',
             'Perfil Básico',
@@ -38,7 +39,7 @@ export const TIERS: Record<SubscriptionTier, TierConfig> = {
         features: [
             'Catálogo Musical Completo',
             'Salas Públicas & Host Control',
-            'Widget Premium para OBS',
+            'Widget PRO (Personalizable)',
             'Ambientes Sonoros (Lluvia, Fuego...)',
             'Descargas Ilimitadas (WAV/MP3)',
             'Artist Hub: Sube tu Música',
