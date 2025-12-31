@@ -100,7 +100,7 @@ service cloud.firestore {
     // ============================================
     // Listen Rooms (Shared Listening)
     // ============================================
-    match /listenRooms/{roomId} {
+    match /listeningRooms/{roomId} {
       allow read: if true; // Public rooms can be read by anyone
       allow create: if isSignedIn();
       allow update: if isSignedIn();
