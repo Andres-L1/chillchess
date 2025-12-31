@@ -106,4 +106,5 @@ Ver [CHANGELOG.md](CHANGELOG.md) para el historial completo de versiones.
 ## 📄 Licencia
 
 MIT. Hecho con 💙 para los amantes del ajedrez y el código.
+© 2025 ChillChess Team.
 
