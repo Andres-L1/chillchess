@@ -130,7 +130,17 @@ interface BugReport {
 - `src/lib/components/admin/BugsTab.svelte` (Admin panel)
 - Firestore Rules para `bug_reports` collection
 
-**Prioridad:** 🟡 MEDIA (mejora QA y feedback)
+**Prioridad:** 🟡 MEDIA (mejora QA y feedback)  
+**Estado:** ✅ **IMPLEMENTADO** (2025-12-31)
+
+**Archivos Creados:**
+- `src/routes/bugs/+page.svelte` - Página pública de reportes
+- `src/lib/components/admin/BugsTab.svelte` - Panel de gestión en admin
+- Integrado en `/admin` con stats y badge
+
+**Acceso:**
+- Usuarios: `https://chillchess.app/bugs`
+- Admin: `/admin` → Tab "Bugs 🐛"
 
 ---
 

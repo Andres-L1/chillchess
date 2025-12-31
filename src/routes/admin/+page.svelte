@@ -8,6 +8,7 @@
     import SubmissionsTab from "$lib/components/admin/SubmissionsTab.svelte";
     import MusicTab from "$lib/components/admin/MusicTab.svelte";
     import LogsTab from "$lib/components/admin/LogsTab.svelte";
+    import BugsTab from "$lib/components/admin/BugsTab.svelte";
 
     // Icons
     import BackIcon from "$lib/components/icons/BackIcon.svelte";
@@ -24,6 +25,7 @@
         | "proposals"
         | "submissions"
         | "music"
+        | "bugs"
         | "logs";
 
     interface TabDef {
@@ -41,6 +43,7 @@
         verifiedArtists: 0,
         pendingSubmissions: 0,
         pendingProposals: 0,
+        pendingBugs: 0,
     };
 
     let loading = true;
@@ -94,6 +97,15 @@
             );
             const pendingPropsSnap = await getDocs(pendingPropsQuery);
             stats.pendingProposals = pendingPropsSnap.size;
+
+            // Pending bugs (reported status)
+            const bugsRef = collection(db, "bug_reports");
+            const pendingBugsQuery = query(
+                bugsRef,
+                where("status", "==", "reported"),
+            );
+            const pendingBugsSnap = await getDocs(pendingBugsQuery);
+            stats.pendingBugs = pendingBugsSnap.size;
         } catch (e) {
             console.error("Error loading stats:", e);
         } finally {
@@ -117,6 +129,12 @@
             badge: stats.pendingSubmissions,
         },
         { id: "music", label: "Música", icon: "🎼" },
+        {
+            id: "bugs",
+            label: "Bugs",
+            icon: "🐛",
+            badge: stats.pendingBugs,
+        },
         { id: "logs", label: "Logs", icon: "📝" },
     ];
 </script>
@@ -395,6 +413,8 @@
                         <SubmissionsTab on:approved={loadStats} />
                     {:else if activeTab === "music"}
                         <MusicTab />
+                    {:else if activeTab === "bugs"}
+                        <BugsTab />
                     {:else if activeTab === "logs"}
                         <LogsTab />
                     {/if}
