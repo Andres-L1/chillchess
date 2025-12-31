@@ -7,9 +7,25 @@ import type { RequestEvent } from '@sveltejs/kit';
 
 export const POST = async ({ locals }: RequestEvent) => {
     // Check admin auth
-    // @ts-ignore - User is added by hooks
-    if (!locals.user || !locals.user.isAdmin) {
-        return json({ error: 'Unauthorized' }, { status: 403 });
+    // @ts-ignore
+    const user = locals.user;
+
+    // TODO: Reemplazar con tu UID real para bypass de emergencia si los claims fallan
+    const OWNER_UID = "tu-uid-aqui";
+
+    if (!user) {
+        return json({
+            error: 'Unauthorized',
+            details: 'No se pudo verificar la sesión. Revisa las variables de entorno del servidor (FB_PRIVATE_KEY).'
+        }, { status: 403 });
+    }
+
+    if (!user.isAdmin && user.uid !== OWNER_UID) {
+        return json({
+            error: 'Forbidden',
+            details: `El usuario ${user.email} (${user.uid}) no tiene permisos de administrador.`,
+            debug: user
+        }, { status: 403 });
     }
 
     try {
