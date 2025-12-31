@@ -2,194 +2,186 @@
     interface RoadmapItem {
         title: string;
         description: string;
-        status: "done" | "in-progress" | "planned";
+        status: 'done' | 'in-progress' | 'planned';
         date: string;
-        category: "music" | "visual" | "tech" | "community";
+        category: 'music' | 'visual' | 'tech' | 'community';
     }
 
     const roadmapItems: RoadmapItem[] = [
         // Completado Recientemente (Hot Fixes & Features)
         {
-            title: "Integración de Fundadores & Artistas",
+            title: 'Integración de Fundadores & Artistas',
             description:
-                "Sistema inteligente para asignar lanzamientos musicales a perfiles Fundadores y Verificados, con distintivos especiales.",
-            status: "done",
-            date: "Diciembre 2025",
-            category: "community",
+                'Sistema inteligente para asignar lanzamientos musicales a perfiles Fundadores y Verificados, con distintivos especiales.',
+            status: 'done',
+            date: 'Diciembre 2025',
+            category: 'community',
         },
         {
-            title: "App Nativa (iOS & Android)",
+            title: 'App Nativa (iOS & Android)',
             description:
-                "Desarrollo de una aplicación móvil nativa para llevar la experiencia ChillChess en tu bolsillo con reproducción offline.",
-            status: "planned",
-            date: "Mediados 2026",
-            category: "tech",
+                'Desarrollo de una aplicación móvil nativa para llevar la experiencia ChillChess en tu bolsillo con reproducción offline.',
+            status: 'planned',
+            date: 'Mediados 2026',
+            category: 'tech',
         },
         {
-            title: "Panel de Administración 2.0",
+            title: 'Admin Panel & Foundation (v2.5)',
             description:
-                "Sistema de gestión integral para usuarios y música, optimizado para móvil con auto-verificación.",
-            status: "done",
-            date: "Diciembre 2025",
-            category: "tech",
+                'Reconstrucción total de la administración con Glassmorphism real, responsive design y arquitectura sólida para escalar.',
+            status: 'done',
+            date: 'Diciembre 2025',
+            category: 'tech',
         },
         {
-            title: "Colección Premium & Búsqueda",
+            title: 'Colección Premium & Búsqueda',
             description:
                 "Rediseño total de la galería musical con 'Hero Mode', filtrado instantáneo y tarjetas inmersivas. ¡Encontrar tu vibe nunca fue tan bonito!",
-            status: "done",
-            date: "Diciembre 2025",
-            category: "visual",
+            status: 'done',
+            date: 'Diciembre 2025',
+            category: 'visual',
         },
         {
-            title: "Vibe Studio 2.1",
+            title: 'Vibe Studio 2.1',
             description:
-                "Personalización total del entorno: Relojes (Neon, Retro, Analógico) y Fondos Dinámicos (Lluvia, Cyber, Zen) reactivos.",
-            status: "done",
-            date: "Diciembre 2025",
-            category: "visual",
+                'Personalización total del entorno: Relojes (Neon, Retro, Analógico) y Fondos Dinámicos (Lluvia, Cyber, Zen) reactivos.',
+            status: 'done',
+            date: 'Diciembre 2025',
+            category: 'visual',
         },
         {
-            title: "Hub de Artistas Automatizado",
+            title: 'Hub de Artistas Automatizado',
             description:
-                "Nuevo flujo de envío de música con carga masiva (drag & drop) y verificación automática de perfiles al aprobar lanzamientos.",
-            status: "done",
-            date: "Diciembre 2025",
-            category: "tech",
+                'Nuevo flujo de envío de música con carga masiva (drag & drop) y verificación automática de perfiles al aprobar lanzamientos.',
+            status: 'done',
+            date: 'Diciembre 2025',
+            category: 'tech',
         },
 
         {
-            title: "Sistema de Favoritos",
+            title: 'Sistema de Favoritos',
             description:
                 "Guarda tus canciones preferidas y accede a ellas fácilmente desde 'Mis Favoritos'.",
-            status: "done",
-            date: "Diciembre 2025",
-            category: "music",
+            status: 'done',
+            date: 'Diciembre 2025',
+            category: 'music',
         },
 
         {
-            title: "Widget para OBS/Streaming",
+            title: 'Widget para OBS/Streaming',
             description:
-                "Widget personalizable con gradientes animados, barra de progreso, equalizer y logo SVG. Perfecto para mostrar en streams.",
-            status: "done",
-            date: "Diciembre 2025",
-            category: "tech",
+                'Widget personalizable con gradientes animados, barra de progreso, equalizer y logo SVG. Perfecto para mostrar en streams.',
+            status: 'done',
+            date: 'Diciembre 2025',
+            category: 'tech',
         },
 
         {
-            title: "Sonidos Ambientales (White Noise)",
+            title: 'Sonidos Ambientales (White Noise)',
             description:
-                "Capa adicional de audio con sonidos de lluvia, fuego, café, océano y bosque que se mezcla con la música.",
-            status: "done",
-            date: "Diciembre 2025",
-            category: "music",
+                'Capa adicional de audio con sonidos de lluvia, fuego, café, océano y bosque que se mezcla con la música.',
+            status: 'done',
+            date: 'Diciembre 2025',
+            category: 'music',
         },
 
         {
-            title: "Salas de Escucha Compartida",
+            title: 'Salas de Escucha Compartida',
             description:
-                "Crea salas públicas o privadas para escuchar música sincronizada en tiempo real con amigos. El host controla la reproducción.",
-            status: "done",
-            date: "Diciembre 2025",
-            category: "community",
+                'Crea salas públicas o privadas para escuchar música sincronizada en tiempo real con amigos. El host controla la reproducción.',
+            status: 'done',
+            date: 'Diciembre 2025',
+            category: 'community',
         },
         {
-            title: "Navegación Simplificada",
-            description:
-                "Menú reorganizado con dropdown de usuario y mejor experiencia en móvil.",
-            status: "done",
-            date: "Diciembre 2025",
-            category: "tech",
+            title: 'Navegación Simplificada',
+            description: 'Menú reorganizado con dropdown de usuario y mejor experiencia en móvil.',
+            status: 'done',
+            date: 'Diciembre 2025',
+            category: 'tech',
         },
         {
-            title: "Responsive Design",
-            description:
-                "Interfaz completamente adaptada para móvil, tablet y desktop.",
-            status: "done",
-            date: "Diciembre 2025",
-            category: "tech",
+            title: 'Responsive Design',
+            description: 'Interfaz completamente adaptada para móvil, tablet y desktop.',
+            status: 'done',
+            date: 'Diciembre 2025',
+            category: 'tech',
         },
 
         // En desarrollo (Hitos hacia la perfección)
         {
-            title: "Lanzamiento v1.0 (Gold)",
+            title: 'Lanzamiento v1.0 (Gold)',
             description:
-                "El hito final de estabilidad. Solo ocurrirá cuando tengamos 0 bugs críticos, múltiples artistas verificados y una experiencia 100% pulida sin fallos ni aristas.",
-            status: "planned",
-            date: "2026",
-            category: "tech",
+                'El hito final. Estabilidad total y perfeccionamiento de todas las funciones + características sorpresa. Cero bugs críticos y experiencia 100% pulida.',
+            status: 'planned',
+            date: '2026',
+            category: 'tech',
         },
         {
-            title: "Expansión del Catálogo Musical",
-            description:
-                "Incorporación de 3-5 álbumes nuevos de lo-fi, jazz y ambient.",
-            status: "in-progress",
-            date: "Enero 2026",
-            category: "music",
+            title: 'Expansión del Catálogo Musical',
+            description: 'Incorporación de 3-5 álbumes nuevos de lo-fi, jazz y ambient.',
+            status: 'in-progress',
+            date: 'Enero 2026',
+            category: 'music',
         },
         {
-            title: "Mejoras del Reproductor",
-            description:
-                "Añadir modo repetición, modo aleatorio y controles de velocidad.",
-            status: "in-progress",
-            date: "Enero 2026",
-            category: "tech",
+            title: 'Mejoras del Reproductor',
+            description: 'Añadir modo repetición, modo aleatorio y controles de velocidad.',
+            status: 'in-progress',
+            date: 'Enero 2026',
+            category: 'tech',
         },
 
         // Planificado (próximos 3 meses)
         {
-            title: "Playlists Personalizadas",
+            title: 'Playlists Personalizadas',
             description:
-                "Crea tus propias listas de reproducción combinando canciones de diferentes álbumes.",
-            status: "planned",
-            date: "Febrero 2026",
-            category: "music",
+                'Crea tus propias listas de reproducción combinando canciones de diferentes álbumes.',
+            status: 'planned',
+            date: 'Febrero 2026',
+            category: 'music',
         },
         {
-            title: "Modo Offline",
-            description:
-                "Descarga álbumes para escuchar sin conexión (solo usuarios Pro).",
-            status: "planned",
-            date: "Marzo 2026",
-            category: "tech",
+            title: 'Modo Offline',
+            description: 'Descarga álbumes para escuchar sin conexión (solo usuarios Pro).',
+            status: 'planned',
+            date: 'Marzo 2026',
+            category: 'tech',
         },
         {
-            title: "Perfil de Usuario Mejorado",
-            description:
-                "Estadísticas de escucha, historial y álbumes más reproducidos.",
-            status: "planned",
-            date: "Marzo 2026",
-            category: "tech",
+            title: 'Perfil de Usuario Mejorado',
+            description: 'Estadísticas de escucha, historial y álbumes más reproducidos.',
+            status: 'planned',
+            date: 'Marzo 2026',
+            category: 'tech',
         },
         {
-            title: "Temas de Color",
-            description:
-                "Elige entre modo oscuro estándar, midnight blue o amethyst.",
-            status: "planned",
-            date: "Abril 2026",
-            category: "visual",
+            title: 'Temas de Color',
+            description: 'Elige entre modo oscuro estándar, midnight blue o amethyst.',
+            status: 'planned',
+            date: 'Abril 2026',
+            category: 'visual',
         },
     ];
 
-    function getStatusColor(status: RoadmapItem["status"]) {
-        if (status === "done")
-            return "bg-green-500/20 text-green-300 border-green-500/30";
-        if (status === "in-progress")
-            return "bg-primary-500/20 text-primary-300 border-primary-500/30";
-        return "bg-slate-500/20 text-slate-300 border-slate-500/30";
+    function getStatusColor(status: RoadmapItem['status']) {
+        if (status === 'done') return 'bg-green-500/20 text-green-300 border-green-500/30';
+        if (status === 'in-progress')
+            return 'bg-primary-500/20 text-primary-300 border-primary-500/30';
+        return 'bg-slate-500/20 text-slate-300 border-slate-500/30';
     }
 
-    function getStatusLabel(status: RoadmapItem["status"]) {
-        if (status === "done") return "✓ Completado";
-        if (status === "in-progress") return "🔄 En Desarrollo";
-        return "📦 Próximamente";
+    function getStatusLabel(status: RoadmapItem['status']) {
+        if (status === 'done') return '✓ Completado';
+        if (status === 'in-progress') return '🔄 En Desarrollo';
+        return '📦 Próximamente';
     }
 
-    import MusicIcon from "$lib/components/icons/MusicIcon.svelte";
-    import ArtIcon from "$lib/components/icons/ArtIcon.svelte";
-    import BoltIcon from "$lib/components/icons/BoltIcon.svelte";
-    import UsersIcon from "$lib/components/icons/UsersIcon.svelte";
-    import BulbIcon from "$lib/components/icons/BulbIcon.svelte";
+    import MusicIcon from '$lib/components/icons/MusicIcon.svelte';
+    import ArtIcon from '$lib/components/icons/ArtIcon.svelte';
+    import BoltIcon from '$lib/components/icons/BoltIcon.svelte';
+    import UsersIcon from '$lib/components/icons/UsersIcon.svelte';
+    import BulbIcon from '$lib/components/icons/BulbIcon.svelte';
 </script>
 
 <svelte:head>
@@ -210,8 +202,8 @@
                 Hoja de Ruta 2025-2026
             </h1>
             <p class="text-lg text-slate-400 max-w-2xl mx-auto">
-                Lo que hemos construido y hacia dónde vamos. Sin promesas
-                vacías, solo progreso real.
+                Lo que hemos construido y hacia dónde vamos. Sin promesas vacías, solo progreso
+                real.
             </p>
         </div>
 
@@ -242,28 +234,24 @@
                                     hover:border-white/10 transition-all hover:shadow-xl hover:shadow-blue-900/10
                                     hover:-translate-y-1"
                         >
-                            <div
-                                class="flex flex-wrap items-start justify-between gap-4 mb-3"
-                            >
+                            <div class="flex flex-wrap items-start justify-between gap-4 mb-3">
                                 <div class="flex items-center gap-3">
-                                    {#if item.category === "music"}
+                                    {#if item.category === 'music'}
                                         <MusicIcon size="lg" gradient={true} />
-                                    {:else if item.category === "visual"}
+                                    {:else if item.category === 'visual'}
                                         <ArtIcon size="lg" gradient={true} />
-                                    {:else if item.category === "tech"}
+                                    {:else if item.category === 'tech'}
                                         <BoltIcon size="lg" gradient={true} />
                                     {:else}
                                         <UsersIcon size="lg" gradient={true} />
                                     {/if}
-                                    <h3
-                                        class="text-xl font-bold text-slate-100"
-                                    >
+                                    <h3 class="text-xl font-bold text-slate-100">
                                         {item.title}
                                     </h3>
                                 </div>
                                 <span
                                     class="px-3 py-1 rounded-full text-xs font-bold border {getStatusColor(
-                                        item.status,
+                                        item.status
                                     )}"
                                 >
                                     {getStatusLabel(item.status)}
@@ -274,9 +262,7 @@
                                 {item.description}
                             </p>
 
-                            <div
-                                class="flex items-center gap-2 text-xs text-slate-500"
-                            >
+                            <div class="flex items-center gap-2 text-xs text-slate-500">
                                 <svg
                                     class="w-4 h-4"
                                     fill="none"
@@ -299,9 +285,7 @@
         </div>
 
         <!-- Footer Note -->
-        <div
-            class="mt-16 p-6 bg-primary-500/10 border border-primary-500/20 rounded-2xl"
-        >
+        <div class="mt-16 p-6 bg-primary-500/10 border border-primary-500/20 rounded-2xl">
             <div class="flex items-start gap-4">
                 <div class="mt-1">
                     <BulbIcon size="lg" gradient={true} />
@@ -316,8 +300,7 @@
                         <a
                             href="https://discord.gg/G7SrFtJHnr"
                             target="_blank"
-                            class="text-blue-400 hover:text-blue-300 underline"
-                            >Discord</a
+                            class="text-blue-400 hover:text-blue-300 underline">Discord</a
                         >.
                     </p>
                 </div>
