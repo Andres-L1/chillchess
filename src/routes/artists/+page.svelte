@@ -213,7 +213,9 @@
                                     >
                                         {artist.artistName}
                                     </h3>
-                                    <VerifiedBadge size="sm" />
+                                    <div class="flex-shrink-0">
+                                        <VerifiedBadge size="sm" />
+                                    </div>
                                 </div>
                                 <p class="text-sm text-slate-400 line-clamp-2">
                                     {artist.bio || "Artista de ChillChess"}

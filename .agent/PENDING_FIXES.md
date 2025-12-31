@@ -134,6 +134,162 @@ interface BugReport {
 
 ---
 
+### 5. Sistema de Respaldo y Persistencia de Datos
+**Requisito:** No debe haber pérdida de datos en Firebase ni R2 (excepto archivos temporales rechazados)  
+**Estado Actual:** Sin backups automáticos configurados
+
+**Análisis:**
+- ✅ **Firebase Firestore:** No hay backups automáticos configurados
+- ✅ **R2 (Cloudflare):** No hay versionado ni backups configurados
+- ⚠️ Riesgo: Eliminación accidental, corrupción, ataques
+
+**Solución Propuesta:**
+
+#### A. Firebase Firestore Backups
+1. **Exportación Programada (Recomendado):**
+```bash
+# Google Cloud Scheduler + Cloud Functions
+# Exportar cada 24h a Google Cloud Storage
+gcloud firestore export gs://chillchess-backups/firestore/$(date +%Y%m%d)
+```
+
+2. **Alternative: Manual via Firebase Console**
+   - Ir a Firestore → Importar/Exportar
+   - Exportar a bucket GCS
+   - Configurar Cloud Scheduler semanal
+
+#### B. R2 Object Versioning
+```javascript
+// Habilitar versionado en R2
+// Opción 1: Via Dashboard Cloudflare
+//   - Ir a R2 → Bucket Settings
+//   - Enable "Object Versioning"
+
+// Opción 2: Via API/Terraform
+{
+  "versioning": {
+    "status": "Enabled"
+  }
+}
+```
+
+#### C. Política de Retención
+**Archivos Temporales (Sí se eliminan):**
+- `submissions/temp/*` → Eliminación automática después de 3 días ✅ YA IMPLEMENTADO
+- Submissions rechazados → Mover a `submissions/rejected/` antes de eliminar
+
+**Archivos Permanentes (NO se eliminan):**
+- `albums/*` → **NUNCA** eliminar automáticamente
+- `avatars/*` → Mantener indefinidamente
+- Metadata de Firestore → Backups diarios
+
+#### D. Implementación Paso a Paso
+
+**Fase 1: Configurar Firestore Exports (2h)**
+```typescript
+// functions/scheduled-backup.ts
+import * as functions from 'firebase-functions';
+import * as admin from 'firebase-admin';
+
+export const scheduledFirestoreBackup = functions
+  .pubsub
+  .schedule('every 24 hours')
+  .onRun(async (context) => {
+    const projectId = process.env.GCP_PROJECT || 'chillchess';
+    const bucket = 'gs://chillchess-backups';
+    const date = new Date().toISOString().split('T')[0];
+    
+    await admin.firestore().exportDocuments({
+      collectionIds: ['users', 'albums', 'proposals', 'bug_reports'],
+      outputUriPrefix: `${bucket}/firestore/${date}`
+    });
+    
+    console.log(`✅ Backup completed: ${date}`);
+  });
+```
+
+**Fase 2: Habilitar R2 Versioning (30min)**
+1. Dashboard Cloudflare → R2
+2. Seleccionar bucket `chillchess-music`
+3. Settings → Enable Versioning
+4. Configurar lifecycle: Mantener últimas 5 versiones
+
+**Fase 3: Política de Archivos Rechazados (1h)**
+```typescript
+// src/routes/api/admin/reject-submission/+server.ts
+export const POST = async ({ request, locals }) => {
+  // ... auth checks
+  const { submissionId } = await request.json();
+  
+  // 1. Mover archivos a /rejected/ en lugar de eliminar
+  const files = await getSubmissionFiles(submissionId);
+  for (const file of files) {
+    await r2.copyObject({
+      Bucket: R2_BUCKET,
+      CopySource: `${R2_BUCKET}/${file.key}`,
+      Key: file.key.replace('submissions/temp/', 'submissions/rejected/')
+    });
+  }
+  
+  // 2. Programar eliminación definitiva después de 30 días
+  await scheduleCleanup(submissionId, 30);
+  
+  // 3. Actualizar Firestore
+  await updateDoc(doc(db, 'submissions', submissionId), {
+    status: 'rejected',
+    rejectedAt: serverTimestamp()
+  });
+};
+```
+
+**Fase 4: Dashboard de Backups (Admin Panel) (2h)**
+```svelte
+<!-- BackupsTab.svelte -->
+<div class="backups-status">
+  <h3>Estado de Respaldos</h3>
+  
+  <div class="backup-card">
+    <h4>🔥 Firestore</h4>
+    <p>Último backup: {lastBackupDate}</p>
+    <p>Tamaño: {backupSize} MB</p>
+    <button on:click={triggerManualBackup}>Backup Manual</button>
+  </div>
+  
+  <div class="backup-card">
+    <h4>☁️ R2 Versioning</h4>
+    <p>Estado: {versioningEnabled ? 'Habilitado ✅' : 'Deshabilitado ⚠️'}</p>
+    <p>Versiones guardadas: {versionCount}</p>
+  </div>
+  
+  <div class="backup-card">
+    <h4>🗑️ Archivos Rechazados</h4>
+    <p>Pendientes de limpieza: {rejectedCount}</p>
+    <button on:click={cleanupRejected}>Limpiar > 30 días</button>
+  </div>
+</div>
+```
+
+#### E. Costo Estimado
+- **Firestore Exports:** Gratis hasta 1GB/día (suficiente)
+- **Google Cloud Storage:** ~$0.02/GB/mes
+- **R2 Versioning:** Sin costo adicional (incluido)
+- **Total Estimado:** < $5 USD/mes
+
+#### F. Checklist de Implementación
+- [ ] Crear proyecto GCP (si no existe)
+- [ ] Configurar Cloud Functions para backups
+- [ ] Habilitar R2 versioning en dashboard
+- [ ] Implementar endpoint de rechazo con movimiento (no eliminación)
+- [ ] Crear BackupsTab en admin panel
+- [ ] Documentar proceso de restauración
+- [ ] Testear backup y restore completo
+
+**Prioridad:** 🔴 ALTA (protección de datos crítica)  
+**Estimación:** 5-6 horas total  
+**Beneficio:** Protección completa contra pérdida de datos
+
+---
+
 ## 📝 Notas de Deployment
 
 **Última versión desplegada:** v0.7.1 (2025-12-31)
