@@ -33,5 +33,10 @@ if (typeof window !== 'undefined' && auth) {
 export const logout = async () => {
     if (auth) {
         await signOut(auth);
+        try {
+            await fetch("/api/auth/session", { method: "DELETE" });
+        } catch (e) {
+            console.error("Session cleanup failed", e);
+        }
     }
 };

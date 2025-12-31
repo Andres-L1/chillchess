@@ -1,44 +1,41 @@
 <script lang="ts">
-    import { createEventDispatcher } from "svelte";
-    import { auth } from "$lib/firebase";
+    import { createEventDispatcher } from 'svelte';
+    import { auth } from '$lib/firebase';
     import {
         signInWithEmailAndPassword,
         createUserWithEmailAndPassword,
         updateProfile,
-    } from "firebase/auth";
+    } from 'firebase/auth';
 
     export let show = false;
 
     const dispatch = createEventDispatcher();
 
     let isRegistering = false;
-    let email = "";
-    let password = "";
-    let name = "";
-    let error = "";
+    let email = '';
+    let password = '';
+    let name = '';
+    let error = '';
     let loading = false;
 
     async function handleSubmit() {
         if (!email || !password) {
-            error = "Por favor completa todos los campos";
+            error = 'Por favor completa todos los campos';
             return;
         }
 
         if (isRegistering && !name) {
-            error = "Necesitamos tu nombre para el perfil";
+            error = 'Necesitamos tu nombre para el perfil';
             return;
         }
 
         loading = true;
-        error = "";
+        error = '';
 
         try {
+            let userCredential;
             if (isRegistering) {
-                const cred = await createUserWithEmailAndPassword(
-                    auth,
-                    email,
-                    password,
-                );
+                userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 // Update display name
                 if (auth.currentUser) {
                     await updateProfile(auth.currentUser, {
@@ -46,24 +43,35 @@
                     });
                 }
             } else {
-                await signInWithEmailAndPassword(auth, email, password);
+                userCredential = await signInWithEmailAndPassword(auth, email, password);
             }
-            dispatch("close");
+
+            // Sync with Server Session (Cookie)
+            if (userCredential.user) {
+                const token = await userCredential.user.getIdToken();
+                await fetch('/api/auth/session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ idToken: token }),
+                });
+            }
+            dispatch('close');
         } catch (e: any) {
             console.error(e);
-            if (e.code === "auth/email-already-in-use") {
-                error =
-                    "Este correo ya está registrado. Intenta iniciar sesión.";
+            if (e.code === 'auth/email-already-in-use') {
+                error = 'Este correo ya está registrado. Intenta iniciar sesión.';
             } else if (
-                e.code === "auth/wrong-password" ||
-                e.code === "auth/user-not-found" ||
-                e.code === "auth/invalid-credential"
+                e.code === 'auth/wrong-password' ||
+                e.code === 'auth/user-not-found' ||
+                e.code === 'auth/invalid-credential'
             ) {
-                error = "Credenciales incorrectas.";
-            } else if (e.code === "auth/weak-password") {
-                error = "La contraseña debe tener al menos 6 caracteres.";
+                error = 'Credenciales incorrectas.';
+            } else if (e.code === 'auth/weak-password') {
+                error = 'La contraseña debe tener al menos 6 caracteres.';
             } else {
-                error = "Error: " + e.message;
+                error = 'Error: ' + e.message;
             }
         } finally {
             loading = false;
@@ -72,11 +80,11 @@
 
     function toggleMode() {
         isRegistering = !isRegistering;
-        error = "";
+        error = '';
     }
 
     function close() {
-        dispatch("close");
+        dispatch('close');
     }
 </script>
 
@@ -108,12 +116,12 @@
             </div>
 
             <h2 class="text-2xl font-bold font-poppins mb-2 text-center">
-                {isRegistering ? "Crear Cuenta" : "Bienvenido"}
+                {isRegistering ? 'Crear Cuenta' : 'Bienvenido'}
             </h2>
             <p class="text-white/60 text-sm mb-6 leading-relaxed text-center">
                 {isRegistering
-                    ? "Únete para guardar tu progreso y desbloquear vibes."
-                    : "Accede a tu espacio de concentración."}
+                    ? 'Únete para guardar tu progreso y desbloquear vibes.'
+                    : 'Accede a tu espacio de concentración.'}
             </p>
 
             <!-- Toggle -->
@@ -124,7 +132,7 @@
                         : 'text-white/40 hover:text-white'}"
                     on:click={() => {
                         isRegistering = false;
-                        error = "";
+                        error = '';
                     }}
                     type="button">Entrar</button
                 >
@@ -134,7 +142,7 @@
                         : 'text-white/40 hover:text-white'}"
                     on:click={() => {
                         isRegistering = true;
-                        error = "";
+                        error = '';
                     }}
                     type="button">Registrarse</button
                 >
@@ -148,10 +156,7 @@
                 </div>
             {/if}
 
-            <form
-                on:submit|preventDefault={handleSubmit}
-                class="w-full flex flex-col gap-4"
-            >
+            <form on:submit|preventDefault={handleSubmit} class="w-full flex flex-col gap-4">
                 {#if isRegistering}
                     <div>
                         <input
@@ -198,7 +203,7 @@
                             class="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"
                         ></span>
                     {:else}
-                        {isRegistering ? "Registrarse" : "Iniciar Sesión"}
+                        {isRegistering ? 'Registrarse' : 'Iniciar Sesión'}
                     {/if}
                 </button>
             </form>
@@ -209,15 +214,13 @@
                 <a
                     href="/privacy"
                     target="_blank"
-                    class="hover:text-white underline transition-colors"
-                    >Privacidad</a
+                    class="hover:text-white underline transition-colors">Privacidad</a
                 >
                 <span>•</span>
                 <a
                     href="/terms"
                     target="_blank"
-                    class="hover:text-white underline transition-colors"
-                    >Términos</a
+                    class="hover:text-white underline transition-colors">Términos</a
                 >
             </div>
         </div>
