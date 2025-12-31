@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { audioStore } from "$lib/audio/store";
-    import { db, storage } from "$lib/firebase";
+    import { audioStore } from '$lib/audio/store';
+    import { db, storage } from '$lib/firebase';
     import {
         collection,
         addDoc,
@@ -11,59 +11,63 @@
         query,
         orderBy,
         where,
-    } from "firebase/firestore";
-    import {
-        ref,
-        uploadBytes,
-        getDownloadURL,
-        deleteObject,
-    } from "firebase/storage";
-    import type { Album } from "$lib/data/albums";
-    import { onMount, tick } from "svelte";
-    import { fly } from "svelte/transition";
+    } from 'firebase/firestore';
+    import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+    import type { Album } from '$lib/data/albums';
+    import { onMount, tick } from 'svelte';
+    import { fly } from 'svelte/transition';
 
     // --- CREATE ALBUM STATE ---
     let showCreateAlbumForm = false;
     let isCreatingAlbum = false;
     let verifiedArtists: any[] = [];
-    let selectedArtistId = "";
+    let selectedArtistId = '';
 
     let newAlbumData = {
-        title: "",
-        artist: "", // Name (display)
-        artistId: "", // Link to profile
-        category: "musica",
+        title: '',
+        artist: '', // Name (display)
+        artistId: '', // Link to profile
+        category: 'musica',
         coverFile: null as File | null,
         tracks: [] as File[],
     };
 
+    // Auto-fill artist name when selected from dropdown
+    $: if (selectedArtistId) {
+        const artist = verifiedArtists.find((a) => a.uid === selectedArtistId);
+        if (artist) {
+            newAlbumData.artist = artist.displayName;
+            newAlbumData.artistId = artist.uid;
+        }
+    }
+
     // --- R2 UPLOAD HELPER ---
     async function uploadToR2(file: File, folderPath: string) {
         // 1. Get Signed URL
-        const res = await fetch("/api/r2/sign-url", {
-            method: "POST",
+        const res = await fetch('/api/r2/sign-url', {
+            method: 'POST',
             body: JSON.stringify({
                 fileName: file.name,
                 fileType: file.type,
                 folder: folderPath,
             }),
         });
-        if (!res.ok) throw new Error("Failed to get upload URL");
+        if (!res.ok) throw new Error('Failed to get upload URL');
         const { uploadUrl, key } = await res.json();
 
         // 2. Upload File (PUT to Signed URL)
         const upload = await fetch(uploadUrl, {
-            method: "PUT",
+            method: 'PUT',
             body: file,
-            headers: { "Content-Type": file.type },
+            headers: { 'Content-Type': file.type },
         });
-        if (!upload.ok) throw new Error("Failed to upload file to R2");
+        if (!upload.ok) throw new Error('Failed to upload file to R2');
 
         // 3. Return Public URL (Assuming R2 dev domain or configured custom domain)
         // Since we don't have the custom domain available here securely, we construct using the R2 dev domain pattern
         // known from the project context or use the key.
         // For now, we return the key prefixed with a standard domain.
-        const PUBLIC_R2_DOMAIN = "https://pub-68b007968c59b47aa64fadcf.r2.dev";
+        const PUBLIC_R2_DOMAIN = 'https://pub-68b007968c59b47aa64fadcf.r2.dev';
         return `${PUBLIC_R2_DOMAIN}/${key}`;
     }
 
@@ -82,31 +86,25 @@
             !newAlbumData.coverFile ||
             newAlbumData.tracks.length === 0
         ) {
-            alert("Completa todos los campos (Portada y Tracks obligatorios)");
+            alert('Completa todos los campos (Portada y Tracks obligatorios)');
             return;
         }
         isCreatingAlbum = true;
         try {
             // Sanitized folder names for R2 structure
-            const safeArtist = newAlbumData.artist.replace(
-                /[^a-zA-Z0-9]/g,
-                "_",
-            );
-            const safeAlbum = newAlbumData.title.replace(/[^a-zA-Z0-9]/g, "_");
+            const safeArtist = newAlbumData.artist.replace(/[^a-zA-Z0-9]/g, '_');
+            const safeAlbum = newAlbumData.title.replace(/[^a-zA-Z0-9]/g, '_');
             const folderPath = `artists/${safeArtist}/${safeAlbum}`;
 
             // 1. Upload Cover to R2
-            const coverUrl = await uploadToR2(
-                newAlbumData.coverFile,
-                folderPath,
-            );
+            const coverUrl = await uploadToR2(newAlbumData.coverFile, folderPath);
 
             // 2. Upload Tracks loop to R2
             const uploadedTracks = [];
             for (const file of newAlbumData.tracks) {
                 const trackUrl = await uploadToR2(file, folderPath);
                 uploadedTracks.push({
-                    title: file.name.replace(/\.[^/.]+$/, ""), // Remove extension
+                    title: file.name.replace(/\.[^/.]+$/, ''), // Remove extension
                     artist: newAlbumData.artist,
                     file: trackUrl,
                     id: crypto.randomUUID(),
@@ -115,52 +113,51 @@
             }
 
             // 3. Save Album Doc to Firestore
-            await addDoc(collection(db, "albums"), {
+            await addDoc(collection(db, 'albums'), {
                 title: newAlbumData.title,
                 artist: newAlbumData.artist,
                 category: newAlbumData.category,
                 cover: coverUrl,
                 tracks: uploadedTracks,
                 createdAt: serverTimestamp(),
-                vibeId: "custom",
-                price: "Free",
-                tag: "New",
-                description: "Uploaded via Admin R2",
+                vibeId: 'custom',
+                price: 'Free',
+                tag: 'New',
+                description: 'Uploaded via Admin R2',
                 isPremium: false,
             });
 
-            alert("✅ Álbum creado y subido a R2 exitosamente");
+            alert('✅ Álbum creado y subido a R2 exitosamente');
             showCreateAlbumForm = false;
             // Reset fields
             newAlbumData = {
-                title: "",
-                artist: "",
-                artistId: "",
-                category: "musica",
+                title: '',
+                artist: '',
+                artistId: '',
+                category: 'musica',
                 coverFile: null,
                 tracks: [],
             };
         } catch (e: any) {
             console.error(e);
-            alert("Error: " + e.message);
+            alert('Error: ' + e.message);
         } finally {
             isCreatingAlbum = false;
         }
     }
 
-    let activeSection: "library" | "creators" = "library";
+    let activeSection: 'library' | 'creators' = 'library';
 
     // --- LIBRARY LOGIC ---
-    let searchTerm = "";
+    let searchTerm = '';
     let playingTrack: string | null = null;
     let audio: HTMLAudioElement | null = null;
-    let statusMessage = "";
+    let statusMessage = '';
 
     $: filteredAlbums = $audioStore.availableAlbums.filter((album) => {
         const term = searchTerm.toLowerCase();
         return (
-            album.title.toLowerCase().includes(term) ||
-            album.artist.toLowerCase().includes(term)
+            album.title.toLowerCase().includes(term) || album.artist.toLowerCase().includes(term)
         );
     });
 
@@ -178,32 +175,24 @@
     }
 
     async function deleteAlbum(album: Album) {
-        if (
-            !confirm(
-                `⚠️ ¿ELIMINAR ÁLBUM "${album.title}"?\n\nEsta acción es irreversible.`,
-            )
-        )
+        if (!confirm(`⚠️ ¿ELIMINAR ÁLBUM "${album.title}"?\n\nEsta acción es irreversible.`))
             return;
 
         try {
-            await deleteDoc(doc(db, "albums", album.id));
+            await deleteDoc(doc(db, 'albums', album.id));
             audioStore.update((state) => ({
                 ...state,
-                availableAlbums: state.availableAlbums.filter(
-                    (a) => a.id !== album.id,
-                ),
+                availableAlbums: state.availableAlbums.filter((a) => a.id !== album.id),
             }));
-            statusMessage = "✅ Álbum eliminado correctamente";
-            setTimeout(() => (statusMessage = ""), 3000);
+            statusMessage = '✅ Álbum eliminado correctamente';
+            setTimeout(() => (statusMessage = ''), 3000);
         } catch (e: any) {
             console.error(e);
-            if (e.code === "permission-denied") {
-                statusMessage =
-                    "❌ No tienes permisos o es un álbum del sistema (no eliminable)";
+            if (e.code === 'permission-denied') {
+                statusMessage = '❌ No tienes permisos o es un álbum del sistema (no eliminable)';
             } else {
                 statusMessage =
-                    "❌ Error al eliminar (probablemente es un álbum estático local): " +
-                    e.message;
+                    '❌ Error al eliminar (probablemente es un álbum estático local): ' + e.message;
             }
         }
     }
@@ -213,8 +202,8 @@
     let loadingCatalog = false;
 
     // Upload Form
-    let newTrackTitle = "";
-    let newTrackArtist = "ChillChess Originals";
+    let newTrackTitle = '';
+    let newTrackArtist = 'ChillChess Originals';
     let newTrackFile: File | null = null;
     let newTrackCover: File | null = null;
     let isUploading = false;
@@ -228,42 +217,34 @@
         try {
             // Updated Query: Filter by 'isVerified' boolean flag
             // This matches the logic in VerifyTab.svelte
-            const q = query(
-                collection(db, "users"),
-                where("isVerified", "==", true),
-            );
+            const q = query(collection(db, 'users'), where('isVerified', '==', true));
 
             const snap = await getDocs(q);
             verifiedArtists = snap.docs.map((d) => {
                 const data = d.data();
                 return {
                     uid: d.id,
-                    displayName:
-                        data.displayName || data.username || "Sin Nombre",
+                    displayName: data.displayName || data.username || 'Sin Nombre',
                     photoURL: data.photoURL,
                     isFounder:
-                        data.subscriptionTier === "pro" ||
-                        data.subscriptionTier === "premium",
+                        data.subscriptionTier === 'pro' || data.subscriptionTier === 'premium',
                 };
             });
 
-            console.log("Verified Artists loaded:", verifiedArtists.length);
+            console.log('Verified Artists loaded:', verifiedArtists.length);
         } catch (e) {
-            console.warn("Error loading verified artists:", e);
+            console.warn('Error loading verified artists:', e);
         }
     }
 
     async function loadCatalog() {
         loadingCatalog = true;
         try {
-            const q = query(
-                collection(db, "creatorCatalog"),
-                orderBy("createdAt", "desc"),
-            );
+            const q = query(collection(db, 'creatorCatalog'), orderBy('createdAt', 'desc'));
             const snap = await getDocs(q);
             catalogTracks = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
         } catch (e) {
-            console.error("Error loading catalog:", e);
+            console.error('Error loading catalog:', e);
         } finally {
             loadingCatalog = false;
         }
@@ -274,7 +255,7 @@
 
     async function uploadToCatalog() {
         if (!newTrackTitle || !newTrackFile) {
-            alert("Título y archivo de audio son obligatorios");
+            alert('Título y archivo de audio son obligatorios');
             return;
         }
 
@@ -291,7 +272,7 @@
             const audioUrl = await getDownloadURL(audioRef);
             uploadProgress = 60;
 
-            let coverUrl = "";
+            let coverUrl = '';
             if (newTrackCover) {
                 const coverPath = `catalog/covers/${timestamp}_${newTrackCover.name}`;
                 const coverRef = ref(storage, coverPath);
@@ -301,31 +282,31 @@
             uploadProgress = 80;
 
             // Save to Firestore
-            await addDoc(collection(db, "creatorCatalog"), {
+            await addDoc(collection(db, 'creatorCatalog'), {
                 title: newTrackTitle,
                 artist: newTrackArtist,
                 url: audioUrl,
-                coverUrl: coverUrl || "/images/default-cover.jpg", // Fallback
+                coverUrl: coverUrl || '/images/default-cover.jpg', // Fallback
                 storagePath: storagePath, // To delete later
                 createdAt: serverTimestamp(),
                 duration: 0, // Placeholder
             });
 
             uploadProgress = 100;
-            statusMessage = "✅ Pista añadida al catálogo";
+            statusMessage = '✅ Pista añadida al catálogo';
 
             // Reset Form
-            newTrackTitle = "";
+            newTrackTitle = '';
             newTrackFile = null;
             newTrackCover = null;
             const fileInputs = document.querySelectorAll('input[type="file"]');
-            fileInputs.forEach((input: any) => (input.value = ""));
+            fileInputs.forEach((input: any) => (input.value = ''));
 
             await loadCatalog();
-            setTimeout(() => (statusMessage = ""), 3000);
+            setTimeout(() => (statusMessage = ''), 3000);
         } catch (e: any) {
             console.error(e);
-            alert("Error al subir: " + e.message);
+            alert('Error al subir: ' + e.message);
         } finally {
             isUploading = false;
             uploadProgress = 0;
@@ -336,19 +317,17 @@
         if (!confirm(`¿Eliminar "${track.title}" del catálogo?`)) return;
 
         try {
-            await deleteDoc(doc(db, "creatorCatalog", track.id));
+            await deleteDoc(doc(db, 'creatorCatalog', track.id));
             if (track.storagePath) {
                 const audioRef = ref(storage, track.storagePath);
-                await deleteObject(audioRef).catch(() =>
-                    console.warn("Audio file not found"),
-                );
+                await deleteObject(audioRef).catch(() => console.warn('Audio file not found'));
             }
             // Add deletion for cover if needed, but skipping for simplicity
 
             catalogTracks = catalogTracks.filter((t) => t.id !== track.id);
-            statusMessage = "🗑️ Pista eliminada";
+            statusMessage = '🗑️ Pista eliminada';
         } catch (e: any) {
-            alert("Error al eliminar: " + e.message);
+            alert('Error al eliminar: ' + e.message);
         }
     }
 </script>
@@ -369,7 +348,7 @@
                 'library'
                     ? 'bg-primary-500 text-white shadow-lg'
                     : 'text-slate-400 hover:text-white'}"
-                on:click={() => (activeSection = "library")}
+                on:click={() => (activeSection = 'library')}
             >
                 Biblioteca App
             </button>
@@ -378,7 +357,7 @@
                 'creators'
                     ? 'bg-purple-500 text-white shadow-lg'
                     : 'text-slate-400 hover:text-white'}"
-                on:click={() => (activeSection = "creators")}
+                on:click={() => (activeSection = 'creators')}
             >
                 Catálogo Streamers
             </button>
@@ -392,7 +371,7 @@
         </div>
     {/if}
 
-    {#if activeSection === "library"}
+    {#if activeSection === 'library'}
         <!-- LIBRARY VIEW (EXISTING CODE) -->
         <div
             class="mb-6 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center"
@@ -416,8 +395,7 @@
             <div
                 class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in cursor-pointer"
                 on:click|self={() => (showCreateAlbumForm = false)}
-                on:keydown={(e) =>
-                    e.key === "Escape" && (showCreateAlbumForm = false)}
+                on:keydown={(e) => e.key === 'Escape' && (showCreateAlbumForm = false)}
                 role="button"
                 tabindex="0"
                 aria-label="Cerrar modal"
@@ -470,9 +448,7 @@
                                         {#each verifiedArtists as artist}
                                             <option value={artist.uid}>
                                                 {artist.displayName}
-                                                {artist.isFounder
-                                                    ? "(Fundador 💎)"
-                                                    : ""}
+                                                {artist.isFounder ? '(Fundador 💎)' : ''}
                                             </option>
                                         {/each}
                                     </select>
@@ -483,8 +459,8 @@
                                     </div>
                                 </div>
                                 <p class="text-xs text-slate-500 mt-2">
-                                    ¿No encuentras al artista? Asegúrate de que
-                                    tenga el rol 'artist' o esté 'verificado'.
+                                    ¿No encuentras al artista? Asegúrate de que tenga el rol
+                                    'artist' o esté 'verificado'.
                                     <button
                                         on:click={loadVerifiedArtists}
                                         class="text-primary-400 underline hover:text-primary-300 ml-1"
@@ -503,9 +479,7 @@
                                     class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary-500 outline-none"
                                 >
                                     <option value="musica">Música</option>
-                                    <option value="juegos"
-                                        >Juegos / Focus</option
-                                    >
+                                    <option value="juegos">Juegos / Focus</option>
                                     <option value="ambiente">Ambiente</option>
                                 </select>
                             </label>
@@ -525,24 +499,20 @@
                                         <div
                                             class="absolute inset-0 bg-cover bg-center"
                                             style="background-image: url({URL.createObjectURL(
-                                                newAlbumData.coverFile,
+                                                newAlbumData.coverFile
                                             )});"
                                         >
                                             <div
                                                 class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                                             >
-                                                <span
-                                                    class="text-white font-bold"
+                                                <span class="text-white font-bold"
                                                     >Cambiar Imagen</span
                                                 >
                                             </div>
                                         </div>
                                     {:else}
-                                        <span class="text-4xl mb-2 opacity-50"
-                                            >🖼️</span
-                                        >
-                                        <span
-                                            class="text-xs text-slate-500 text-center"
+                                        <span class="text-4xl mb-2 opacity-50">🖼️</span>
+                                        <span class="text-xs text-slate-500 text-center"
                                             >Click para subir imagen</span
                                         >
                                     {/if}
@@ -556,13 +526,10 @@
                             </label>
 
                             <label class="block group">
-                                <span
-                                    class="block text-sm font-semibold text-slate-400 mb-2"
+                                <span class="block text-sm font-semibold text-slate-400 mb-2"
                                     >Tracks (Selección múltiple)</span
                                 >
-                                <div
-                                    class="bg-black/40 border border-white/10 rounded-xl p-4"
-                                >
+                                <div class="bg-black/40 border border-white/10 rounded-xl p-4">
                                     <input
                                         type="file"
                                         multiple
@@ -579,10 +546,7 @@
                                                 <div
                                                     class="flex items-center gap-2 py-2 border-b border-white/5 last:border-0 text-xs text-slate-300"
                                                 >
-                                                    <span
-                                                        class="text-primary-500"
-                                                        >🎵</span
-                                                    >
+                                                    <span class="text-primary-500">🎵</span>
                                                     {file.name}
                                                 </div>
                                             {/each}
@@ -600,9 +564,7 @@
                     </div>
 
                     <!-- Footer Actions -->
-                    <div
-                        class="flex justify-end items-center gap-4 pt-4 border-t border-white/5"
-                    >
+                    <div class="flex justify-end items-center gap-4 pt-4 border-t border-white/5">
                         <button
                             on:click={() => (showCreateAlbumForm = false)}
                             class="px-6 py-2 text-slate-400 hover:text-white font-medium transition-colors"
@@ -614,9 +576,7 @@
                             disabled={isCreatingAlbum}
                             class="px-8 py-3 bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-500 hover:to-purple-500 rounded-xl font-bold text-white shadow-lg shadow-primary-900/20 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 transition-all w-full md:w-auto"
                         >
-                            {isCreatingAlbum
-                                ? "Subiendo y Procesando..."
-                                : "🚀 Publicar Álbum"}
+                            {isCreatingAlbum ? 'Subiendo y Procesando...' : '🚀 Publicar Álbum'}
                         </button>
                     </div>
                 </div>
@@ -647,10 +607,7 @@
                         </div>
 
                         <div class="overflow-hidden">
-                            <h3
-                                class="font-bold text-white truncate"
-                                title={album.title}
-                            >
+                            <h3 class="font-bold text-white truncate" title={album.title}>
                                 {album.title}
                             </h3>
                             <p class="text-sm text-slate-400 truncate">
@@ -680,9 +637,7 @@
                                             ▶
                                         {/if}
                                     </button>
-                                    <span class="text-slate-300 truncate"
-                                        >{track.title}</span
-                                    >
+                                    <span class="text-slate-300 truncate">{track.title}</span>
                                 </div>
                             {/each}
                         {:else}
@@ -707,20 +662,14 @@
         <!-- CREATORS CATALOG VIEW (NEW) -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Upload Form -->
-            <div
-                class="bg-white/5 border border-white/10 rounded-2xl p-6 h-fit"
-            >
-                <h3
-                    class="text-xl font-bold text-white mb-4 flex items-center gap-2"
-                >
+            <div class="bg-white/5 border border-white/10 rounded-2xl p-6 h-fit">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
                     <span class="text-purple-400">📤</span> Subir Música
                 </h3>
 
                 <div class="space-y-4">
                     <label class="block">
-                        <span class="block text-sm text-slate-400 mb-1"
-                            >Título</span
-                        >
+                        <span class="block text-sm text-slate-400 mb-1">Título</span>
                         <input
                             type="text"
                             bind:value={newTrackTitle}
@@ -729,9 +678,7 @@
                         />
                     </label>
                     <label class="block">
-                        <span class="block text-sm text-slate-400 mb-1"
-                            >Artista</span
-                        >
+                        <span class="block text-sm text-slate-400 mb-1">Artista</span>
                         <input
                             type="text"
                             bind:value={newTrackArtist}
@@ -739,9 +686,7 @@
                         />
                     </label>
 
-                    <div
-                        class="bg-black/20 p-4 rounded-lg border border-white/5 border-dashed"
-                    >
+                    <div class="bg-black/20 p-4 rounded-lg border border-white/5 border-dashed">
                         <label class="block w-full cursor-pointer">
                             <span class="block text-sm text-slate-400 mb-2"
                                 >Archivo de Audio (MP3)</span
@@ -750,26 +695,21 @@
                                 type="file"
                                 accept="audio/mpeg"
                                 on:change={(e) =>
-                                    (newTrackFile =
-                                        e.currentTarget.files?.[0] || null)}
+                                    (newTrackFile = e.currentTarget.files?.[0] || null)}
                                 class="w-full text-sm text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-purple-500/20 file:text-purple-400 hover:file:bg-purple-500/30"
                             />
                         </label>
                     </div>
 
-                    <div
-                        class="bg-black/20 p-4 rounded-lg border border-white/5 border-dashed"
-                    >
+                    <div class="bg-black/20 p-4 rounded-lg border border-white/5 border-dashed">
                         <label class="block w-full cursor-pointer">
-                            <span class="block text-sm text-slate-400 mb-2"
-                                >Portada (Opcional)</span
+                            <span class="block text-sm text-slate-400 mb-2">Portada (Opcional)</span
                             >
                             <input
                                 type="file"
                                 accept="image/*"
                                 on:change={(e) =>
-                                    (newTrackCover =
-                                        e.currentTarget.files?.[0] || null)}
+                                    (newTrackCover = e.currentTarget.files?.[0] || null)}
                                 class="w-full text-sm text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-slate-500/20 file:text-slate-400 hover:file:bg-slate-500/30"
                             />
                         </label>
@@ -777,9 +717,7 @@
 
                     <button
                         on:click={uploadToCatalog}
-                        disabled={isUploading ||
-                            !newTrackTitle ||
-                            !newTrackFile}
+                        disabled={isUploading || !newTrackTitle || !newTrackFile}
                         class="w-full py-3 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-lg shadow-purple-900/20 transition-all flex items-center justify-center gap-2"
                     >
                         {#if isUploading}
@@ -792,34 +730,26 @@
                         {/if}
                     </button>
                     <p class="text-xs text-slate-500 text-center">
-                        La música será pública en el catálogo de creadores de
-                        inmediato.
+                        La música será pública en el catálogo de creadores de inmediato.
                     </p>
                 </div>
             </div>
 
             <!-- List -->
             <div class="lg:col-span-2">
-                <div
-                    class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden"
-                >
-                    <div
-                        class="p-4 border-b border-white/10 flex justify-between items-center"
-                    >
+                <div class="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+                    <div class="p-4 border-b border-white/10 flex justify-between items-center">
                         <h3 class="font-bold text-slate-200">
                             Catálogo Actual ({catalogTracks.length})
                         </h3>
                         <button
                             on:click={loadCatalog}
-                            class="text-xs text-purple-400 hover:text-purple-300"
-                            >Actualizar</button
+                            class="text-xs text-purple-400 hover:text-purple-300">Actualizar</button
                         >
                     </div>
 
                     {#if loadingCatalog}
-                        <div class="p-8 text-center text-slate-500">
-                            Cargando...
-                        </div>
+                        <div class="p-8 text-center text-slate-500">Cargando...</div>
                     {:else if catalogTracks.length === 0}
                         <div class="p-8 text-center text-slate-500">
                             El catálogo está vacío. Sube tu primera canción.
@@ -840,28 +770,22 @@
                                         />
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p
-                                            class="font-bold text-white text-sm truncate"
-                                        >
+                                        <p class="font-bold text-white text-sm truncate">
                                             {track.title}
                                         </p>
-                                        <p
-                                            class="text-xs text-slate-400 truncate"
-                                        >
+                                        <p class="text-xs text-slate-400 truncate">
                                             {track.artist}
                                         </p>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <button
-                                            on:click={() =>
-                                                togglePlay(track.url)}
+                                            on:click={() => togglePlay(track.url)}
                                             class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
                                         >
                                             {#if playingTrack === track.url}⏸{:else}▶{/if}
                                         </button>
                                         <button
-                                            on:click={() =>
-                                                deleteCatalogTrack(track)}
+                                            on:click={() => deleteCatalogTrack(track)}
                                             class="w-8 h-8 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-500 flex items-center justify-center transition-colors"
                                             title="Eliminar"
                                         >

@@ -117,6 +117,14 @@ service cloud.firestore {
     }
 
     // ============================================
+    // Creator Catalog (Music for Streamers)
+    // ============================================
+    match /creatorCatalog/{trackId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ============================================
     // Widget / OBS Overlay Sync (Unified)
     // ============================================
     match /nowPlaying/{userId} {
