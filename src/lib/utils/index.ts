@@ -55,5 +55,5 @@ export {
     formatAlbumYear,
 } from './formatters';
 
-// Debounce (if exists)
+// Timing Utilities
 export { debounce, throttle } from './debounce';
