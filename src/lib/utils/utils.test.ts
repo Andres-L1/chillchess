@@ -14,7 +14,7 @@ import {
 } from '$lib/utils/formatters';
 import {
     validateBugTitle,
-    validateEmail,
+    isValidEmail,
     isEmpty,
 } from '$lib/utils/validators';
 import { debounce } from '$lib/utils/debounce';
@@ -73,13 +73,13 @@ describe('Validators', () => {
         });
     });
 
-    describe('validateEmail', () => {
+    describe('isValidEmail', () => {
         it('validates email format', () => {
-            expect(validateEmail('test@example.com')).toBe(true);
-            expect(validateEmail('user+tag@domain.co.uk')).toBe(true);
-            expect(validateEmail('invalid')).toBe(false);
-            expect(validateEmail('invalid@')).toBe(false);
-            expect(validateEmail('@invalid.com')).toBe(false);
+            expect(isValidEmail('test@example.com')).toBe(true);
+            expect(isValidEmail('user+tag@domain.co.uk')).toBe(true);
+            expect(isValidEmail('invalid')).toBe(false);
+            expect(isValidEmail('invalid@')).toBe(false);
+            expect(isValidEmail('@invalid.com')).toBe(false);
         });
     });
 
