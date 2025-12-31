@@ -15,7 +15,7 @@
     "format:check": "prettier --check .",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "prepare": "husky install"
+    "prepare": "husky install || echo \"Husky not installed, skipping...\""
   },
   "devDependencies": {
     "@fontsource/cinzel": "^5.0.0",
