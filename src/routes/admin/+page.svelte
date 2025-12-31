@@ -155,6 +155,12 @@
             <div
                 class="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
                 on:click={() => (isMobileMenuOpen = false)}
+                on:keydown={(e) => {
+                    if (e.key === 'Escape' || e.key === 'Enter') isMobileMenuOpen = false;
+                }}
+                role="button"
+                tabindex="0"
+                aria-label="Cerrar menú"
                 transition:fade
             ></div>
         {/if}
@@ -367,8 +373,16 @@
 
                         <!-- Proposals Stat -->
                         <div
-                            class="bg-[#131b2e]/60 backdrop-blur-xl p-6 rounded-2xl border border-white/5 relative overflow-hidden group hover:border-purple-500/30 transition-colors cursor-pointer"
+                            class="bg-[#131b2e]/60 backdrop-blur-xl p-6 rounded-2xl border border-white/5 relative overflow-hidden group hover:border-purple-500/30 transition-colors cursor-pointer outline-none focus:ring-2 focus:ring-purple-500/50"
                             on:click={() => (activeTab = 'proposals')}
+                            on:keydown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    activeTab = 'proposals';
+                                    e.preventDefault();
+                                }
+                            }}
+                            role="button"
+                            tabindex="0"
                         >
                             <div
                                 class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"
@@ -392,8 +406,16 @@
 
                         <!-- Bugs Stat (New) -->
                         <div
-                            class="bg-[#131b2e]/60 backdrop-blur-xl p-6 rounded-2xl border border-white/5 relative overflow-hidden group hover:border-red-500/30 transition-colors cursor-pointer"
+                            class="bg-[#131b2e]/60 backdrop-blur-xl p-6 rounded-2xl border border-white/5 relative overflow-hidden group hover:border-red-500/30 transition-colors cursor-pointer outline-none focus:ring-2 focus:ring-red-500/50"
                             on:click={() => (activeTab = 'bugs')}
+                            on:keydown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    activeTab = 'bugs';
+                                    e.preventDefault();
+                                }
+                            }}
+                            role="button"
+                            tabindex="0"
                         >
                             <div
                                 class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"
