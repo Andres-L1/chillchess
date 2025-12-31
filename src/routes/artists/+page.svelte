@@ -213,7 +213,7 @@
                                     >
                                         {artist.artistName}
                                     </h3>
-                                    <div class="flex-shrink-0">
+                                    <div class="flex-shrink-0 relative z-10">
                                         <VerifiedBadge size="sm" />
                                     </div>
                                 </div>

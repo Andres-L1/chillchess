@@ -1,6 +1,6 @@
 <script lang="ts">
     import { audioStore, setMusicVolume } from "$lib/audio/store";
-    import { fly } from "svelte/transition";
+    import { fly, fade } from "svelte/transition";
 
     let isHovering = false;
     let volumeTimeout: number;
@@ -17,7 +17,7 @@
 </script>
 
 <div
-    class="relative flex items-center justify-center p-2"
+    class="relative flex items-center justify-center p-2 group"
     on:mouseenter={() => (isHovering = true)}
     on:mouseleave={() => (isHovering = false)}
     role="group"
@@ -26,7 +26,7 @@
     <!-- Mute/Unmute Button -->
     <button
         on:click={() => setMusicVolume($audioStore.musicVolume === 0 ? 0.5 : 0)}
-        class="text-slate-400 hover:text-white transition-colors relative z-10 p-2"
+        class="text-slate-400 hover:text-white transition-colors relative z-20 p-2"
         title={$audioStore.musicVolume === 0 ? "Activar Sonido" : "Silenciar"}
     >
         {#if $audioStore.musicVolume === 0 || $audioStore.isMuted}
@@ -48,41 +48,37 @@
         {/if}
     </button>
 
-    <!-- Vertical Slider Popup -->
-    {#if isHovering}
+    <!-- Horizontal Slider (Expands to Right) -->
+    <!-- Always rendered but hidden via width/opacity for transition -->
+    <div
+        class="flex items-center transition-all duration-300 ease-out overflow-hidden {isHovering
+            ? 'w-24 opacity-100 ml-2'
+            : 'w-0 opacity-0 ml-0 hover:w-24 hover:opacity-100'}"
+    >
         <div
-            transition:fly={{ y: 10, duration: 200 }}
-            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-10 h-32 bg-[#0F172A]/90 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col items-center justify-end p-3 shadow-2xl z-[200]"
+            class="relative w-full h-1.5 bg-white/10 rounded-full group/slider"
         >
+            <!-- Track Fill -->
             <div
-                class="relative w-1.5 h-full bg-white/10 rounded-full flex items-end group"
+                class="absolute left-0 top-0 h-full bg-primary-500 rounded-full"
+                style="width: {$audioStore.musicVolume * 100}%"
             >
-                <!-- Track Fill -->
+                <!-- Knob (Visible on hover of slider) -->
                 <div
-                    class="w-full bg-primary-500 rounded-full relative"
-                    style="height: {$audioStore.musicVolume * 100}%"
-                >
-                    <!-- Knob -->
-                    <div
-                        class="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-white rounded-full shadow-md"
-                    ></div>
-                </div>
-
-                <!-- Invisible Range Input -->
-                <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    value={$audioStore.musicVolume}
-                    on:input={handleVolumeChange}
-                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer appearance-none z-10"
-                    style="-webkit-appearance: slider-vertical;"
-                />
+                    class="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white rounded-full shadow-md opacity-0 group-hover/slider:opacity-100 transition-opacity"
+                ></div>
             </div>
-            <span class="text-[10px] font-bold text-slate-400 mt-2 font-mono"
-                >{Math.round($audioStore.musicVolume * 100)}%</span
-            >
+
+            <!-- Input -->
+            <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={$audioStore.musicVolume}
+                on:input={handleVolumeChange}
+                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            />
         </div>
-    {/if}
+    </div>
 </div>
