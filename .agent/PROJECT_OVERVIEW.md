@@ -18,6 +18,8 @@
 **URL:** [chillchess.com](https://chillchess.com)  
 **Plataforma:** SvelteKit + Firebase + Cloudflare R2 + Netlify
 
+> **📌 IMPORTANTE:** Para tareas pendientes, bugs conocidos y features en desarrollo, consultar [`.agent/PENDING_FIXES.md`](./.PENDING_FIXES.md)
+
 ---
 
 ## 📁 Arquitectura del Proyecto
