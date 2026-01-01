@@ -1,10 +1,35 @@
 <script lang="ts">
     import type { ArtistProfile, SocialLink } from "$lib/types/artist";
     import { SOCIAL_PLATFORMS } from "$lib/types/artist";
+    import { onMount } from 'svelte';
+    import { collection, query, where, getDocs } from 'firebase/firestore';
+    import { db } from '$lib/firebase';
+    import type { Album } from '$lib/data/albums';
 
     export let profile: ArtistProfile;
     export let isPro: boolean = false;
     export let isPreview: boolean = false;
+
+    let artistAlbums: Album[] = [];
+    let loadingAlbums = true;
+
+    onMount(async () => {
+        if (!profile.userId || isPreview) {
+            loadingAlbums = false;
+            return;
+        }
+
+        try {
+            // Query albums where artistId matches
+            const q = query(collection(db, 'albums'), where('artistId', '==', profile.userId));
+            const snapshot = await getDocs(q);
+            artistAlbums = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Album));
+        } catch (e) {
+            console.error("Error loading artist albums:", e);
+        } finally {
+            loadingAlbums = false;
+        }
+    });
 
     // Get social platform info
     function getPlatformInfo(platform: string) {
@@ -163,6 +188,30 @@
                         {/if}
                     </button>
                 {/each}
+            </div>
+        {/if}
+
+        <!-- Discography / Releases Section (Auto-Connected) -->
+        {#if !loadingAlbums && artistAlbums.length > 0}
+            <div class="mt-8 pt-6 border-t border-white/10">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">Lanzamientos</h3>
+                <div class="space-y-3">
+                    {#each artistAlbums as album}
+                        <div class="flex items-center gap-3 p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors group text-left cursor-default">
+                            <img src={album.cover} alt={album.title} class="w-10 h-10 rounded object-cover bg-black/50" />
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-bold text-white truncate group-hover:text-primary-400 transition-colors">{album.title}</p>
+                                <p class="text-[10px] text-slate-500">{album.tracks?.length || 0} canciones</p>
+                            </div>
+                            <span class="text-xs text-slate-600 font-mono">
+                                {(() => {
+                                    const seconds = (album.createdAt as any)?.seconds;
+                                    return new Date(seconds ? seconds * 1000 : Date.now()).getFullYear();
+                                })()}
+                            </span>
+                        </div>
+                    {/each}
+                </div>
             </div>
         {/if}
 
