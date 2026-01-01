@@ -100,6 +100,36 @@
     function getSocialIcon(platform: string) {
         return SOCIAL_PLATFORMS.find((p) => p.id === platform)?.icon || '🔗';
     }
+    $: flatTracks = artistAlbums.flatMap((a) =>
+        (a.tracks || []).map((t) => ({
+            ...t,
+            albumCover: a.cover,
+            albumTitle: a.title,
+            artist: a.artist,
+        }))
+    );
+
+    function playArtistMix() {
+        audioStore.update((s) => ({
+            ...s,
+            playlist: flatTracks,
+            currentTrackIndex: 0,
+            isPlaying: true,
+            isRadioMode: false,
+            currentAlbumId: undefined,
+        }));
+    }
+
+    function handlePlayTrack(index: number) {
+        audioStore.update((s) => ({
+            ...s,
+            playlist: flatTracks,
+            currentTrackIndex: index,
+            isPlaying: true,
+            isRadioMode: false,
+            currentAlbumId: undefined,
+        }));
+    }
 </script>
 
 <svelte:head>
@@ -218,6 +248,76 @@
                 {/if}
             </div>
         </div>
+
+        <!-- Songs Section (NEW) -->
+        {#if flatTracks.length > 0}
+            <div class="mb-12 animate-fade-in">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-4">
+                        <h2 class="text-3xl font-bold">Canciones</h2>
+                        <div class="text-sm text-slate-500 bg-white/5 px-3 py-1 rounded-full">
+                            {flatTracks.length} tracks
+                        </div>
+                    </div>
+                    <button
+                        on:click={playArtistMix}
+                        class="bg-primary-500 hover:bg-primary-400 text-white px-6 py-2 rounded-full font-bold flex items-center gap-2 transition-all shadow-lg hover:shadow-primary-500/20 transform hover:-translate-y-0.5"
+                    >
+                        <span>▶</span> Reproducir Todo
+                    </button>
+                </div>
+
+                <div class="bg-black/20 rounded-3xl border border-white/5 overflow-hidden">
+                    <div class="max-h-[400px] overflow-y-auto custom-scrollbar p-2">
+                        {#each flatTracks as track, i}
+                            <button
+                                class="w-full flex items-center gap-4 p-3 hover:bg-white/5 transition-colors group rounded-xl text-left"
+                                on:click={() => handlePlayTrack(i)}
+                            >
+                                <div
+                                    class="w-12 h-12 rounded-lg bg-slate-800 flex-shrink-0 overflow-hidden relative group-hover:shadow-lg transition-all"
+                                >
+                                    <img
+                                        src={track.albumCover}
+                                        alt={track.albumTitle}
+                                        class="w-full h-full object-cover opacity-80 group-hover:opacity-100"
+                                    />
+                                    <div
+                                        class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                        <span class="text-white text-sm">▶</span>
+                                    </div>
+                                </div>
+
+                                <span
+                                    class="text-sm font-mono text-slate-600 w-6 text-center group-hover:text-primary-400 transition-colors"
+                                >
+                                    {i + 1}
+                                </span>
+
+                                <div class="min-w-0 flex-1">
+                                    <div
+                                        class="font-bold text-white truncate group-hover:text-primary-300 transition-colors"
+                                    >
+                                        {track.title}
+                                    </div>
+                                    <div
+                                        class="text-xs text-slate-400 truncate flex items-center gap-2"
+                                    >
+                                        <span>{track.albumTitle}</span>
+                                    </div>
+                                </div>
+                                <div
+                                    class="text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity px-2"
+                                >
+                                    ▶
+                                </div>
+                            </button>
+                        {/each}
+                    </div>
+                </div>
+            </div>
+        {/if}
 
         <!-- Albums Section -->
         <div class="pb-32">
