@@ -1,13 +1,13 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { userStore } from "$lib/auth/userStore";
-    import { userSubscription } from "$lib/subscription/userSubscription";
-    import { goto } from "$app/navigation";
-    import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-    import { db } from "$lib/firebase";
-    import type { ArtistProfile, SocialLink } from "$lib/types/artist";
-    import { SOCIAL_PLATFORMS, DEFAULT_THEME_COLORS } from "$lib/types/artist";
-    import ArtistCard from "$lib/components/ArtistCard.svelte";
+    import { onMount } from 'svelte';
+    import { userStore } from '$lib/auth/userStore';
+    import { userSubscription } from '$lib/subscription/userSubscription';
+    import { goto } from '$app/navigation';
+    import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+    import { db } from '$lib/firebase';
+    import type { ArtistProfile, SocialLink } from '$lib/types/artist';
+    import { SOCIAL_PLATFORMS, DEFAULT_THEME_COLORS } from '$lib/types/artist';
+    import ArtistCard from '$lib/components/ArtistCard.svelte';
 
     let loading = true;
     let saving = false;
@@ -15,20 +15,20 @@
     let isPro = false;
 
     // Form state
-    let artistName = "";
-    let bio = "";
-    let avatarUrl = "";
-    let bannerUrl = "";
-    let themeColor = "#9333EA";
-    let accentColor = "#A855F7";
+    let artistName = '';
+    let bio = '';
+    let avatarUrl = '';
+    let bannerUrl = '';
+    let themeColor = '#9333EA';
+    let accentColor = '#A855F7';
     let socialLinks: SocialLink[] = [];
 
     // UI state
     let showPreview = false;
     let addingLink = false;
-    let newLinkPlatform: any = "spotify";
-    let newLinkUrl = "";
-    let newLinkLabel = "";
+    let newLinkPlatform: any = 'spotify';
+    let newLinkUrl = '';
+    let newLinkLabel = '';
 
     // Badge preferences
     let showVerifiedBadge = true;
@@ -37,41 +37,38 @@
     onMount(async () => {
         // Check auth
         if (!$userStore.user) {
-            goto("/");
+            goto('/');
             return;
         }
 
         // Check if pro
-        isPro = $userSubscription.tier === "pro";
+        isPro = $userSubscription.tier === 'pro';
 
         // Load badge preferences from user profile (users collection)
-        showVerifiedBadge =
-            $userSubscription.profile?.showVerifiedBadge ?? true;
+        showVerifiedBadge = $userSubscription.profile?.showVerifiedBadge ?? true;
         showFounderBadge = $userSubscription.profile?.showFounderBadge ?? true;
 
         // Load existing profile
         try {
-            const profileDoc = await getDoc(
-                doc(db, "artists", $userStore.user.uid),
-            );
+            const profileDoc = await getDoc(doc(db, 'artists', $userStore.user.uid));
 
             if (profileDoc.exists()) {
                 profile = profileDoc.data() as ArtistProfile;
                 // Populate form
                 artistName = profile.artistName;
                 bio = profile.bio;
-                avatarUrl = profile.avatarUrl || "";
-                bannerUrl = profile.bannerUrl || "";
-                themeColor = profile.themeColor || "#9333EA";
-                accentColor = profile.accentColor || "#A855F7";
+                avatarUrl = profile.avatarUrl || '';
+                bannerUrl = profile.bannerUrl || '';
+                themeColor = profile.themeColor || '#9333EA';
+                accentColor = profile.accentColor || '#A855F7';
                 socialLinks = profile.socialLinks || [];
             } else {
                 // Initialize with user data
-                artistName = $userStore.user.displayName || "Mi Nombre";
-                bio = "Artista en ChillChess";
+                artistName = $userStore.user.displayName || 'Mi Nombre';
+                bio = 'Artista en ChillChess';
             }
         } catch (e) {
-            console.error("Error loading profile:", e);
+            console.error('Error loading profile:', e);
         } finally {
             loading = false;
         }
@@ -80,68 +77,59 @@
     async function saveProfile() {
         if (!$userStore.user) return;
         if (!artistName.trim()) {
-            alert("El nombre de artista es obligatorio");
+            alert('El nombre de artista es obligatorio');
             return;
         }
 
         saving = true;
 
-        // Clean socialLinks to remove any undefined values (Firestore doesn't accept them)
-        const cleanedSocialLinks = socialLinks.map((link) => {
-            const cleaned: any = {
-                platform: link.platform,
-                url: link.url,
-            };
-            if (link.label) {
-                cleaned.label = link.label;
-            }
-            return cleaned;
-        });
-
-        // Construct object conditionally to avoid 'undefined' values which Firestore rejects
-        const baseData = {
-            userId: $userStore.user.uid,
-            artistName: artistName.trim(),
-            bio: bio.trim(),
-            socialLinks: cleanedSocialLinks,
-            totalPlays: profile?.totalPlays || 0,
-            followerCount: profile?.followerCount || 0,
-            createdAt: profile?.createdAt || Date.now(),
-            updatedAt: Date.now(),
-        };
-
-        // Add optional fields only if they have values
-        const profileData: any = { ...baseData };
-
-        if (avatarUrl.trim()) {
-            profileData.avatarUrl = avatarUrl.trim();
-        }
-
-        if (isPro) {
-            if (bannerUrl.trim()) profileData.bannerUrl = bannerUrl.trim();
-            profileData.themeColor = themeColor;
-            profileData.accentColor = accentColor;
-        }
-
         try {
-            await setDoc(
-                doc(db, "artists", $userStore.user.uid),
-                profileData,
-                { merge: true }, // Merge to be safe, though setDoc overwrites by default without it on new docs
-            );
-            profile = profileData as ArtistProfile;
+            // 1. Prepare Data with Nuclear Sanitization (removes all undefined)
+            // This fixes the issue where Firestore rejects the update if any field is undefined
+            const rawData = {
+                userId: $userStore.user.uid,
+                artistName: artistName.trim(),
+                bio: bio.trim(),
+                socialLinks: socialLinks.map((l) => ({
+                    platform: l.platform,
+                    url: l.url,
+                    label: l.label || null, // Use null instead of undefined
+                })),
+                totalPlays: profile?.totalPlays || 0,
+                followerCount: profile?.followerCount || 0,
+                createdAt: profile?.createdAt || Date.now(),
+                updatedAt: Date.now(),
+                // Optional fields
+                avatarUrl: avatarUrl.trim() || null,
+                bannerUrl: isPro ? bannerUrl.trim() || null : null,
+                themeColor: isPro ? themeColor : null,
+                accentColor: isPro ? accentColor : null,
+            };
 
-            // Save badge preferences to user profile (users collection)
-            await updateDoc(doc(db, "users", $userStore.user.uid), {
+            // Remove nulls if you prefer compact DB, or keep them.
+            // Firestore handles null fine, but undefined throws error.
+            // We'll use the JSON trick to strip undefined if any slipped in.
+            const cleanData = JSON.parse(JSON.stringify(rawData));
+
+            // 2. Update Artist Profile
+            await setDoc(doc(db, 'artists', $userStore.user.uid), cleanData, { merge: true });
+
+            profile = cleanData as ArtistProfile;
+
+            // 3. Update User Preferences (Badges)
+            await updateDoc(doc(db, 'users', $userStore.user.uid), {
                 showVerifiedBadge,
                 showFounderBadge,
                 updatedAt: Date.now(),
             });
 
-            alert("✅ Perfil guardado correctamente");
+            alert('✅ Perfil guardado correctamente');
+
+            // Force reload to ensure all stores and UI are synced
+            window.location.reload();
         } catch (error: any) {
-            console.error("Error saving profile:", error);
-            alert("❌ Error al guardar: " + error.message);
+            console.error('Error saving profile:', error);
+            alert('❌ Error al guardar: ' + (error.message || 'Intenta de nuevo'));
         } finally {
             saving = false;
         }
@@ -149,7 +137,7 @@
 
     function addSocialLink() {
         if (!newLinkUrl.trim()) {
-            alert("La URL es obligatoria");
+            alert('La URL es obligatoria');
             return;
         }
 
@@ -166,8 +154,8 @@
         socialLinks = [...socialLinks, newLink];
 
         // Reset form
-        newLinkUrl = "";
-        newLinkLabel = "";
+        newLinkUrl = '';
+        newLinkLabel = '';
         addingLink = false;
     }
 
@@ -176,13 +164,13 @@
     }
 
     $: previewProfile = {
-        userId: $userStore.user?.uid || "",
+        userId: $userStore.user?.uid || '',
         artistName,
         bio,
         avatarUrl,
-        bannerUrl: isPro ? bannerUrl : "",
-        themeColor: isPro ? themeColor : "#9333EA",
-        accentColor: isPro ? accentColor : "#A855F7",
+        bannerUrl: isPro ? bannerUrl : '',
+        themeColor: isPro ? themeColor : '#9333EA',
+        accentColor: isPro ? accentColor : '#A855F7',
         socialLinks,
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -207,8 +195,8 @@
                 <h1 class="text-3xl font-bold">Mi Tarjeta de Artista</h1>
                 <p class="text-slate-400 text-sm mt-1">
                     {isPro
-                        ? "✨ Personalización completa disponible"
-                        : "🎨 Versión básica - Actualiza a Pro para más opciones"}
+                        ? '✨ Personalización completa disponible'
+                        : '🎨 Versión básica - Actualiza a Pro para más opciones'}
                 </p>
             </div>
 
@@ -217,7 +205,7 @@
                     on:click={() => (showPreview = !showPreview)}
                     class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
                 >
-                    {showPreview ? "✏️ Editar" : "👁️ Vista Previa"}
+                    {showPreview ? '✏️ Editar' : '👁️ Vista Previa'}
                 </button>
             </div>
         </div>
@@ -240,18 +228,12 @@
                 <!-- Left: Form -->
                 <div class="space-y-6">
                     <!-- Basic Info Card -->
-                    <div
-                        class="bg-[#1a1a1a] rounded-2xl border border-white/10 p-6"
-                    >
-                        <h2 class="text-xl font-bold mb-4">
-                            Información Básica
-                        </h2>
+                    <div class="bg-[#1a1a1a] rounded-2xl border border-white/10 p-6">
+                        <h2 class="text-xl font-bold mb-4">Información Básica</h2>
 
                         <div class="space-y-4">
                             <div>
-                                <label
-                                    for="artist-name"
-                                    class="block text-sm font-medium mb-2"
+                                <label for="artist-name" class="block text-sm font-medium mb-2"
                                     >Nombre de Artista *</label
                                 >
                                 <input
@@ -264,9 +246,7 @@
                             </div>
 
                             <div>
-                                <label
-                                    for="artist-bio"
-                                    class="block text-sm font-medium mb-2"
+                                <label for="artist-bio" class="block text-sm font-medium mb-2"
                                     >Bio</label
                                 >
                                 <textarea
@@ -283,9 +263,7 @@
                             </div>
 
                             <div>
-                                <label
-                                    for="avatar-url"
-                                    class="block text-sm font-medium mb-2"
+                                <label for="avatar-url" class="block text-sm font-medium mb-2"
                                     >Avatar URL</label
                                 >
                                 <input
@@ -300,15 +278,10 @@
                     </div>
 
                     <!-- Badge Visibility Settings -->
-                    <div
-                        class="bg-[#1a1a1a] rounded-2xl border border-white/10 p-6"
-                    >
-                        <h2 class="text-xl font-bold mb-4">
-                            Insignias y Visibilidad
-                        </h2>
+                    <div class="bg-[#1a1a1a] rounded-2xl border border-white/10 p-6">
+                        <h2 class="text-xl font-bold mb-4">Insignias y Visibilidad</h2>
                         <p class="text-sm text-slate-400 mb-6">
-                            Controla qué insignias se muestran en tu perfil
-                            público
+                            Controla qué insignias se muestran en tu perfil público
                         </p>
 
                         <div class="space-y-4">
@@ -321,11 +294,7 @@
                                         <div
                                             class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg"
                                         >
-                                            <svg
-                                                class="w-5 h-5"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                            >
+                                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
                                                 <path
                                                     d="M8.5 12L11 14.5L15.5 9.5"
                                                     stroke="white"
@@ -360,11 +329,7 @@
                                         <div
                                             class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-lg"
                                         >
-                                            <svg
-                                                class="w-5 h-5"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                            >
+                                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
                                                 <path
                                                     d="M12 2L2 12L12 22L22 12L12 2Z"
                                                     fill="white"
@@ -373,9 +338,7 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <div class="font-medium text-white">
-                                                Fundador
-                                            </div>
+                                            <div class="font-medium text-white">Fundador</div>
                                             <div class="text-xs text-slate-400">
                                                 Diamante púrpura exclusivo
                                             </div>
@@ -396,15 +359,12 @@
                                         fill="currentColor"
                                         viewBox="0 0 24 24"
                                     >
-                                        <path
-                                            d="M12 2L2 12L12 22L22 12L12 2Z"
-                                        />
+                                        <path d="M12 2L2 12L12 22L22 12L12 2Z" />
                                     </svg>
                                     <p class="text-sm">
                                         Conviértete en <a
                                             href="/pricing"
-                                            class="text-primary-400 hover:underline"
-                                            >Fundador</a
+                                            class="text-primary-400 hover:underline">Fundador</a
                                         > para desbloquear insignias exclusivas
                                     </p>
                                 </div>
@@ -422,19 +382,13 @@
                                 class="absolute -top-10 -right-10 w-32 h-32 bg-primary-500/10 rounded-full blur-3xl group-hover:bg-primary-500/20 transition-all duration-700"
                             ></div>
 
-                            <div
-                                class="flex items-center gap-3 mb-6 relative z-10"
-                            >
+                            <div class="flex items-center gap-3 mb-6 relative z-10">
                                 <span class="text-2xl">🎨</span>
                                 <div>
-                                    <h2
-                                        class="text-xl font-bold text-slate-100"
-                                    >
+                                    <h2 class="text-xl font-bold text-slate-100">
                                         Personalización Pro
                                     </h2>
-                                    <p class="text-xs text-purple-300">
-                                        Diseña tu identidad única
-                                    </p>
+                                    <p class="text-xs text-purple-300">Diseña tu identidad única</p>
                                 </div>
                             </div>
 
@@ -460,16 +414,12 @@
 
                                 <!-- Theme Presets -->
                                 <div>
-                                    <h3
-                                        class="block text-sm font-medium mb-3 text-slate-300"
-                                    >
+                                    <h3 class="block text-sm font-medium mb-3 text-slate-300">
                                         Temas Predefinidos
                                     </h3>
-                                    <div
-                                        class="grid grid-cols-2 sm:grid-cols-4 gap-3"
-                                    >
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                         <!-- Themes Loop -->
-                                        {#each [{ name: "Chill Original", p: "#9333EA", a: "#A855F7" }, { name: "Ocean Vibes", p: "#0ea5e9", a: "#38bdf8" }, { name: "Sunset Lo-fi", p: "#f59e0b", a: "#fbbf24" }, { name: "Forest Rain", p: "#10b981", a: "#34d399" }, { name: "Cherry", p: "#ec4899", a: "#f472b6" }, { name: "Cyberpunk", p: "#f43f5e", a: "#22d3ee" }, { name: "Royal Gold", p: "#d97706", a: "#fcd34d" }, { name: "Noir", p: "#334155", a: "#94a3b8" }] as theme}
+                                        {#each [{ name: 'Chill Original', p: '#9333EA', a: '#A855F7' }, { name: 'Ocean Vibes', p: '#0ea5e9', a: '#38bdf8' }, { name: 'Sunset Lo-fi', p: '#f59e0b', a: '#fbbf24' }, { name: 'Forest Rain', p: '#10b981', a: '#34d399' }, { name: 'Cherry', p: '#ec4899', a: '#f472b6' }, { name: 'Cyberpunk', p: '#f43f5e', a: '#22d3ee' }, { name: 'Royal Gold', p: '#d97706', a: '#fcd34d' }, { name: 'Noir', p: '#334155', a: '#94a3b8' }] as theme}
                                             <button
                                                 on:click={() => {
                                                     themeColor = theme.p;
@@ -492,9 +442,7 @@
 
                                 <!-- Custom Colors -->
                                 <div>
-                                    <h3
-                                        class="block text-sm font-medium mb-3 text-slate-300"
-                                    >
+                                    <h3 class="block text-sm font-medium mb-3 text-slate-300">
                                         Colores Personalizados
                                     </h3>
                                     <div class="grid grid-cols-2 gap-4">
@@ -503,12 +451,8 @@
                                             <div
                                                 class="flex justify-between text-xs text-slate-400"
                                             >
-                                                <span
-                                                    >Primario (Botones/Bordes)</span
-                                                >
-                                                <span class="font-mono"
-                                                    >{themeColor}</span
-                                                >
+                                                <span>Primario (Botones/Bordes)</span>
+                                                <span class="font-mono">{themeColor}</span>
                                             </div>
                                             <div
                                                 class="flex items-center gap-3 bg-[#0B1120]/50 p-2 rounded-xl border border-white/10"
@@ -531,13 +475,8 @@
                                             <div
                                                 class="flex justify-between text-xs text-slate-400"
                                             >
-                                                <span
-                                                    >Acento
-                                                    (Gradientes/Detalles)</span
-                                                >
-                                                <span class="font-mono"
-                                                    >{accentColor}</span
-                                                >
+                                                <span>Acento (Gradientes/Detalles)</span>
+                                                <span class="font-mono">{accentColor}</span>
                                             </div>
                                             <div
                                                 class="flex items-center gap-3 bg-[#0B1120]/50 p-2 rounded-xl border border-white/10"
@@ -561,16 +500,14 @@
                     {/if}
 
                     <!-- Social Links -->
-                    <div
-                        class="bg-[#1a1a1a] rounded-2xl border border-white/10 p-6"
-                    >
+                    <div class="bg-[#1a1a1a] rounded-2xl border border-white/10 p-6">
                         <div class="flex items-center justify-between mb-4">
                             <h2 class="text-xl font-bold">Redes Sociales</h2>
                             <button
                                 on:click={() => (addingLink = !addingLink)}
                                 class="px-3 py-1 bg-primary-500 hover:bg-primary-600 rounded-lg text-sm font-medium transition-colors"
                             >
-                                {addingLink ? "Cancelar" : "+ Añadir"}
+                                {addingLink ? 'Cancelar' : '+ Añadir'}
                             </button>
                         </div>
 
@@ -582,44 +519,31 @@
 
                         <!-- Add Link Form -->
                         {#if addingLink}
-                            <div
-                                class="bg-[#0B1120] rounded-lg p-4 mb-4 space-y-3"
-                            >
+                            <div class="bg-[#0B1120] rounded-lg p-4 mb-4 space-y-3">
                                 <div>
                                     <h3
                                         class="block text-xs mb-2 font-medium text-slate-400 uppercase"
                                     >
                                         Plataforma
                                     </h3>
-                                    <div
-                                        class="grid grid-cols-2 sm:grid-cols-3 gap-2"
-                                    >
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                         {#each SOCIAL_PLATFORMS as platform}
                                             <button
                                                 type="button"
-                                                on:click={() =>
-                                                    (newLinkPlatform =
-                                                        platform.id)}
+                                                on:click={() => (newLinkPlatform = platform.id)}
                                                 class="flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-all text-left {newLinkPlatform ===
                                                 platform.id
                                                     ? 'bg-blue-500/10 border-blue-500 text-white shadow-lg shadow-blue-900/20'
                                                     : 'bg-[#1a1a1a] border-white/5 text-slate-400 hover:bg-[#252525] hover:border-white/10'}"
                                             >
-                                                <span class="text-lg"
-                                                    >{platform.icon}</span
-                                                >
-                                                <span class="truncate"
-                                                    >{platform.label}</span
-                                                >
+                                                <span class="text-lg">{platform.icon}</span>
+                                                <span class="truncate">{platform.label}</span>
                                             </button>
                                         {/each}
                                     </div>
                                 </div>
                                 <div>
-                                    <label
-                                        for="link-url"
-                                        class="block text-xs mb-1">URL *</label
-                                    >
+                                    <label for="link-url" class="block text-xs mb-1">URL *</label>
                                     <input
                                         id="link-url"
                                         type="url"
@@ -629,9 +553,7 @@
                                     />
                                 </div>
                                 <div>
-                                    <label
-                                        for="link-label"
-                                        class="block text-xs mb-1"
+                                    <label for="link-label" class="block text-xs mb-1"
                                         >Label (opcional)</label
                                     >
                                     <input
@@ -655,14 +577,12 @@
                         <div class="space-y-2">
                             {#each socialLinks as link, i}
                                 {@const platform = SOCIAL_PLATFORMS.find(
-                                    (p) => p.id === link.platform,
+                                    (p) => p.id === link.platform
                                 )}
                                 <div
                                     class="flex items-center justify-between bg-[#0B1120] rounded-lg p-3"
                                 >
-                                    <div
-                                        class="flex items-center gap-3 flex-1 min-w-0"
-                                    >
+                                    <div class="flex items-center gap-3 flex-1 min-w-0">
                                         <span class="text-xl">
                                             {platform?.icon}
                                         </span>
@@ -670,9 +590,7 @@
                                             <div class="font-medium text-sm">
                                                 {link.label || platform?.label}
                                             </div>
-                                            <div
-                                                class="text-xs text-slate-500 truncate"
-                                            >
+                                            <div class="text-xs text-slate-500 truncate">
                                                 {link.url}
                                             </div>
                                         </div>
@@ -685,9 +603,7 @@
                                     </button>
                                 </div>
                             {:else}
-                                <p
-                                    class="text-slate-500 text-sm text-center py-4"
-                                >
+                                <p class="text-slate-500 text-sm text-center py-4">
                                     No hay links añadidos
                                 </p>
                             {/each}
@@ -700,24 +616,16 @@
                         disabled={saving}
                         class="w-full py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg shadow-lg transition-all"
                     >
-                        {saving ? "Guardando..." : "💾 Guardar Perfil"}
+                        {saving ? 'Guardando...' : '💾 Guardar Perfil'}
                     </button>
                 </div>
 
                 <!-- Right: Live Preview -->
                 <div class="sticky top-8 h-fit">
-                    <div
-                        class="bg-[#1a1a1a] rounded-2xl border border-white/10 p-6"
-                    >
-                        <h3 class="text-lg font-bold mb-4">
-                            Vista Previa en Vivo
-                        </h3>
+                    <div class="bg-[#1a1a1a] rounded-2xl border border-white/10 p-6">
+                        <h3 class="text-lg font-bold mb-4">Vista Previa en Vivo</h3>
                         <div class="flex justify-center">
-                            <ArtistCard
-                                profile={previewProfile}
-                                {isPro}
-                                isPreview={true}
-                            />
+                            <ArtistCard profile={previewProfile} {isPro} isPreview={true} />
                         </div>
                     </div>
                 </div>

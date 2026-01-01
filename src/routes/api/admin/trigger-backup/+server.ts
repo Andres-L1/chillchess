@@ -1,55 +1,49 @@
 import { json } from '@sveltejs/kit';
-import type { RequestEvent } from '@sveltejs/kit';
+import { adminAuth, adminDB } from '$lib/server/admin';
+import { env } from '$env/dynamic/private';
 
-// Note: This endpoint is a placeholder for manual backup triggering
-// Actual implementation requires Google Cloud Functions and proper IAM setup
-// See .agent/PENDING_FIXES.md for complete setup instructions
-
-export const POST = async ({ locals }: RequestEvent) => {
-    // Check admin auth
-    // @ts-ignore
-    const user = locals.user;
-
-    // TODO: Reemplazar con tu UID real para bypass de emergencia si los claims fallan
-    const OWNER_UID = "tu-uid-aqui";
-
-    if (!user) {
-        return json({
-            error: 'Unauthorized',
-            details: 'No se pudo verificar la sesión. Revisa las variables de entorno del servidor (FB_PRIVATE_KEY).'
-        }, { status: 403 });
+export const POST = async ({ locals }) => {
+    // 1. Verify Admin
+    if (!locals.user || !locals.user.isAdmin) {
+        return json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (!user.isAdmin && user.uid !== OWNER_UID) {
-        return json({
-            error: 'Forbidden',
-            details: `El usuario ${user.email} (${user.uid}) no tiene permisos de administrador.`,
-            debug: user
-        }, { status: 403 });
+    if (!adminDB) {
+        return json({ error: 'Firebase Admin not initialized' }, { status: 500 });
     }
 
     try {
-        // TODO: Implement actual backup trigger
-        // This would typically call a Cloud Function that executes:
-        //
-        // const admin = require('firebase-admin');
-        // const client = admin.firestore();
-        // 
-        // const outputUriPrefix = `gs://chillchess-backups/firestore/${new Date().toISOString().split('T')[0]}`;
-        // 
-        // await client.exportDocuments({
-        //     collectionIds: ['users', 'albums', 'proposals', 'bug_reports', 'musicSubmissions', 'listenRooms'],
-        //     outputUriPrefix
-        // });
+        // 2. Trigger Export via Firestore Admin SDK
+        // Note: This requires the App Engine default service account to have 
+        // 'Cloud Datastore Import Export Admin' role.
 
-        // For now, return a message indicating manual setup needed
-        return json({
-            message: 'Manual backup trigger not yet configured. Please use Google Cloud Console to trigger backups manually, or configure Cloud Functions as per documentation.',
-            documentation: '.agent/PENDING_FIXES.md Section 5.D Phase 1',
-            consoleUrl: 'https://console.cloud.google.com/firestore',
-        }, { status: 501 }); // 501 = Not Implemented
-    } catch (error) {
-        console.error('Error triggering backup:', error);
-        return json({ error: 'Internal server error' }, { status: 500 });
+        const projectId = env.GCP_PROJECT || process.env.GCP_PROJECT || 'chillchess';
+        const bucket = 'gs://chillchess-backups';
+        const date = new Date().toISOString().split('T')[0];
+
+        // Access internal GAPIC client (needed for exportDocuments)
+        const firestore = adminDB;
+        const client = (firestore as any)._firestoreClient || (firestore as any)._client;
+        if (client) {
+            // Depending on the client version, method might be different, but usually it's this or via REST
+            // We try to reuse the same logic as the Cloud Function
+
+            const databaseName = client.databasePath(projectId, '(default)');
+            // Use the client to export
+            await client.exportDocuments({
+                name: databaseName,
+                outputUriPrefix: `${bucket}/firestore/manual_${date}_${Date.now()}`,
+                collectionIds: ['users', 'albums', 'proposals', 'bug_reports', 'artistProfiles']
+            });
+        } else {
+            console.warn("Could not find inner Firestore client for export.");
+            throw new Error("Manual backup unavailable: Internal client not found.");
+        }
+
+        return json({ success: true, message: 'Backup initiated' });
+
+    } catch (error: any) {
+        console.error('Backup trigger error:', error);
+        return json({ error: error.message }, { status: 500 });
     }
 };
