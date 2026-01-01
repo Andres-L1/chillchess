@@ -134,29 +134,7 @@ export interface BugReport {
     adminNotes?: string;
 }
 
-// ============================================================================
-// GAME TYPES (Chess-specific)
-// ============================================================================
-
-export type GameMode = 'classical' | 'rapid' | 'blitz' | 'bullet';
-export type GameStatus = 'waiting' | 'active' | 'completed' | 'abandoned';
-export type GameResult = 'white' | 'black' | 'draw' | 'ongoing';
-
-export interface ChessGame {
-    id: string;
-    whitePlayer: string; // user UID
-    blackPlayer: string; // user UID
-    mode: GameMode;
-    status: GameStatus;
-    result: GameResult;
-    moves: string[]; // PGN notation
-    startedAt: Date;
-    endedAt?: Date;
-    timeControl?: {
-        initial: number; // seconds
-        increment: number;
-    };
-}
+// Game Types removed (Chess logic deprecated)
 
 // ============================================================================
 // TOURNAMENT TYPES
