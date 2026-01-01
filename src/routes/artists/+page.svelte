@@ -1,44 +1,87 @@
 <script lang="ts">
-    import { goto } from "$app/navigation";
-    import { onMount, onDestroy } from "svelte";
-    import type { ArtistProfile } from "$lib/types/artist";
-    import VerifiedBadge from "$lib/components/VerifiedBadge.svelte";
-    import MusicIcon from "$lib/components/icons/MusicIcon.svelte";
-    import AlbumIcon from "$lib/components/icons/AlbumIcon.svelte";
-    import { ALBUMS } from "$lib/data/albums";
-    import { db } from "$lib/firebase";
-    import { collection, query, where, onSnapshot } from "firebase/firestore";
+    import { goto } from '$app/navigation';
+    import { onMount, onDestroy } from 'svelte';
+    import type { ArtistProfile } from '$lib/types/artist';
+    import VerifiedBadge from '$lib/components/VerifiedBadge.svelte';
+    import MusicIcon from '$lib/components/icons/MusicIcon.svelte';
+    import AlbumIcon from '$lib/components/icons/AlbumIcon.svelte';
+    import { db } from '$lib/firebase';
+    import { collection, query, where, onSnapshot } from 'firebase/firestore';
+    import { ALBUMS } from '$lib/data/albums';
+    import type { Album } from '$lib/data/albums';
 
     export let data: { verifiedArtists: ArtistProfile[] };
 
     // Use reactive variable for real-time updates
     let verifiedArtists = data.verifiedArtists || [];
-    let unsubscribe: (() => void) | null = null;
+    let albumsMap: Record<string, Album[]> = {}; // Map artistId -> Albums
+    let totalAlbumsCount = 0;
+
+    let unsubscribeArtists: (() => void) | null = null;
+    let unsubscribeAlbums: (() => void) | null = null;
 
     // Set up real-time listener for verified artists
     onMount(() => {
-        const artistsRef = collection(db, "artists");
-        const q = query(artistsRef, where("isVerified", "==", true));
+        // 1. Listen for Artists
+        const artistsRef = collection(db, 'artists');
+        const qArtists = query(artistsRef, where('isVerified', '==', true));
 
-        unsubscribe = onSnapshot(q, (querySnapshot) => {
+        unsubscribeArtists = onSnapshot(qArtists, (querySnapshot) => {
             verifiedArtists = [];
             querySnapshot.forEach((doc) => {
                 verifiedArtists.push({ ...doc.data() } as ArtistProfile);
             });
-            // Force reactivity
-            verifiedArtists = verifiedArtists;
+        });
+
+        // 2. Listen for Albums (Global listener for simplicity, or filtered)
+        // Since we need to count albums for ALL verified artists, fetching all albums is reasonable for now
+        // (assuming < 1000 albums initially).
+        const albumsRef = collection(db, 'albums');
+        unsubscribeAlbums = onSnapshot(albumsRef, (snapshot) => {
+            const firestoreAlbums = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }) as Album);
+
+            // Re-build map and stats
+            const tempMap: Record<string, Album[]> = {};
+
+            // Helper to add to map
+            const add = (artistName: string, album: Album) => {
+                if (!tempMap[artistName]) tempMap[artistName] = [];
+                tempMap[artistName].push(album);
+            };
+
+            // Add Firestore albums
+            firestoreAlbums.forEach((a) => {
+                if (a.artist) add(a.artist, a); // Use artist name as key as per current logic
+            });
+
+            // Add Static albums (legacy)
+            ALBUMS.forEach((a) => {
+                // Determine if already present by ID/Name?
+                // Simple merge: if not present in firestore, add it.
+                if (!firestoreAlbums.find((fa) => fa.id === a.id)) {
+                    add(a.artist, a);
+                }
+            });
+
+            albumsMap = tempMap;
+
+            // Calculate total relevant albums (only for verified artists)
+            totalAlbumsCount = Object.keys(tempMap).reduce((sum, artistName) => {
+                // Check if this artist is in verified list
+                const isVerified = verifiedArtists.some((va) => va.artistName === artistName);
+                return sum + (isVerified ? tempMap[artistName].length : 0);
+            }, 0);
         });
     });
 
     onDestroy(() => {
-        if (unsubscribe) {
-            unsubscribe();
-        }
+        if (unsubscribeArtists) unsubscribeArtists();
+        if (unsubscribeAlbums) unsubscribeAlbums();
     });
 
-    // Get albums for each verified artist
+    // Get albums for each verified artist (Real-time)
     function getArtistAlbums(artistName: string) {
-        return ALBUMS.filter((album) => album.artist === artistName);
+        return albumsMap[artistName] || [];
     }
 </script>
 
@@ -46,9 +89,7 @@
     <title>Artistas Verificados | ChillChess</title>
 </svelte:head>
 
-<div
-    class="min-h-screen bg-midnight-900 text-white font-poppins pb-32 pt-24 px-4 md:px-12"
->
+<div class="min-h-screen bg-midnight-900 text-white font-poppins pb-32 pt-24 px-4 md:px-12">
     <div class="max-w-7xl mx-auto">
         <!-- Back Button -->
         <div class="mb-8">
@@ -87,21 +128,9 @@
                     stroke-linejoin="round"
                 >
                     <defs>
-                        <linearGradient
-                            id="micGradient"
-                            x1="0%"
-                            y1="0%"
-                            x2="100%"
-                            y2="100%"
-                        >
-                            <stop
-                                offset="0%"
-                                style="stop-color:#FF7B3D;stop-opacity:1"
-                            />
-                            <stop
-                                offset="100%"
-                                style="stop-color:#FFB347;stop-opacity:1"
-                            />
+                        <linearGradient id="micGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#FF7B3D;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
                         </linearGradient>
                     </defs>
                     <!-- Microphone body -->
@@ -116,11 +145,7 @@
                         fill="none"
                     />
                     <!-- Microphone stand -->
-                    <path
-                        d="M12 19v3M8 22h8"
-                        stroke="url(#micGradient)"
-                        stroke-width="2"
-                    />
+                    <path d="M12 19v3M8 22h8" stroke="url(#micGradient)" stroke-width="2" />
                     <!-- Sound waves -->
                     <path
                         d="M19 10v2a7 7 0 0 1-14 0v-2"
@@ -133,8 +158,8 @@
                 Artistas <span class="text-primary-500">Verificados</span>
             </h1>
             <p class="text-slate-400 text-lg max-w-2xl mx-auto">
-                Conoce a los creadores detrás de la música de ChillChess.
-                Artistas verificados con contenido original y de calidad.
+                Conoce a los creadores detrás de la música de ChillChess. Artistas verificados con
+                contenido original y de calidad.
             </p>
         </header>
 
@@ -145,16 +170,12 @@
                     <div class="text-3xl font-bold text-primary-500">
                         {verifiedArtists.length}
                     </div>
-                    <div class="text-sm text-slate-500">
-                        Artistas Verificados
-                    </div>
+                    <div class="text-sm text-slate-500">Artistas Verificados</div>
                 </div>
                 <div class="text-center">
                     <div class="text-3xl font-bold text-primary-500">
                         {ALBUMS.filter((a) =>
-                            verifiedArtists.some(
-                                (va) => va.artistName === a.artist,
-                            ),
+                            verifiedArtists.some((va) => va.artistName === a.artist)
                         ).length}
                     </div>
                     <div class="text-sm text-slate-500">Álbumes Totales</div>
@@ -164,26 +185,20 @@
 
         <!-- Artists Grid -->
         {#if verifiedArtists.length === 0}
-            <div
-                class="text-center py-20 bg-white/5 rounded-3xl border border-white/10"
-            >
+            <div class="text-center py-20 bg-white/5 rounded-3xl border border-white/10">
                 <div class="inline-flex justify-center mb-4 text-slate-600">
                     <MusicIcon size="xl" />
                 </div>
                 <h3 class="text-2xl font-bold mb-2">Próximamente</h3>
-                <p class="text-slate-400">
-                    Los artistas verificados aparecerán aquí pronto.
-                </p>
+                <p class="text-slate-400">Los artistas verificados aparecerán aquí pronto.</p>
             </div>
         {:else}
-            <div
-                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in-up"
-            >
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in-up">
                 {#each verifiedArtists as artist}
                     {@const artistAlbums = getArtistAlbums(artist.artistName)}
                     {@const totalTracks = artistAlbums.reduce(
                         (sum, album) => sum + (album.tracks?.length || 0),
-                        0,
+                        0
                     )}
 
                     <button
@@ -208,9 +223,7 @@
 
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2 mb-1">
-                                    <h3
-                                        class="text-xl font-bold text-white truncate"
-                                    >
+                                    <h3 class="text-xl font-bold text-white truncate">
                                         {artist.artistName}
                                     </h3>
                                     <div class="flex-shrink-0 relative z-10">
@@ -218,7 +231,7 @@
                                     </div>
                                 </div>
                                 <p class="text-sm text-slate-400 line-clamp-2">
-                                    {artist.bio || "Artista de ChillChess"}
+                                    {artist.bio || 'Artista de ChillChess'}
                                 </p>
                             </div>
                         </div>
@@ -228,10 +241,9 @@
                             <div class="flex items-center gap-1.5">
                                 <AlbumIcon size="sm" />
                                 <span
-                                    >{artistAlbums.length} álbum{artistAlbums.length !==
-                                    1
-                                        ? "es"
-                                        : ""}</span
+                                    >{artistAlbums.length} álbum{artistAlbums.length !== 1
+                                        ? 'es'
+                                        : ''}</span
                                 >
                             </div>
                             <div class="flex items-center gap-1.5">
@@ -265,9 +277,7 @@
                         {/if}
 
                         <!-- CTA -->
-                        <div
-                            class="mt-4 flex items-center justify-between text-sm"
-                        >
+                        <div class="mt-4 flex items-center justify-between text-sm">
                             <span
                                 class="text-primary-400 font-medium group-hover:text-primary-300 transition-colors"
                             >
