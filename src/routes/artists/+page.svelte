@@ -81,9 +81,10 @@
     $: if (verifiedArtists) updateTotalStats();
 
     // Robust matcher for the grid
-    function getAlbumsForArtist(artist: ArtistProfile) {
-        if (!artist) return [];
-        return allAlbumsList.filter((album) => {
+    // We pass 'albums' explicitly to trigger Svelte reactivity in the template when the list updates
+    function getAlbumsForArtist(artist: ArtistProfile, albums: Album[]) {
+        if (!artist || !albums) return [];
+        return albums.filter((album) => {
             // Cast to any to access artistId if interface update hasn't propagated or is missing
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const a = album as any;
@@ -210,7 +211,7 @@
         {:else}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in-up">
                 {#each verifiedArtists as artist}
-                    {@const artistAlbums = getAlbumsForArtist(artist)}
+                    {@const artistAlbums = getAlbumsForArtist(artist, allAlbumsList)}
                     {@const totalTracks = artistAlbums.reduce(
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         (sum, album) => sum + (album.tracks?.length || 0),
