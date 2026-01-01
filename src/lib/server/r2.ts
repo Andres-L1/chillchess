@@ -23,4 +23,6 @@ export const r2 = new S3Client({
     forcePathStyle: true, // Crucial for Cloudflare R2 to avoid DNS/CORS issues with bucket subdomains
 });
 
-export const R2_BUCKET = env.R2_BUCKET_NAME || process.env.R2_BUCKET_NAME || "chillchess-music";
+// Force the correct bucket name to match Cloudflare R2 dashboard
+// This overrides any potentially incorrect environment variables in Netlify
+export const R2_BUCKET = "chillchess-music";
