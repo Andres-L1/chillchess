@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { adminAuth, adminDB } from '$lib/server/admin';
+// @ts-ignore
 import { env } from '$env/dynamic/private';
 
 export const POST = async ({ locals }) => {
