@@ -30,35 +30,56 @@
         });
 
         // 2. Listen to Albums changes (Real-time Discography)
-        // We query albums where artistId matches the current page ID
+        // We listen to BOTH querying by artistId (new standard) AND artist Name (legacy/fallback)
+        // This ensures old albums and new ones both appear.
         const albumsRef = collection(db, 'albums');
-        const q = query(albumsRef, where('artistId', '==', data.artistId));
 
-        unsubscribeAlbums = onSnapshot(q, (snapshot) => {
-            const firestoreAlbums = snapshot.docs.map(
-                (doc) =>
-                    ({
-                        id: doc.id,
-                        ...doc.data(),
-                    }) as Album
-            );
+        // Query 1: By ID
+        const qId = query(albumsRef, where('artistId', '==', data.artistId));
 
-            // Optional: Merge with static albums if they exist and match name, or replace entirely.
-            // For now, let's prioritize Firestore albums + any static ones that might match by name (legacy)
+        // Query 2: By Name (Legacy support) - we need to wait for artist profile to load name first?
+        // Actually, 'artist' variable is reactive but inside onMount we need the initial value or wait.
+        // Let's rely on data.artistProfile.artistName or updated artist.artistName.
+        // Ideally we start with ID query, but we can setup name query too.
+
+        const updateAlbums = (newDocs: Album[]) => {
+            // Merge with existing state.
+            const currentMap = new Map(artistAlbums.map((a) => [a.id, a]));
+            newDocs.forEach((a) => currentMap.set(a.id, a));
+
+            // Also merge static albums just in case specific ones are hardcoded
             const staticAlbums = ALBUMS.filter((a) => a.artist === artist.artistName);
+            staticAlbums.forEach((a) => {
+                if (!currentMap.has(a.id)) currentMap.set(a.id, a);
+            });
 
-            // Dedup by ID just in case
-            const all = [...firestoreAlbums, ...staticAlbums];
-            const unique = new Map();
-            all.forEach((a) => unique.set(a.id, a));
-
-            artistAlbums = Array.from(unique.values()).sort((a, b) => {
-                // Sort by creation time if available, or fallback
+            artistAlbums = Array.from(currentMap.values()).sort((a, b) => {
                 const timeA = (a.createdAt as any)?.seconds || 0;
                 const timeB = (b.createdAt as any)?.seconds || 0;
                 return timeB - timeA;
             });
+        };
+
+        const unsubId = onSnapshot(qId, (snapshot) => {
+            const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Album);
+            updateAlbums(docs);
         });
+
+        // We also want to query by Name, but only if we have a name.
+        // Note: This might duplicate reads if an album has both correct ID and Name, but map deduplicates.
+        let unsubName: (() => void) | null = null;
+        if (artist.artistName) {
+            const qName = query(albumsRef, where('artist', '==', artist.artistName));
+            unsubName = onSnapshot(qName, (snapshot) => {
+                const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Album);
+                updateAlbums(docs);
+            });
+        }
+
+        unsubscribeAlbums = () => {
+            unsubId();
+            if (unsubName) unsubName();
+        };
     });
 
     onDestroy(() => {

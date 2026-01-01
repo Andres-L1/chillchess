@@ -116,6 +116,7 @@
             await addDoc(collection(db, 'albums'), {
                 title: newAlbumData.title,
                 artist: newAlbumData.artist,
+                artistId: newAlbumData.artistId, // Essential for linking to profile
                 category: newAlbumData.category,
                 cover: coverUrl,
                 tracks: uploadedTracks,
