@@ -438,7 +438,8 @@
                     class="bg-[#131b2e] border border-white/10 rounded-2xl p-6 w-full max-w-2xl shadow-2xl relative overflow-y-auto max-h-[90vh] cursor-default"
                     on:click|stopPropagation
                     on:keydown|stopPropagation
-                    role="document"
+                    role="dialog"
+                    aria-modal="true"
                     tabindex="-1"
                     transition:scale={{ duration: 200, start: 0.95 }}
                 >
