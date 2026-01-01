@@ -33,56 +33,73 @@
             });
         });
 
-        // 2. Listen for Albums (Global listener for simplicity, or filtered)
-        // Since we need to count albums for ALL verified artists, fetching all albums is reasonable for now
-        // (assuming < 1000 albums initially).
+        // 2. Listen for Albums
+        // We fetch ALL albums and allow the template to filter them robustly
         const albumsRef = collection(db, 'albums');
         unsubscribeAlbums = onSnapshot(albumsRef, (snapshot) => {
             const firestoreAlbums = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }) as Album);
 
-            // Re-build map and stats
-            const tempMap: Record<string, Album[]> = {};
-
-            // Helper to add to map
-            const add = (artistName: string, album: Album) => {
-                if (!tempMap[artistName]) tempMap[artistName] = [];
-                tempMap[artistName].push(album);
-            };
-
-            // Add Firestore albums
-            firestoreAlbums.forEach((a) => {
-                if (a.artist) add(a.artist, a); // Use artist name as key as per current logic
-            });
-
-            // Add Static albums (legacy)
-            ALBUMS.forEach((a) => {
-                // Determine if already present by ID/Name?
-                // Simple merge: if not present in firestore, add it.
-                if (!firestoreAlbums.find((fa) => fa.id === a.id)) {
-                    add(a.artist, a);
+            // Merge with static albums (deduplicated by ID)
+            const all = [...firestoreAlbums];
+            ALBUMS.forEach((staticAlbum) => {
+                if (!all.find((a) => a.id === staticAlbum.id)) {
+                    all.push(staticAlbum);
                 }
             });
 
-            albumsMap = tempMap;
+            // Store all albums in a flat list
+            // We will filter per artist in the template or a derived store/function
+            allAlbumsList = all;
 
-            // Calculate total relevant albums (only for verified artists)
-            totalAlbumsCount = Object.keys(tempMap).reduce((sum, artistName) => {
-                // Check if this artist is in verified list
-                const isVerified = verifiedArtists.some((va) => va.artistName === artistName);
-                return sum + (isVerified ? tempMap[artistName].length : 0);
-            }, 0);
+            // Update total stats (approximated count of albums linked to verified artists)
+            // This is just for the "Total Albums" header counter
+            updateTotalStats();
         });
     });
+
+    let allAlbumsList: Album[] = [];
+
+    function updateTotalStats() {
+        if (!verifiedArtists.length) {
+            totalAlbumsCount = 0;
+            return;
+        }
+        // Count unique albums that belong to ANY verified artist
+        const relevantAlbums = allAlbumsList.filter((album) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const a = album as any;
+            return verifiedArtists.some(
+                (artist) =>
+                    (a.artistId && a.artistId === artist.userId) ||
+                    (a.artist && a.artist.toLowerCase() === artist.artistName.toLowerCase())
+            );
+        });
+        totalAlbumsCount = relevantAlbums.length;
+    }
+
+    // Trigger stats update when artists change too
+    $: if (verifiedArtists) updateTotalStats();
+
+    // Robust matcher for the grid
+    function getAlbumsForArtist(artist: ArtistProfile) {
+        if (!artist) return [];
+        return allAlbumsList.filter((album) => {
+            // Cast to any to access artistId if interface update hasn't propagated or is missing
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const a = album as any;
+            const idMatch = a.artistId && a.artistId === artist.userId;
+            const nameMatch =
+                album.artist &&
+                artist.artistName &&
+                album.artist.toLowerCase() === artist.artistName.toLowerCase();
+            return idMatch || nameMatch;
+        });
+    }
 
     onDestroy(() => {
         if (unsubscribeArtists) unsubscribeArtists();
         if (unsubscribeAlbums) unsubscribeAlbums();
     });
-
-    // Get albums for each verified artist (Real-time)
-    function getArtistAlbums(artistName: string) {
-        return albumsMap[artistName] || [];
-    }
 </script>
 
 <svelte:head>
@@ -174,9 +191,7 @@
                 </div>
                 <div class="text-center">
                     <div class="text-3xl font-bold text-primary-500">
-                        {ALBUMS.filter((a) =>
-                            verifiedArtists.some((va) => va.artistName === a.artist)
-                        ).length}
+                        {totalAlbumsCount}
                     </div>
                     <div class="text-sm text-slate-500">Álbumes Totales</div>
                 </div>
@@ -195,8 +210,9 @@
         {:else}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in-up">
                 {#each verifiedArtists as artist}
-                    {@const artistAlbums = getArtistAlbums(artist.artistName)}
+                    {@const artistAlbums = getAlbumsForArtist(artist)}
                     {@const totalTracks = artistAlbums.reduce(
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         (sum, album) => sum + (album.tracks?.length || 0),
                         0
                     )}
