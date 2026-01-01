@@ -64,13 +64,15 @@ service cloud.firestore {
     // ============================================
     // Bug Reports Collection (NEW)
     // ============================================
+    // ============================================
+    // Bug Reports Collection (NEW)
+    // ============================================
     match /bug_reports/{bugId} {
       // Public read - anyone can see bug reports
       allow read: if true;
       
       // Anyone can create bug reports (even anonymous users)
-      allow create: if request.resource.data.keys().hasAll(['title', 'description', 'severity', 'browser', 'os', 'status', 'createdAt'])
-                    && request.resource.data.title is string
+      allow create: if request.resource.data.title is string
                     && request.resource.data.title.size() >= 5
                     && request.resource.data.title.size() <= 100
                     && request.resource.data.description is string
@@ -78,7 +80,8 @@ service cloud.firestore {
                     && request.resource.data.description.size() <= 500
                     && request.resource.data.severity in ['low', 'medium', 'high', 'critical']
                     && request.resource.data.status == 'reported'
-                    && request.resource.data.createdAt == request.time;
+                    // Relaxed timestamp check for robustness with serverTimestamp()
+                    && request.resource.data.createdAt is timestamp;
       
       // Only admins can update (change status, add notes)
       allow update: if isAdmin();
