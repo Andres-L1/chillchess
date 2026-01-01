@@ -287,7 +287,7 @@ export const POST = async ({ request, locals }) => {
 
 #### F. Checklist de Implementación
 - [ ] Crear proyecto GCP (si no existe)
-- [ ] Configurar Cloud Functions para backups
+- [x] Configurar Cloud Functions para backups (Código implementado)
 - [ ] Habilitar R2 versioning en dashboard
 - [ ] Implementar endpoint de rechazo con movimiento (no eliminación)
 - [ ] Crear BackupsTab en admin panel
@@ -305,10 +305,11 @@ export const POST = async ({ request, locals }) => {
 - API endpoint `/api/admin/trigger-backup` (placeholder documentado)
 - Integración en admin panel con tab dedicado
 - Documentación completa en PENDING_FIXES.md
+- **Cloud Function:** `scheduled-backup.ts` creada y exportada
 
 **⏳ Pendiente (Requiere Configuración Externa):**
 - [ ] Configurar Cloud Scheduler en Google Cloud Platform
-- [ ] Configurar Cloud Function para backups automáticos
+- [x] Cloud Function implementada (`scheduled-backup.ts`) - Requiere deploy
 - [ ] Habilitar R2 versioning en Cloudflare Dashboard
 - [ ] Configurar bucket GCS para almacenar backups
 - [ ] Testear backup y restore completo

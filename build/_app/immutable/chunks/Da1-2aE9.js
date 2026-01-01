@@ -1,1 +1,0 @@
-import{w as r}from"./BRP6Yj6K.js";const i=typeof window<"u",a=i?JSON.parse(localStorage.getItem("chill_favorites")||"[]"):[],o=r(a);i&&o.subscribe(e=>{localStorage.setItem("chill_favorites",JSON.stringify(e))});function f(e){o.update(t=>t.includes(e)?t.filter(s=>s!==e):[...t,e])}function l(e,t){return t.includes(e)}export{o as f,l as i,f as t};

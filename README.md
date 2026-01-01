@@ -8,10 +8,12 @@ Música de todo tipo sin interrupciones, perfecta para tus **Streams** y sesione
 
 ## 🌟 Concepto
 
-A diferencia de otras plataformas centradas en el estrés, el ELO y el reloj, ChillChess busca ser tu segunda pantalla perfecta. Entra, elige tu ambiente, y deja que la belleza del ajedrez fluya.
+ChillChess es tu segunda pantalla perfecta. Entra, elige tu ambiente y disfruta de una experiencia musical inmersiva diseñada para creadores de contenido y productividad.
 
-*   **Visualizador Pasivo**: Tableros que reproducen partidas históricas automáticamente.
-*   **Atmósferas**: Sonidos de lluvia, cafetería o biblioteca combinados con música Lo-Fi.
+*   **Música Lo-Fi & Chill**: Selección curada para concentración y relax.
+*   **Widget OBS**: Integra la música en tus streams con widgets personalizables y elegantes.
+*   **Atmósferas**: Mezcla sonidos de White Noise (lluvia, cafetería, bosque, etc.) con tu música.
+*   **Salas Compartidas**: Escucha música sincronizada con tus amigos o comunidad en tiempo real.
 *   **Zero Distractions**: Interfaz minimalista "Glassmorphism" con tema Gold & Noir.
 
 ## 🛠️ Tech Stack
@@ -20,9 +22,8 @@ Arquitectura "Zero Cost & High Speed".
 
 *   **Frontend**: SvelteKit (Rendering & State)
 *   **UI/UX**: TailwindCSS + Glassmorphism Design
-*   **Chess Logic**: `chess.js` (Rules) + `cm-chessboard` (Visualization)
 *   **Backend**: Firebase (Auth, Firestore, Functions)
-*   **Storage**: Cloudflare R2
+*   **Storage**: Cloudflare R2 (Audio Hosting)
 *   **Deployment**: Netlify (CI/CD)
 
 ## 📚 Documentación
@@ -30,6 +31,7 @@ Arquitectura "Zero Cost & High Speed".
 - **[Arquitectura del Proyecto](.agent/ARCHITECTURE.md)** - Estructura, convenciones y mejores prácticas
 - **[Guía de Contribución](.agent/CONTRIBUTING.md)** - Cómo contribuir al proyecto
 - **[Tareas Pendientes](.agent/PENDING_FIXES.md)** - Bugs conocidos y features por implementar
+- **[Estado de Features](FEATURES_STATUS.md)** - Resumen de funcionalidades implementadas
 
 ## 🚀 Development
 
@@ -80,15 +82,16 @@ src/
 
 Ver [ARCHITECTURE.md](.agent/ARCHITECTURE.md) para detalles completos.
 
-## 🗺️ Roadmap hacia v1.0
+## 🗺️ Roadmap
 
-El objetivo principal para la versión 1.0 es alcanzar la **estabilidad total** y el perfeccionamiento de todas las funcionalidades existentes, junto con la incorporación de sistemas clave de competición.
+El objetivo es crear la plataforma definitiva de música para concentración y streaming.
 
-- [x] **Fase 1: El Santuario** (Visualización, Audio, Atmósfera)
-- [x] **Fase 2: La Comunidad** (Propuestas, Usuarios, Bug Reports)
-- [x] **Fase 3: La Fundación** (Admin Panel 2.0, Infraestructura de Código, Tooling)
-- [ ] **Fase 4: La Expansión** (Apps Nativas, Modo TV, Integración IoT)
-- [ ] **Fase 5: v1.0 Release Candidate** (Auditoría de Seguridad, Performance Tuning, SEO)
+- [x] **Core Player**: Reproducción continua, control de volumen, metadata.
+- [x] **Atmósferas**: Sistema de mezcla de White Noise.
+- [x] **OBS Widget**: Overlay para streamers.
+- [x] **Social**: Salas de escucha compartida.
+- [ ] **Apps Nativas**: Desktop y Mobile.
+- [ ] **Modo TV**: Interfaz optimizada para pantallas grandes.
 
 ## 📝 Changelog
 
@@ -106,6 +109,5 @@ Ver [CHANGELOG.md](CHANGELOG.md) para el historial completo de versiones.
 
 ## 📄 Licencia
 
-MIT. Hecho con 💙 para los amantes del ajedrez y el código.
+MIT. Hecho con 💙 para los creadores y amantes de la música.
 © 2025 ChillChess Team.
-
