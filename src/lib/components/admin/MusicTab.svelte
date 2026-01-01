@@ -67,7 +67,7 @@
         // Since we don't have the custom domain available here securely, we construct using the R2 dev domain pattern
         // known from the project context or use the key.
         // For now, we return the key prefixed with a standard domain.
-        const PUBLIC_R2_DOMAIN = 'https://pub-68b007968c59b47aa64fadcf.r2.dev';
+        const PUBLIC_R2_DOMAIN = 'https://pub-e58e51867b4c44f58a32c407eb8cca7c.r2.dev';
         return `${PUBLIC_R2_DOMAIN}/${key}`;
     }
 
