@@ -1,5 +1,7 @@
 import { S3Client } from "@aws-sdk/client-s3";
+// @ts-ignore
 import { env } from "$env/dynamic/private";
+// @ts-ignore
 import { env as publicEnv } from "$env/dynamic/public";
 
 // Fallback logic adjusted to check publicEnv for PUBLIC_ prefixed vars
@@ -18,6 +20,7 @@ export const r2 = new S3Client({
         accessKeyId: ACCESS_KEY_ID || "",
         secretAccessKey: SECRET_ACCESS_KEY || "",
     },
+    forcePathStyle: true, // Crucial for Cloudflare R2 to avoid DNS/CORS issues with bucket subdomains
 });
 
 export const R2_BUCKET = env.R2_BUCKET_NAME || process.env.R2_BUCKET_NAME || "chillchess-music";
