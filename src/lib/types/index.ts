@@ -11,7 +11,7 @@ import type { Timestamp } from 'firebase/firestore';
 // USER TYPES
 // ============================================================================
 
-export type SubscriptionTier = 'free' | 'pro' | 'premium';
+export type SubscriptionTier = 'free' | 'pro';
 export type UserRole = 'user' | 'admin' | 'moderator';
 
 export interface User {
