@@ -6,6 +6,7 @@
         addDoc,
         getDocs,
         deleteDoc,
+        updateDoc,
         doc,
         serverTimestamp,
         query,
@@ -23,6 +24,18 @@
     let verifiedArtists: any[] = [];
     let selectedArtistId = '';
 
+    // --- EDIT ALBUM STATE ---
+    let showEditAlbumForm = false;
+    let isEditingAlbum = false;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let editingAlbum: any = {
+        id: '',
+        title: '',
+        artist: '',
+        artistId: '',
+        category: 'musica',
+    };
+
     let newAlbumData = {
         title: '',
         artist: '', // Name (display)
@@ -38,6 +51,16 @@
         if (artist) {
             newAlbumData.artist = artist.displayName;
             newAlbumData.artistId = artist.uid;
+        }
+    }
+
+    // Auto-fill artist fields in EDIT mode too if using dropdown
+    let selectedEditArtistId = '';
+    $: if (selectedEditArtistId && showEditAlbumForm) {
+        const artist = verifiedArtists.find((a) => a.uid === selectedEditArtistId);
+        if (artist) {
+            editingAlbum.artist = artist.displayName;
+            editingAlbum.artistId = artist.uid;
         }
     }
 
@@ -63,20 +86,70 @@
         });
         if (!upload.ok) throw new Error('Failed to upload file to R2');
 
-        // 3. Return Public URL (Assuming R2 dev domain or configured custom domain)
-        // Since we don't have the custom domain available here securely, we construct using the R2 dev domain pattern
-        // known from the project context or use the key.
-        // For now, we return the key prefixed with a standard domain.
+        // 3. Return Public URL
         const PUBLIC_R2_DOMAIN = 'https://pub-e58e51867b4c44f58a32c407eb8cca7c.r2.dev';
         return `${PUBLIC_R2_DOMAIN}/${key}`;
     }
 
     // Handlers
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function handleCoverSelect(e: any) {
         newAlbumData.coverFile = e.target.files[0];
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function handleTracksSelect(e: any) {
         newAlbumData.tracks = Array.from(e.target.files);
+    }
+
+    function openEditModal(album: Album) {
+        editingAlbum = {
+            id: album.id,
+            title: album.title,
+            artist: album.artist,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            artistId: (album as any).artistId || '',
+            category: album.category || 'musica',
+        };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if ((album as any).artistId) {
+            // selectedEditArtistId = (album as any).artistId; // Optional: auto-select dropdown
+        }
+        showEditAlbumForm = true;
+    }
+
+    async function saveAlbumChanges() {
+        if (!editingAlbum.title || !editingAlbum.artist) {
+            alert('Título y Artista son obligatorios');
+            return;
+        }
+
+        isEditingAlbum = true;
+        try {
+            const albumRef = doc(db, 'albums', editingAlbum.id);
+            await updateDoc(albumRef, {
+                title: editingAlbum.title,
+                artist: editingAlbum.artist,
+                artistId: editingAlbum.artistId,
+                category: editingAlbum.category,
+            });
+
+            // Audio store updates automatically via snapshot or we can manually update local state for instant feel
+            audioStore.update((s) => ({
+                ...s,
+                availableAlbums: s.availableAlbums.map((a) =>
+                    a.id === editingAlbum.id ? { ...a, ...editingAlbum } : a
+                ),
+            }));
+
+            alert('✅ Álbum actualizado');
+            showEditAlbumForm = false;
+        } catch (e: any) {
+            // eslint-disable-line @typescript-eslint/no-explicit-any
+            console.error(e);
+            alert('Error al actualizar: ' + e.message);
+        } finally {
+            isEditingAlbum = false;
+        }
     }
 
     async function createAlbum() {
@@ -100,7 +173,8 @@
             const coverUrl = await uploadToR2(newAlbumData.coverFile, folderPath);
 
             // 2. Upload Tracks loop to R2
-            const uploadedTracks = [];
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const uploadedTracks: any[] = [];
             for (const file of newAlbumData.tracks) {
                 const trackUrl = await uploadToR2(file, folderPath);
                 uploadedTracks.push({
@@ -140,6 +214,7 @@
                 tracks: [],
             };
         } catch (e: any) {
+            // eslint-disable-line @typescript-eslint/no-explicit-any
             console.error(e);
             alert('Error: ' + e.message);
         } finally {
@@ -584,6 +659,118 @@
             </div>
         {/if}
 
+        {#if showEditAlbumForm}
+            <!-- EDIT MODAL OVERLAY -->
+            <div
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in"
+                on:click|self={() => (showEditAlbumForm = false)}
+                on:keydown={(e) => e.key === 'Escape' && (showEditAlbumForm = false)}
+                role="button"
+                tabindex="0"
+            >
+                <div
+                    class="bg-midnight-900 border border-white/10 rounded-3xl p-6 md:p-8 w-full max-w-xl shadow-2xl relative"
+                >
+                    <button
+                        on:click={() => (showEditAlbumForm = false)}
+                        class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
+                    >
+                        ✕
+                    </button>
+
+                    <h3 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                        <span class="text-3xl">✏️</span> Editar Álbum
+                    </h3>
+
+                    <div class="space-y-5">
+                        <label class="block">
+                            <span class="block text-sm font-semibold text-slate-400 mb-2"
+                                >Título</span
+                            >
+                            <input
+                                type="text"
+                                bind:value={editingAlbum.title}
+                                class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary-500 outline-none"
+                            />
+                        </label>
+
+                        <label class="block">
+                            <span class="block text-sm font-semibold text-slate-400 mb-2"
+                                >Artista (Seleccionar para auto-completar)</span
+                            >
+                            <div class="relative mb-2">
+                                <select
+                                    bind:value={selectedEditArtistId}
+                                    class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary-500 appearance-none"
+                                >
+                                    <option value="" disabled selected>-- Cambiar Artista --</option
+                                    >
+                                    {#each verifiedArtists as artist}
+                                        <option value={artist.uid}>{artist.displayName}</option>
+                                    {/each}
+                                </select>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <span class="text-xs text-slate-500 block mb-1"
+                                        >Nombre (Display)</span
+                                    >
+                                    <input
+                                        type="text"
+                                        bind:value={editingAlbum.artist}
+                                        class="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-2 text-sm text-white"
+                                    />
+                                </div>
+                                <div>
+                                    <span class="text-xs text-slate-500 block mb-1"
+                                        >ID (Enlace Perfil)</span
+                                    >
+                                    <input
+                                        type="text"
+                                        bind:value={editingAlbum.artistId}
+                                        class="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-2 text-sm text-slate-400"
+                                    />
+                                </div>
+                            </div>
+                        </label>
+
+                        <label class="block">
+                            <span class="block text-sm font-semibold text-slate-400 mb-2"
+                                >Categoría</span
+                            >
+                            <select
+                                bind:value={editingAlbum.category}
+                                class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary-500 outline-none"
+                            >
+                                <option value="musica">Música</option>
+                                <option value="juegos">Juegos / Focus</option>
+                                <option value="ambiente">Ambiente</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div
+                        class="flex justify-end items-center gap-4 pt-6 mt-6 border-t border-white/5"
+                    >
+                        <button
+                            on:click={() => (showEditAlbumForm = false)}
+                            class="px-6 py-2 text-slate-400 hover:text-white font-medium"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            on:click={saveAlbumChanges}
+                            disabled={isEditingAlbum}
+                            class="px-8 py-3 bg-primary-600 hover:bg-primary-500 rounded-xl font-bold text-white shadow-lg disabled:opacity-50"
+                        >
+                            {isEditingAlbum ? 'Guardando...' : 'Guardar Cambios'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        {/if}
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {#each filteredAlbums.slice(0, 50) as album (album.id)}
                 <div
@@ -648,12 +835,18 @@
                         {/if}
                     </div>
 
-                    <div class="flex justify-end pt-3 border-t border-white/10">
+                    <div class="flex justify-between pt-3 border-t border-white/10">
+                        <button
+                            on:click={() => openEditModal(album)}
+                            class="text-xs flex items-center gap-1 text-primary-400 hover:text-primary-300 px-3 py-1.5 rounded-lg hover:bg-primary-500/10 transition-colors"
+                        >
+                            ✏️ Editar
+                        </button>
                         <button
                             on:click={() => deleteAlbum(album)}
                             class="text-xs flex items-center gap-1 text-red-400 hover:text-red-300 px-3 py-1.5 rounded-lg hover:bg-red-500/10 transition-colors"
                         >
-                            🗑️ Eliminar Álbum
+                            🗑️ Eliminar
                         </button>
                     </div>
                 </div>
