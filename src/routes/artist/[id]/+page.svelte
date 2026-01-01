@@ -1,45 +1,72 @@
 <script lang="ts">
-    import { goto } from "$app/navigation";
-    import { onMount, onDestroy } from "svelte";
-    import type { ArtistProfile } from "$lib/types/artist";
-    import VerifiedBadge from "$lib/components/VerifiedBadge.svelte";
-    import MusicIcon from "$lib/components/icons/MusicIcon.svelte";
-    import { ALBUMS } from "$lib/data/albums";
-    import { playAlbum, audioStore } from "$lib/audio/store";
-    import { SOCIAL_PLATFORMS } from "$lib/types/artist";
-    import { db } from "$lib/firebase";
-    import { doc, onSnapshot } from "firebase/firestore";
+    import { goto } from '$app/navigation';
+    import { onMount, onDestroy } from 'svelte';
+    import type { ArtistProfile } from '$lib/types/artist';
+    import VerifiedBadge from '$lib/components/VerifiedBadge.svelte';
+    import MusicIcon from '$lib/components/icons/MusicIcon.svelte';
+    import { playAlbum, audioStore } from '$lib/audio/store';
+    import { SOCIAL_PLATFORMS } from '$lib/types/artist';
+    import { db } from '$lib/firebase';
+    import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
+    import { ALBUMS } from '$lib/data/albums'; // Keep type reference if needed, but not data
+    import type { Album } from '$lib/data/albums';
 
     export let data: { artistProfile: ArtistProfile; artistId: string };
 
     // Use reactive variable for real-time updates
     let artist = data.artistProfile;
-    let unsubscribe: (() => void) | null = null;
+    let artistAlbums: Album[] = []; // Changed to local state
+    let unsubscribeArtist: (() => void) | null = null;
+    let unsubscribeAlbums: (() => void) | null = null; // New listener for albums
 
     // Set up real-time listener
     onMount(() => {
-        const artistRef = doc(db, "artists", data.artistId);
-
-        unsubscribe = onSnapshot(artistRef, (docSnap) => {
+        // 1. Listen to Artist Profile changes
+        const artistRef = doc(db, 'artists', data.artistId);
+        unsubscribeArtist = onSnapshot(artistRef, (docSnap) => {
             if (docSnap.exists()) {
                 artist = docSnap.data() as ArtistProfile;
             }
         });
+
+        // 2. Listen to Albums changes (Real-time Discography)
+        // We query albums where artistId matches the current page ID
+        const albumsRef = collection(db, 'albums');
+        const q = query(albumsRef, where('artistId', '==', data.artistId));
+
+        unsubscribeAlbums = onSnapshot(q, (snapshot) => {
+            const firestoreAlbums = snapshot.docs.map(
+                (doc) =>
+                    ({
+                        id: doc.id,
+                        ...doc.data(),
+                    }) as Album
+            );
+
+            // Optional: Merge with static albums if they exist and match name, or replace entirely.
+            // For now, let's prioritize Firestore albums + any static ones that might match by name (legacy)
+            const staticAlbums = ALBUMS.filter((a) => a.artist === artist.artistName);
+
+            // Dedup by ID just in case
+            const all = [...firestoreAlbums, ...staticAlbums];
+            const unique = new Map();
+            all.forEach((a) => unique.set(a.id, a));
+
+            artistAlbums = Array.from(unique.values()).sort((a, b) => {
+                // Sort by creation time if available, or fallback
+                const timeA = (a.createdAt as any)?.seconds || 0;
+                const timeB = (b.createdAt as any)?.seconds || 0;
+                return timeB - timeA;
+            });
+        });
     });
 
     onDestroy(() => {
-        if (unsubscribe) {
-            unsubscribe();
-        }
+        if (unsubscribeArtist) unsubscribeArtist();
+        if (unsubscribeAlbums) unsubscribeAlbums();
     });
 
-    $: artistAlbums = ALBUMS.filter(
-        (album) => album.artist === artist.artistName,
-    );
-    $: totalTracks = artistAlbums.reduce(
-        (sum, album) => sum + (album.tracks?.length || 0),
-        0,
-    );
+    $: totalTracks = artistAlbums.reduce((sum, album) => sum + (album.tracks?.length || 0), 0);
     $: popularTracks = artistAlbums
         .flatMap((album) => album.tracks || [])
         .sort(() => 0.5 - Math.random())
@@ -50,7 +77,7 @@
     }
 
     function getSocialIcon(platform: string) {
-        return SOCIAL_PLATFORMS.find((p) => p.id === platform)?.icon || "🔗";
+        return SOCIAL_PLATFORMS.find((p) => p.id === platform)?.icon || '🔗';
     }
 </script>
 
@@ -82,12 +109,7 @@
                 href="/artists"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-black/50 hover:bg-black/70 backdrop-blur-sm border border-white/10 rounded-xl transition-all text-white"
             >
-                <svg
-                    class="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                         stroke-linecap="round"
                         stroke-linejoin="round"
@@ -122,9 +144,7 @@
 
             <!-- Info -->
             <div class="flex-1 text-center md:text-left">
-                <div
-                    class="flex flex-col md:flex-row items-center md:items-start gap-3 mb-4"
-                >
+                <div class="flex flex-col md:flex-row items-center md:items-start gap-3 mb-4">
                     <h1 class="text-4xl md:text-5xl font-bold">
                         {artist.artistName}
                     </h1>
@@ -136,9 +156,7 @@
                 </p>
 
                 <!-- Stats -->
-                <div
-                    class="flex flex-wrap justify-center md:justify-start gap-6 mb-6"
-                >
+                <div class="flex flex-wrap justify-center md:justify-start gap-6 mb-6">
                     <div class="text-center md:text-left">
                         <div class="text-2xl font-bold text-primary-500">
                             {artistAlbums.length}
@@ -163,9 +181,7 @@
 
                 <!-- Social Links -->
                 {#if artist.socialLinks && artist.socialLinks.length > 0}
-                    <div
-                        class="flex flex-wrap justify-center md:justify-start gap-3"
-                    >
+                    <div class="flex flex-wrap justify-center md:justify-start gap-3">
                         {#each artist.socialLinks as social}
                             <a
                                 href={social.url}
@@ -174,9 +190,7 @@
                                 class="px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg transition-all flex items-center gap-2"
                             >
                                 <span>{getSocialIcon(social.platform)}</span>
-                                <span class="text-sm capitalize"
-                                    >{social.platform}</span
-                                >
+                                <span class="text-sm capitalize">{social.platform}</span>
                             </a>
                         {/each}
                     </div>
@@ -189,25 +203,16 @@
             <h2 class="text-3xl font-bold mb-8">Discografía</h2>
 
             {#if artistAlbums.length === 0}
-                <div
-                    class="text-center py-12 bg-white/5 rounded-2xl border border-white/10"
-                >
+                <div class="text-center py-12 bg-white/5 rounded-2xl border border-white/10">
                     <div class="inline-flex justify-center mb-3 text-slate-400">
                         <MusicIcon size="xl" />
                     </div>
-                    <p class="text-slate-400">
-                        Este artista aún no tiene álbumes publicados.
-                    </p>
+                    <p class="text-slate-400">Este artista aún no tiene álbumes publicados.</p>
                 </div>
             {:else}
-                <div
-                    class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
-                >
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                     {#each artistAlbums as album}
-                        <button
-                            on:click={() => goto(`/album/${album.id}`)}
-                            class="group text-left"
-                        >
+                        <button on:click={() => goto(`/album/${album.id}`)} class="group text-left">
                             <div
                                 class="aspect-square rounded-2xl bg-slate-800 mb-4 overflow-hidden relative shadow-lg group-hover:shadow-primary-500/30 transition-all group-hover:-translate-y-2"
                             >
@@ -222,8 +227,7 @@
                                     class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
                                 >
                                     <button
-                                        on:click|stopPropagation={() =>
-                                            handlePlayAlbum(album.id)}
+                                        on:click|stopPropagation={() => handlePlayAlbum(album.id)}
                                         class="w-14 h-14 bg-primary-500 hover:bg-primary-400 rounded-full flex items-center justify-center transition-transform hover:scale-110"
                                     >
                                         {#if $audioStore.currentAlbumId === album.id && $audioStore.isPlaying}
@@ -232,9 +236,7 @@
                                                 fill="currentColor"
                                                 viewBox="0 0 24 24"
                                             >
-                                                <path
-                                                    d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"
-                                                />
+                                                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                                             </svg>
                                         {:else}
                                             <svg
