@@ -4,6 +4,7 @@
     import { onMount } from 'svelte';
     import { collection, query, where, getDocs } from 'firebase/firestore';
     import { db } from '$lib/firebase';
+    import { audioStore } from '$lib/audio/store';
     import type { Album } from '$lib/data/albums';
 
     export let profile: ArtistProfile;
@@ -186,9 +187,85 @@
 
         <!-- Discography / Releases Section (Auto-Connected) -->
         {#if !loadingAlbums && artistAlbums.length > 0}
+            <!-- 1. All Tracks (Popular / Latest) -->
+            {@const allTracks = artistAlbums.flatMap((a) =>
+                (a.tracks || []).map((t) => ({ ...t, albumCover: a.cover, albumTitle: a.title }))
+            )}
+
+            {#if allTracks.length > 0}
+                <div class="mt-8 pt-6 border-t border-white/10">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">
+                            Canciones ({allTracks.length})
+                        </h3>
+                        <button
+                            on:click={() => {
+                                // Play All
+                                audioStore.update((s) => ({
+                                    ...s,
+                                    playlist: allTracks,
+                                    currentTrackIndex: 0,
+                                    isPlaying: true,
+                                    isRadioMode: false,
+                                    currentAlbumId: undefined,
+                                }));
+                            }}
+                            class="text-xs font-bold text-primary-400 hover:text-white flex items-center gap-1 transition-colors"
+                        >
+                            <span>▶</span> Reproducir Todas
+                        </button>
+                    </div>
+
+                    <div class="space-y-1 max-h-60 overflow-y-auto custom-scrollbar pr-2">
+                        {#each allTracks as track, i}
+                            <button
+                                on:click={() => {
+                                    // Play this track within the context of ALL artist tracks
+                                    audioStore.update((s) => ({
+                                        ...s,
+                                        playlist: allTracks,
+                                        currentTrackIndex: i,
+                                        isPlaying: true,
+                                        isRadioMode: false,
+                                        currentAlbumId: undefined,
+                                    }));
+                                }}
+                                class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 transition-colors group text-left"
+                            >
+                                <div
+                                    class="w-8 h-8 rounded overflow-hidden bg-black/50 flex-shrink-0 relative group-hover:ring-1 group-hover:ring-primary-500"
+                                >
+                                    <img
+                                        src={track.albumCover || '/images/default-album.png'}
+                                        alt={track.title}
+                                        class="w-full h-full object-cover"
+                                    />
+                                    <div
+                                        class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100"
+                                    >
+                                        <span class="text-white text-[10px]">▶</span>
+                                    </div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p
+                                        class="text-xs font-bold text-white truncate group-hover:text-primary-400 transition-colors"
+                                    >
+                                        {track.title}
+                                    </p>
+                                    <p class="text-[10px] text-slate-500 truncate">
+                                        {track.albumTitle}
+                                    </p>
+                                </div>
+                            </button>
+                        {/each}
+                    </div>
+                </div>
+            {/if}
+
+            <!-- 2. Albums List -->
             <div class="mt-8 pt-6 border-t border-white/10">
                 <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">
-                    Lanzamientos
+                    Álbumes
                 </h3>
                 <div class="space-y-3">
                     {#each artistAlbums as album}
