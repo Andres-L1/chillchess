@@ -1,6 +1,6 @@
 <script lang="ts">
-    import type { ArtistProfile, SocialLink } from "$lib/types/artist";
-    import { SOCIAL_PLATFORMS } from "$lib/types/artist";
+    import type { ArtistProfile, SocialLink } from '$lib/types/artist';
+    import { SOCIAL_PLATFORMS } from '$lib/types/artist';
     import { onMount } from 'svelte';
     import { collection, query, where, getDocs } from 'firebase/firestore';
     import { db } from '$lib/firebase';
@@ -23,37 +23,41 @@
             // Query albums where artistId matches
             const q = query(collection(db, 'albums'), where('artistId', '==', profile.userId));
             const snapshot = await getDocs(q);
-            artistAlbums = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Album));
+            artistAlbums = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Album);
         } catch (e) {
-            console.error("Error loading artist albums:", e);
+            console.error('Error loading artist albums:', e);
         } finally {
             loadingAlbums = false;
         }
     });
 
+    // Helper to extract year safely
+    function getAlbumYear(album: Album) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const seconds = (album.createdAt as any)?.seconds;
+        return new Date(seconds ? seconds * 1000 : Date.now()).getFullYear();
+    }
+
     // Get social platform info
     function getPlatformInfo(platform: string) {
-        return (
-            SOCIAL_PLATFORMS.find((p) => p.id === platform) ||
-            SOCIAL_PLATFORMS[6]
-        );
+        return SOCIAL_PLATFORMS.find((p) => p.id === platform) || SOCIAL_PLATFORMS[6];
     }
 
     // Handle link click
     function handleSocialClick(link: SocialLink) {
         if (!isPro && !isPreview) {
             // Free users: links don't work
-            alert("🔒 Actualiza a Pro para habilitar links a redes sociales");
+            alert('🔒 Actualiza a Pro para habilitar links a redes sociales');
             return;
         }
         // Pro users or preview: open link
-        window.open(link.url, "_blank");
+        window.open(link.url, '_blank');
     }
 
     // Theme colors
-    $: themeColor = profile.themeColor || "#9333EA";
-    $: accentColor = profile.accentColor || "#A855F7";
-    $: cardLayout = profile.cardLayout || "default";
+    $: themeColor = profile.themeColor || '#9333EA';
+    $: accentColor = profile.accentColor || '#A855F7';
+    $: cardLayout = profile.cardLayout || 'default';
 </script>
 
 <div
@@ -63,21 +67,15 @@
     <!-- Banner -->
     <div class="relative h-32 overflow-hidden">
         {#if profile.bannerUrl && isPro}
-            <img
-                src={profile.bannerUrl}
-                alt="Banner"
-                class="w-full h-full object-cover"
-            />
-        {:else if isPro && profile.bannerStyle === "gradient"}
+            <img src={profile.bannerUrl} alt="Banner" class="w-full h-full object-cover" />
+        {:else if isPro && profile.bannerStyle === 'gradient'}
             <div
                 class="w-full h-full"
                 style="background: linear-gradient(135deg, {themeColor}, {accentColor})"
             ></div>
         {:else}
             <!-- Default gradient for free users -->
-            <div
-                class="w-full h-full bg-gradient-to-br from-slate-700 to-slate-900"
-            ></div>
+            <div class="w-full h-full bg-gradient-to-br from-slate-700 to-slate-900"></div>
         {/if}
 
         <!-- PRO Badge -->
@@ -118,16 +116,13 @@
     <!-- Content -->
     <div class="px-6 pb-6 pt-4 text-center">
         <!-- Artist Name -->
-        <h2
-            class="text-2xl font-bold mb-2"
-            style="color: {isPro ? themeColor : '#FFFFFF'}"
-        >
+        <h2 class="text-2xl font-bold mb-2" style="color: {isPro ? themeColor : '#FFFFFF'}">
             {profile.artistName}
         </h2>
 
         <!-- Bio -->
         <p class="text-slate-400 text-sm mb-6 max-w-md mx-auto leading-relaxed">
-            {profile.bio || "Artista en ChillChess"}
+            {profile.bio || 'Artista en ChillChess'}
         </p>
 
         <!-- Stats (PRO only) -->
@@ -172,9 +167,7 @@
                         <span class="text-lg">{platformInfo.icon}</span>
                         <span
                             class="text-white"
-                            style="color: {isPro
-                                ? platformInfo.color
-                                : '#9CA3AF'}"
+                            style="color: {isPro ? platformInfo.color : '#9CA3AF'}"
                         >
                             {link.label || platformInfo.label}
                         </span>
@@ -194,20 +187,31 @@
         <!-- Discography / Releases Section (Auto-Connected) -->
         {#if !loadingAlbums && artistAlbums.length > 0}
             <div class="mt-8 pt-6 border-t border-white/10">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">Lanzamientos</h3>
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">
+                    Lanzamientos
+                </h3>
                 <div class="space-y-3">
                     {#each artistAlbums as album}
-                        <div class="flex items-center gap-3 p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors group text-left cursor-default">
-                            <img src={album.cover} alt={album.title} class="w-10 h-10 rounded object-cover bg-black/50" />
+                        <div
+                            class="flex items-center gap-3 p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-colors group text-left cursor-default"
+                        >
+                            <img
+                                src={album.cover}
+                                alt={album.title}
+                                class="w-10 h-10 rounded object-cover bg-black/50"
+                            />
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-bold text-white truncate group-hover:text-primary-400 transition-colors">{album.title}</p>
-                                <p class="text-[10px] text-slate-500">{album.tracks?.length || 0} canciones</p>
+                                <p
+                                    class="text-sm font-bold text-white truncate group-hover:text-primary-400 transition-colors"
+                                >
+                                    {album.title}
+                                </p>
+                                <p class="text-[10px] text-slate-500">
+                                    {album.tracks?.length || 0} canciones
+                                </p>
                             </div>
                             <span class="text-xs text-slate-600 font-mono">
-                                {(() => {
-                                    const seconds = (album.createdAt as any)?.seconds;
-                                    return new Date(seconds ? seconds * 1000 : Date.now()).getFullYear();
-                                })()}
+                                {getAlbumYear(album)}
                             </span>
                         </div>
                     {/each}

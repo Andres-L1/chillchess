@@ -21,6 +21,7 @@ export interface Album {
     description: string;
     isPremium?: boolean; // Requires Pro subscription
     category: AlbumCategory; // New field for categorization
+    createdAt?: any; // Timestamp from Firestore
 }
 
 export const ALBUMS: Album[] = [
