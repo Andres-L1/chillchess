@@ -115,6 +115,7 @@
 
             // Save Metadata to Firestore
             await addDoc(collection(db, 'musicSubmissions'), {
+                userId, // Required for Firestore Rules
                 artistId: userId,
                 artistName: $userStore.user?.displayName || 'Unknown Artist',
                 artistEmail: $userStore.user?.email,
