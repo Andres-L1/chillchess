@@ -42,7 +42,11 @@ service cloud.firestore {
     match /artists/{artistId} {
       allow read: if true; // Public read for verified artists
       allow create: if isSignedIn();
-      allow update: if isOwner(artistId) || isAdmin();
+      // Allow update if userId matches OR if document ID matches (backward compatible)
+      allow update: if isSignedIn() && 
+                       (request.auth.uid == artistId || 
+                        get(/databases/$(database)/documents/artists/$(artistId)).data.userId == request.auth.uid) ||
+                       isAdmin();
       allow delete: if isAdmin();
     }
     
