@@ -158,6 +158,7 @@
                             value={widgetUrl}
                             class="w-full bg-transparent p-4 text-xs text-green-400 font-mono outline-none cursor-text"
                             on:click={(e) => e.currentTarget.select()}
+                            aria-label="URL del Widget generado"
                         />
                     </div>
                     <button
