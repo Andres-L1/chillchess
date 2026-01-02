@@ -133,10 +133,12 @@
                             <div class="space-y-4">
                                 <div>
                                     <label
+                                        for="streak-label"
                                         class="block text-xs uppercase text-slate-500 mb-1 font-bold"
                                         >Texto de etiqueta</label
                                     >
                                     <input
+                                        id="streak-label"
                                         type="text"
                                         bind:value={streakLabel}
                                         class="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-orange-500 outline-none transition-colors placeholder:text-slate-600"
