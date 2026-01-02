@@ -217,14 +217,14 @@
         </div>
         {#if $userStore.user}
             <a
-                href="/profile/{$userStore.user.uid}"
+                href="/artist/{$userStore.user.uid}"
                 class="flex items-center gap-3 bg-[#1e293b] hover:bg-slate-700 px-4 py-2 rounded-full border border-white/5 transition-all group"
             >
-                <span class="text-xs font-bold text-green-400 group-hover:text-green-300"
+                <span class="text-xs font-bold text-orange-400 group-hover:text-orange-300"
                     >Ver Perfil</span
                 >
                 <div
-                    class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-bold text-xs"
+                    class="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white font-bold text-xs"
                 >
                     {$userStore.user.displayName
                         ? $userStore.user.displayName[0].toUpperCase()

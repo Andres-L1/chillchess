@@ -8,18 +8,22 @@
     import { SOCIAL_PLATFORMS } from '$lib/types/artist';
     import { db } from '$lib/firebase';
     import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
-    import { ALBUMS } from '$lib/data/albums'; // Keep type reference if needed, but not data
+    import { ALBUMS } from '$lib/data/albums';
     import type { Album } from '$lib/data/albums';
 
     export let data: { artistProfile: ArtistProfile; artistId: string };
 
     // Use reactive variable for real-time updates
     let artist = data.artistProfile;
-    let artistAlbums: Album[] = []; // Changed to local state
+    let artistAlbums: Album[] = [];
     let unsubscribeArtist: (() => void) | null = null;
-    let unsubscribeAlbums: (() => void) | null = null; // New listener for albums
+    let unsubscribeAlbums: (() => void) | null = null;
 
-    // Set up real-time listener
+    // Activity / Heatmap
+    let activityMap: Record<string, number> = {};
+    let calendar: { date: string; count: number; intensity: number }[] = [];
+    let unsubscribeUser: (() => void) | null = null;
+
     onMount(() => {
         // 1. Listen to Artist Profile changes
         const artistRef = doc(db, 'artists', data.artistId);
@@ -29,25 +33,24 @@
             }
         });
 
-        // 2. Listen to Albums changes (Real-time Discography)
-        // We listen to BOTH querying by artistId (new standard) AND artist Name (legacy/fallback)
-        // This ensures old albums and new ones both appear.
-        const albumsRef = collection(db, 'albums');
+        // 2. Listen to User Activity (Heatmap)
+        const userRef = doc(db, 'users', data.artistId);
+        unsubscribeUser = onSnapshot(userRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const userData = docSnap.data();
+                activityMap = userData.activityMap || {};
+                generateCalendar();
+            }
+        });
 
-        // Query 1: By ID
+        // 3. Listen to Albums changes
+        const albumsRef = collection(db, 'albums');
         const qId = query(albumsRef, where('artistId', '==', data.artistId));
 
-        // Query 2: By Name (Legacy support) - we need to wait for artist profile to load name first?
-        // Actually, 'artist' variable is reactive but inside onMount we need the initial value or wait.
-        // Let's rely on data.artistProfile.artistName or updated artist.artistName.
-        // Ideally we start with ID query, but we can setup name query too.
-
         const updateAlbums = (newDocs: Album[]) => {
-            // Merge with existing state.
             const currentMap = new Map(artistAlbums.map((a) => [a.id, a]));
             newDocs.forEach((a) => currentMap.set(a.id, a));
 
-            // Also merge static albums just in case specific ones are hardcoded
             const staticAlbums = ALBUMS.filter((a) => a.artist === artist.artistName);
             staticAlbums.forEach((a) => {
                 if (!currentMap.has(a.id)) currentMap.set(a.id, a);
@@ -65,8 +68,6 @@
             updateAlbums(docs);
         });
 
-        // We also want to query by Name, but only if we have a name.
-        // Note: This might duplicate reads if an album has both correct ID and Name, but map deduplicates.
         let unsubName: (() => void) | null = null;
         if (artist.artistName) {
             const qName = query(albumsRef, where('artist', '==', artist.artistName));
@@ -85,21 +86,32 @@
     onDestroy(() => {
         if (unsubscribeArtist) unsubscribeArtist();
         if (unsubscribeAlbums) unsubscribeAlbums();
+        if (unsubscribeUser) unsubscribeUser();
     });
 
+    function generateCalendar() {
+        const days = 365;
+        const end = new Date();
+        const start = new Date();
+        start.setDate(end.getDate() - days);
+
+        const tempCal = [];
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+            const key = d.toISOString().split('T')[0];
+            const count = activityMap[key] || 0;
+
+            let intensity = 0;
+            if (count > 0) intensity = 1;
+            if (count > 2) intensity = 2;
+            if (count > 5) intensity = 3;
+            if (count > 8) intensity = 4;
+
+            tempCal.push({ date: key, count, intensity });
+        }
+        calendar = tempCal;
+    }
+
     $: totalTracks = artistAlbums.reduce((sum, album) => sum + (album.tracks?.length || 0), 0);
-    $: popularTracks = artistAlbums
-        .flatMap((album) => album.tracks || [])
-        .sort(() => 0.5 - Math.random())
-        .slice(0, 5);
-
-    function handlePlayAlbum(albumId: string) {
-        playAlbum(albumId);
-    }
-
-    function getSocialIcon(platform: string) {
-        return SOCIAL_PLATFORMS.find((p) => p.id === platform)?.icon || '🔗';
-    }
     $: flatTracks = artistAlbums.flatMap((a) =>
         (a.tracks || []).map((t) => ({
             ...t,
@@ -108,7 +120,6 @@
             artist: a.artist,
         }))
     );
-
     $: totalDurationSeconds = flatTracks.reduce((acc, t) => acc + (t.duration || 0), 0);
     $: formattedDuration = formatTime(totalDurationSeconds);
 
@@ -116,8 +127,7 @@
         if (!seconds) return '--';
         const h = Math.floor(seconds / 3600);
         const m = Math.floor((seconds % 3600) / 60);
-        if (h > 0) return `${h}h ${m}m`;
-        return `${m}m`;
+        return h > 0 ? `${h}h ${m}m` : `${m}m`;
     }
 
     function playArtistMix() {
@@ -141,10 +151,18 @@
             currentAlbumId: undefined,
         }));
     }
+
+    function handlePlayAlbum(albumId: string) {
+        playAlbum(albumId);
+    }
+
+    function getSocialIcon(platform: string) {
+        return SOCIAL_PLATFORMS.find((p) => p.id === platform)?.icon || '🔗';
+    }
 </script>
 
 <svelte:head>
-    <title>{artist.artistName} | Artistas ChillChess</title>
+    <title>{artist.artistName} | ChillChess</title>
 </svelte:head>
 
 <div class="min-h-screen bg-midnight-900 text-white font-poppins">
@@ -164,22 +182,20 @@
         <div
             class="absolute inset-0 bg-gradient-to-t from-midnight-900 via-midnight-900/50 to-transparent"
         ></div>
-
-        <!-- Back Button -->
         <div class="absolute top-6 left-6">
             <a
                 href="/artists"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-black/50 hover:bg-black/70 backdrop-blur-sm border border-white/10 rounded-xl transition-all text-white"
             >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    ><path
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"
                         d="M15 19l-7-7 7-7"
-                    />
-                </svg>
-                Volver a Artistas
+                    /></svg
+                >
+                Volver
             </a>
         </div>
     </div>
@@ -207,30 +223,29 @@
             <!-- Info -->
             <div class="flex-1 text-center md:text-left">
                 <div class="flex flex-col md:flex-row items-center md:items-start gap-3 mb-4">
-                    <h1 class="text-4xl md:text-5xl font-bold">
-                        {artist.artistName}
-                    </h1>
+                    <h1 class="text-4xl md:text-5xl font-bold">{artist.artistName}</h1>
                     <VerifiedBadge size="xl2" />
                 </div>
-
                 <p class="text-lg text-slate-300 mb-6 max-w-2xl">
-                    {artist.bio}
+                    {artist.bio || 'Bienvenido a mi perfil.'}
                 </p>
 
                 <!-- Stats -->
                 <div class="flex flex-wrap justify-center md:justify-start gap-6 mb-6">
                     <div class="text-center md:text-left">
-                        <div class="text-2xl font-bold text-primary-500">
-                            {artistAlbums.length}
+                        <div class="text-2xl font-bold text-orange-500">
+                            {calendar.reduce((acc, d) => acc + d.count, 0)}
                         </div>
-                        <div class="text-sm text-slate-500">Álbumes</div>
+                        <div class="text-sm text-slate-500">Actividad</div>
                     </div>
-                    <div class="text-center md:text-left">
-                        <div class="text-2xl font-bold text-primary-500">
-                            {totalTracks}
+                    {#if artistAlbums.length > 0}
+                        <div class="text-center md:text-left">
+                            <div class="text-2xl font-bold text-primary-500">
+                                {artistAlbums.length}
+                            </div>
+                            <div class="text-sm text-slate-500">Álbumes</div>
                         </div>
-                        <div class="text-sm text-slate-500">Canciones</div>
-                    </div>
+                    {/if}
                     {#if artist.followerCount}
                         <div class="text-center md:text-left">
                             <div class="text-2xl font-bold text-primary-500">
@@ -260,7 +275,46 @@
             </div>
         </div>
 
-        <!-- Songs Section (NEW) -->
+        <!-- ACTIVITY HEATMAP (NEW) -->
+        <div class="bg-[#1e293b] border border-white/5 rounded-3xl p-6 md:p-8 mb-12">
+            <h2
+                class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6 border-b border-white/5 pb-4"
+            >
+                Actividad (ChillChess Tracker)
+            </h2>
+            <div class="overflow-x-auto pb-4">
+                <div class="inline-grid grid-rows-7 grid-flow-col gap-1 min-w-max">
+                    {#each calendar as day}
+                        <div
+                            class="w-3 h-3 md:w-4 md:h-4 rounded-sm transition-all hover:scale-125 ring-0 hover:ring-1 ring-white/50"
+                            style="background-color: {day.intensity === 0
+                                ? '#334155'
+                                : day.intensity === 1
+                                  ? '#fed7aa'
+                                  : day.intensity === 2
+                                    ? '#fb923c'
+                                    : day.intensity === 3
+                                      ? '#ea580c'
+                                      : '#c2410c'}; opacity: {day.intensity === 0 ? 0.3 : 1}"
+                            title="{day.date}: {day.count} pts"
+                        ></div>
+                    {/each}
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-2 text-xs text-slate-500 mt-4">
+                <span>Off</span>
+                <div class="flex gap-1">
+                    <div class="w-3 h-3 rounded-sm bg-[#334155] opacity-30"></div>
+                    <div class="w-3 h-3 rounded-sm bg-[#fed7aa]"></div>
+                    <div class="w-3 h-3 rounded-sm bg-[#fb923c]"></div>
+                    <div class="w-3 h-3 rounded-sm bg-[#ea580c]"></div>
+                    <div class="w-3 h-3 rounded-sm bg-[#c2410c]"></div>
+                </div>
+                <span>On Fire</span>
+            </div>
+        </div>
+
+        <!-- Songs Section -->
         {#if flatTracks.length > 0}
             <div class="mb-12 animate-fade-in">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -279,7 +333,6 @@
                         <span>▶</span> Reproducir Todo
                     </button>
                 </div>
-
                 <div class="bg-black/20 rounded-3xl border border-white/5 overflow-hidden">
                     <div class="max-h-[400px] overflow-y-auto custom-scrollbar p-2">
                         {#each flatTracks as track, i}
@@ -301,13 +354,10 @@
                                         <span class="text-white text-sm">▶</span>
                                     </div>
                                 </div>
-
                                 <span
                                     class="text-sm font-mono text-slate-600 w-6 text-center group-hover:text-primary-400 transition-colors"
+                                    >{i + 1}</span
                                 >
-                                    {i + 1}
-                                </span>
-
                                 <div class="min-w-0 flex-1">
                                     <div
                                         class="font-bold text-white truncate group-hover:text-primary-300 transition-colors"
@@ -333,17 +383,9 @@
         {/if}
 
         <!-- Albums Section -->
-        <div class="pb-32">
-            <h2 class="text-3xl font-bold mb-8">Discografía</h2>
-
-            {#if artistAlbums.length === 0}
-                <div class="text-center py-12 bg-white/5 rounded-2xl border border-white/10">
-                    <div class="inline-flex justify-center mb-3 text-slate-400">
-                        <MusicIcon size="xl" />
-                    </div>
-                    <p class="text-slate-400">Este artista aún no tiene álbumes publicados.</p>
-                </div>
-            {:else}
+        {#if artistAlbums.length > 0}
+            <div class="pb-32">
+                <h2 class="text-3xl font-bold mb-8">Discografía</h2>
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                     {#each artistAlbums as album}
                         <button on:click={() => goto(`/album/${album.id}`)} class="group text-left">
@@ -355,8 +397,6 @@
                                     alt={album.title}
                                     class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
                                 />
-
-                                <!-- Play Overlay -->
                                 <div
                                     class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
                                 >
@@ -369,22 +409,18 @@
                                                 class="w-6 h-6"
                                                 fill="currentColor"
                                                 viewBox="0 0 24 24"
+                                                ><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" /></svg
                                             >
-                                                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                                            </svg>
                                         {:else}
                                             <svg
                                                 class="w-6 h-6 ml-1"
                                                 fill="currentColor"
-                                                viewBox="0 0 24 24"
+                                                viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg
                                             >
-                                                <path d="M8 5v14l11-7z" />
-                                            </svg>
                                         {/if}
                                     </button>
                                 </div>
                             </div>
-
                             <h3
                                 class="font-bold text-white/90 group-hover:text-primary-400 transition-colors truncate mb-1"
                             >
@@ -393,18 +429,14 @@
                             <p class="text-sm text-slate-400 truncate">
                                 {(album.tracks || []).length} canciones
                             </p>
-
-                            {#if album.tag}
-                                <span
+                            {#if album.tag}<span
                                     class="inline-block mt-2 text-xs px-2 py-1 rounded-full bg-primary-500/20 text-primary-300 font-bold"
-                                >
-                                    {album.tag}
-                                </span>
-                            {/if}
+                                    >{album.tag}</span
+                                >{/if}
                         </button>
                     {/each}
                 </div>
-            {/if}
-        </div>
+            </div>
+        {/if}
     </div>
 </div>
