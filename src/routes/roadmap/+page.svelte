@@ -8,35 +8,45 @@
     }
 
     const roadmapItems: RoadmapItem[] = [
-        // Completado Recientemente (Hot Fixes & Features)
+        // --- COMPLETADO (Enero 2026) ---
         {
-            title: 'Integración de Fundadores & Artistas',
+            title: 'Modo Enfoque Minimalista',
             description:
-                'Sistema inteligente para asignar lanzamientos musicales a perfiles Fundadores y Verificados, con distintivos especiales.',
+                'Rediseño total de la experiencia de concentración con temporizador "Orange Vibe", controles intuitivos y eliminación de distracciones.',
+            status: 'done',
+            date: 'Enero 2026',
+            category: 'visual',
+        },
+        {
+            title: 'Infraestructura de Álbumes Dinámicos',
+            description:
+                'Sistema híbrido de carga de música que combina caché local y Firestore para una reproducción instantánea de nuevos lanzamientos.',
+            status: 'done',
+            date: 'Enero 2026',
+            category: 'tech',
+        },
+        {
+            title: 'Seguridad & Recuperación',
+            description:
+                'Implementación completa del flujo de "Olvidé mi contraseña" y validación robusta de reportes de errores.',
+            status: 'done',
+            date: 'Enero 2026',
+            category: 'tech',
+        },
+
+        // --- COMPLETADO (Diciembre 2025) ---
+        {
+            title: 'Integración de Fundadores',
+            description:
+                'Sistema inteligente para asignar lanzamientos musicales a perfiles Fundadores y Verificados.',
             status: 'done',
             date: 'Diciembre 2025',
             category: 'community',
         },
         {
-            title: 'App Nativa (iOS & Android)',
+            title: 'Colección Premium',
             description:
-                'Desarrollo de una aplicación móvil nativa para llevar la experiencia ChillChess en tu bolsillo con reproducción offline.',
-            status: 'planned',
-            date: 'Mediados 2026',
-            category: 'tech',
-        },
-        {
-            title: 'Admin Panel & Foundation (v2.5)',
-            description:
-                'Reconstrucción total de la administración con Glassmorphism real, responsive design y arquitectura sólida para escalar.',
-            status: 'done',
-            date: 'Diciembre 2025',
-            category: 'tech',
-        },
-        {
-            title: 'Colección Premium & Búsqueda',
-            description:
-                "Rediseño total de la galería musical con 'Hero Mode', filtrado instantáneo y tarjetas inmersivas. ¡Encontrar tu vibe nunca fue tan bonito!",
+                "Rediseño total de la galería musical con 'Hero Mode', filtrado instantáneo y tarjetas inmersivas.",
             status: 'done',
             date: 'Diciembre 2025',
             category: 'visual',
@@ -44,7 +54,7 @@
         {
             title: 'Vibe Studio 2.1',
             description:
-                'Personalización total del entorno: Relojes (Neon, Retro, Analógico) y Fondos Dinámicos (Lluvia, Cyber, Zen) reactivos.',
+                'Personalización total del entorno: Relojes (Neon, Retro, Analógico) y Fondos Dinámicos reactivos.',
             status: 'done',
             date: 'Diciembre 2025',
             category: 'visual',
@@ -52,12 +62,11 @@
         {
             title: 'Hub de Artistas Automatizado',
             description:
-                'Nuevo flujo de envío de música con carga masiva (drag & drop) y verificación automática de perfiles al aprobar lanzamientos.',
+                'Nuevo flujo de envío de música con carga masiva (drag & drop) y verificación automática.',
             status: 'done',
             date: 'Diciembre 2025',
             category: 'tech',
         },
-
         {
             title: 'Sistema de Favoritos',
             description:
@@ -66,101 +75,88 @@
             date: 'Diciembre 2025',
             category: 'music',
         },
-
         {
-            title: 'Widget para OBS/Streaming',
+            title: 'Widget para Streaming',
             description:
-                'Widget personalizable con gradientes animados, barra de progreso, equalizer y logo SVG. Perfecto para mostrar en streams.',
+                'Widget personalizable con gradientes animados, barra de progreso y equalizer para OBS.',
             status: 'done',
             date: 'Diciembre 2025',
             category: 'tech',
         },
-
         {
-            title: 'Sonidos Ambientales (White Noise)',
+            title: 'Sonidos Ambientales',
             description:
-                'Capa adicional de audio con sonidos de lluvia, fuego, café, océano y bosque que se mezcla con la música.',
+                'Capa adicional de audio con sonidos de lluvia, fuego, café y bosque mezclables.',
             status: 'done',
             date: 'Diciembre 2025',
             category: 'music',
         },
-
         {
-            title: 'Salas de Escucha Compartida',
+            title: 'Salas Compartidas',
             description:
-                'Crea salas públicas o privadas para escuchar música sincronizada en tiempo real con amigos. El host controla la reproducción.',
+                'Salas públicas o privadas para escuchar música sincronizada en tiempo real con amigos.',
             status: 'done',
             date: 'Diciembre 2025',
             category: 'community',
         },
         {
-            title: 'Navegación Simplificada',
-            description: 'Menú reorganizado con dropdown de usuario y mejor experiencia en móvil.',
-            status: 'done',
-            date: 'Diciembre 2025',
-            category: 'tech',
-        },
-        {
-            title: 'Responsive Design',
-            description: 'Interfaz completamente adaptada para móvil, tablet y desktop.',
+            title: 'Admin Panel & Foundation',
+            description:
+                'Reconstrucción total de la administración con Glassmorphism y arquitectura escalable.',
             status: 'done',
             date: 'Diciembre 2025',
             category: 'tech',
         },
 
-        // En desarrollo (Hitos hacia la perfección)
+        // --- EN PROGRESO ---
         {
-            title: 'Lanzamiento v1.0 (Gold)',
-            description:
-                'El hito final. Estabilidad total y perfeccionamiento de todas las funciones + características sorpresa. Cero bugs críticos y experiencia 100% pulida.',
-            status: 'planned',
-            date: '2026',
-            category: 'tech',
-        },
-        {
-            title: 'Expansión del Catálogo Musical',
-            description: 'Incorporación de 3-5 álbumes nuevos de lo-fi, jazz y ambient.',
+            title: 'Expansión Musical',
+            description: 'Incorporación de nuevos álbumes de lo-fi, jazz y ambient exclusivos.',
             status: 'in-progress',
-            date: 'Enero 2026',
+            date: 'Q1 2026',
             category: 'music',
         },
         {
             title: 'Mejoras del Reproductor',
-            description: 'Añadir modo repetición, modo aleatorio y controles de velocidad.',
+            description: 'Añadir modo repetición inteligente, crossfade y controles de velocidad.',
             status: 'in-progress',
-            date: 'Enero 2026',
+            date: 'Q1 2026',
             category: 'tech',
         },
 
-        // Planificado (próximos 3 meses)
+        // --- PLANIFICADO ---
         {
             title: 'Playlists Personalizadas',
             description:
-                'Crea tus propias listas de reproducción combinando canciones de diferentes álbumes.',
+                'Crea y comparte tus propias listas de reproducción combinando diferentes álbumes.',
             status: 'planned',
             date: 'Febrero 2026',
             category: 'music',
         },
         {
-            title: 'Modo Offline',
-            description: 'Descarga álbumes para escuchar sin conexión (solo usuarios Pro).',
+            title: 'Perfil de Usuario Pro',
+            description: 'Estadísticas detalladas de escucha, historial y medallas por logros.',
             status: 'planned',
             date: 'Marzo 2026',
             category: 'tech',
         },
         {
-            title: 'Perfil de Usuario Mejorado',
-            description: 'Estadísticas de escucha, historial y álbumes más reproducidos.',
+            title: 'Modo Offline (App Nativa)',
+            description:
+                'Desarrollo de aplicación móvil nativa (iOS/Android) con descargas offline.',
             status: 'planned',
-            date: 'Marzo 2026',
+            date: 'Mediados 2026',
             category: 'tech',
         },
+
+        // --- EL OBJETIVO FINAL ---
         {
-            title: 'Temas de Color',
-            description: 'Elige entre modo oscuro estándar, midnight blue o amethyst.',
+            title: 'Lanzamiento v1.0 (Gold)',
+            description:
+                'El hito final. Estabilidad total, cero bugs críticos y una experiencia 100% pulida. El ChillChess definitivo.',
             status: 'planned',
-            date: 'Abril 2026',
-            category: 'visual',
+            date: 'Finales 2026',
+            category: 'community',
         },
     ];
 

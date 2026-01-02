@@ -9,6 +9,20 @@
 
     const patches: Patch[] = [
         {
+            version: 'v0.9',
+            date: '02 Ene 2026',
+            title: 'The Focus Update',
+            type: 'major',
+            changes: [
+                '🧘 Modo Enfoque 2.0: Rediseño minimalista del temporizador con tema naranja y controles limpios.',
+                '💿 Álbumes Dinámicos: Solucionado el problema de carga de álbumes nuevos desde la base de datos.',
+                '🔐 Recuperación de Cuenta: Añadida opción de "Olvidé mi contraseña" en el login.',
+                '⏱️ Duración de Playlist: Ahora se muestra el tiempo total de las canciones en el perfil del artista.',
+                '📱 Mejoras Móviles: Ajustes en el reproductor inferior para evitar cortes en pantallas pequeñas.',
+                '🐛 Correcciones: Validación de reportes de bugs y selección aleatoria real (Shuffle) arreglada.',
+            ],
+        },
+        {
             version: 'v0.8',
             date: '31 Dic 2025',
             title: 'The Foundation Update',
