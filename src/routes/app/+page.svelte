@@ -246,7 +246,7 @@
                     type="text"
                     bind:value={currentTask}
                     placeholder="¿En qué estás trabajando?"
-                    class="w-full bg-transparent border-none text-center text-2xl md:text-4xl font-medium text-white placeholder:text-slate-600 focus:outline-none focus:placeholder:text-slate-700 transition-all"
+                    class="w-full bg-transparent border-none text-center text-3xl md:text-5xl font-light text-white placeholder:text-white/20 hover:placeholder:text-white/40 focus:placeholder:text-white/50 focus:outline-none transition-all"
                 />
             </div>
 
@@ -257,41 +257,38 @@
                     : ''} transition-all duration-700"
             >
                 <!-- Circular Progress SVG -->
+                <!-- Circular Progress SVG (Ultra Thin) -->
                 <svg
-                    class="w-[300px] h-[300px] md:w-[450px] md:h-[450px] transform -rotate-90 drop-shadow-2xl text-white relative z-10"
+                    class="w-[320px] h-[320px] md:w-[480px] md:h-[480px] transform -rotate-90 text-white relative z-10"
                     viewBox="0 0 100 100"
                 >
-                    <!-- Track -->
-                    <!-- Track (White Base) -->
+                    <!-- Track (Ultra subtle) -->
                     <circle
                         cx="50"
                         cy="50"
-                        r="48"
+                        r="49"
                         fill="none"
                         stroke="white"
-                        stroke-width="2"
-                        class="opacity-30"
+                        stroke-width="0.5"
+                        class="opacity-20"
                     />
-                    <!-- Indicator (Glowy Orange) -->
+                    <!-- Indicator (Thin & Glowy) -->
                     <circle
                         cx="50"
                         cy="50"
-                        r="48"
+                        r="49"
                         fill="none"
                         stroke="url(#gradient-timer)"
-                        stroke-width="3"
-                        stroke-dasharray="301.6"
-                        stroke-dashoffset={((focusDuration - timeLeft) / focusDuration) * 301.6}
+                        stroke-width="1"
+                        stroke-dasharray="307.8"
+                        stroke-dashoffset={((focusDuration - timeLeft) / focusDuration) * 307.8}
                         stroke-linecap="round"
-                        class="filter drop-shadow-[0_0_8px_rgba(249,115,22,0.8)] transition-all duration-1000 ease-linear origin-center"
-                        class:animate-pulse={!timerRunning &&
-                            timeLeft < focusDuration &&
-                            timeLeft > 0}
+                        class="filter drop-shadow-[0_0_15px_rgba(249,115,22,0.6)] transition-all duration-1000 ease-linear origin-center"
                     />
                     <defs>
                         <linearGradient id="gradient-timer" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stop-color="#f97316" />
-                            <stop offset="100%" stop-color="#ef4444" />
+                            <stop offset="0%" stop-color="#fff" />
+                            <stop offset="100%" stop-color="#fff" />
                         </linearGradient>
                     </defs>
                 </svg>
@@ -299,50 +296,49 @@
                 <!-- Time Display -->
                 <div class="absolute inset-0 flex flex-col items-center justify-center z-10">
                     <div
-                        class="font-poppins text-7xl md:text-9xl font-medium tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-200 select-none tabular-nums"
+                        class="font-poppins text-7xl md:text-9xl font-light tracking-tighter text-white/90 select-none tabular-nums drop-shadow-2xl"
                     >
                         {formatTime(timeLeft)}
                     </div>
-                    <div
-                        class="text-orange-300/60 text-[10px] md:text-xs font-bold tracking-[0.25em] uppercase mt-4"
-                    >
-                        {Math.floor(focusDuration / 60)} MINUTOS
-                    </div>
                 </div>
-
-                <!-- Input overlay (Hidden for now to keep clean, adjustment via presets preferred) -->
             </div>
 
-            <!-- Controls (Minimal) -->
+            <!-- Controls (Ultra Minimal) -->
             <div
-                class="flex items-center gap-8 md:gap-12 animate-fade-in-up transition-opacity duration-700 min-h-[60px]"
+                class="flex items-center gap-6 md:gap-10 animate-fade-in-up transition-opacity duration-700 min-h-[60px]"
                 class:opacity-0={hideUI}
                 class:pointer-events-none={hideUI}
             >
                 {#if !timerRunning && timeLeft === focusDuration}
-                    <!-- Initial State: Play Button & Presets -->
+                    <!-- Initial State: Play Button -->
                     <div class="flex flex-col items-center gap-8">
                         <button
                             on:click={startTimer}
-                            class="w-16 h-16 md:w-20 md:h-20 bg-orange-600 hover:bg-orange-500 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(249,115,22,0.4)] hover:shadow-[0_0_50px_rgba(249,115,22,0.6)] hover:scale-105 transition-all text-white group"
+                            class="group relative flex items-center justify-center"
                         >
-                            <svg
-                                class="w-8 h-8 ml-1 group-hover:scale-110 transition-transform"
-                                fill="currentColor"
-                                viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg
+                            <div
+                                class="absolute inset-0 bg-white/10 rounded-full blur-xl group-hover:bg-white/20 transition-all duration-500 scale-75 group-hover:scale-100"
+                            ></div>
+                            <span
+                                class="relative text-3xl md:text-5xl font-light tracking-[0.2em] text-white group-hover:text-white transition-all uppercase opacity-80 group-hover:opacity-100"
                             >
+                                Empezar
+                            </span>
                         </button>
 
-                        <div class="flex gap-3">
-                            {#each [5, 25, 45] as min}
+                        <!-- Discrete Presets -->
+                        <div
+                            class="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                        >
+                            {#each [5, 25, 45, 60] as min}
                                 <button
                                     on:click={() => {
                                         timeLeft = min * 60;
                                         focusDuration = timeLeft;
                                     }}
-                                    class="px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/20 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all"
-                                    class:bg-white-10={focusDuration === min * 60}
+                                    class="text-xs font-medium text-slate-500 hover:text-white transition-colors uppercase tracking-widest"
                                     class:text-white={focusDuration === min * 60}
+                                    class:underline={focusDuration === min * 60}
                                 >
                                     {min}m
                                 </button>
@@ -350,40 +346,59 @@
                         </div>
                     </div>
                 {:else}
-                    <!-- Active Session Controls -->
+                    <!-- Active Session Controls (Icons Only) -->
 
-                    <!-- Cancel / Reset -->
+                    <!-- Cancel -->
                     <button
                         on:click={resetTimer}
-                        class="text-slate-400 hover:text-white transition-colors text-xs md:text-sm font-medium hover:scale-105 tracking-wide uppercase"
+                        class="w-12 h-12 md:w-14 md:h-14 rounded-full border border-white/10 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all hover:scale-105 backdrop-blur-sm"
+                        title="Cancelar"
                     >
-                        Cancelar
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            ><path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="1.5"
+                                d="M6 18L18 6M6 6l12 12"
+                            /></svg
+                        >
                     </button>
 
-                    <!-- Pause / Resume -->
+                    <!-- Pause / Resume (Main Action) -->
                     <button
                         on:click={toggleTimer}
-                        class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors font-medium text-xs md:text-sm hover:scale-105 uppercase tracking-wide px-4 py-2 rounded-full hover:bg-white/5"
+                        class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white text-black hover:scale-110 transition-all flex items-center justify-center shadow-[0_0_40px_rgba(255,255,255,0.3)]"
                     >
                         {#if timerRunning}
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"
+                            <svg
+                                class="w-6 h-6 md:w-8 md:h-8"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
                                 ><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg
                             >
-                            <span>Pausar</span>
                         {:else}
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"
-                                ><path d="M8 5v14l11-7z" /></svg
+                            <svg
+                                class="w-6 h-6 md:w-8 md:h-8 ml-1"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg
                             >
-                            <span>Reanudar</span>
                         {/if}
                     </button>
 
-                    <!-- I'm Done (Complete) -->
+                    <!-- Finish (Check) -->
                     <button
                         on:click={completeTimer}
-                        class="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white text-xs md:text-sm font-bold rounded-xl shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 hover:-translate-y-0.5 transition-all tracking-wide uppercase"
+                        class="w-12 h-12 md:w-14 md:h-14 rounded-full border border-white/10 hover:bg-green-500/20 hover:border-green-500/50 flex items-center justify-center text-slate-400 hover:text-green-400 transition-all hover:scale-105 backdrop-blur-sm"
+                        title="Terminar"
                     >
-                        ¡He terminado!
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            ><path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="1.5"
+                                d="M5 13l4 4L19 7"
+                            /></svg
+                        >
                     </button>
                 {/if}
             </div>
