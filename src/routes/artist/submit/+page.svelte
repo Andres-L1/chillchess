@@ -73,33 +73,11 @@
         return audioFiles.length > 0;
     }
 
-    async function uploadToR2(file: File, folder: string) {
-        // 1. Get Signed URL
-        const res = await fetch('/api/r2/sign-url', {
-            method: 'POST',
-            body: JSON.stringify({
-                fileName: file.name,
-                fileType: file.type,
-                folder,
-            }),
-        });
-
-        if (!res.ok) throw new Error('Failed to get upload URL');
-
-        const { uploadUrl, key } = await res.json();
-
-        // 2. Upload direct to R2
-        const upload = await fetch(uploadUrl, {
-            method: 'PUT',
-            body: file,
-            headers: {
-                'Content-Type': file.type,
-            },
-        });
-
-        if (!upload.ok) throw new Error('Upload to R2 failed');
-
-        return { key, name: file.name, size: file.size, type: file.type };
+    async function uploadToFirebase(file: File, folder: string) {
+        const fileRef = ref(storage, `${folder}/${file.name}`);
+        const snapshot = await uploadBytes(fileRef, file);
+        const url = await getDownloadURL(snapshot.ref);
+        return { key: url, name: file.name, size: file.size, type: file.type };
     }
 
     async function submitRelease() {
@@ -120,34 +98,32 @@
             const timestamp = Date.now();
             const basePath = `submissions/${userId}/${timestamp}`;
 
-            // Upload Cover to R2
-            const coverData = await uploadToR2(coverFile, basePath);
+            // Upload Cover to Firebase
+            const coverData = await uploadToFirebase(coverFile, basePath);
             uploadProgress = 20;
 
-            // Upload Audio Files to R2
+            // Upload Audio Files to Firebase
             const uploadedAudio = [];
             const totalFiles = audioFiles.length;
 
             for (let i = 0; i < audioFiles.length; i++) {
                 const file = audioFiles[i];
-                const data = await uploadToR2(file, basePath);
+                const data = await uploadToFirebase(file, basePath);
                 uploadedAudio.push(data);
                 uploadProgress = 20 + ((i + 1) / totalFiles) * 70;
             }
 
             // Save Metadata to Firestore
-            // We save the 'key' (path in R2) instead of the full URL
-            // because we'll generate timed URLs for privacy or simply construct the public URL if public.
             await addDoc(collection(db, 'musicSubmissions'), {
                 artistId: userId,
                 artistName: $userStore.user?.displayName || 'Unknown Artist',
                 artistEmail: $userStore.user?.email,
                 releaseTitle,
                 genre: genre === 'Otra' ? customGenre : genre,
-                r2CoverKey: coverData.key,
-                r2AudioKeys: uploadedAudio, // Array of { key, name, size }
+                coverUrl: coverData.key, // Store direct URL
+                audioFiles: uploadedAudio, // Store array of { key: url, name, size }
                 tracklist: tracklist.trim(),
-                submissionType: 'r2_direct',
+                submissionType: 'firebase_direct',
                 status: 'pending',
                 submittedAt: serverTimestamp(),
             });
