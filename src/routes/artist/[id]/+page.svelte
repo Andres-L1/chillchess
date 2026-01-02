@@ -90,10 +90,16 @@
     });
 
     function generateCalendar() {
-        const days = 365;
-        const end = new Date();
-        const start = new Date();
-        start.setDate(end.getDate() - days);
+        const now = new Date();
+        const currentYear = now.getFullYear();
+
+        // Check if leap year
+        const isLeapYear =
+            (currentYear % 4 === 0 && currentYear % 100 !== 0) || currentYear % 400 === 0;
+        const daysInYear = isLeapYear ? 366 : 365;
+
+        const start = new Date(currentYear, 0, 1); // Jan 1
+        const end = new Date(currentYear, 11, 31); // Dec 31
 
         const tempCal = [];
         for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
