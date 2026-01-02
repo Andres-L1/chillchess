@@ -246,7 +246,7 @@
                 class="p-2 opacity-50 hover:opacity-100 transition-opacity z-50 text-white"
                 title="Explorar Música"
             >
-                <MusicIcon size="lg" />
+                <MusicIcon size="md" />
             </button>
         </header>
 
@@ -276,14 +276,15 @@
                     viewBox="0 0 100 100"
                 >
                     <!-- Track -->
+                    <!-- Track (White Base) -->
                     <circle
                         cx="50"
                         cy="50"
                         r="48"
                         fill="none"
-                        stroke="currentColor"
-                        stroke-width="0.5"
-                        class="text-slate-700/50"
+                        stroke="white"
+                        stroke-width="2"
+                        class="opacity-30"
                     />
                     <!-- Indicator (Glowy Orange) -->
                     <circle
@@ -292,11 +293,11 @@
                         r="48"
                         fill="none"
                         stroke="url(#gradient-timer)"
-                        stroke-width="1.5"
+                        stroke-width="3"
                         stroke-dasharray="301.6"
                         stroke-dashoffset={((focusDuration - timeLeft) / focusDuration) * 301.6}
                         stroke-linecap="round"
-                        class="filter drop-shadow-[0_0_8px_rgba(249,115,22,0.6)] transition-all duration-1000 ease-linear origin-center"
+                        class="filter drop-shadow-[0_0_8px_rgba(249,115,22,0.8)] transition-all duration-1000 ease-linear origin-center"
                         class:animate-pulse={!timerRunning &&
                             timeLeft < focusDuration &&
                             timeLeft > 0}
@@ -583,58 +584,99 @@
         </div>
     {/if}
 
-    <!-- Vibe Studio Overlay -->
-    {#if showVibeStudio}
+    <!-- White Noise Overlay -->
+    {#if showWhiteNoise}
         <button
-            class="absolute inset-0 z-[70] bg-black/80 backdrop-blur-xl animate-fade-in flex flex-col p-4 md:p-8 overflow-hidden text-left cursor-default w-full border-none outline-none appearance-none"
-            on:click|self={() => (showVibeStudio = false)}
-            on:keydown={(e) => e.key === 'Escape' && (showVibeStudio = false)}
-            tabindex="0"
+            class="absolute inset-0 z-[65] bg-black/80 backdrop-blur-xl animate-fade-in flex items-center justify-center p-4"
+            on:click|self={() => (showWhiteNoise = false)}
+            on:keydown={(e) => e.key === 'Escape' && (showWhiteNoise = false)}
         >
-            <div class="max-w-4xl mx-auto w-full h-full flex flex-col">
-                <div class="flex justify-between items-center mb-6 shrink-0">
-                    <div>
-                        <h2 class="text-3xl font-bold text-slate-100 mb-1">Vibe Studio</h2>
-                        <p class="text-slate-400 text-sm">
-                            Personaliza tu atmósfera de concentración
-                        </p>
-                    </div>
+            <div
+                class="bg-[#1e293b] border border-white/10 p-6 rounded-2xl max-w-sm w-full shadow-2xl animate-fade-in-up"
+            >
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-white">Ambiente</h2>
                     <button
-                        on:click={() => (showVibeStudio = false)}
-                        class="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors shrink-0"
+                        on:click={() => (showWhiteNoise = false)}
+                        class="p-1 rounded-full hover:bg-white/10 transition-colors"
                     >
                         ✕
                     </button>
                 </div>
+                <WhiteNoiseControls />
+            </div>
+        </button>
+    {/if}
 
-                <!-- TABS -->
-                <div class="flex gap-4 mb-6 border-b border-white/10 pb-1">
+    <!-- Vibe Studio Overlay (Improved Responsiveness) -->
+    {#if showVibeStudio}
+        <div
+            class="absolute inset-0 z-[70] bg-black/90 backdrop-blur-2xl animate-fade-in flex flex-col items-center justify-center p-4 md:p-8"
+            role="dialog"
+            aria-modal="true"
+        >
+            <!-- Close Backdrop -->
+            <button
+                class="absolute inset-0 w-full h-full cursor-default focus:outline-none"
+                on:click={() => (showVibeStudio = false)}
+                aria-label="Cerrar"
+            ></button>
+
+            <div
+                class="relative bg-[#0F172A] border border-white/10 rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
+            >
+                <!-- Header -->
+                <div
+                    class="p-6 md:p-8 border-b border-white/5 flex justify-between items-start shrink-0 bg-[#0F172A]"
+                >
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Vibe Studio</h2>
+                        <p class="text-slate-400 text-sm">Diseña tu espacio ideal</p>
+                    </div>
                     <button
-                        on:click={() => (vibeTab = 'scenes')}
-                        class="px-4 py-2 text-sm font-bold uppercase tracking-wider transition-colors border-b-2 {vibeTab ===
-                        'scenes'
-                            ? 'border-primary-500 text-white'
-                            : 'border-transparent text-slate-500 hover:text-white'}"
+                        on:click={() => (showVibeStudio = false)}
+                        class="p-2 bg-white/5 rounded-full hover:bg-white/20 transition-colors text-white"
                     >
-                        🌆 Ambientes
-                    </button>
-                    <button
-                        on:click={() => (vibeTab = 'clock')}
-                        class="px-4 py-2 text-sm font-bold uppercase tracking-wider transition-colors border-b-2 {vibeTab ===
-                        'clock'
-                            ? 'border-primary-500 text-white'
-                            : 'border-transparent text-slate-500 hover:text-white'}"
-                    >
-                        🕰️ Reloj
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            ><path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                            /></svg
+                        >
                     </button>
                 </div>
 
-                <!-- CONTENT -->
-                <div class="overflow-y-auto flex-1 pr-2">
+                <!-- Tabs -->
+                <div class="px-6 md:px-8 border-b border-white/5 bg-[#0F172A]/50 shrink-0">
+                    <div class="flex gap-6">
+                        <button
+                            on:click={() => (vibeTab = 'scenes')}
+                            class="py-4 text-sm font-bold uppercase tracking-wider border-b-2 transition-colors {vibeTab ===
+                            'scenes'
+                                ? 'border-primary-500 text-primary-400'
+                                : 'border-transparent text-slate-500 hover:text-white'}"
+                        >
+                            🌆 Ambientes
+                        </button>
+                        <button
+                            on:click={() => (vibeTab = 'clock')}
+                            class="py-4 text-sm font-bold uppercase tracking-wider border-b-2 transition-colors {vibeTab ===
+                            'clock'
+                                ? 'border-primary-500 text-primary-400'
+                                : 'border-transparent text-slate-500 hover:text-white'}"
+                        >
+                            🕰️ Reloj
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Content (Scrollable) -->
+                <div class="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar bg-[#0B1120]">
                     {#if vibeTab === 'scenes'}
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Existing Scenes Logic -->
-                            {#each [{ id: 'none', label: 'Silencio Digital', icon: '🔇', desc: 'Sin efectos de fondo', pro: false }, { id: 'noir', label: 'Lluvia Nocturna', icon: '🌧️', desc: 'Sonido de lluvia suave y tonos oscuros', pro: false }, { id: 'library', label: 'Biblioteca', icon: '📚', desc: 'Ambiente académico y texturas de papel', pro: false }, { id: 'zen', label: 'Jardín Zen', icon: '🎋', desc: 'Naturaleza y sonidos de viento', pro: true }, { id: 'space', label: 'Cosmos', icon: '🌌', desc: 'Frecuencias espaciales y vacío', pro: true }, { id: 'cyber', label: 'Cyber Grid', icon: '👾', desc: 'Rejilla de neón retro-futurista', pro: true }, { id: 'breathe', label: 'Modo Respiración', icon: '🧘', desc: 'Fondo pulsante para guiado 4-7-8', pro: true }] as vibe}
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {#each [{ id: 'none', label: 'Silencio Digital', icon: '🔇', desc: 'Sin efectos', pro: false }, { id: 'noir', label: 'Lluvia Nocturna', icon: '🌧️', desc: 'Lluvia suave y tonos oscuros', pro: false }, { id: 'library', label: 'Biblioteca', icon: '📚', desc: 'Ambiente académico', pro: false }, { id: 'zen', label: 'Jardín Zen', icon: '🎋', desc: 'Naturaleza y viento', pro: true }, { id: 'space', label: 'Cosmos', icon: '🌌', desc: 'Frecuencias espaciales', pro: true }, { id: 'cyber', label: 'Cyber Grid', icon: '👾', desc: 'Neón retro-futurista', pro: true }, { id: 'breathe', label: 'Modo Respiración', icon: '🧘', desc: 'Guía 4-7-8 pulsante', pro: true }] as vibe}
                                 {@const isLocked = vibe.pro && $userSubscription.tier !== 'pro'}
                                 <button
                                     on:click={() => {
@@ -642,157 +684,80 @@
                                             showPaywall = true;
                                         } else {
                                             vibeStore.setBackground(vibe.id);
-                                            showVibeStudio = false;
+                                            // Optional: Close on select? Maybe not, allow exploring.
                                         }
                                     }}
-                                    class="relative p-5 rounded-2xl border transition-all text-left flex items-center gap-4 group {isLocked
-                                        ? 'bg-white/5 border-white/5 opacity-70 hover:opacity-100 cursor-not-allowed'
-                                        : 'bg-[#1e293b]/50 border-white/10 hover:bg-[#1e293b] hover:border-orange-500/50 cursor-pointer'}"
+                                    class="relative p-4 rounded-xl border transition-all text-left flex items-center gap-4 group
+                                    {$vibeStore.background === vibe.id
+                                        ? 'bg-primary-500/10 border-primary-500 ring-1 ring-primary-500'
+                                        : 'border-white/5 hover:border-white/20 hover:bg-white/5'}
+                                    {isLocked ? 'opacity-60 grayscale' : ''}"
                                 >
                                     <div
-                                        class="w-10 h-10 rounded-lg flex items-center justify-center text-xl {isLocked
-                                            ? 'bg-white/5 grayscale'
-                                            : 'bg-white/10 group-hover:bg-orange-500/20'}"
+                                        class="w-12 h-12 rounded-lg flex items-center justify-center text-2xl bg-black/20 group-hover:scale-110 transition-transform"
                                     >
                                         {vibe.icon}
                                     </div>
-                                    <div class="flex-1">
-                                        <div class="flex items-center gap-2">
-                                            <h3 class="font-bold text-slate-200 text-sm">
-                                                {vibe.label}
-                                            </h3>
-                                            {#if isLocked}
-                                                <span
-                                                    class="text-[9px] bg-orange-500/20 text-orange-400 px-1 py-0.5 rounded font-bold uppercase tracking-wider border border-orange-500/20"
-                                                    >PRO</span
-                                                >
-                                            {/if}
-                                        </div>
-                                        <p class="text-xs text-slate-400 mt-0.5">
-                                            {vibe.desc}
-                                        </p>
+                                    <div>
+                                        <h3 class="font-bold text-white text-sm">{vibe.label}</h3>
+                                        <p class="text-xs text-slate-400">{vibe.desc}</p>
                                     </div>
                                     {#if isLocked}
-                                        <div class="text-slate-500">🔒</div>
+                                        <div class="absolute top-2 right-2 text-xs">🔒</div>
                                     {/if}
                                 </button>
                             {/each}
                         </div>
                     {:else if vibeTab === 'clock'}
-                        <div class="space-y-6">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {#each [{ id: 'modern', label: 'Moderno', font: 'font-poppins', desc: 'Limpio y minimalista', pro: false }, { id: 'neon', label: 'Neon Cyber', font: 'font-mono text-primary-400 shadow-glow', desc: 'Estilo hacker brillante', pro: true }, { id: 'retro', label: 'Pixel Retro', font: 'font-mono', desc: 'Estilo 8-bit clásico', pro: true }, { id: 'elegant', label: 'Editorial', font: 'font-serif italic', desc: 'Sofisticado y clásico', pro: true }, { id: 'analog', label: 'Analógico', font: 'text-2xl', desc: 'Clásico y atemporal', pro: true }] as style}
-                                    {@const isLocked =
-                                        style.pro && $userSubscription.tier !== 'pro'}
-                                    <button
-                                        on:click={() => {
-                                            if (isLocked) {
-                                                showPaywall = true;
-                                            } else {
-                                                vibeStore.setClockStyle(style.id);
-                                            }
-                                        }}
-                                        class="group relative p-4 rounded-xl border transition-all text-left flex flex-col gap-3
-                                            {$vibeStore.clockStyle === style.id
-                                            ? 'bg-primary-500/10 border-primary-500'
-                                            : isLocked
-                                              ? 'bg-white/5 border-white/5 opacity-70'
-                                              : 'bg-[#1e293b]/50 border-white/10 hover:border-white/30'}"
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {#each [{ id: 'modern', label: 'Moderno', font: 'font-poppins', desc: 'Minimalista', pro: false }, { id: 'neon', label: 'Neon Cyber', font: 'font-mono text-primary-400 shadow-glow', desc: 'Hacker Style', pro: true }, { id: 'retro', label: 'Pixel Retro', font: 'font-mono', desc: '8-bit Clásico', pro: true }, { id: 'elegant', label: 'Editorial', font: 'font-serif italic', desc: 'Sofisticado', pro: true }, { id: 'analog', label: 'Analógico', font: 'text-2xl', desc: 'Atemporal', pro: true }] as style}
+                                {@const isLocked = style.pro && $userSubscription.tier !== 'pro'}
+                                <button
+                                    on:click={() => {
+                                        if (isLocked) {
+                                            showPaywall = true;
+                                        } else {
+                                            vibeStore.setClockStyle(style.id);
+                                        }
+                                    }}
+                                    class="relative p-6 rounded-xl border transition-all text-left flex flex-col gap-4 group
+                                        {$vibeStore.clockStyle === style.id
+                                        ? 'bg-primary-500/10 border-primary-500 ring-1 ring-primary-500'
+                                        : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/20'}
+                                        {isLocked ? 'opacity-60' : ''}"
+                                >
+                                    <div
+                                        class="h-20 bg-black/30 rounded-lg flex items-center justify-center text-3xl text-white overflow-hidden group-hover:scale-[1.02] transition-transform"
                                     >
-                                        <!-- Preview -->
-                                        <div
-                                            class="h-16 flex items-center justify-center bg-black/20 rounded-lg text-2xl text-white"
-                                        >
-                                            {#if style.id === 'analog'}
-                                                <svg
-                                                    viewBox="0 0 100 100"
-                                                    class="w-10 h-10 text-white opacity-80"
-                                                >
-                                                    <circle
-                                                        cx="50"
-                                                        cy="50"
-                                                        r="45"
-                                                        stroke="currentColor"
-                                                        stroke-width="4"
-                                                        fill="none"
-                                                    />
-                                                    <line
-                                                        x1="50"
-                                                        y1="50"
-                                                        x2="50"
-                                                        y2="25"
-                                                        stroke="currentColor"
-                                                        stroke-width="4"
-                                                        stroke-linecap="round"
-                                                    />
-                                                    <line
-                                                        x1="50"
-                                                        y1="50"
-                                                        x2="70"
-                                                        y2="50"
-                                                        stroke="currentColor"
-                                                        stroke-width="3"
-                                                        stroke-linecap="round"
-                                                    />
-                                                </svg>
-                                            {:else}
-                                                <span
-                                                    class="{style.font} {style.id === 'neon'
-                                                        ? 'drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]'
-                                                        : ''} {style.id === 'retro'
-                                                        ? 'font-bold'
-                                                        : ''}"
-                                                >
-                                                    12:45
-                                                </span>
-                                            {/if}
-                                        </div>
-
-                                        <div class="flex justify-between items-end">
-                                            <div>
-                                                <h3
-                                                    class="font-bold text-white text-sm flex items-center gap-2"
-                                                >
-                                                    {style.label}
-                                                    {#if isLocked}
-                                                        <span
-                                                            class="text-[9px] bg-orange-500/20 text-orange-400 px-1 py-0.5 rounded font-bold uppercase tracking-wider"
-                                                            >PRO</span
-                                                        >
-                                                    {/if}
-                                                </h3>
-                                                <p class="text-xs text-slate-400 mt-0.5">
-                                                    {style.desc}
-                                                </p>
+                                        {#if style.id === 'analog'}
+                                            <div
+                                                class="w-12 h-12 rounded-full border-2 border-white/80 relative"
+                                            >
+                                                <div
+                                                    class="absolute inset-0 m-auto w-0.5 h-5 bg-white top-[10%] origin-bottom animate-[spin_4s_linear_infinite]"
+                                                ></div>
+                                                <div
+                                                    class="absolute inset-0 m-auto w-0.5 h-3 bg-white top-[25%] origin-bottom animate-[spin_60s_linear_infinite]"
+                                                ></div>
                                             </div>
-
-                                            {#if $vibeStore.clockStyle === style.id}
-                                                <div class="text-primary-400">
-                                                    <svg
-                                                        class="w-5 h-5"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                        ><path
-                                                            stroke-linecap="round"
-                                                            stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M5 13l4 4L19 7"
-                                                        ></path></svg
-                                                    >
-                                                </div>
-                                            {:else if isLocked}
-                                                <div class="text-slate-500">🔒</div>
-                                            {/if}
+                                        {:else}
+                                            <span class={style.font}>12:00</span>
+                                        {/if}
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <h3 class="font-bold text-white">{style.label}</h3>
+                                            <p class="text-xs text-slate-400">{style.desc}</p>
                                         </div>
-                                    </button>
-                                {/each}
-                            </div>
+                                        {#if isLocked}<span>🔒</span>{/if}
+                                    </div>
+                                </button>
+                            {/each}
                         </div>
                     {/if}
                 </div>
             </div>
-        </button>
+        </div>
     {/if}
 
     <!-- Immersive Education Toast -->
