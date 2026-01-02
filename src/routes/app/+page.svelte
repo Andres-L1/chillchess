@@ -1,7 +1,7 @@
 <script lang="ts">
     // @ts-nocheck
-    import { onMount, onDestroy } from "svelte";
-    import { goto } from "$app/navigation";
+    import { onMount, onDestroy } from 'svelte';
+    import { goto } from '$app/navigation';
     import {
         audioStore,
         unlockAudio,
@@ -9,30 +9,30 @@
         togglePlayback,
         prevTrack,
         nextTrack,
-    } from "$lib/audio/store";
-    import { CATEGORY_LABELS, type AlbumCategory } from "$lib/data/albums";
-    import { userStore } from "$lib/auth/userStore";
-    import { userSubscription } from "$lib/subscription/userSubscription";
-    import { playMoveSound } from "$lib/audio/sfx";
+    } from '$lib/audio/store';
+    import { CATEGORY_LABELS, type AlbumCategory } from '$lib/data/albums';
+    import { userStore } from '$lib/auth/userStore';
+    import { userSubscription } from '$lib/subscription/userSubscription';
+    import { playMoveSound } from '$lib/audio/sfx';
 
-    import Visualizer from "$lib/components/Visualizer.svelte";
-    import ChillBackground from "$lib/components/ChillBackground.svelte";
-    import PaywallModal from "$lib/components/PaywallModal.svelte";
-    import EyeIcon from "$lib/components/icons/EyeIcon.svelte";
-    import BackIcon from "$lib/components/icons/BackIcon.svelte";
-    import HeadphonesIcon from "$lib/components/icons/HeadphonesIcon.svelte";
-    import SettingsIcon from "$lib/components/icons/SettingsIcon.svelte";
-    import MusicIcon from "$lib/components/icons/MusicIcon.svelte";
-    import Clock from "$lib/components/Clock.svelte";
-    import WhiteNoiseControls from "$lib/components/WhiteNoiseControls.svelte";
-    import { vibeStore } from "$lib/stores/vibeStore";
-    import { timerStore } from "$lib/stores/timerStore";
+    import Visualizer from '$lib/components/Visualizer.svelte';
+    import ChillBackground from '$lib/components/ChillBackground.svelte';
+    import PaywallModal from '$lib/components/PaywallModal.svelte';
+    import EyeIcon from '$lib/components/icons/EyeIcon.svelte';
+    import BackIcon from '$lib/components/icons/BackIcon.svelte';
+    import HeadphonesIcon from '$lib/components/icons/HeadphonesIcon.svelte';
+    import SettingsIcon from '$lib/components/icons/SettingsIcon.svelte';
+    import MusicIcon from '$lib/components/icons/MusicIcon.svelte';
+    import Clock from '$lib/components/Clock.svelte';
+    import WhiteNoiseControls from '$lib/components/WhiteNoiseControls.svelte';
+    import { vibeStore } from '$lib/stores/vibeStore';
+    import { timerStore } from '$lib/stores/timerStore';
 
     let showMusicExplorer = false;
     let showVibeStudio = false;
     let showPaywall = false;
     let showWhiteNoise = false; // NEW
-    let vibeTab: "scenes" | "clock" = "scenes"; // Tab state for modal
+    let vibeTab: 'scenes' | 'clock' = 'scenes'; // Tab state for modal
     let isUserLoaded = false;
 
     // Immersive Mode Logic
@@ -41,9 +41,7 @@
     let hideUiTimeout: any;
 
     function toggleImmersive() {
-        const isPro =
-            $userSubscription.tier === "pro" ||
-            $userSubscription.profile?.isAdmin;
+        const isPro = $userSubscription.tier === 'pro' || $userSubscription.profile?.isAdmin;
 
         if (!isPro) {
             showPaywall = true;
@@ -84,10 +82,10 @@
     function formatTime(seconds: number) {
         const m = Math.floor(seconds / 60);
         const s = seconds % 60;
-        return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     }
 
-    function setTimerMode(mode: "focus" | "short" | "long") {
+    function setTimerMode(mode: 'focus' | 'short' | 'long') {
         stopTimer(false);
         timerStore.setMode(mode);
     }
@@ -140,7 +138,7 @@
         if (newTime > 180 * 60) newTime = 180 * 60; // Max 180 min
         timeLeft = newTime;
         focusDuration = timeLeft;
-        timerMode = "custom";
+        timerMode = 'custom';
     }
 
     // Circular Progress
@@ -150,7 +148,7 @@
     // Auth Check Logic
     $: if (!$userStore.loading) {
         if (!$userStore.user) {
-            goto("/");
+            goto('/');
         } else {
             isUserLoaded = true;
         }
@@ -166,15 +164,13 @@
     }
 
     // Auto-load categories
-    let selectedCategory: AlbumCategory | "all" = "all";
+    let selectedCategory: AlbumCategory | 'all' = 'all';
 
     // Dynamic Albums from Store
     $: filteredAlbums =
-        selectedCategory === "all"
+        selectedCategory === 'all'
             ? $audioStore.availableAlbums
-            : $audioStore.availableAlbums.filter(
-                  (a) => a.category === selectedCategory,
-              );
+            : $audioStore.availableAlbums.filter((a) => a.category === selectedCategory);
 
     onDestroy(() => {
         stopTimer();
@@ -193,9 +189,7 @@
     class="relative w-screen h-[100dvh] bg-[#0B1120] overflow-hidden flex flex-col text-white font-poppins selection:bg-primary-500/30"
 >
     <!-- BACKGROUND LAYER (Chill Lo-Fi Scene) -->
-    <div
-        class="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden"
-    >
+    <div class="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden">
         <ChillBackground />
         <!-- Vignette Overlay -->
         <div
@@ -243,11 +237,7 @@
                     class="flex items-center gap-2 bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-full px-3 py-2 border border-white/10 hover:border-white/20 shadow-lg transition-all group"
                     title="Modo Inmersivo (PRO)"
                 >
-                    <EyeIcon
-                        size="sm"
-                        open={!immersiveMode}
-                        gradient={immersiveMode}
-                    />
+                    <EyeIcon size="sm" open={!immersiveMode} gradient={immersiveMode} />
                 </button>
             </div>
 
@@ -261,225 +251,154 @@
         </header>
 
         <!-- CENTER: FOCUS TIMER (Flexible space) -->
-        <main
-            class="flex-1 flex flex-col items-center justify-evenly p-4 min-h-0"
-        >
+        <main class="flex-1 flex flex-col items-center justify-center p-4 min-h-0 relative z-20">
+            <!-- Timer Label Pill -->
+            <div
+                class="mb-8 flex items-center gap-2 px-4 py-1.5 bg-white/5 border border-white/10 rounded-full backdrop-blur-md animate-fade-in-down transition-opacity duration-700"
+                class:opacity-0={hideUI}
+            >
+                <span class="text-pink-400 animate-pulse">🌸</span>
+                <span
+                    class="text-[10px] md:text-xs font-bold tracking-[0.2em] text-slate-300 uppercase"
+                    >Focus Timer</span
+                >
+            </div>
+
             <!-- Timer Container -->
             <div
-                class="relative group flex items-center justify-center {immersiveMode
-                    ? 'opacity-0 pointer-events-none'
-                    : ''} transition-opacity duration-700"
+                class="relative group flex items-center justify-center mb-12 {immersiveMode
+                    ? 'scale-110'
+                    : ''} transition-all duration-700"
             >
-                <!-- Toggle View Button (Timer vs Board) -->
-                <!-- For now, we show Board BEHIND timer or replaced? 
-                     User said passive visualization. Let's make it the main view and timer overlay? 
-                     Or put it side by side? 
-                     Let's add it below the timer for now, or replace the timer SVGs with the Board if a flag is set.
-                     Actually, let's put it absolute centered behind the timer, but that might obscure it.
-                     Let's adding it as a sibling for now to see it render.
-                -->
-
-                <!-- Circular Progress SVG (Responsive to Height & Width) -->
+                <!-- Circular Progress SVG -->
                 <svg
-                    class="w-auto h-auto max-w-[80vw] max-h-[40vh] md:max-h-[50vh] aspect-square transform -rotate-90 drop-shadow-2xl text-white relative z-10"
+                    class="w-[280px] h-[280px] md:w-[380px] md:h-[380px] transform -rotate-90 drop-shadow-2xl text-white relative z-10"
                     viewBox="0 0 100 100"
                 >
                     <!-- Track -->
                     <circle
                         cx="50"
                         cy="50"
-                        r="45"
+                        r="48"
                         fill="none"
                         stroke="currentColor"
-                        stroke-width="1.5"
-                        class="text-white/5"
+                        stroke-width="0.5"
+                        class="text-slate-700/50"
                     />
-                    <!-- Indicator -->
+                    <!-- Indicator (Glowy Blue/Indigo) -->
                     <circle
                         cx="50"
                         cy="50"
-                        r="45"
+                        r="48"
                         fill="none"
-                        stroke="currentColor"
+                        stroke="url(#gradient-timer)"
                         stroke-width="1.5"
-                        stroke-dasharray="283"
-                        stroke-dashoffset={progressCircle}
+                        stroke-dasharray="301.6"
+                        stroke-dashoffset={((focusDuration - timeLeft) / focusDuration) * 301.6}
                         stroke-linecap="round"
-                        class="text-white filter drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-1000 ease-linear origin-center"
-                        class:text-green-400={timerRunning}
-                        class:animate-breathe={timerRunning}
+                        class="filter drop-shadow-[0_0_8px_rgba(99,102,241,0.6)] transition-all duration-1000 ease-linear origin-center"
+                        class:animate-pulse={!timerRunning &&
+                            timeLeft < focusDuration &&
+                            timeLeft > 0}
                     />
+                    <defs>
+                        <linearGradient id="gradient-timer" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#6366f1" />
+                            <stop offset="100%" stop-color="#a855f7" />
+                        </linearGradient>
+                    </defs>
                 </svg>
 
-                <!-- Time Display/Input (Centered) -->
-                <div
-                    class="absolute inset-0 flex flex-col items-center justify-center z-10"
-                >
-                    {#if !timerRunning}
-                        <div
-                            class="flex items-center justify-center relative group/input gap-4"
-                        >
-                            <button
-                                on:click={() => adjustTime(-5)}
-                                class="text-slate-500 hover:text-white transition-colors p-2 opacity-0 group-hover/input:opacity-100"
-                                aria-label="- 5 minutos"
-                            >
-                                <svg
-                                    class="w-6 h-6"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                    ><path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M20 12H4"
-                                    /></svg
-                                >
-                            </button>
-
-                            <div class="relative">
-                                <input
-                                    type="number"
-                                    min="1"
-                                    max="180"
-                                    value={Math.floor(timeLeft / 60)}
-                                    on:input={(e) => {
-                                        const val = parseInt(
-                                            e.currentTarget.value,
-                                        );
-                                        if (val > 0 && val <= 180) {
-                                            timeLeft = val * 60;
-                                            focusDuration = timeLeft;
-                                            timerMode = "custom";
-                                        }
-                                    }}
-                                    class="font-mono text-5xl md:text-8xl font-light tracking-tighter text-white bg-transparent text-center w-[1.5em] focus:outline-none focus:border-b-2 focus:border-white/20 appearance-none m-0 p-0 selection:bg-white/20 hover:scale-105 transition-transform cursor-pointer"
-                                />
-                                <span
-                                    class="text-2xl text-slate-500 font-medium absolute -right-6 top-2 md:top-8 md:-right-8 opacity-0 group-hover/input:opacity-100 transition-opacity"
-                                    >m</span
-                                >
-                            </div>
-
-                            <button
-                                on:click={() => adjustTime(5)}
-                                class="text-slate-500 hover:text-white transition-colors p-2 opacity-0 group-hover/input:opacity-100"
-                                aria-label="+ 5 minutos"
-                            >
-                                <svg
-                                    class="w-6 h-6"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                    ><path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M12 4v16m8-8H4"
-                                    /></svg
-                                >
-                            </button>
-
-                            <div
-                                class="absolute -bottom-6 text-xs text-slate-500 opacity-0 group-hover/input:opacity-100 transition-opacity whitespace-nowrap pointer-events-none"
-                            >
-                                Click para editar o usa +/-
-                            </div>
-                        </div>
-                    {:else}
-                        <Clock {timeLeft} isTimerRunning={timerRunning} />
-                    {/if}
-
-                    {#if !timerRunning}
-                        <div
-                            class="text-slate-400 text-sm tracking-[0.2em] mt-2 md:mt-4 uppercase opacity-60 font-medium"
-                        >
-                            ENFOQUE
-                        </div>
-                    {:else}
-                        <div
-                            class="text-slate-400 text-sm tracking-[0.2em] mt-2 md:mt-4 uppercase opacity-60 font-medium animate-pulse"
-                        >
-                            ENFOQUE
-                        </div>
-                    {/if}
+                <!-- Time Display -->
+                <div class="absolute inset-0 flex flex-col items-center justify-center z-10">
+                    <div
+                        class="font-poppins text-6xl md:text-8xl font-medium tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-300 select-none tabular-nums"
+                    >
+                        {formatTime(timeLeft)}
+                    </div>
+                    <div
+                        class="text-indigo-300/60 text-[10px] md:text-xs font-bold tracking-[0.25em] uppercase mt-4"
+                    >
+                        {Math.floor(focusDuration / 60)} MIN SESSION
+                    </div>
                 </div>
+
+                <!-- Input overlay (Hidden for now to keep clean, adjustment via presets preferred) -->
             </div>
 
-            <!-- Controls (Flexible positioning) - Hide in Immersive Mode -->
+            <!-- Controls (Minimal) -->
             <div
-                class="flex flex-col items-center gap-6 md:gap-8 animate-fade-in-up w-full max-w-md transition-opacity duration-700 ease-in-out"
+                class="flex items-center gap-8 md:gap-12 animate-fade-in-up transition-opacity duration-700 min-h-[60px]"
                 class:opacity-0={hideUI}
                 class:pointer-events-none={hideUI}
             >
-                <!-- Main Action -->
-                <button
-                    on:click={toggleTimer}
-                    class="group relative px-8 py-4 md:px-10 md:py-5 bg-white text-black rounded-full font-bold tracking-[0.2em] hover:scale-105 transition-all shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:shadow-[0_0_50px_rgba(255,255,255,0.4)] active:scale-95 flex items-center gap-3 z-50 text-sm md:text-base border border-transparent hover:border-white/50 w-full md:w-auto justify-center"
-                >
-                    {#if timerRunning}
-                        <span>PAUSAR</span>
-                    {:else if timeLeft < focusDuration && timeLeft > 0}
-                        <span>REANUDAR</span>
-                    {:else}
-                        <span>INICIAR</span>
-                    {/if}
-                </button>
+                {#if !timerRunning && timeLeft === focusDuration}
+                    <!-- Initial State: Play Button & Presets -->
+                    <div class="flex flex-col items-center gap-8">
+                        <button
+                            on:click={startTimer}
+                            class="w-16 h-16 md:w-20 md:h-20 bg-indigo-600 hover:bg-indigo-500 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(99,102,241,0.4)] hover:shadow-[0_0_50px_rgba(99,102,241,0.6)] hover:scale-105 transition-all text-white group"
+                        >
+                            <svg
+                                class="w-8 h-8 ml-1 group-hover:scale-110 transition-transform"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg
+                            >
+                        </button>
 
-                <!-- Secondary Actions -->
-                <div
-                    class="flex items-center justify-center gap-2 md:gap-3 z-50 bg-black/20 backdrop-blur-sm p-1.5 md:p-2 rounded-2xl border border-white/5 w-auto max-w-full overflow-x-auto no-scrollbar"
-                >
-                    <button
-                        on:click={() => setTimerMode("focus")}
-                        class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-[10px] md:text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap {timerMode ===
-                        'focus'
-                            ? 'bg-white text-black shadow-lg'
-                            : 'text-slate-500 hover:text-white hover:bg-white/5'}"
-                    >
-                        25m
-                    </button>
-                    <button
-                        on:click={() => setTimerMode("short")}
-                        class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-[10px] md:text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap {timerMode ===
-                        'short'
-                            ? 'bg-white text-black shadow-lg'
-                            : 'text-slate-500 hover:text-white hover:bg-white/5'}"
-                    >
-                        5m
-                    </button>
-                    <button
-                        on:click={() => setTimerMode("long")}
-                        class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-[10px] md:text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap {timerMode ===
-                        'long'
-                            ? 'bg-white text-black shadow-lg'
-                            : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'}"
-                    >
-                        15m
-                    </button>
+                        <div class="flex gap-3">
+                            {#each [5, 25, 45] as min}
+                                <button
+                                    on:click={() => {
+                                        timeLeft = min * 60;
+                                        focusDuration = timeLeft;
+                                    }}
+                                    class="px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/20 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition-all"
+                                    class:bg-white-10={focusDuration === min * 60}
+                                    class:text-white={focusDuration === min * 60}
+                                >
+                                    {min}m
+                                </button>
+                            {/each}
+                        </div>
+                    </div>
+                {:else}
+                    <!-- Active Session Controls -->
 
-                    <div class="w-px h-6 bg-white/10 mx-1 shrink-0"></div>
-
+                    <!-- Cancel / Reset -->
                     <button
                         on:click={resetTimer}
-                        class="p-2 text-slate-500 hover:text-red-400 transition-colors rounded-full hover:bg-red-500/10 shrink-0"
-                        title="Reiniciar"
+                        class="text-slate-400 hover:text-white transition-colors text-xs md:text-sm font-medium hover:scale-105 tracking-wide uppercase"
                     >
-                        <svg
-                            class="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            ><path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                            ></path></svg
-                        >
+                        Cancelar
                     </button>
-                </div>
+
+                    <!-- Pause / Resume -->
+                    <button
+                        on:click={toggleTimer}
+                        class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors font-medium text-xs md:text-sm hover:scale-105 uppercase tracking-wide px-4 py-2 rounded-full hover:bg-white/5"
+                    >
+                        {#if timerRunning}
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"
+                                ><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg
+                            >
+                            <span>Pausar</span>
+                        {:else}
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"
+                                ><path d="M8 5v14l11-7z" /></svg
+                            >
+                            <span>Reanudar</span>
+                        {/if}
+                    </button>
+
+                    <!-- I'm Done (Complete) -->
+                    <button
+                        on:click={completeTimer}
+                        class="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs md:text-sm font-bold rounded-xl shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all tracking-wide uppercase"
+                    >
+                        ¡Terminé!
+                    </button>
+                {/if}
             </div>
         </main>
 
@@ -495,14 +414,9 @@
             >
                 <!-- Track Info (Desktop - Minimal) -->
                 {#if $audioStore.isPlaying}
-                    <div
-                        class="hidden md:flex flex-col items-end mr-2 text-right opacity-60"
-                    >
-                        <span
-                            class="text-[9px] uppercase font-bold tracking-widest leading-none"
-                        >
-                            {$audioStore.playlist[$audioStore.currentTrackIndex]
-                                ?.title || "Musica"}
+                    <div class="hidden md:flex flex-col items-end mr-2 text-right opacity-60">
+                        <span class="text-[9px] uppercase font-bold tracking-widest leading-none">
+                            {$audioStore.playlist[$audioStore.currentTrackIndex]?.title || 'Musica'}
                         </span>
                     </div>
                 {/if}
@@ -514,10 +428,7 @@
                         class="text-white/50 hover:text-white transition-colors p-1.5"
                         aria-label="Anterior"
                     >
-                        <svg
-                            class="w-4 h-4"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"
                             ><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" /></svg
                         >
                     </button>
@@ -525,24 +436,14 @@
                     <button
                         on:click|stopPropagation={togglePlayback}
                         class="w-8 h-8 bg-white/10 hover:bg-white text-white hover:text-black rounded-full flex items-center justify-center transition-all"
-                        aria-label={$audioStore.isPlaying
-                            ? "Pausar"
-                            : "Reproducir"}
+                        aria-label={$audioStore.isPlaying ? 'Pausar' : 'Reproducir'}
                     >
                         {#if $audioStore.isPlaying}
-                            <svg
-                                class="w-4 h-4"
-                                fill="currentColor"
-                                viewBox="0 0 24 24"
-                                ><path
-                                    d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"
-                                /></svg
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"
+                                ><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg
                             >
                         {:else}
-                            <svg
-                                class="w-4 h-4 ml-0.5"
-                                fill="currentColor"
-                                viewBox="0 0 24 24"
+                            <svg class="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24"
                                 ><path d="M8 5v14l11-7z" /></svg
                             >
                         {/if}
@@ -553,13 +454,8 @@
                         class="text-white/50 hover:text-white transition-colors p-1.5"
                         aria-label="Siguiente"
                     >
-                        <svg
-                            class="w-5 h-5"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                            ><path
-                                d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"
-                            /></svg
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"
+                            ><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" /></svg
                         >
                     </button>
 
@@ -574,11 +470,7 @@
                         class="text-white/50 hover:text-cyan-400 transition-colors p-1.5"
                         title="Configurar Ambiente"
                     >
-                        <svg
-                            class="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                             ><path
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
@@ -590,10 +482,7 @@
 
                     <!-- Volume Control -->
                     <div class="w-px h-4 bg-white/10 mx-1"></div>
-                    <div
-                        class="flex items-center gap-2 group/vol"
-                        title="Volumen"
-                    >
+                    <div class="flex items-center gap-2 group/vol" title="Volumen">
                         <input
                             type="range"
                             min="0"
@@ -699,15 +588,13 @@
         <button
             class="absolute inset-0 z-[70] bg-black/80 backdrop-blur-xl animate-fade-in flex flex-col p-4 md:p-8 overflow-hidden text-left cursor-default w-full border-none outline-none appearance-none"
             on:click|self={() => (showVibeStudio = false)}
-            on:keydown={(e) => e.key === "Escape" && (showVibeStudio = false)}
+            on:keydown={(e) => e.key === 'Escape' && (showVibeStudio = false)}
             tabindex="0"
         >
             <div class="max-w-4xl mx-auto w-full h-full flex flex-col">
                 <div class="flex justify-between items-center mb-6 shrink-0">
                     <div>
-                        <h2 class="text-3xl font-bold text-slate-100 mb-1">
-                            Vibe Studio
-                        </h2>
+                        <h2 class="text-3xl font-bold text-slate-100 mb-1">Vibe Studio</h2>
                         <p class="text-slate-400 text-sm">
                             Personaliza tu atmósfera de concentración
                         </p>
@@ -723,7 +610,7 @@
                 <!-- TABS -->
                 <div class="flex gap-4 mb-6 border-b border-white/10 pb-1">
                     <button
-                        on:click={() => (vibeTab = "scenes")}
+                        on:click={() => (vibeTab = 'scenes')}
                         class="px-4 py-2 text-sm font-bold uppercase tracking-wider transition-colors border-b-2 {vibeTab ===
                         'scenes'
                             ? 'border-primary-500 text-white'
@@ -732,7 +619,7 @@
                         🌆 Ambientes
                     </button>
                     <button
-                        on:click={() => (vibeTab = "clock")}
+                        on:click={() => (vibeTab = 'clock')}
                         class="px-4 py-2 text-sm font-bold uppercase tracking-wider transition-colors border-b-2 {vibeTab ===
                         'clock'
                             ? 'border-primary-500 text-white'
@@ -744,13 +631,11 @@
 
                 <!-- CONTENT -->
                 <div class="overflow-y-auto flex-1 pr-2">
-                    {#if vibeTab === "scenes"}
+                    {#if vibeTab === 'scenes'}
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Existing Scenes Logic -->
-                            {#each [{ id: "none", label: "Silencio Digital", icon: "🔇", desc: "Sin efectos de fondo", pro: false }, { id: "noir", label: "Lluvia Nocturna", icon: "🌧️", desc: "Sonido de lluvia suave y tonos oscuros", pro: false }, { id: "library", label: "Biblioteca", icon: "📚", desc: "Ambiente académico y texturas de papel", pro: false }, { id: "zen", label: "Jardín Zen", icon: "🎋", desc: "Naturaleza y sonidos de viento", pro: true }, { id: "space", label: "Cosmos", icon: "🌌", desc: "Frecuencias espaciales y vacío", pro: true }, { id: "cyber", label: "Cyber Grid", icon: "👾", desc: "Rejilla de neón retro-futurista", pro: true }, { id: "breathe", label: "Modo Respiración", icon: "🧘", desc: "Fondo pulsante para guiado 4-7-8", pro: true }] as vibe}
-                                {@const isLocked =
-                                    vibe.pro &&
-                                    $userSubscription.tier !== "pro"}
+                            {#each [{ id: 'none', label: 'Silencio Digital', icon: '🔇', desc: 'Sin efectos de fondo', pro: false }, { id: 'noir', label: 'Lluvia Nocturna', icon: '🌧️', desc: 'Sonido de lluvia suave y tonos oscuros', pro: false }, { id: 'library', label: 'Biblioteca', icon: '📚', desc: 'Ambiente académico y texturas de papel', pro: false }, { id: 'zen', label: 'Jardín Zen', icon: '🎋', desc: 'Naturaleza y sonidos de viento', pro: true }, { id: 'space', label: 'Cosmos', icon: '🌌', desc: 'Frecuencias espaciales y vacío', pro: true }, { id: 'cyber', label: 'Cyber Grid', icon: '👾', desc: 'Rejilla de neón retro-futurista', pro: true }, { id: 'breathe', label: 'Modo Respiración', icon: '🧘', desc: 'Fondo pulsante para guiado 4-7-8', pro: true }] as vibe}
+                                {@const isLocked = vibe.pro && $userSubscription.tier !== 'pro'}
                                 <button
                                     on:click={() => {
                                         if (isLocked) {
@@ -773,9 +658,7 @@
                                     </div>
                                     <div class="flex-1">
                                         <div class="flex items-center gap-2">
-                                            <h3
-                                                class="font-bold text-slate-200 text-sm"
-                                            >
+                                            <h3 class="font-bold text-slate-200 text-sm">
                                                 {vibe.label}
                                             </h3>
                                             {#if isLocked}
@@ -785,9 +668,7 @@
                                                 >
                                             {/if}
                                         </div>
-                                        <p
-                                            class="text-xs text-slate-400 mt-0.5"
-                                        >
+                                        <p class="text-xs text-slate-400 mt-0.5">
                                             {vibe.desc}
                                         </p>
                                     </div>
@@ -797,21 +678,18 @@
                                 </button>
                             {/each}
                         </div>
-                    {:else if vibeTab === "clock"}
+                    {:else if vibeTab === 'clock'}
                         <div class="space-y-6">
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {#each [{ id: "modern", label: "Moderno", font: "font-poppins", desc: "Limpio y minimalista", pro: false }, { id: "neon", label: "Neon Cyber", font: "font-mono text-primary-400 shadow-glow", desc: "Estilo hacker brillante", pro: true }, { id: "retro", label: "Pixel Retro", font: "font-mono", desc: "Estilo 8-bit clásico", pro: true }, { id: "elegant", label: "Editorial", font: "font-serif italic", desc: "Sofisticado y clásico", pro: true }, { id: "analog", label: "Analógico", font: "text-2xl", desc: "Clásico y atemporal", pro: true }] as style}
+                                {#each [{ id: 'modern', label: 'Moderno', font: 'font-poppins', desc: 'Limpio y minimalista', pro: false }, { id: 'neon', label: 'Neon Cyber', font: 'font-mono text-primary-400 shadow-glow', desc: 'Estilo hacker brillante', pro: true }, { id: 'retro', label: 'Pixel Retro', font: 'font-mono', desc: 'Estilo 8-bit clásico', pro: true }, { id: 'elegant', label: 'Editorial', font: 'font-serif italic', desc: 'Sofisticado y clásico', pro: true }, { id: 'analog', label: 'Analógico', font: 'text-2xl', desc: 'Clásico y atemporal', pro: true }] as style}
                                     {@const isLocked =
-                                        style.pro &&
-                                        $userSubscription.tier !== "pro"}
+                                        style.pro && $userSubscription.tier !== 'pro'}
                                     <button
                                         on:click={() => {
                                             if (isLocked) {
                                                 showPaywall = true;
                                             } else {
-                                                vibeStore.setClockStyle(
-                                                    style.id,
-                                                );
+                                                vibeStore.setClockStyle(style.id);
                                             }
                                         }}
                                         class="group relative p-4 rounded-xl border transition-all text-left flex flex-col gap-3
@@ -825,7 +703,7 @@
                                         <div
                                             class="h-16 flex items-center justify-center bg-black/20 rounded-lg text-2xl text-white"
                                         >
-                                            {#if style.id === "analog"}
+                                            {#if style.id === 'analog'}
                                                 <svg
                                                     viewBox="0 0 100 100"
                                                     class="w-10 h-10 text-white opacity-80"
@@ -859,11 +737,9 @@
                                                 </svg>
                                             {:else}
                                                 <span
-                                                    class="{style.font} {style.id ===
-                                                    'neon'
+                                                    class="{style.font} {style.id === 'neon'
                                                         ? 'drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]'
-                                                        : ''} {style.id ===
-                                                    'retro'
+                                                        : ''} {style.id === 'retro'
                                                         ? 'font-bold'
                                                         : ''}"
                                                 >
@@ -872,9 +748,7 @@
                                             {/if}
                                         </div>
 
-                                        <div
-                                            class="flex justify-between items-end"
-                                        >
+                                        <div class="flex justify-between items-end">
                                             <div>
                                                 <h3
                                                     class="font-bold text-white text-sm flex items-center gap-2"
@@ -887,9 +761,7 @@
                                                         >
                                                     {/if}
                                                 </h3>
-                                                <p
-                                                    class="text-xs text-slate-400 mt-0.5"
-                                                >
+                                                <p class="text-xs text-slate-400 mt-0.5">
                                                     {style.desc}
                                                 </p>
                                             </div>
@@ -910,9 +782,7 @@
                                                     >
                                                 </div>
                                             {:else if isLocked}
-                                                <div class="text-slate-500">
-                                                    🔒
-                                                </div>
+                                                <div class="text-slate-500">🔒</div>
                                             {/if}
                                         </div>
                                     </button>
@@ -939,7 +809,7 @@
         <div
             class="fixed inset-0 z-[100] flex items-center justify-center p-4"
             on:click={() => (showWhiteNoise = false)}
-            on:keydown={(e) => e.key === "Escape" && (showWhiteNoise = false)}
+            on:keydown={(e) => e.key === 'Escape' && (showWhiteNoise = false)}
             role="button"
             tabindex="-1"
             aria-label="Close modal"
@@ -955,9 +825,7 @@
                 aria-labelledby="white-noise-title"
             >
                 <div class="flex justify-between items-center mb-6">
-                    <h2 id="white-noise-title" class="text-2xl font-bold">
-                        Sonidos Ambientales
-                    </h2>
+                    <h2 id="white-noise-title" class="text-2xl font-bold">Sonidos Ambientales</h2>
                     <button
                         on:click={() => (showWhiteNoise = false)}
                         class="text-slate-400 hover:text-white transition-colors"
@@ -970,19 +838,15 @@
                 <WhiteNoiseControls />
 
                 <p class="text-xs text-slate-500 mt-6 text-center">
-                    Los sonidos ambientales se mezclan con la música para crear
-                    la atmósfera perfecta.
+                    Los sonidos ambientales se mezclan con la música para crear la atmósfera
+                    perfecta.
                 </p>
             </div>
         </div>
     {/if}
 
     <!-- Paywall Modal -->
-    <PaywallModal
-        show={showPaywall}
-        blockedFeature="vibe"
-        on:close={() => (showPaywall = false)}
-    />
+    <PaywallModal show={showPaywall} blockedFeature="vibe" on:close={() => (showPaywall = false)} />
 </div>
 
 <style>
@@ -997,12 +861,12 @@
     }
 
     /* Remove input arrows */
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
+    input[type='number']::-webkit-inner-spin-button,
+    input[type='number']::-webkit-outer-spin-button {
         -webkit-appearance: none;
         margin: 0;
     }
-    input[type="number"] {
+    input[type='number'] {
         -moz-appearance: textfield;
         appearance: textfield;
     }
