@@ -34,6 +34,7 @@
     let showWhiteNoise = false; // NEW
     let vibeTab: 'scenes' | 'clock' = 'scenes'; // Tab state for modal
     let isUserLoaded = false;
+    let currentTask = ''; // Added Task Input state
 
     // Immersive Mode Logic
     let immersiveMode = false;
@@ -201,36 +202,19 @@
     <div class="relative z-10 w-full h-full flex flex-col overflow-hidden">
         <!-- Navbar (Fixed height) -->
         <header
-            class="p-4 md:p-6 flex justify-between items-center animate-fade-in-down shrink-0 transition-opacity duration-700 ease-in-out"
+            class="p-4 md:p-6 flex justify-between items-center animate-fade-in-down shrink-0 transition-opacity duration-700 ease-in-out z-50"
             class:opacity-0={hideUI}
             class:pointer-events-none={hideUI}
         >
             <a
                 href="/"
-                class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-opacity z-50 text-white p-2 -ml-2 group"
+                class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-opacity text-white p-2 -ml-2 group"
                 title="Salir"
             >
                 <BackIcon size="md" />
             </a>
 
             <div class="flex items-center gap-2">
-                <button
-                    on:click={() => (showVibeStudio = !showVibeStudio)}
-                    class="flex items-center gap-2 bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-full px-3 py-2 border border-white/10 hover:border-white/20 shadow-lg transition-all group"
-                    title="Vibe Studio"
-                >
-                    <SettingsIcon size="sm" />
-                </button>
-
-                <!-- White Noise Button -->
-                <button
-                    on:click={() => (showWhiteNoise = !showWhiteNoise)}
-                    class="flex items-center gap-2 bg-white/5 hover:bg-white/10 backdrop-blur-md rounded-full px-3 py-2 border border-white/10 hover:border-white/20 shadow-lg transition-all group"
-                    title="Sonidos Ambientales"
-                >
-                    <HeadphonesIcon size="sm" />
-                </button>
-
                 <!-- Immersive Toggle (PRO) -->
                 <button
                     on:click={toggleImmersive}
@@ -243,7 +227,7 @@
 
             <button
                 on:click={toggleMusicExplorer}
-                class="p-2 opacity-50 hover:opacity-100 transition-opacity z-50 text-white"
+                class="p-2 opacity-50 hover:opacity-100 transition-opacity text-white"
                 title="Explorar Música"
             >
                 <MusicIcon size="md" />
@@ -253,15 +237,17 @@
         <!-- CENTER: FOCUS TIMER (Flexible space) -->
         <main class="flex-1 flex flex-col items-center justify-center p-4 min-h-0 relative z-20">
             <!-- Timer Label Pill -->
+            <!-- Task Input (Loggd Style) -->
             <div
-                class="mb-8 flex items-center gap-2 px-4 py-1.5 bg-white/5 border border-white/10 rounded-full backdrop-blur-md animate-fade-in-down transition-opacity duration-700"
+                class="w-full max-w-2xl px-4 text-center mb-10 z-30 transition-opacity duration-700"
                 class:opacity-0={hideUI}
             >
-                <span class="text-orange-400 animate-pulse">🔥</span>
-                <span
-                    class="text-[10px] md:text-xs font-bold tracking-[0.2em] text-slate-300 uppercase"
-                    >Modo Enfoque</span
-                >
+                <input
+                    type="text"
+                    bind:value={currentTask}
+                    placeholder="¿En qué estás trabajando?"
+                    class="w-full bg-transparent border-none text-center text-2xl md:text-4xl font-medium text-white placeholder:text-slate-600 focus:outline-none focus:placeholder:text-slate-700 transition-all"
+                />
             </div>
 
             <!-- Timer Container -->
@@ -272,7 +258,7 @@
             >
                 <!-- Circular Progress SVG -->
                 <svg
-                    class="w-[280px] h-[280px] md:w-[380px] md:h-[380px] transform -rotate-90 drop-shadow-2xl text-white relative z-10"
+                    class="w-[300px] h-[300px] md:w-[450px] md:h-[450px] transform -rotate-90 drop-shadow-2xl text-white relative z-10"
                     viewBox="0 0 100 100"
                 >
                     <!-- Track -->
@@ -313,7 +299,7 @@
                 <!-- Time Display -->
                 <div class="absolute inset-0 flex flex-col items-center justify-center z-10">
                     <div
-                        class="font-poppins text-6xl md:text-8xl font-medium tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-300 select-none tabular-nums"
+                        class="font-poppins text-7xl md:text-9xl font-medium tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-200 select-none tabular-nums"
                     >
                         {formatTime(timeLeft)}
                     </div>
@@ -463,22 +449,25 @@
                     <!-- Divider -->
                     <div class="w-px h-4 bg-white/10 mx-1"></div>
 
-                    <!-- Ambience Toggle (Rain Icon - Placeholder for now) -->
                     <button
                         on:click|stopPropagation={() => {
                             showVibeStudio = true;
                         }}
-                        class="text-white/50 hover:text-cyan-400 transition-colors p-1.5"
-                        title="Configurar Ambiente"
+                        class="text-white/50 hover:text-white transition-colors p-1.5"
+                        title="Vibe Studio"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            ><path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
-                            ></path></svg
-                        >
+                        <SettingsIcon size="xs" />
+                    </button>
+
+                    <!-- Ambience Toggle (White Noise) -->
+                    <button
+                        on:click|stopPropagation={() => {
+                            showWhiteNoise = true;
+                        }}
+                        class="text-white/50 hover:text-white transition-colors p-1.5"
+                        title="Sonidos Ambientales"
+                    >
+                        <HeadphonesIcon size="xs" />
                     </button>
 
                     <!-- Volume Control -->
@@ -766,47 +755,6 @@
             class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[80] bg-black/60 backdrop-blur-md px-4 py-2 rounded-full text-xs text-slate-400 pointer-events-none animate-fade-in"
         >
             Modo Inmersivo activo. Mueve el mouse para ver controles.
-        </div>
-    {/if}
-
-    <!-- White Noise Modal -->
-    {#if showWhiteNoise}
-        <div
-            class="fixed inset-0 z-[100] flex items-center justify-center p-4"
-            on:click={() => (showWhiteNoise = false)}
-            on:keydown={(e) => e.key === 'Escape' && (showWhiteNoise = false)}
-            role="button"
-            tabindex="-1"
-            aria-label="Close modal"
-        >
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-            <div
-                class="bg-[#0f1729]/95 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 max-w-md w-full shadow-2xl"
-                on:click|stopPropagation
-                on:keydown|stopPropagation
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="white-noise-title"
-            >
-                <div class="flex justify-between items-center mb-6">
-                    <h2 id="white-noise-title" class="text-2xl font-bold">Sonidos Ambientales</h2>
-                    <button
-                        on:click={() => (showWhiteNoise = false)}
-                        class="text-slate-400 hover:text-white transition-colors"
-                        aria-label="Cerrar"
-                    >
-                        ✕
-                    </button>
-                </div>
-
-                <WhiteNoiseControls />
-
-                <p class="text-xs text-slate-500 mt-6 text-center">
-                    Los sonidos ambientales se mezclan con la música para crear la atmósfera
-                    perfecta.
-                </p>
-            </div>
         </div>
     {/if}
 
