@@ -318,51 +318,63 @@
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Modal - Floating & Mobile-First -->
 {#if showModal}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
     <div
-        role="dialog"
-        aria-modal="true"
-        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        role="presentation"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4"
         on:click={() => (showModal = false)}
-        on:keydown={(e) => e.key === 'Escape' && (showModal = false)}
     >
+        <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
         <div
-            role="document"
-            class="bg-[#1a1a1a] rounded-2xl border border-white/20 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+            class="bg-[#1a1a1a] rounded-2xl border border-white/20 w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl"
             on:click|stopPropagation
-            on:keydown|stopPropagation
+            on:keydown={(e) => e.key === 'Escape' && (showModal = false)}
+            tabindex="-1"
         >
             <div
-                class="p-6 border-b border-white/10 flex items-center justify-between sticky top-0 bg-[#1a1a1a] z-10"
+                class="p-4 sm:p-6 border-b border-white/10 flex items-center justify-between sticky top-0 bg-[#1a1a1a] z-10"
             >
-                <h2 class="text-2xl font-bold">
+                <h2 id="modal-title" class="text-xl sm:text-2xl font-bold">
                     {modalMode === 'create' ? 'Crear Álbum' : 'Editar Álbum'}
                 </h2>
                 <button
+                    type="button"
                     on:click={() => (showModal = false)}
-                    class="text-slate-400 hover:text-white text-2xl">×</button
+                    class="text-slate-400 hover:text-white text-2xl sm:text-3xl w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-lg transition-all"
+                    aria-label="Cerrar">×</button
                 >
             </div>
 
-            <div class="p-6 space-y-6">
+            <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
                 <!-- Title -->
                 <div>
-                    <label class="block text-sm font-medium mb-2">Título del Álbum *</label>
+                    <label for="album-title" class="block text-sm font-medium mb-2"
+                        >Título del Álbum *</label
+                    >
                     <input
+                        id="album-title"
                         type="text"
                         bind:value={title}
                         placeholder="Ej: Midnight Lofi Vibes"
-                        class="w-full bg-[#0B1120] border border-white/10 rounded-xl px-4 py-3 focus:border-primary-500 focus:outline-none"
+                        class="w-full bg-[#0B1120] border border-white/10 rounded-xl px-4 py-3 focus:border-primary-500 focus:outline-none text-base"
                     />
                 </div>
 
                 <!-- Category -->
                 <div>
-                    <label class="block text-sm font-medium mb-2">Categoría</label>
+                    <label for="album-category" class="block text-sm font-medium mb-2"
+                        >Categoría</label
+                    >
                     <select
+                        id="album-category"
                         bind:value={category}
-                        class="w-full bg-[#0B1120] border border-white/10 rounded-xl px-4 py-3 focus:border-primary-500 focus:outline-none"
+                        class="w-full bg-[#0B1120] border border-white/10 rounded-xl px-4 py-3 focus:border-primary-500 focus:outline-none text-base"
                     >
                         <option>Lo-fi</option>
                         <option>Ambient</option>
@@ -374,23 +386,25 @@
 
                 <!-- Cover -->
                 <div>
-                    <label class="block text-sm font-medium mb-2">Portada</label>
-                    <div class="flex gap-4 items-start">
+                    <label for="album-cover" class="block text-sm font-medium mb-2">Portada</label>
+                    <div class="flex flex-col sm:flex-row gap-4 items-start">
                         {#if coverPreview}
                             <img
                                 src={coverPreview}
                                 alt="Preview"
-                                class="w-32 h-32 rounded-xl object-cover"
+                                class="w-32 h-32 rounded-xl object-cover mx-auto sm:mx-0"
                             />
                         {/if}
                         <label
-                            class="flex-1 border-2 border-dashed border-white/20 rounded-xl p-6 text-center cursor-pointer hover:border-primary-500 transition-all"
+                            for="album-cover"
+                            class="flex-1 w-full border-2 border-dashed border-white/20 rounded-xl p-6 text-center cursor-pointer hover:border-primary-500 transition-all active:scale-95"
                         >
                             <span class="text-2xl block mb-2">📷</span>
                             <span class="text-sm text-slate-400"
                                 >{coverFile ? coverFile.name : 'Haz clic para subir'}</span
                             >
                             <input
+                                id="album-cover"
                                 type="file"
                                 accept="image/*"
                                 class="hidden"
@@ -402,26 +416,29 @@
 
                 <!-- Tracks -->
                 <div>
-                    <label class="block text-sm font-medium mb-2">Canciones ({tracks.length})</label
+                    <label for="tracks-list" class="block text-sm font-medium mb-2"
+                        >Canciones ({tracks.length})</label
                     >
-                    <div class="space-y-2 mb-3">
+                    <div id="tracks-list" class="space-y-2 mb-3">
                         {#each tracks as track, i}
                             <div class="flex items-center gap-2 bg-[#0B1120] p-3 rounded-lg">
-                                <span class="text-slate-500 text-sm">{i + 1}.</span>
-                                <div class="flex-1">
-                                    <p class="font-medium text-sm">{track.title}</p>
+                                <span class="text-slate-500 text-sm shrink-0">{i + 1}.</span>
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-medium text-sm truncate">{track.title}</p>
                                     <p class="text-xs text-slate-500 truncate">{track.url}</p>
                                 </div>
                                 <button
+                                    type="button"
                                     on:click={() => removeTrack(i)}
-                                    class="text-red-400 hover:text-red-300"
+                                    class="text-red-400 hover:text-red-300 w-8 h-8 flex items-center justify-center hover:bg-red-500/10 rounded transition-all shrink-0"
+                                    aria-label="Eliminar track {track.title}"
                                 >
                                     ✕
                                 </button>
                             </div>
                         {/each}
                     </div>
-                    <div class="flex gap-2">
+                    <div class="flex flex-col sm:flex-row gap-2">
                         <input
                             type="text"
                             bind:value={newTrackTitle}
@@ -435,8 +452,9 @@
                             class="flex-1 bg-[#0B1120] border border-white/10 rounded-lg px-3 py-2 text-sm"
                         />
                         <button
+                            type="button"
                             on:click={addTrack}
-                            class="px-4 py-2 bg-primary-600 hover:bg-primary-500 rounded-lg text-sm font-bold"
+                            class="px-4 py-2 bg-primary-600 hover:bg-primary-500 rounded-lg text-sm font-bold whitespace-nowrap active:scale-95 transition-transform"
                         >
                             + Añadir
                         </button>
@@ -444,17 +462,19 @@
                 </div>
 
                 <!-- Actions -->
-                <div class="flex gap-3 pt-4">
+                <div class="flex flex-col sm:flex-row gap-3 pt-4">
                     <button
+                        type="button"
                         on:click={() => (showModal = false)}
-                        class="flex-1 py-3 bg-white/10 hover:bg-white/20 rounded-xl font-bold"
+                        class="w-full py-3 bg-white/10 hover:bg-white/20 rounded-xl font-bold active:scale-95 transition-all"
                     >
                         Cancelar
                     </button>
                     <button
+                        type="button"
                         on:click={saveAlbum}
                         disabled={saving || !title.trim()}
-                        class="flex-1 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 disabled:opacity-50 rounded-xl font-bold"
+                        class="w-full py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold active:scale-95 transition-all"
                     >
                         {saving
                             ? 'Guardando...'
