@@ -284,11 +284,26 @@
                 </p>
             </div>
 
-            <button
-                on:click={() => (showPreview = !showPreview)}
-                class="p-3 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
-                title={showPreview ? 'Editar Perfil' : 'Vista Previa'}
-            >
+            <div class="flex gap-3">
+                {#if $userSubscription.profile?.isVerified}
+                    <a
+                        href="/artist/albums"
+                        class="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 rounded-xl font-bold text-sm transition-all shadow-lg flex items-center gap-2"
+                    >
+                        💿 Mis Álbumes
+                    </a>
+                    <a
+                        href="/artist/submit"
+                        class="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 rounded-xl font-bold text-sm transition-all shadow-lg flex items-center gap-2"
+                    >
+                        🎵 Enviar Música
+                    </a>
+                {/if}
+                <button
+                    on:click={() => (showPreview = !showPreview)}
+                    class="p-3 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+                    title={showPreview ? 'Editar Perfil' : 'Vista Previa'}
+                >
                 {#if showPreview}
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
