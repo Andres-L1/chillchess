@@ -323,12 +323,12 @@
                                         style="background-color: {day.intensity === 0
                                             ? '#334155'
                                             : day.intensity === 1
-                                              ? '#c2410c'
+                                              ? '#fed7aa'
                                               : day.intensity === 2
-                                                ? '#ea580c'
+                                                ? '#fb923c'
                                                 : day.intensity === 3
-                                                  ? '#fb923c'
-                                                  : '#fed7aa'}; opacity: {day.intensity === 0
+                                                  ? '#f97316'
+                                                  : '#ea580c'}; opacity: {day.intensity === 0
                                             ? 0.3
                                             : 1}"
                                         title="{day.date}: {day.count} pts"
@@ -342,10 +342,10 @@
                             <span>Off</span>
                             <div class="flex gap-1">
                                 <div class="w-2 h-2 rounded-sm bg-[#334155] opacity-30"></div>
-                                <div class="w-2 h-2 rounded-sm bg-[#c2410c]"></div>
-                                <div class="w-2 h-2 rounded-sm bg-[#ea580c]"></div>
-                                <div class="w-2 h-2 rounded-sm bg-[#fb923c]"></div>
                                 <div class="w-2 h-2 rounded-sm bg-[#fed7aa]"></div>
+                                <div class="w-2 h-2 rounded-sm bg-[#fb923c]"></div>
+                                <div class="w-2 h-2 rounded-sm bg-[#f97316]"></div>
+                                <div class="w-2 h-2 rounded-sm bg-[#ea580c]"></div>
                             </div>
                             <span>On Fire</span>
                         </div>
