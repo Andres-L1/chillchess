@@ -1,27 +1,22 @@
 <script lang="ts">
-    import {
-        audioStore,
-        nextTrack,
-        prevTrack,
-        togglePlayback,
-    } from "$lib/audio/store";
+    import { audioStore, nextTrack, prevTrack, togglePlayback } from '$lib/audio/store';
 
     // Ambience files (loops)
     const AMBIENCE_TRACKS = {
-        rain: "/assets/audio/ambience/rain.mp3",
-        library: "/assets/audio/ambience/library.mp3",
-        garden: "/assets/audio/ambience/garden.mp3",
-        none: "",
+        rain: '/assets/audio/ambience/rain.mp3',
+        library: '/assets/audio/ambience/library.mp3',
+        garden: '/assets/audio/ambience/garden.mp3',
+        none: '',
     };
 
     // White Noise files (loops)
     const WHITE_NOISE_TRACKS = {
-        none: "",
-        rain: "/whitenoise/rain.wav",
-        fire: "/whitenoise/fire.mp3",
-        cafe: "/whitenoise/cafe.wav",
-        ocean: "/whitenoise/ocean.flac",
-        forest: "/whitenoise/forest.wav",
+        none: '',
+        rain: '/whitenoise/rain.wav',
+        fire: '/whitenoise/fire.mp3',
+        cafe: '/whitenoise/cafe.wav',
+        ocean: '/whitenoise/ocean.flac',
+        forest: '/whitenoise/forest.wav',
     };
 
     let musicEl: HTMLAudioElement;
@@ -37,31 +32,24 @@
     // --- MEDIA SESSION API INTEGRATION (Background Play & Metadata) ---
 
     // Update Playback State (Playing/Paused) for System UI
-    $: if (typeof navigator !== "undefined" && "mediaSession" in navigator) {
-        navigator.mediaSession.playbackState = $audioStore.isPlaying
-            ? "playing"
-            : "paused";
+    $: if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = $audioStore.isPlaying ? 'playing' : 'paused';
     }
 
     $: updateMediaSession(
         $audioStore.currentTrackIndex,
         $audioStore.currentAlbumId,
-        $audioStore.playlist,
+        $audioStore.playlist
     );
 
     function getAbsoluteUrl(path: string) {
-        if (!path) return "";
-        if (path.startsWith("http")) return path;
+        if (!path) return '';
+        if (path.startsWith('http')) return path;
         return window.location.origin + path;
     }
 
-    function updateMediaSession(
-        index: number,
-        albumId: string | undefined,
-        playlist: any[],
-    ) {
-        if (typeof navigator === "undefined" || !("mediaSession" in navigator))
-            return;
+    function updateMediaSession(index: number, albumId: string | undefined, playlist: any[]) {
+        if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return;
 
         if (playlist.length === 0) {
             navigator.mediaSession.metadata = null;
@@ -69,9 +57,7 @@
         }
 
         const currentTrack = playlist[index];
-        const currentAlbum = $audioStore.availableAlbums.find(
-            (a) => a.id === albumId,
-        );
+        const currentAlbum = $audioStore.availableAlbums.find((a) => a.id === albumId);
 
         if (currentTrack && currentAlbum) {
             const artUrl = getAbsoluteUrl(currentAlbum.cover);
@@ -83,32 +69,21 @@
                 artwork: [
                     {
                         src: artUrl,
-                        sizes: "512x512",
-                        type: "image/jpeg",
+                        sizes: '512x512',
+                        type: 'image/jpeg',
                     },
                 ],
             });
 
             // Set Action Handlers
             try {
-                navigator.mediaSession.setActionHandler("play", () =>
-                    togglePlayback(),
-                );
-                navigator.mediaSession.setActionHandler("pause", () =>
-                    togglePlayback(),
-                );
-                navigator.mediaSession.setActionHandler("previoustrack", () =>
-                    prevTrack(),
-                );
-                navigator.mediaSession.setActionHandler("nexttrack", () =>
-                    nextTrack(),
-                );
-                navigator.mediaSession.setActionHandler("seekto", (details) => {
+                navigator.mediaSession.setActionHandler('play', () => togglePlayback());
+                navigator.mediaSession.setActionHandler('pause', () => togglePlayback());
+                navigator.mediaSession.setActionHandler('previoustrack', () => prevTrack());
+                navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack());
+                navigator.mediaSession.setActionHandler('seekto', (details) => {
                     // Support system scrubber
-                    if (
-                        details.seekTime !== undefined &&
-                        details.fastSeek === false
-                    ) {
+                    if (details.seekTime !== undefined && details.fastSeek === false) {
                         audioStore.update((s) => ({
                             ...s,
                             seekRequest: details.seekTime ?? null,
@@ -116,7 +91,7 @@
                     }
                 });
             } catch (e) {
-                console.warn("Media Session Action Handler error:", e);
+                console.warn('Media Session Action Handler error:', e);
             }
         }
     }
@@ -127,48 +102,39 @@
 
         // Handle Playlist
         if ($audioStore.playlist.length > 0) {
-            const currentTrack =
-                $audioStore.playlist[$audioStore.currentTrackIndex];
+            const currentTrack = $audioStore.playlist[$audioStore.currentTrackIndex];
             const trackSrc = currentTrack.file; // Path relative to static
 
             // Change source if different
             // Note: Use getAttribute to avoid full URL matching issues
-            if (musicEl.getAttribute("src") !== trackSrc) {
+            if (musicEl.getAttribute('src') !== trackSrc) {
                 musicEl.src = trackSrc;
                 if ($audioStore.isPlaying) {
-                    musicEl
-                        .play()
-                        .catch((e) => console.log("Auto-play blocked:", e));
+                    musicEl.play().catch((e) => console.log('Auto-play blocked:', e));
                 }
             }
 
             // Play/Pause state
-            if (
-                $audioStore.isPlaying &&
-                musicEl.paused &&
-                musicEl.readyState >= 2
-            ) {
+            if ($audioStore.isPlaying && musicEl.paused && musicEl.readyState >= 2) {
                 // 2 = HAVE_CURRENT_DATA
-                musicEl.play().catch((e) => console.log("Play error:", e));
+                musicEl.play().catch((e) => console.log('Play error:', e));
             } else if (!$audioStore.isPlaying && !musicEl.paused) {
                 musicEl.pause();
             }
         } else {
             // No playlist active -> Stop music
             musicEl.pause();
-            musicEl.src = "";
+            musicEl.src = '';
         }
     }
 
     // Handle Ambience Layer
     $: if (ambienceEl) {
-        ambienceEl.volume = $audioStore.isMuted
-            ? 0
-            : $audioStore.ambienceVolume;
+        ambienceEl.volume = $audioStore.isMuted ? 0 : $audioStore.ambienceVolume;
 
         const ambienceSrc = AMBIENCE_TRACKS[$audioStore.currentAmbience];
 
-        if (ambienceEl.getAttribute("src") !== ambienceSrc) {
+        if (ambienceEl.getAttribute('src') !== ambienceSrc) {
             if (ambienceSrc) {
                 ambienceEl.src = ambienceSrc;
                 if ($audioStore.isPlaying) {
@@ -178,7 +144,7 @@
                 }
             } else {
                 ambienceEl.pause();
-                ambienceEl.src = "";
+                ambienceEl.src = '';
             }
         }
 
@@ -199,13 +165,11 @@
 
     // Handle White Noise Layer (independent of music playback)
     $: if (whiteNoiseEl) {
-        whiteNoiseEl.volume = $audioStore.isMuted
-            ? 0
-            : $audioStore.whiteNoiseVolume;
+        whiteNoiseEl.volume = $audioStore.isMuted ? 0 : $audioStore.whiteNoiseVolume;
 
         const whiteNoiseSrc = WHITE_NOISE_TRACKS[$audioStore.currentWhiteNoise];
 
-        if (whiteNoiseEl.getAttribute("src") !== whiteNoiseSrc) {
+        if (whiteNoiseEl.getAttribute('src') !== whiteNoiseSrc) {
             if (whiteNoiseSrc) {
                 whiteNoiseEl.src = whiteNoiseSrc;
                 whiteNoiseEl.play().catch(() => {
@@ -213,16 +177,12 @@
                 });
             } else {
                 whiteNoiseEl.pause();
-                whiteNoiseEl.src = "";
+                whiteNoiseEl.src = '';
             }
         }
 
         // Keep playing if has source (white noise is always on when selected)
-        if (
-            whiteNoiseSrc &&
-            whiteNoiseEl.paused &&
-            whiteNoiseEl.readyState >= 2
-        ) {
+        if (whiteNoiseSrc && whiteNoiseEl.paused && whiteNoiseEl.readyState >= 2) {
             whiteNoiseEl.play().catch(() => {
                 /* Autoplay blocked */
             });
@@ -230,12 +190,12 @@
     }
 
     function handleTrackEnd() {
-        console.log("Track ended");
+        console.log('Track ended');
 
         // Handle repeat modes
-        const { repeatMode, currentTrackIndex, playlist } = $audioStore;
+        const { repeatMode, currentTrackIndex, playlist, shuffle } = $audioStore;
 
-        if (repeatMode === "one") {
+        if (repeatMode === 'one') {
             // Repeat current track
             if (musicEl) {
                 musicEl.currentTime = 0;
@@ -243,8 +203,9 @@
                     /* Autoplay blocked */
                 });
             }
-        } else if (repeatMode === "all") {
+        } else if (repeatMode === 'all' || shuffle) {
             // Go to next track, loop back to start if at end
+            // OR if shuffle is on, play next random song
             nextTrack();
         } else {
             // Normal mode: next track or stop at end
@@ -267,7 +228,7 @@
     }
 
     // --- AUDIO ANALYSIS (VISUALIZER) ---
-    import { analysisStore } from "$lib/audio/analysis";
+    import { analysisStore } from '$lib/audio/analysis';
 
     let audioContext: AudioContext;
     let sourceNode: MediaElementAudioSourceNode;
@@ -275,12 +236,11 @@
     let animationLoopId: number;
 
     function initAudioAnalysis() {
-        if (typeof window === "undefined") return;
+        if (typeof window === 'undefined') return;
         if (!musicEl || audioContext) return;
 
         try {
-            const AudioContextClass =
-                window.AudioContext || (window as any).webkitAudioContext;
+            const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
             audioContext = new AudioContextClass();
             analyser = audioContext.createAnalyser();
             analyser.fftSize = 256; // 128 bins
@@ -290,9 +250,9 @@
             sourceNode.connect(analyser);
             analyser.connect(audioContext.destination);
 
-            console.log("Audio Context Initialized for Visualization");
+            console.log('Audio Context Initialized for Visualization');
         } catch (e) {
-            console.error("Audio Analysis Setup Failed:", e);
+            console.error('Audio Analysis Setup Failed:', e);
         }
     }
 
@@ -336,7 +296,7 @@
         }
     }
 
-    import { browser } from "$app/environment";
+    import { browser } from '$app/environment';
     let lastFrameTime = 0;
 
     // Trigger analysis loop when playing
@@ -346,7 +306,7 @@
             initAudioAnalysis();
         }
         // Resume context
-        if (audioContext?.state === "suspended") {
+        if (audioContext?.state === 'suspended') {
             audioContext.resume();
         }
         // Start loop
