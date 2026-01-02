@@ -14,6 +14,7 @@
         updateDoc,
         doc,
         increment,
+        deleteDoc,
     } from 'firebase/firestore';
     import { toast } from '$lib/stores/notificationStore';
     import { fade, scale } from 'svelte/transition';
@@ -23,25 +24,18 @@
     let tasks: any[] = [];
     let loading = true;
 
-    // Modals
+    // Modals & State
     let showHabitModal = false;
     let showTaskModal = false;
+    let editingHabit: any = null; // If null, creating. If set, editing.
+    let editingTask: any = null;
 
-    // Habit Form Data
-    let newHabit = {
-        title: '',
-        frequency: 'daily',
-        color: 'orange',
-        notes: '',
-    };
+    // Form Defaults
+    const defaultHabit = { title: '', frequency: 'A diario', color: 'orange', notes: '' };
+    const defaultTask = { title: '', dueDate: 'Hoy', priority: 'none', notes: '' };
 
-    // Task Form Data
-    let newTask = {
-        title: '',
-        dueDate: 'today',
-        priority: 'none',
-        notes: '',
-    };
+    let formDataHabit = { ...defaultHabit };
+    let formDataTask = { ...defaultTask };
 
     const COLORS = ['orange', 'red', 'green', 'blue', 'purple', 'pink', 'cyan'];
 
@@ -75,28 +69,60 @@
         if ($userStore.user) loadData();
     });
 
-    async function createHabit() {
-        if (!newHabit.title.trim() || !$userStore.user) return;
+    // --- HABIT LOGIC ---
+    function openHabitModal(habit: any = null) {
+        if (habit) {
+            editingHabit = habit;
+            formDataHabit = { ...habit }; // Populate form
+        } else {
+            editingHabit = null; // Create mode
+            formDataHabit = { ...defaultHabit };
+        }
+        showHabitModal = true;
+    }
+
+    async function saveHabit() {
+        if (!formDataHabit.title.trim() || !$userStore.user) return;
         try {
-            await addDoc(collection(db, 'habits'), {
-                userId: $userStore.user.uid,
-                title: newHabit.title,
-                frequency: newHabit.frequency,
-                color: newHabit.color,
-                notes: newHabit.notes,
-                streak: 0,
-                createdAt: serverTimestamp(),
-            });
-            toast.success('Hábito creado');
-            newHabit = { title: '', frequency: 'daily', color: 'orange', notes: '' };
+            if (editingHabit) {
+                // UPDATE
+                await updateDoc(doc(db, 'habits', editingHabit.id), {
+                    title: formDataHabit.title,
+                    frequency: formDataHabit.frequency,
+                    color: formDataHabit.color,
+                    notes: formDataHabit.notes,
+                });
+                toast.success('Hábito actualizado');
+            } else {
+                // CREATE
+                await addDoc(collection(db, 'habits'), {
+                    userId: $userStore.user.uid,
+                    ...formDataHabit,
+                    streak: 0,
+                    createdAt: serverTimestamp(),
+                });
+                toast.success('Hábito creado');
+            }
             showHabitModal = false;
             loadData();
         } catch (e) {
-            toast.error('Error al crear hábito');
+            toast.error('Error al guardar hábito');
         }
     }
 
-    // Increment Habit Logic
+    async function deleteHabit() {
+        if (!editingHabit) return;
+        if (!confirm('¿Seguro que quieres eliminar este hábito?')) return;
+        try {
+            await deleteDoc(doc(db, 'habits', editingHabit.id));
+            toast.success('Hábito eliminado');
+            showHabitModal = false;
+            loadData();
+        } catch (e) {
+            toast.error('Error al eliminar');
+        }
+    }
+
     async function incrementHabit(habit: any) {
         habit.streak = (habit.streak || 0) + 1;
         habits = habits;
@@ -112,24 +138,55 @@
         }
     }
 
-    async function createTask() {
-        if (!newTask.title.trim() || !$userStore.user) return;
+    // --- TASK LOGIC ---
+    function openTaskModal(task: any = null) {
+        if (task) {
+            editingTask = task;
+            formDataTask = { ...task };
+        } else {
+            editingTask = null;
+            formDataTask = { ...defaultTask };
+        }
+        showTaskModal = true;
+    }
+
+    async function saveTask() {
+        if (!formDataTask.title.trim() || !$userStore.user) return;
         try {
-            await addDoc(collection(db, 'tasks'), {
-                userId: $userStore.user.uid,
-                title: newTask.title,
-                dueDate: newTask.dueDate,
-                priority: newTask.priority,
-                notes: newTask.notes,
-                completed: false,
-                createdAt: serverTimestamp(),
-            });
-            toast.success('Tarea añadida');
-            newTask = { title: '', dueDate: 'today', priority: 'none', notes: '' };
+            if (editingTask) {
+                await updateDoc(doc(db, 'tasks', editingTask.id), {
+                    title: formDataTask.title,
+                    dueDate: formDataTask.dueDate,
+                    priority: formDataTask.priority,
+                    notes: formDataTask.notes,
+                });
+                toast.success('Tarea actualizada');
+            } else {
+                await addDoc(collection(db, 'tasks'), {
+                    userId: $userStore.user.uid,
+                    ...formDataTask,
+                    completed: false,
+                    createdAt: serverTimestamp(),
+                });
+                toast.success('Tarea añadida');
+            }
             showTaskModal = false;
             loadData();
         } catch (e) {
-            toast.error('Error al crear tarea');
+            toast.error('Error al guardar tarea');
+        }
+    }
+
+    async function deleteTask() {
+        if (!editingTask) return;
+        if (!confirm('¿Seguro que quieres eliminar esta tarea?')) return;
+        try {
+            await deleteDoc(doc(db, 'tasks', editingTask.id));
+            toast.success('Tarea eliminada');
+            showTaskModal = false;
+            loadData();
+        } catch (e) {
+            toast.error('Error al eliminar');
         }
     }
 
@@ -165,20 +222,18 @@
 
         <div class="flex items-center gap-3 mb-4">
             <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-400 to-red-600"></div>
-            <h1 class="text-3xl md:text-4xl font-bold">Crea un hábito o una tarea.</h1>
+            <h1 class="text-3xl md:text-4xl font-bold">Dashboard</h1>
         </div>
 
         <p class="text-slate-400 text-lg mb-8 leading-relaxed">
-            <strong class="text-orange-400">Hábitos:</strong> Cosas que quieres repetir (Ej: "Leer
-            10 páginas").<br />
-            <strong class="text-blue-400">Tareas:</strong> Cosas únicas por hacer (Ej: "Cancelar suscripción").
+            Gestiona tus objetivos diarios y mantén el foco.
         </p>
     </header>
 
     <main class="max-w-4xl mx-auto space-y-6">
         <!-- New Habit Button (Card Style) -->
         <button
-            on:click={() => (showHabitModal = true)}
+            on:click={() => openHabitModal(null)}
             class="w-full bg-[#0F172A] border border-white/5 rounded-2xl p-6 flex items-center justify-between group hover:border-orange-500/50 transition-all text-left"
         >
             <div class="flex items-center gap-4">
@@ -203,7 +258,7 @@
 
         <!-- New Task Button (Card Style) -->
         <button
-            on:click={() => (showTaskModal = true)}
+            on:click={() => openTaskModal(null)}
             class="w-full bg-[#0F172A] border border-white/5 rounded-2xl p-6 flex items-center justify-between group hover:border-blue-500/50 transition-all text-left"
         >
             <div class="flex items-center gap-4">
@@ -240,13 +295,22 @@
                 {:else}
                     <div class="space-y-3">
                         {#each habits as habit}
-                            <button
-                                on:click={() => incrementHabit(habit)}
-                                class="w-full text-left p-4 rounded-xl border border-white/5 bg-white/[0.02] flex items-center justify-between group hover:border-orange-500/30 transition-all hover:bg-white/5"
+                            <div
+                                class="w-full text-left p-4 rounded-xl border border-white/5 bg-white/[0.02] flex items-center justify-between group hover:border-orange-500/30 transition-all hover:bg-white/5 relative"
                             >
-                                <span class="font-medium text-slate-200">{habit.title}</span>
-                                <div
-                                    class="flex items-center gap-2 text-xs text-slate-400 font-bold bg-white/5 px-3 py-1.5 rounded group-hover:bg-orange-500 group-hover:text-white transition-colors"
+                                <!-- Click Area for Details -->
+                                <button
+                                    on:click={() => openHabitModal(habit)}
+                                    class="flex-1 text-left font-medium text-slate-200 hover:text-white transition-colors truncate mr-4"
+                                >
+                                    {habit.title}
+                                </button>
+
+                                <!-- Streak Action -->
+                                <button
+                                    on:click|stopPropagation={() => incrementHabit(habit)}
+                                    class="flex items-center gap-2 text-xs text-slate-400 font-bold bg-white/5 px-3 py-1.5 rounded hover:bg-orange-500 hover:text-white transition-colors z-10"
+                                    title="Incrementar Racha"
                                 >
                                     <svg
                                         class="w-3 h-3"
@@ -257,12 +321,12 @@
                                             stroke-linecap="round"
                                             stroke-linejoin="round"
                                             stroke-width="3"
-                                            d="M5 13l4 4L19 7"
+                                            d="M13 10V3L4 14h7v7l9-11h-7z"
                                         /></svg
                                     >
                                     <span>{habit.streak || 0}</span>
-                                </div>
-                            </button>
+                                </button>
+                            </div>
                         {/each}
                     </div>
                 {/if}
@@ -280,17 +344,18 @@
                 {:else}
                     <div class="space-y-3">
                         {#each tasks as task}
-                            <button
-                                on:click={() => toggleTask(task)}
+                            <div
                                 class="w-full text-left p-4 rounded-xl border border-white/5 bg-white/[0.02] flex items-center justify-between group hover:bg-white/5 transition-all {task.completed
                                     ? 'opacity-50'
                                     : ''}"
                             >
-                                <div class="flex items-center gap-4">
-                                    <div
-                                        class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors {task.completed
+                                <div class="flex items-center gap-4 flex-1 min-w-0">
+                                    <!-- Checkbox Action -->
+                                    <button
+                                        on:click|stopPropagation={() => toggleTask(task)}
+                                        class="w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-colors {task.completed
                                             ? 'border-blue-500 bg-blue-500 text-white'
-                                            : 'border-slate-600 group-hover:border-blue-400'}"
+                                            : 'border-slate-600 hover:border-blue-400'}"
                                     >
                                         {#if task.completed}
                                             <svg
@@ -306,25 +371,31 @@
                                                 /></svg
                                             >
                                         {/if}
-                                    </div>
-                                    <div class="flex flex-col">
+                                    </button>
+
+                                    <!-- Detail Click -->
+                                    <button
+                                        on:click={() => openTaskModal(task)}
+                                        class="flex flex-col text-left overflow-hidden"
+                                    >
                                         <span
-                                            class="font-medium {task.completed
+                                            class="font-medium truncate {task.completed
                                                 ? 'line-through text-slate-500'
-                                                : 'text-slate-200'}">{task.title}</span
+                                                : 'text-slate-200 group-hover:text-white'}"
+                                            >{task.title}</span
                                         >
-                                        {#if task.dueDate}
+                                        {#if task.dueDate && task.dueDate !== 'Sin fecha'}
                                             <span class="text-[10px] text-slate-500 uppercase"
-                                                >{task.dueDate === 'today'
+                                                >{task.dueDate === 'Today'
                                                     ? 'Hoy'
                                                     : task.dueDate}</span
                                             >
                                         {/if}
-                                    </div>
+                                    </button>
                                 </div>
                                 {#if task.priority && task.priority !== 'none'}
                                     <div
-                                        class="w-2 h-2 rounded-full
+                                        class="w-2 h-2 rounded-full ml-3 flex-shrink-0
                                         {task.priority === 'high'
                                             ? 'bg-red-500'
                                             : task.priority === 'medium'
@@ -332,7 +403,7 @@
                                               : 'bg-blue-500'}"
                                     ></div>
                                 {/if}
-                            </button>
+                            </div>
                         {/each}
                     </div>
                 {/if}
@@ -351,7 +422,9 @@
                 in:scale={{ start: 0.95 }}
             >
                 <div class="p-6 border-b border-white/5 flex justify-between items-center">
-                    <h2 class="text-xl font-bold">Nuevo hábito</h2>
+                    <h2 class="text-xl font-bold">
+                        {editingHabit ? 'Editar hábito' : 'Nuevo hábito'}
+                    </h2>
                     <button
                         on:click={() => (showHabitModal = false)}
                         class="text-slate-400 hover:text-white">✕</button
@@ -362,7 +435,7 @@
                     <div class="relative">
                         <!-- svelte-ignore a11y-autofocus -->
                         <input
-                            bind:value={newHabit.title}
+                            bind:value={formDataHabit.title}
                             placeholder="ej. Ejercicio 30min, Leer..."
                             class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-orange-500 transition-colors placeholder:text-slate-600"
                             autoFocus
@@ -373,8 +446,8 @@
                     <div class="flex flex-wrap gap-2 text-sm">
                         {#each ['A diario', 'Días laborables', 'Fines de semana', 'Costumbre'] as type}
                             <button
-                                on:click={() => (newHabit.frequency = type)}
-                                class="px-3 py-1.5 rounded-lg border transition-colors {newHabit.frequency ===
+                                on:click={() => (formDataHabit.frequency = type)}
+                                class="px-3 py-1.5 rounded-lg border transition-colors {formDataHabit.frequency ===
                                 type
                                     ? 'bg-orange-500 text-white border-orange-500'
                                     : 'border-white/10 text-slate-400 hover:text-white'}"
@@ -386,7 +459,7 @@
 
                     <!-- Notes -->
                     <textarea
-                        bind:value={newHabit.notes}
+                        bind:value={formDataHabit.notes}
                         placeholder="Notas (opcional)"
                         rows="2"
                         class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 resize-none transition-colors"
@@ -397,8 +470,8 @@
                         <span class="text-xs font-bold text-slate-500 uppercase">Color</span>
                         {#each COLORS as color}
                             <button
-                                on:click={() => (newHabit.color = color)}
-                                class="w-6 h-6 rounded-full transition-transform hover:scale-110 ring-2 ring-offset-2 ring-offset-[#0F172A] {newHabit.color ===
+                                on:click={() => (formDataHabit.color = color)}
+                                class="w-6 h-6 rounded-full transition-transform hover:scale-110 ring-2 ring-offset-2 ring-offset-[#0F172A] {formDataHabit.color ===
                                 color
                                     ? 'ring-white'
                                     : 'ring-transparent'}"
@@ -408,17 +481,31 @@
                     </div>
                 </div>
                 <!-- Actions -->
-                <div class="p-6 border-t border-white/5 flex justify-end gap-3 bg-black/20">
-                    <button
-                        on:click={() => (showHabitModal = false)}
-                        class="px-5 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 transition-colors font-medium"
-                        >Cancelar</button
-                    >
-                    <button
-                        on:click={createHabit}
-                        class="px-5 py-2.5 rounded-xl bg-slate-200 text-slate-900 hover:bg-white transition-colors font-bold shadow-lg shadow-white/10"
-                        >Crear</button
-                    >
+                <div class="p-6 border-t border-white/5 flex justify-between gap-3 bg-black/20">
+                    {#if editingHabit}
+                        <button
+                            on:click={deleteHabit}
+                            class="text-red-400 hover:text-red-300 hover:bg-red-500/10 px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+                        >
+                            Eliminar
+                        </button>
+                    {:else}
+                        <div></div>
+                        <!-- Spacer -->
+                    {/if}
+                    <div class="flex gap-3">
+                        <button
+                            on:click={() => (showHabitModal = false)}
+                            class="px-5 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 transition-colors font-medium"
+                            >Cancelar</button
+                        >
+                        <button
+                            on:click={saveHabit}
+                            class="px-5 py-2.5 rounded-xl bg-slate-200 text-slate-900 hover:bg-white transition-colors font-bold shadow-lg shadow-white/10"
+                        >
+                            {editingHabit ? 'Guardar' : 'Crear'}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -435,7 +522,9 @@
                 in:scale={{ start: 0.95 }}
             >
                 <div class="p-6 border-b border-white/5 flex justify-between items-center">
-                    <h2 class="text-xl font-bold">Nueva tarea</h2>
+                    <h2 class="text-xl font-bold">
+                        {editingTask ? 'Editar tarea' : 'Nueva tarea'}
+                    </h2>
                     <button
                         on:click={() => (showTaskModal = false)}
                         class="text-slate-400 hover:text-white">✕</button
@@ -446,7 +535,7 @@
                     <div class="relative">
                         <!-- svelte-ignore a11y-autofocus -->
                         <input
-                            bind:value={newTask.title}
+                            bind:value={formDataTask.title}
                             placeholder="p. ej. Reservar dentista..."
                             class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-blue-500 transition-colors placeholder:text-slate-600"
                             autoFocus
@@ -457,8 +546,8 @@
                     <div class="flex flex-wrap gap-2 text-sm">
                         {#each ['Hoy', 'Mañana', 'Esta semana', 'Sin fecha'] as date}
                             <button
-                                on:click={() => (newTask.dueDate = date)}
-                                class="px-3 py-1.5 rounded-lg border transition-colors {newTask.dueDate ===
+                                on:click={() => (formDataTask.dueDate = date)}
+                                class="px-3 py-1.5 rounded-lg border transition-colors {formDataTask.dueDate ===
                                 date
                                     ? 'bg-blue-500 text-white border-blue-500'
                                     : 'border-white/10 text-slate-400 hover:text-white'}"
@@ -473,8 +562,8 @@
                         <span class="text-xs font-bold text-slate-500 uppercase">Prioridad</span>
                         {#each [{ id: 'none', label: 'Ninguna', color: 'bg-slate-500' }, { id: 'low', label: 'Baja', color: 'bg-blue-500' }, { id: 'medium', label: 'Media', color: 'bg-yellow-500' }, { id: 'high', label: 'Alta', color: 'bg-red-500' }] as p}
                             <button
-                                on:click={() => (newTask.priority = p.id)}
-                                class="flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all {newTask.priority ===
+                                on:click={() => (formDataTask.priority = p.id)}
+                                class="flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all {formDataTask.priority ===
                                 p.id
                                     ? 'border-white bg-white/5'
                                     : 'border-transparent opacity-60 hover:opacity-100'}"
@@ -487,24 +576,37 @@
 
                     <!-- Notes -->
                     <textarea
-                        bind:value={newTask.notes}
+                        bind:value={formDataTask.notes}
                         placeholder="Notas (opcional)"
                         rows="2"
                         class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 resize-none transition-colors"
                     ></textarea>
                 </div>
                 <!-- Actions -->
-                <div class="p-6 border-t border-white/5 flex justify-end gap-3 bg-black/20">
-                    <button
-                        on:click={() => (showTaskModal = false)}
-                        class="px-5 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 transition-colors font-medium"
-                        >Cancelar</button
-                    >
-                    <button
-                        on:click={createTask}
-                        class="px-5 py-2.5 rounded-xl bg-blue-500 text-white hover:bg-blue-400 transition-colors font-bold shadow-lg shadow-blue-500/20"
-                        >Agregar</button
-                    >
+                <div class="p-6 border-t border-white/5 flex justify-between gap-3 bg-black/20">
+                    {#if editingTask}
+                        <button
+                            on:click={deleteTask}
+                            class="text-red-400 hover:text-red-300 hover:bg-red-500/10 px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+                        >
+                            Eliminar
+                        </button>
+                    {:else}
+                        <div></div>
+                    {/if}
+                    <div class="flex gap-3">
+                        <button
+                            on:click={() => (showTaskModal = false)}
+                            class="px-5 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 transition-colors font-medium"
+                            >Cancelar</button
+                        >
+                        <button
+                            on:click={saveTask}
+                            class="px-5 py-2.5 rounded-xl bg-blue-500 text-white hover:bg-blue-400 transition-colors font-bold shadow-lg shadow-blue-500/20"
+                        >
+                            {editingTask ? 'Guardar' : 'Agregar'}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
