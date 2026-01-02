@@ -135,7 +135,7 @@
                 lastCompleted: serverTimestamp(),
             });
             toast.success('¡Bien hecho! +1 Racha');
-            trackActivity($userStore.user.uid);
+            if ($userStore.user) trackActivity($userStore.user.uid);
         } catch (e) {
             habit.streak -= 1;
             toast.error('Error');
@@ -192,7 +192,7 @@
         tasks = tasks;
         try {
             await updateDoc(doc(db, 'tasks', task.id), { completed: task.completed });
-            if (task.completed) trackActivity($userStore.user.uid);
+            if (task.completed && $userStore.user) trackActivity($userStore.user.uid);
         } catch (e) {
             task.completed = !task.completed;
         }
