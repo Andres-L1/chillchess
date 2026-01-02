@@ -35,6 +35,10 @@
     let showVerifiedBadge = true;
     let showFounderBadge = true;
 
+    // Activity Heatmap
+    let activityMap: Record<string, number> = {};
+    let calendar: { date: string; count: number; intensity: number }[] = [];
+
     onMount(async () => {
         // Check auth
         if (!$userStore.user) {
@@ -68,12 +72,42 @@
                 artistName = $userStore.user.displayName || 'Mi Nombre';
                 bio = 'Artista en ChillChess';
             }
+
+            // Load activity data for heatmap
+            const userDoc = await getDoc(doc(db, 'users', $userStore.user.uid));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                activityMap = userData.activityMap || {};
+                generateCalendar();
+            }
         } catch (e) {
             console.error('Error loading profile:', e);
         } finally {
             loading = false;
         }
     });
+
+    function generateCalendar() {
+        const days = 365;
+        const end = new Date();
+        const start = new Date();
+        start.setDate(end.getDate() - days);
+
+        const tempCal = [];
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+            const key = d.toISOString().split('T')[0];
+            const count = activityMap[key] || 0;
+
+            let intensity = 0;
+            if (count > 0) intensity = 1;
+            if (count > 2) intensity = 2;
+            if (count > 5) intensity = 3;
+            if (count > 8) intensity = 4;
+
+            tempCal.push({ date: key, count, intensity });
+        }
+        calendar = tempCal;
+    }
 
     async function saveProfile() {
         if (!$userStore.user) return;
@@ -275,6 +309,45 @@
                                     class="w-full bg-[#0B1120]/50 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none transition-all"
                                 />
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Activity Heatmap Card (NEW) -->
+                    <div class="bg-[#1a1a1a] rounded-2xl border border-white/10 p-6">
+                        <h2 class="text-xl font-bold mb-4">Tu Actividad (Tracker)</h2>
+                        <div class="overflow-x-auto pb-4">
+                            <div class="inline-grid grid-rows-7 grid-flow-col gap-1 min-w-max">
+                                {#each calendar as day}
+                                    <div
+                                        class="w-3 h-3 rounded-sm transition-all hover:scale-125"
+                                        style="background-color: {day.intensity === 0
+                                            ? '#334155'
+                                            : day.intensity === 1
+                                              ? '#c2410c'
+                                              : day.intensity === 2
+                                                ? '#ea580c'
+                                                : day.intensity === 3
+                                                  ? '#fb923c'
+                                                  : '#fed7aa'}; opacity: {day.intensity === 0
+                                            ? 0.3
+                                            : 1}"
+                                        title="{day.date}: {day.count} pts"
+                                    ></div>
+                                {/each}
+                            </div>
+                        </div>
+                        <div
+                            class="flex items-center justify-end gap-2 text-xs text-slate-500 mt-2"
+                        >
+                            <span>Off</span>
+                            <div class="flex gap-1">
+                                <div class="w-2 h-2 rounded-sm bg-[#334155] opacity-30"></div>
+                                <div class="w-2 h-2 rounded-sm bg-[#c2410c]"></div>
+                                <div class="w-2 h-2 rounded-sm bg-[#ea580c]"></div>
+                                <div class="w-2 h-2 rounded-sm bg-[#fb923c]"></div>
+                                <div class="w-2 h-2 rounded-sm bg-[#fed7aa]"></div>
+                            </div>
+                            <span>On Fire</span>
                         </div>
                     </div>
 
