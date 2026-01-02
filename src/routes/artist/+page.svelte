@@ -3,7 +3,16 @@
     import { userStore } from '$lib/auth/userStore';
     import { userSubscription } from '$lib/subscription/userSubscription';
     import { goto } from '$app/navigation';
-    import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+    import {
+        doc,
+        getDoc,
+        setDoc,
+        updateDoc,
+        collection,
+        query,
+        where,
+        getDocs,
+    } from 'firebase/firestore';
     import { db } from '$lib/firebase';
     import type { ArtistProfile, SocialLink } from '$lib/types/artist';
     import { SOCIAL_PLATFORMS, DEFAULT_THEME_COLORS } from '$lib/types/artist';
@@ -13,6 +22,7 @@
     let loading = true;
     let saving = false;
     let profile: ArtistProfile | null = null;
+    let currentProfileId: string | null = null; // Tracks which document ID to save to
     let isPro = false;
 
     // Form state
@@ -53,11 +63,42 @@
         showVerifiedBadge = $userSubscription.profile?.showVerifiedBadge ?? true;
         showFounderBadge = $userSubscription.profile?.showFounderBadge ?? true;
 
-        // Load existing profile
+        // ========================================
+        // DYNAMIC PROFILE LOOKUP (Auto-Migration)
+        // ========================================
+        // This searches for the user's artist profile intelligently:
+        // 1. First by userId field (supports custom IDs like 'JULYACTV')
+        // 2. Then by document ID = UID (current standard)
+        // This auto-syncs legacy profiles without manual migration
         try {
-            const profileDoc = await getDoc(doc(db, 'artists', $userStore.user.uid));
+            let profileDoc;
+            let profileId: string | null = null;
 
-            if (profileDoc.exists()) {
+            // STEP 1: Search by userId field (for legacy/custom ID profiles)
+            const artistsQuery = query(
+                collection(db, 'artists'),
+                where('userId', '==', $userStore.user.uid)
+            );
+            const querySnapshot = await getDocs(artistsQuery);
+
+            if (!querySnapshot.empty) {
+                // Found profile with matching userId
+                profileDoc = querySnapshot.docs[0];
+                profileId = profileDoc.id;
+                console.log(`✅ Found artist profile by userId: ${profileId}`);
+            } else {
+                // STEP 2: Fallback to UID-based lookup (current standard)
+                profileDoc = await getDoc(doc(db, 'artists', $userStore.user.uid));
+                if (profileDoc.exists()) {
+                    profileId = $userStore.user.uid;
+                    console.log(`✅ Found artist profile by UID: ${profileId}`);
+                }
+            }
+
+            // Store the resolved profile ID for saving later
+            currentProfileId = profileId;
+
+            if (profileDoc?.exists()) {
                 profile = profileDoc.data() as ArtistProfile;
                 // Populate form
                 artistName = profile.artistName;
@@ -68,9 +109,10 @@
                 accentColor = profile.accentColor || '#A855F7';
                 socialLinks = profile.socialLinks || [];
             } else {
-                // Initialize with user data
+                // No existing profile - will create new one on save
                 artistName = $userStore.user.displayName || 'Mi Nombre';
                 bio = 'Artista en ChillChess';
+                currentProfileId = $userStore.user.uid; // Default to UID for new profiles
             }
 
             // Load activity data for heatmap
@@ -152,8 +194,9 @@
             // We'll use the JSON trick to strip undefined if any slipped in.
             const cleanData = JSON.parse(JSON.stringify(rawData));
 
-            // 2. Update Artist Profile
-            await setDoc(doc(db, 'artists', $userStore.user.uid), cleanData, { merge: true });
+            // 2. Update Artist Profile (to the CORRECT document ID)
+            const targetProfileId = currentProfileId || $userStore.user.uid;
+            await setDoc(doc(db, 'artists', targetProfileId), cleanData, { merge: true });
 
             profile = cleanData as ArtistProfile;
 
