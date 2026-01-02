@@ -74,7 +74,7 @@
             let profileDoc;
             let profileId: string | null = null;
 
-            // STEP 1: Search by userId field (for legacy/custom ID profiles)
+            // STEP 1: Search by userId field (Strongest Link)
             const artistsQuery = query(
                 collection(db, 'artists'),
                 where('userId', '==', $userStore.user.uid)
@@ -82,37 +82,35 @@
             const querySnapshot = await getDocs(artistsQuery);
 
             if (!querySnapshot.empty) {
-                // Found profile with matching userId
                 profileDoc = querySnapshot.docs[0];
                 profileId = profileDoc.id;
-                console.log(`✅ Found artist profile by userId: ${profileId}`);
+                console.log(`✅ Found linked profile: ${profileId}`);
             } else {
-                // STEP 2: Fallback to UID-based lookup
-                const uidDoc = await getDoc(doc(db, 'artists', $userStore.user.uid));
-                if (uidDoc.exists()) {
-                    profileDoc = uidDoc;
-                    profileId = $userStore.user.uid;
-                    console.log(`✅ Found artist profile by UID: ${profileId}`);
-                } else {
-                    // STEP 3: Search by exact Artist Name as a last resort
-                    // This helps claim legacy profiles like 'julyactv-official' that don't have a userId yet
-                    const nameQuery = query(
-                        collection(db, 'artists'),
-                        where('artistName', '==', $userStore.user.displayName || '')
-                    );
-                    const nameSnapshot = await getDocs(nameQuery);
+                // STEP 2: Search by Artist Name (Legacy/Claim) - PRIORITIZED OVER UID
+                // We check this BEFORE checking UID doc to prevent using a duplicate empty profile
+                const nameQuery = query(
+                    collection(db, 'artists'),
+                    where('artistName', '==', $userStore.user.displayName || '')
+                );
+                const nameSnapshot = await getDocs(nameQuery);
+                const potentialMatch = nameSnapshot.empty
+                    ? null
+                    : nameSnapshot.docs.find(
+                          (d) => !d.data().userId || d.data().userId === $userStore.user?.uid
+                      );
 
-                    if (!nameSnapshot.empty && $userStore.user) {
-                        // Take the first one that doesn't have a userId or matches
-                        const potentialMatch = nameSnapshot.docs.find(
-                            (d) => !d.data().userId || d.data().userId === $userStore.user?.uid
-                        );
-                        if (potentialMatch) {
-                            profileDoc = potentialMatch;
-                            profileId = potentialMatch.id;
-                            console.log(`✅ Auto-claimed legacy profile by name: ${profileId}`);
-                            toast.success('Perfil antiguo vinculado automáticamente');
-                        }
+                if (potentialMatch) {
+                    profileDoc = potentialMatch;
+                    profileId = potentialMatch.id;
+                    console.log(`✅ Claimed legacy profile by name: ${profileId}`);
+                    toast.success('Perfil antiguo vinculado automáticamente');
+                } else {
+                    // STEP 3: Fallback to UID Document ID
+                    const uidDoc = await getDoc(doc(db, 'artists', $userStore.user.uid));
+                    if (uidDoc.exists()) {
+                        profileDoc = uidDoc;
+                        profileId = $userStore.user.uid;
+                        console.log(`✅ Found profile by UID: ${profileId}`);
                     }
                 }
             }

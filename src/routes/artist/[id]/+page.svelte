@@ -34,7 +34,11 @@
         });
 
         // 2. Listen to User Activity (Heatmap)
-        const userRef = doc(db, 'users', data.artistId);
+        // CRITICAL FIX: We must use the REAL userId (UID) linked to the profile,
+        // not the document ID (which might be 'julyactv-official')
+        const targetUserId = artist.userId || data.artistId;
+        const userRef = doc(db, 'users', targetUserId);
+
         unsubscribeUser = onSnapshot(userRef, (docSnap) => {
             if (docSnap.exists()) {
                 const userData = docSnap.data();

@@ -141,11 +141,14 @@
             };
 
             // Upload new cover if changed
+            // Upload new cover if changed
             if (editCoverFile) {
                 const timestamp = Date.now();
-                const coverRef = ref(storage, `albums/${editingAlbum.artistId}/${timestamp}_cover`);
-                const snapshot = await uploadBytes(coverRef, editCoverFile);
-                updateData.cover = await getDownloadURL(snapshot.ref);
+                // Use R2 instead of Firebase Storage
+                updateData.cover = await uploadToR2(
+                    editCoverFile,
+                    `albums/${editingAlbum.artistId}/${timestamp}_cover`
+                );
                 editingAlbum.cover = updateData.cover;
             }
 
@@ -179,15 +182,14 @@
 
         isEditingAlbum = true;
         try {
-            // Upload track to Firebase Storage
+            // Upload track to R2
             const timestamp = Date.now();
             const safeTitle = newTrackForAlbum.title.replace(/[^a-zA-Z0-9]/g, '_');
-            const trackRef = ref(
-                storage,
+
+            const trackUrl = await uploadToR2(
+                newTrackForAlbum.file,
                 `albums/${editingAlbum.artistId}/tracks/${timestamp}_${safeTitle}`
             );
-            const snapshot = await uploadBytes(trackRef, newTrackForAlbum.file);
-            const trackUrl = await getDownloadURL(snapshot.ref);
 
             // Add to tracks array
             const newTrack = {
@@ -256,14 +258,24 @@
             const safeAlbum = newAlbumData.title.replace(/[^a-zA-Z0-9]/g, '_');
             const folderPath = `artists/${safeArtist}/${safeAlbum}`;
 
-            // 1. Upload Cover to R2
-            const coverUrl = await uploadToR2(newAlbumData.coverFile, folderPath);
+            // Upload Cover to R2
+            let coverUrl = '';
+            if (newAlbumData.coverFile) {
+                coverUrl = await uploadToR2(
+                    newAlbumData.coverFile,
+                    `albums/${newAlbumData.artistId}/${safeAlbum}`
+                );
+            }
 
-            // 2. Upload Tracks loop to R2
+            // 2. Upload Tracks
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const uploadedTracks: any[] = [];
             for (const file of newAlbumData.tracks) {
-                const trackUrl = await uploadToR2(file, folderPath);
+                const trackUrl = await uploadToR2(
+                    file,
+                    `albums/${newAlbumData.artistId}/${safeAlbum}/tracks`
+                );
+
                 uploadedTracks.push({
                     title: file.name.replace(/\.[^/.]+$/, ''), // Remove extension
                     artist: newAlbumData.artist,
@@ -427,20 +439,22 @@
 
         try {
             const timestamp = Date.now();
-            const storagePath = `catalog/${timestamp}_${newTrackFile.name}`;
-            const audioRef = ref(storage, storagePath);
+            const safeFileName = newTrackFile.name.replace(/[^a-zA-Z0-9.]/g, '_');
 
-            // Upload Audio
-            await uploadBytes(audioRef, newTrackFile);
-            const audioUrl = await getDownloadURL(audioRef);
+            const storagePath = `catalog/${timestamp}_${safeFileName}`;
+
+            // Upload Audio to R2
+            const audioUrl = await uploadToR2(newTrackFile, storagePath);
             uploadProgress = 60;
 
             let coverUrl = '';
             if (newTrackCover) {
-                const coverPath = `catalog/covers/${timestamp}_${newTrackCover.name}`;
-                const coverRef = ref(storage, coverPath);
-                await uploadBytes(coverRef, newTrackCover);
-                coverUrl = await getDownloadURL(coverRef);
+                const safeCoverName = newTrackCover.name.replace(/[^a-zA-Z0-9.]/g, '_');
+                // Upload Cover to R2
+                coverUrl = await uploadToR2(
+                    newTrackCover,
+                    `catalog/covers/${timestamp}_${safeCoverName}`
+                );
             }
             uploadProgress = 80;
 
