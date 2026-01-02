@@ -87,22 +87,44 @@
                 profileId = profileDoc.id;
                 console.log(`✅ Found artist profile by userId: ${profileId}`);
             } else {
-                // STEP 2: Fallback to UID-based lookup (current standard)
-                profileDoc = await getDoc(doc(db, 'artists', $userStore.user.uid));
-                if (profileDoc.exists()) {
+                // STEP 2: Fallback to UID-based lookup
+                const uidDoc = await getDoc(doc(db, 'artists', $userStore.user.uid));
+                if (uidDoc.exists()) {
+                    profileDoc = uidDoc;
                     profileId = $userStore.user.uid;
                     console.log(`✅ Found artist profile by UID: ${profileId}`);
+                } else {
+                    // STEP 3: Search by exact Artist Name as a last resort
+                    // This helps claim legacy profiles like 'julyactv-official' that don't have a userId yet
+                    const nameQuery = query(
+                        collection(db, 'artists'),
+                        where('artistName', '==', $userStore.user.displayName || '')
+                    );
+                    const nameSnapshot = await getDocs(nameQuery);
+
+                    if (!nameSnapshot.empty && $userStore.user) {
+                        // Take the first one that doesn't have a userId or matches
+                        const potentialMatch = nameSnapshot.docs.find(
+                            (d) => !d.data().userId || d.data().userId === $userStore.user?.uid
+                        );
+                        if (potentialMatch) {
+                            profileDoc = potentialMatch;
+                            profileId = potentialMatch.id;
+                            console.log(`✅ Auto-claimed legacy profile by name: ${profileId}`);
+                            toast.success('Perfil antiguo vinculado automáticamente');
+                        }
+                    }
                 }
             }
 
             // Store the resolved profile ID for saving later
             currentProfileId = profileId;
 
-            if (profileDoc?.exists()) {
+            if (profileDoc && profileDoc.exists()) {
                 profile = profileDoc.data() as ArtistProfile;
-                // Populate form
-                artistName = profile.artistName;
-                bio = profile.bio;
+                // Ensure profile is reactive
+                artistName = profile.artistName || '';
+                bio = profile.bio || '';
                 avatarUrl = profile.avatarUrl || '';
                 bannerUrl = profile.bannerUrl || '';
                 themeColor = profile.themeColor || '#9333EA';
