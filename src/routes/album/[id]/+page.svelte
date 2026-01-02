@@ -1,5 +1,6 @@
 <script lang="ts">
     import { page } from '$app/stores';
+    import { goto } from '$app/navigation';
     import { audioStore, playAlbum } from '$lib/audio/store';
     import { getAlbumById } from '$lib/data/albums';
     import type { Album } from '$lib/data/albums';
@@ -102,6 +103,14 @@
         const secs = Math.floor(seconds % 60);
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
+
+    function goBack() {
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            goto('/');
+        }
+    }
 </script>
 
 <svelte:head>
@@ -122,8 +131,8 @@
         <!-- Header -->
         <div class="border-b border-white/5">
             <div class="max-w-7xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
-                <a
-                    href="/"
+                <button
+                    on:click={goBack}
                     class="flex items-center gap-3 text-slate-400 hover:text-white transition-colors group"
                 >
                     <svg
@@ -140,7 +149,7 @@
                         />
                     </svg>
                     <span class="font-medium">Volver</span>
-                </a>
+                </button>
 
                 {#if album.isPremium}
                     <div
