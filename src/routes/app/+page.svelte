@@ -19,6 +19,7 @@
     import { toast } from '$lib/stores/notificationStore';
     import { fade, scale } from 'svelte/transition';
     import BackIcon from '$lib/components/icons/BackIcon.svelte';
+    import { trackActivity } from '$lib/utils/activity';
 
     let habits: any[] = [];
     let tasks: any[] = [];
@@ -72,7 +73,10 @@
     }
 
     onMount(() => {
-        if ($userStore.user) loadData();
+        if ($userStore.user) {
+            loadData();
+            trackActivity($userStore.user.uid);
+        }
     });
 
     // --- LOGIC (Habits/Tasks) Same as before ---
@@ -101,6 +105,7 @@
                     createdAt: serverTimestamp(),
                 });
                 toast.success('Hábito creado');
+                trackActivity($userStore.user.uid);
             }
             showHabitModal = false;
             loadData();
@@ -130,6 +135,7 @@
                 lastCompleted: serverTimestamp(),
             });
             toast.success('¡Bien hecho! +1 Racha');
+            trackActivity($userStore.user.uid);
         } catch (e) {
             habit.streak -= 1;
             toast.error('Error');
@@ -186,6 +192,7 @@
         tasks = tasks;
         try {
             await updateDoc(doc(db, 'tasks', task.id), { completed: task.completed });
+            if (task.completed) trackActivity($userStore.user.uid);
         } catch (e) {
             task.completed = !task.completed;
         }
@@ -208,7 +215,23 @@
             <h1 class="text-2xl md:text-3xl font-bold text-white">Panel de Control</h1>
             <p class="text-slate-400 text-sm">Organiza tu vida y tu mente.</p>
         </div>
-        <!-- Profile/Settings placeholder could go here -->
+        {#if $userStore.user}
+            <a
+                href="/profile/{$userStore.user.uid}"
+                class="flex items-center gap-3 bg-[#1e293b] hover:bg-slate-700 px-4 py-2 rounded-full border border-white/5 transition-all group"
+            >
+                <span class="text-xs font-bold text-green-400 group-hover:text-green-300"
+                    >Ver Perfil</span
+                >
+                <div
+                    class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-bold text-xs"
+                >
+                    {$userStore.user.displayName
+                        ? $userStore.user.displayName[0].toUpperCase()
+                        : 'U'}
+                </div>
+            </a>
+        {/if}
     </header>
 
     <main class="max-w-6xl mx-auto space-y-6">
