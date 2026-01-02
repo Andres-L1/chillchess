@@ -8,6 +8,7 @@
     import type { ArtistProfile, SocialLink } from '$lib/types/artist';
     import { SOCIAL_PLATFORMS, DEFAULT_THEME_COLORS } from '$lib/types/artist';
     import ArtistCard from '$lib/components/ArtistCard.svelte';
+    import { toast } from '$lib/stores/notificationStore';
 
     let loading = true;
     let saving = false;
@@ -77,7 +78,7 @@
     async function saveProfile() {
         if (!$userStore.user) return;
         if (!artistName.trim()) {
-            alert('El nombre de artista es obligatorio');
+            toast.warning('El nombre de artista es obligatorio');
             return;
         }
 
@@ -123,13 +124,13 @@
                 updatedAt: Date.now(),
             });
 
-            alert('✅ Perfil guardado correctamente');
+            toast.success('✅ Perfil guardado correctamente');
 
             // Force reload to ensure all stores and UI are synced
             window.location.reload();
         } catch (error: any) {
             console.error('Error saving profile:', error);
-            alert('❌ Error al guardar: ' + (error.message || 'Intenta de nuevo'));
+            toast.error('❌ Error al guardar: ' + (error.message || 'Intenta de nuevo'));
         } finally {
             saving = false;
         }
@@ -137,7 +138,7 @@
 
     function addSocialLink() {
         if (!newLinkUrl.trim()) {
-            alert('La URL es obligatoria');
+            toast.warning('La URL es obligatoria');
             return;
         }
 

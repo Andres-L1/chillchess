@@ -1,20 +1,20 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { db } from "$lib/firebase";
-    import { collection, query, getDocs, orderBy } from "firebase/firestore";
-    import { fade, fly } from "svelte/transition";
+    import { onMount } from 'svelte';
+    import { db } from '$lib/firebase';
+    import { collection, query, getDocs, orderBy } from 'firebase/firestore';
+    import { fade, fly } from 'svelte/transition';
+    import { toast } from '$lib/stores/notificationStore';
 
     let tracks: any[] = [];
     let loading = true;
-    let searchTerm = "";
+    let searchTerm = '';
     let playingTrack: string | null = null;
     let audio: HTMLAudioElement | null = null;
 
     $: filteredTracks = tracks.filter((track) => {
         const term = searchTerm.toLowerCase();
         return (
-            track.title.toLowerCase().includes(term) ||
-            track.artist.toLowerCase().includes(term)
+            track.title.toLowerCase().includes(term) || track.artist.toLowerCase().includes(term)
         );
     });
 
@@ -24,14 +24,11 @@
 
     async function loadCatalog() {
         try {
-            const q = query(
-                collection(db, "creatorCatalog"),
-                orderBy("createdAt", "desc"),
-            );
+            const q = query(collection(db, 'creatorCatalog'), orderBy('createdAt', 'desc'));
             const snap = await getDocs(q);
             tracks = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
         } catch (e) {
-            console.error("Error loading catalogue:", e);
+            console.error('Error loading catalogue:', e);
         } finally {
             loading = false;
         }
@@ -53,11 +50,11 @@
     function copyCredits(track: any) {
         const creditText = `Music provided by ChillChess\nTrack: ${track.title}\nArtist: ${track.artist}\nListen: https://chillchess.com/creators`;
         navigator.clipboard.writeText(creditText);
-        alert("📋 Créditos copiados al portapapeles");
+        toast.success('📋 Créditos copiados al portapapeles');
     }
 
     function downloadTrack(url: string) {
-        window.open(url, "_blank");
+        window.open(url, '_blank');
     }
 </script>
 
@@ -65,9 +62,7 @@
     <title>Creators Catalog | ChillChess</title>
 </svelte:head>
 
-<div
-    class="min-h-screen bg-[#0B1120] text-white pt-24 pb-12 px-4 md:px-8 font-poppins relative"
->
+<div class="min-h-screen bg-[#0B1120] text-white pt-24 pb-12 px-4 md:px-8 font-poppins relative">
     <!-- Ambient Background -->
     <div
         class="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-purple-900/20 to-transparent pointer-events-none"
@@ -91,8 +86,7 @@
             in:fly={{ y: 20, duration: 800 }}
         >
             <div>
-                <span
-                    class="text-purple-400 font-mono tracking-widest text-sm uppercase mb-2 block"
+                <span class="text-purple-400 font-mono tracking-widest text-sm uppercase mb-2 block"
                     >Royalty Free Music</span
                 >
                 <h1
@@ -101,8 +95,8 @@
                     Creators Catalog
                 </h1>
                 <p class="text-slate-400 max-w-xl text-lg">
-                    Música segura para tus streams y vídeos. Sin copyright, sin
-                    problemas. Solo copia los créditos y disfruta.
+                    Música segura para tus streams y vídeos. Sin copyright, sin problemas. Solo
+                    copia los créditos y disfruta.
                 </p>
             </div>
 
@@ -130,13 +124,9 @@
                 ></div>
             </div>
         {:else if tracks.length === 0}
-            <div
-                class="text-center py-20 bg-white/5 rounded-3xl border border-white/10"
-            >
+            <div class="text-center py-20 bg-white/5 rounded-3xl border border-white/10">
                 <p class="text-2xl mb-2">📭</p>
-                <p class="text-slate-400">
-                    El catálogo se está actualizando. Vuelve pronto.
-                </p>
+                <p class="text-slate-400">El catálogo se está actualizando. Vuelve pronto.</p>
             </div>
         {:else}
             <div
@@ -186,23 +176,17 @@
                                     />
                                 </div>
                                 <div class="min-w-0">
-                                    <p
-                                        class="font-bold text-white truncate text-lg"
-                                    >
+                                    <p class="font-bold text-white truncate text-lg">
                                         {track.title}
                                     </p>
-                                    <p
-                                        class="md:hidden text-sm text-slate-400 truncate"
-                                    >
+                                    <p class="md:hidden text-sm text-slate-400 truncate">
                                         {track.artist}
                                     </p>
                                 </div>
                             </div>
 
                             <!-- Artist (Desktop) -->
-                            <div
-                                class="hidden md:block text-slate-300 font-medium truncate"
-                            >
+                            <div class="hidden md:block text-slate-300 font-medium truncate">
                                 {track.artist}
                             </div>
 

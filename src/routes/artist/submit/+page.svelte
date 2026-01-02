@@ -1,12 +1,13 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { userStore } from "$lib/auth/userStore";
-    import { goto } from "$app/navigation";
-    import { db, storage } from "$lib/firebase";
-    import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-    import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-    import { userSubscription } from "$lib/subscription/userSubscription";
-    import PaywallModal from "$lib/components/PaywallModal.svelte";
+    import { onMount } from 'svelte';
+    import { userStore } from '$lib/auth/userStore';
+    import { goto } from '$app/navigation';
+    import { db, storage } from '$lib/firebase';
+    import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+    import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+    import { userSubscription } from '$lib/subscription/userSubscription';
+    import PaywallModal from '$lib/components/PaywallModal.svelte';
+    import { toast } from '$lib/stores/notificationStore';
 
     let uploading = false;
     let uploadProgress = 0;
@@ -14,22 +15,22 @@
     let currentStep = 1;
 
     // Check PRO status
-    $: isPro = $userSubscription.tier === "pro";
+    $: isPro = $userSubscription.tier === 'pro';
 
     // Form Data
-    let releaseTitle = "";
-    let genre = "Lo-fi Hip Hop";
-    let customGenre = "";
+    let releaseTitle = '';
+    let genre = 'Lo-fi Hip Hop';
+    let customGenre = '';
     let coverFile: File | null = null;
     let coverPreview: string | null = null;
 
     // Audio Files (Direct Upload)
     let audioFiles: File[] = [];
-    let tracklist = "";
+    let tracklist = '';
 
     onMount(() => {
         if (!$userStore.user) {
-            goto("/");
+            goto('/');
         }
     });
 
@@ -39,7 +40,7 @@
             const file = input.files[0];
             if (file.size > 5 * 1024 * 1024) {
                 // 5MB limit
-                alert("La portada no puede superar los 5MB");
+                toast.warning('La portada no puede superar los 5MB');
                 return;
             }
             coverFile = file;
@@ -55,20 +56,16 @@
             audioFiles = Array.from(input.files);
             // Auto-generate tracklist from filenames
             tracklist = audioFiles
-                .map(
-                    (file, idx) =>
-                        `${idx + 1}. ${file.name.replace(/\.(mp3|wav|m4a)$/i, "")}`,
-                )
-                .join("\n");
+                .map((file, idx) => `${idx + 1}. ${file.name.replace(/\.(mp3|wav|m4a)$/i, '')}`)
+                .join('\n');
         }
     }
 
     function canProceedToStep(step: number): boolean {
         if (step === 2) {
             const hasValidGenre =
-                genre !== "Otra" ||
-                (genre === "Otra" && customGenre.trim() !== "");
-            return releaseTitle.trim() !== "" && hasValidGenre;
+                genre !== 'Otra' || (genre === 'Otra' && customGenre.trim() !== '');
+            return releaseTitle.trim() !== '' && hasValidGenre;
         }
         if (step === 3) {
             return coverFile !== null;
@@ -78,8 +75,8 @@
 
     async function uploadToR2(file: File, folder: string) {
         // 1. Get Signed URL
-        const res = await fetch("/api/r2/sign-url", {
-            method: "POST",
+        const res = await fetch('/api/r2/sign-url', {
+            method: 'POST',
             body: JSON.stringify({
                 fileName: file.name,
                 fileType: file.type,
@@ -87,34 +84,33 @@
             }),
         });
 
-        if (!res.ok) throw new Error("Failed to get upload URL");
+        if (!res.ok) throw new Error('Failed to get upload URL');
 
         const { uploadUrl, key } = await res.json();
 
         // 2. Upload direct to R2
         const upload = await fetch(uploadUrl, {
-            method: "PUT",
+            method: 'PUT',
             body: file,
             headers: {
-                "Content-Type": file.type,
+                'Content-Type': file.type,
             },
         });
 
-        if (!upload.ok) throw new Error("Upload to R2 failed");
+        if (!upload.ok) throw new Error('Upload to R2 failed');
 
         return { key, name: file.name, size: file.size, type: file.type };
     }
 
     async function submitRelease() {
         if (!releaseTitle.trim() || !coverFile || audioFiles.length === 0) {
-            alert(
-                "Por favor completa todos los campos y sube al menos un archivo de audio",
+            toast.warning(
+                'Por favor completa todos los campos y sube al menos un archivo de audio'
             );
             return;
         }
 
-        if (!confirm("¿Estás seguro de enviar esta música para revisión?"))
-            return;
+        if (!confirm('¿Estás seguro de enviar esta música para revisión?')) return;
 
         uploading = true;
         uploadProgress = 5;
@@ -142,26 +138,26 @@
             // Save Metadata to Firestore
             // We save the 'key' (path in R2) instead of the full URL
             // because we'll generate timed URLs for privacy or simply construct the public URL if public.
-            await addDoc(collection(db, "musicSubmissions"), {
+            await addDoc(collection(db, 'musicSubmissions'), {
                 artistId: userId,
-                artistName: $userStore.user?.displayName || "Unknown Artist",
+                artistName: $userStore.user?.displayName || 'Unknown Artist',
                 artistEmail: $userStore.user?.email,
                 releaseTitle,
-                genre: genre === "Otra" ? customGenre : genre,
+                genre: genre === 'Otra' ? customGenre : genre,
                 r2CoverKey: coverData.key,
                 r2AudioKeys: uploadedAudio, // Array of { key, name, size }
                 tracklist: tracklist.trim(),
-                submissionType: "r2_direct",
-                status: "pending",
+                submissionType: 'r2_direct',
+                status: 'pending',
                 submittedAt: serverTimestamp(),
             });
 
             uploadProgress = 100;
-            alert("✅ ¡Música enviada con éxito! La revisaremos pronto.");
-            goto("/artist");
+            toast.success('✅ ¡Música enviada con éxito! La revisaremos pronto.');
+            goto('/artist');
         } catch (e: any) {
-            console.error("Error upload:", e);
-            alert("Error al enviar: " + e.message);
+            console.error('Error upload:', e);
+            toast.error('Error al enviar: ' + e.message);
         } finally {
             uploading = false;
         }
@@ -182,9 +178,8 @@
             </div>
             <h1 class="text-2xl font-bold mb-2">Acceso Reservado</h1>
             <p class="text-slate-400 mb-6">
-                El envío de música para A&R es una función exclusiva para
-                nuestros miembros <span class="text-primary-400 font-bold"
-                    >PRO</span
+                El envío de música para A&R es una función exclusiva para nuestros miembros <span
+                    class="text-primary-400 font-bold">PRO</span
                 >.
             </p>
             <div class="space-y-3">
@@ -194,17 +189,12 @@
                 >
                     Desbloquear Acceso
                 </button>
-                <a
-                    href="/"
-                    class="block text-sm text-slate-500 hover:text-white"
+                <a href="/" class="block text-sm text-slate-500 hover:text-white"
                     >Volver al Inicio</a
                 >
             </div>
         </div>
-        <PaywallModal
-            show={showPaywall}
-            on:close={() => (showPaywall = false)}
-        />
+        <PaywallModal show={showPaywall} on:close={() => (showPaywall = false)} />
     </div>
 {:else}
     <div
@@ -251,18 +241,14 @@
                                       ? 'bg-primary-600 text-white'
                                       : 'bg-white/10 text-slate-500'}"
                             >
-                                {currentStep > step ? "✓" : step}
+                                {currentStep > step ? '✓' : step}
                             </div>
                             <span
                                 class="text-xs mt-2 {currentStep >= step
                                     ? 'text-white'
                                     : 'text-slate-500'}"
                             >
-                                {step === 1
-                                    ? "Info"
-                                    : step === 2
-                                      ? "Portada"
-                                      : "Tracks"}
+                                {step === 1 ? 'Info' : step === 2 ? 'Portada' : 'Tracks'}
                             </span>
                         </div>
                         {#if step < 3}
@@ -283,22 +269,17 @@
                 <div class="flex items-start gap-3">
                     <span class="text-2xl">📢</span>
                     <div class="flex-1 text-sm space-y-1">
-                        <p class="text-white font-bold">
-                            Información Importante
-                        </p>
+                        <p class="text-white font-bold">Información Importante</p>
                         <ul class="text-slate-300 space-y-1 text-xs">
-                            <li>
-                                • Debes poseer el 100% de los derechos de autor
-                            </li>
+                            <li>• Debes poseer el 100% de los derechos de autor</li>
                             <li>
                                 • <span class="text-yellow-400 font-medium"
                                     >La publicación no está garantizada</span
-                                > - Seleccionamos solo lo que encaje con nuestra
-                                vibe
+                                > - Seleccionamos solo lo que encaje con nuestra vibe
                             </li>
                             <li>
-                                • Si es aprobada, recibirás verificación ✓ y
-                                aparecerás en el feed global
+                                • Si es aprobada, recibirás verificación ✓ y aparecerás en el feed
+                                global
                             </li>
                         </ul>
                     </div>
@@ -316,8 +297,7 @@
 
                     <div class="grid md:grid-cols-2 gap-6">
                         <div class="md:col-span-2">
-                            <span
-                                class="block text-sm font-medium mb-2 text-slate-300"
+                            <span class="block text-sm font-medium mb-2 text-slate-300"
                                 >Título del Álbum o Single</span
                             >
                             <input
@@ -329,8 +309,7 @@
                         </div>
 
                         <div class="md:col-span-2">
-                            <span
-                                class="block text-sm font-medium mb-2 text-slate-300"
+                            <span class="block text-sm font-medium mb-2 text-slate-300"
                                 >Género Principal</span
                             >
                             <select
@@ -353,11 +332,9 @@
                             </select>
                         </div>
 
-                        {#if genre === "Otra"}
+                        {#if genre === 'Otra'}
                             <div class="md:col-span-2 animate-fade-in">
-                                <span
-                                    class="block text-sm font-medium mb-2 text-slate-300"
-                                >
+                                <span class="block text-sm font-medium mb-2 text-slate-300">
                                     Especifica el género
                                 </span>
                                 <input
@@ -371,32 +348,24 @@
                     </div>
 
                     <!-- Validation feedback -->
-                    {#if releaseTitle.trim() === ""}
-                        <div
-                            class="text-sm text-slate-400 flex items-center gap-2"
-                        >
-                            <span class="text-red-400">○</span> Ingresa un título
-                            para continuar
+                    {#if releaseTitle.trim() === ''}
+                        <div class="text-sm text-slate-400 flex items-center gap-2">
+                            <span class="text-red-400">○</span> Ingresa un título para continuar
                         </div>
-                    {:else if genre === "Otra" && customGenre.trim() === ""}
-                        <div
-                            class="text-sm text-slate-400 flex items-center gap-2"
-                        >
-                            <span class="text-red-400">○</span> Especifica el género
-                            personalizado
+                    {:else if genre === 'Otra' && customGenre.trim() === ''}
+                        <div class="text-sm text-slate-400 flex items-center gap-2">
+                            <span class="text-red-400">○</span> Especifica el género personalizado
                         </div>
                     {:else}
-                        <div
-                            class="text-sm text-primary-400 flex items-center gap-2"
-                        >
+                        <div class="text-sm text-primary-400 flex items-center gap-2">
                             <span>✓</span> Listo para continuar
                         </div>
                     {/if}
 
                     <button
                         on:click={() => (currentStep = 2)}
-                        disabled={releaseTitle.trim() === "" ||
-                            (genre === "Otra" && customGenre.trim() === "")}
+                        disabled={releaseTitle.trim() === '' ||
+                            (genre === 'Otra' && customGenre.trim() === '')}
                         class="w-full py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg transition-all shadow-lg shadow-primary-900/20"
                     >
                         Continuar →
@@ -432,9 +401,7 @@
                             {:else}
                                 <div class="text-center p-6">
                                     <span class="text-4xl mb-2 block">🖼️</span>
-                                    <p class="text-sm text-slate-400">
-                                        Haz clic para subir
-                                    </p>
+                                    <p class="text-sm text-slate-400">Haz clic para subir</p>
                                 </div>
                             {/if}
                             <input
@@ -446,24 +413,19 @@
                         </div>
 
                         <div class="flex-1 space-y-3">
-                            <h3 class="font-bold text-white">
-                                Requisitos de la Imagen
-                            </h3>
+                            <h3 class="font-bold text-white">Requisitos de la Imagen</h3>
                             <ul class="text-sm text-slate-400 space-y-2">
                                 <li class="flex items-center gap-2">
-                                    <span class="text-green-400">✓</span> Formato
-                                    cuadrado (1:1)
+                                    <span class="text-green-400">✓</span> Formato cuadrado (1:1)
                                 </li>
                                 <li class="flex items-center gap-2">
-                                    <span class="text-green-400">✓</span> Mínimo
-                                    1000x1000px
+                                    <span class="text-green-400">✓</span> Mínimo 1000x1000px
                                 </li>
                                 <li class="flex items-center gap-2">
                                     <span class="text-green-400">✓</span> JPG o PNG
                                 </li>
                                 <li class="flex items-center gap-2">
-                                    <span class="text-green-400">✓</span> Máximo
-                                    5MB
+                                    <span class="text-green-400">✓</span> Máximo 5MB
                                 </li>
                             </ul>
                             {#if coverPreview}
@@ -531,28 +493,21 @@
                                 <div class="text-center">
                                     <span class="text-4xl mb-2 block">🎧</span>
                                     {#if audioFiles.length > 0}
-                                        <p
-                                            class="text-primary-400 font-bold mb-2"
-                                        >
+                                        <p class="text-primary-400 font-bold mb-2">
                                             ✓ {audioFiles.length} archivo(s) seleccionado(s)
                                         </p>
-                                        <ul
-                                            class="text-xs text-slate-400 space-y-1"
-                                        >
+                                        <ul class="text-xs text-slate-400 space-y-1">
                                             {#each audioFiles as file}
                                                 <li>
-                                                    {file.name} ({(
-                                                        file.size /
-                                                        1024 /
-                                                        1024
-                                                    ).toFixed(2)} MB)
+                                                    {file.name} ({(file.size / 1024 / 1024).toFixed(
+                                                        2
+                                                    )} MB)
                                                 </li>
                                             {/each}
                                         </ul>
                                     {:else}
                                         <p class="text-sm text-slate-400">
-                                            Arrastra archivos aquí o haz clic
-                                            para seleccionar
+                                            Arrastra archivos aquí o haz clic para seleccionar
                                         </p>
                                     {/if}
                                 </div>

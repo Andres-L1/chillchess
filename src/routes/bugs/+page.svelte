@@ -1,5 +1,6 @@
 <script lang="ts">
     import { userStore } from '$lib/auth/userStore';
+    import { toast } from '$lib/stores/notificationStore';
     import { db } from '$lib/firebase';
     import {
         collection,
@@ -132,11 +133,11 @@
         const description = newDescription.trim();
 
         if (title.length < 5) {
-            alert('El título es muy corto (mínimo 5 caracteres).');
+            toast.warning('El título es muy corto (mínimo 5 caracteres).');
             return;
         }
         if (description.length < 10) {
-            alert('Por favor detalla más el problema (mínimo 10 caracteres).');
+            toast.warning('Por favor detalla más el problema (mínimo 10 caracteres).');
             return;
         }
 
@@ -161,16 +162,15 @@
             newSteps = '';
             newSeverity = 'medium';
             showNewReport = false;
-
-            alert('✅ Bug reportado. ¡Gracias por tu ayuda!');
+            toast.success('✅ Bug reportado. ¡Gracias por tu ayuda!');
         } catch (error: any) {
-            console.error('Error reporting bug:', error);
+            console.error('Error submitting bug:', error);
             if (error.code === 'permission-denied') {
-                alert(
-                    'Error de permisos. Asegúrate de estar conectado o que los datos sean válidos.'
+                toast.error(
+                    'No tienes permisos. Asegúrate de iniciar sesión y verificar tu cuenta.'
                 );
             } else {
-                alert('Error al enviar reporte: ' + error.message);
+                toast.error('Error al enviar reporte: ' + error.message);
             }
         } finally {
             isSubmitting = false;
