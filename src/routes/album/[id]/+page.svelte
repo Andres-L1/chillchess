@@ -1,76 +1,127 @@
 <script lang="ts">
-    import { page } from "$app/stores";
-    import { audioStore, playAlbum } from "$lib/audio/store";
-    import { getAlbumById } from "$lib/data/albums";
-    import { userSubscription } from "$lib/subscription/userSubscription";
-    import PaywallModal from "$lib/components/PaywallModal.svelte";
-    import VerifiedBadge from "$lib/components/VerifiedBadge.svelte";
+    import { page } from '$app/stores';
+    import { audioStore, playAlbum } from '$lib/audio/store';
+    import { getAlbumById } from '$lib/data/albums';
+    import type { Album } from '$lib/data/albums';
+    import { userSubscription } from '$lib/subscription/userSubscription';
+    import PaywallModal from '$lib/components/PaywallModal.svelte';
+    import VerifiedBadge from '$lib/components/VerifiedBadge.svelte';
+    import { db } from '$lib/firebase';
+    import { doc, getDoc } from 'firebase/firestore';
 
     $: albumId = $page.params.id;
-    $: album = getAlbumById(albumId);
+
+    let album: Album | undefined | null = null;
+    let loading = true;
+
+    // Reactively load album when ID changes
+    $: if (albumId) {
+        loadAlbum(albumId);
+    }
+
+    async function loadAlbum(id: string) {
+        loading = true;
+        album = null; // Reset to prevent showing wrong data during load
+
+        // 1. Check Static Data
+        let found = getAlbumById(id);
+
+        // 2. Check Store (Dynamic Data)
+        if (!found) {
+            found = $audioStore.availableAlbums.find((a) => a.id === id);
+        }
+
+        // 3. Fetch from Firestore (Fallback)
+        if (!found) {
+            try {
+                const docRef = doc(db, 'albums', id);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    found = { id: docSnap.id, ...docSnap.data() } as Album;
+                }
+            } catch (error) {
+                console.error('Error loading album:', error);
+            }
+        }
+
+        album = found;
+        loading = false;
+    }
+
     $: isPlaying = $audioStore.isPlaying;
     $: isCurrentAlbum = $audioStore.currentAlbumId === albumId;
 
     let showPaywall = false;
 
     function handlePlayAlbum() {
-        if (album?.isPremium && $userSubscription.tier === "free") {
+        const currentAlbum = album;
+        if (!currentAlbum) return;
+        if (currentAlbum.isPremium && $userSubscription.tier === 'free') {
             showPaywall = true;
             return;
         }
-        if (album) {
-            playAlbum(album.id);
+        // Ensure store has this album data if it was just fetched
+        // Ensure store has this album data if it was just fetched
+        if (!$audioStore.availableAlbums.find((a) => a.id === currentAlbum.id)) {
+            audioStore.update((s) => ({
+                ...s,
+                availableAlbums: [...s.availableAlbums, currentAlbum],
+            }));
         }
+        playAlbum(currentAlbum.id);
     }
 
     function handlePlayTrack(index: number) {
-        if (album?.isPremium && $userSubscription.tier === "free") {
+        const currentAlbum = album;
+        if (!currentAlbum) return;
+
+        if (currentAlbum.isPremium && $userSubscription.tier === 'free') {
             showPaywall = true;
             return;
         }
-        if (album) {
-            playAlbum(album.id);
-            // Wait for next tick then set track index
-            audioStore.update((s) => ({ ...s, currentTrackIndex: index }));
+
+        // Ensure store has this album data if it was just fetched
+        // Ensure store has this album data if it was just fetched
+        if (!$audioStore.availableAlbums.find((a) => a.id === currentAlbum.id)) {
+            audioStore.update((s) => ({
+                ...s,
+                availableAlbums: [...s.availableAlbums, currentAlbum],
+            }));
         }
+
+        playAlbum(currentAlbum.id);
+        // Wait for next tick then set track index
+        setTimeout(() => {
+            audioStore.update((s) => ({ ...s, currentTrackIndex: index }));
+        }, 50);
     }
 
     function formatDuration(seconds?: number) {
-        if (!seconds) return "--:--";
+        if (!seconds) return '--:--';
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs.toString().padStart(2, "0")}`;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
 </script>
 
 <svelte:head>
-    <title>{album?.title || "Álbum"} | ChillChess</title>
+    <title>{album?.title || 'Álbum'} | ChillChess</title>
 </svelte:head>
 
-<PaywallModal
-    show={showPaywall}
-    blockedFeature="vibe"
-    on:close={() => (showPaywall = false)}
-/>
+<PaywallModal show={showPaywall} blockedFeature="vibe" on:close={() => (showPaywall = false)} />
 
 {#if !album}
     <div class="min-h-screen bg-[#0B1120] flex items-center justify-center">
         <div class="text-center">
-            <h1 class="text-2xl font-bold text-white mb-4">
-                Álbum no encontrado
-            </h1>
-            <a href="/" class="text-blue-400 hover:text-blue-300"
-                >← Volver al inicio</a
-            >
+            <h1 class="text-2xl font-bold text-white mb-4">Álbum no encontrado</h1>
+            <a href="/" class="text-blue-400 hover:text-blue-300">← Volver al inicio</a>
         </div>
     </div>
 {:else}
     <div class="min-h-screen bg-[#0B1120] text-white">
         <!-- Header -->
         <div class="border-b border-white/5">
-            <div
-                class="max-w-7xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between"
-            >
+            <div class="max-w-7xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
                 <a
                     href="/"
                     class="flex items-center gap-3 text-slate-400 hover:text-white transition-colors group"
@@ -125,12 +176,12 @@
                                 class="text-lg text-slate-400 flex items-center justify-center gap-2"
                             >
                                 {album.artist}
-                                {#if album.artist === "JULYACTV"}
+                                {#if album.artist === 'JULYACTV'}
                                     <VerifiedBadge size="sm" />
                                 {/if}
                             </p>
                             <p class="text-sm text-slate-500 mt-2">
-                                {album.tracks.length} canciones
+                                {album.tracks?.length || 0} canciones
                             </p>
                         </div>
 
@@ -139,20 +190,12 @@
                             class="w-full py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-primary-500/30"
                         >
                             {#if isPlaying && $audioStore.currentAlbumId === album.id}
-                                <svg
-                                    class="w-6 h-6"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                                 </svg>
                                 <span>Pausar</span>
                             {:else}
-                                <svg
-                                    class="w-6 h-6"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M8 5v14l11-7z" />
                                 </svg>
                                 <span>Reproducir Todo</span>
@@ -171,7 +214,7 @@
                     </div>
 
                     <div class="space-y-2">
-                        {#each album.tracks as track, index}
+                        {#each album.tracks || [] as track, index}
                             {@const isCurrentTrack =
                                 $audioStore.currentAlbumId === album.id &&
                                 $audioStore.currentTrackIndex === index}
@@ -191,9 +234,7 @@
                                             fill="currentColor"
                                             viewBox="0 0 24 24"
                                         >
-                                            <path
-                                                d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"
-                                            />
+                                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                                         </svg>
                                     {:else}
                                         <svg
@@ -207,9 +248,7 @@
                                 </div>
 
                                 <!-- Track Number -->
-                                <div
-                                    class="text-slate-500 font-bold w-8 text-left"
-                                >
+                                <div class="text-slate-500 font-bold w-8 text-left">
                                     {index + 1}
                                 </div>
 
@@ -220,9 +259,7 @@
                                     >
                                         {track.title}
                                     </div>
-                                    <div
-                                        class="text-sm text-slate-400 truncate"
-                                    >
+                                    <div class="text-sm text-slate-400 truncate">
                                         {track.artist}
                                     </div>
                                 </div>
