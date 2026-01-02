@@ -471,6 +471,7 @@
                     >
                 </div>
                 <div class="p-6 space-y-6">
+                    <!-- svelte-ignore a11y-autofocus -->
                     <input
                         bind:value={formDataHabit.title}
                         placeholder="Ej: Leer 10 min..."
@@ -537,6 +538,7 @@
                     >
                 </div>
                 <div class="p-6 space-y-6">
+                    <!-- svelte-ignore a11y-autofocus -->
                     <input
                         bind:value={formDataTask.title}
                         placeholder="Ej: Comprar leche..."
