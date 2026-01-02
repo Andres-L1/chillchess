@@ -219,7 +219,19 @@ export function playPlaylist(tracks: Track[]) {
 export function nextTrack() {
     audioStore.update(s => {
         if (s.playlist.length === 0) return s;
-        const nextIndex = (s.currentTrackIndex + 1) % s.playlist.length;
+
+        let nextIndex: number;
+
+        if (s.shuffle && s.playlist.length > 1) {
+            // Random shuffle: pick a random song that isn't the current one
+            do {
+                nextIndex = Math.floor(Math.random() * s.playlist.length);
+            } while (nextIndex === s.currentTrackIndex);
+        } else {
+            // Normal behavior: next track or loop to start
+            nextIndex = (s.currentTrackIndex + 1) % s.playlist.length;
+        }
+
         return { ...s, currentTrackIndex: nextIndex };
     });
 }
