@@ -434,6 +434,8 @@
                 tabindex="0"
                 aria-label="Cerrar modal"
             >
+                <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
                 <div
                     class="bg-[#131b2e] border border-white/10 rounded-2xl p-6 w-full max-w-2xl shadow-2xl relative overflow-y-auto max-h-[90vh] cursor-default"
                     on:click|stopPropagation
