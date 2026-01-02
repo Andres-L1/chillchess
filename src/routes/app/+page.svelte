@@ -27,6 +27,9 @@
     import WhiteNoiseControls from '$lib/components/WhiteNoiseControls.svelte';
     import { vibeStore } from '$lib/stores/vibeStore';
     import { timerStore } from '$lib/stores/timerStore';
+    import { db } from '$lib/firebase';
+    import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+    import { toast } from '$lib/stores/notificationStore';
 
     let showMusicExplorer = false;
     let showVibeStudio = false;
@@ -125,11 +128,49 @@
         timerStore.reset();
     }
 
+    async function saveFocusSession(completed: boolean) {
+        if (!$userStore.user) return;
+
+        // Calculate accrued time (if completed naturally, it's full duration; if manual finish, it's elapsed)
+        const elapsed = focusDuration - timeLeft;
+
+        // Minimum 10 seconds to log (to avoid accidental clicks)
+        if (elapsed < 10) return;
+
+        try {
+            await addDoc(collection(db, 'focus_sessions'), {
+                userId: $userStore.user.uid,
+                task: currentTask.trim() || 'Sesión de Enfoque',
+                duration: elapsed,
+                plannedDuration: focusDuration,
+                type: 'timer',
+                completed: completed,
+                createdAt: serverTimestamp(),
+                // Store local timestamp for easier frontend sort without server roundtrip
+                timestamp: Date.now(),
+            });
+
+            if (completed) {
+                toast.success('¡Sesión registrada correctamente! 🔥');
+            } else {
+                toast.success('Sesión guardada.');
+            }
+        } catch (e) {
+            console.error('Error saving session', e);
+            toast.error('Error al guardar la sesión');
+        }
+    }
+
     function completeTimer() {
+        // Determine completion state BEFORE stopping/resetting if needed
+        const isNaturalCompletion = timeLeft === 0;
+
         stopTimer();
         playMoveSound(true);
         setTimeout(() => playMoveSound(true), 500);
         setTimeout(() => playMoveSound(true), 1000);
+
+        saveFocusSession(isNaturalCompletion || true); // If called manually via 'Finish' button, treat as 'completed' for purpose of saving
     }
 
     function adjustTime(minutes: number) {
