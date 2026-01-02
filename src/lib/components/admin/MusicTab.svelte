@@ -34,6 +34,13 @@
         artist: '',
         artistId: '',
         category: 'musica',
+        cover: '', // Current cover URL
+        tracks: [], // Current tracks
+    };
+    let editCoverFile: File | null = null;
+    let newTrackForAlbum = {
+        title: '',
+        file: null as File | null,
     };
 
     let newAlbumData = {
@@ -109,11 +116,11 @@
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             artistId: (album as any).artistId || '',
             category: album.category || 'musica',
+            cover: album.cover || '',
+            tracks: album.tracks || [],
         };
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if ((album as any).artistId) {
-            // selectedEditArtistId = (album as any).artistId; // Optional: auto-select dropdown
-        }
+        editCoverFile = null;
+        newTrackForAlbum = { title: '', file: null };
         showEditAlbumForm = true;
     }
 
@@ -125,13 +132,25 @@
 
         isEditingAlbum = true;
         try {
-            const albumRef = doc(db, 'albums', editingAlbum.id);
-            await updateDoc(albumRef, {
+            const updateData: any = {
                 title: editingAlbum.title,
                 artist: editingAlbum.artist,
                 artistId: editingAlbum.artistId,
                 category: editingAlbum.category,
-            });
+                updatedAt: Date.now(),
+            };
+
+            // Upload new cover if changed
+            if (editCoverFile) {
+                const timestamp = Date.now();
+                const coverRef = ref(storage, `albums/${editingAlbum.artistId}/${timestamp}_cover`);
+                const snapshot = await uploadBytes(coverRef, editCoverFile);
+                updateData.cover = await getDownloadURL(snapshot.ref);
+                editingAlbum.cover = updateData.cover;
+            }
+
+            const albumRef = doc(db, 'albums', editingAlbum.id);
+            await updateDoc(albumRef, updateData);
 
             // Audio store updates automatically via snapshot or we can manually update local state for instant feel
             audioStore.update((s) => ({
@@ -149,6 +168,74 @@
             alert('Error al actualizar: ' + e.message);
         } finally {
             isEditingAlbum = false;
+        }
+    }
+
+    async function addTrackToAlbum() {
+        if (!newTrackForAlbum.title.trim() || !newTrackForAlbum.file) {
+            alert('Título y archivo de audio son obligatorios');
+            return;
+        }
+
+        isEditingAlbum = true;
+        try {
+            // Upload track to Firebase Storage
+            const timestamp = Date.now();
+            const safeTitle = newTrackForAlbum.title.replace(/[^a-zA-Z0-9]/g, '_');
+            const trackRef = ref(
+                storage,
+                `albums/${editingAlbum.artistId}/tracks/${timestamp}_${safeTitle}`
+            );
+            const snapshot = await uploadBytes(trackRef, newTrackForAlbum.file);
+            const trackUrl = await getDownloadURL(snapshot.ref);
+
+            // Add to tracks array
+            const newTrack = {
+                id: `track-${Date.now()}`,
+                title: newTrackForAlbum.title.trim(),
+                artist: editingAlbum.artist,
+                file: trackUrl,
+                duration: 0,
+            };
+
+            const updatedTracks = [...(editingAlbum.tracks || []), newTrack];
+            editingAlbum.tracks = updatedTracks;
+
+            // Update Firestore
+            const albumRef = doc(db, 'albums', editingAlbum.id);
+            await updateDoc(albumRef, {
+                tracks: updatedTracks,
+                updatedAt: Date.now(),
+            });
+
+            // Reset form
+            newTrackForAlbum = { title: '', file: null };
+            alert('✅ Track añadido al álbum');
+        } catch (e: any) {
+            console.error(e);
+            alert('Error al añadir track: ' + e.message);
+        } finally {
+            isEditingAlbum = false;
+        }
+    }
+
+    async function removeTrackFromAlbum(trackId: string) {
+        if (!confirm('¿Eliminar esta canción del álbum?')) return;
+
+        try {
+            const updatedTracks = editingAlbum.tracks.filter((t: any) => t.id !== trackId);
+            editingAlbum.tracks = updatedTracks;
+
+            const albumRef = doc(db, 'albums', editingAlbum.id);
+            await updateDoc(albumRef, {
+                tracks: updatedTracks,
+                updatedAt: Date.now(),
+            });
+
+            alert('✅ Track eliminado');
+        } catch (e: any) {
+            console.error(e);
+            alert('Error: ' + e.message);
         }
     }
 
@@ -669,7 +756,7 @@
                 tabindex="0"
             >
                 <div
-                    class="bg-midnight-900 border border-white/10 rounded-3xl p-6 md:p-8 w-full max-w-xl shadow-2xl relative"
+                    class="bg-midnight-900 border border-white/10 rounded-3xl p-6 md:p-8 w-full max-w-2xl shadow-2xl relative overflow-y-auto max-h-[90vh]"
                 >
                     <button
                         on:click={() => (showEditAlbumForm = false)}
@@ -682,89 +769,165 @@
                         <span class="text-3xl">✏️</span> Editar Álbum
                     </h3>
 
-                    <div class="space-y-5">
-                        <label class="block">
-                            <span class="block text-sm font-semibold text-slate-400 mb-2"
-                                >Título</span
-                            >
-                            <input
-                                type="text"
-                                bind:value={editingAlbum.title}
-                                class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary-500 outline-none"
-                            />
-                        </label>
-
-                        <label class="block">
-                            <span class="block text-sm font-semibold text-slate-400 mb-2"
-                                >Artista (Seleccionar para auto-completar)</span
-                            >
-                            <div class="relative mb-2">
-                                <select
-                                    bind:value={selectedEditArtistId}
-                                    class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary-500 appearance-none"
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        <div class="space-y-5">
+                            <label class="block">
+                                <span class="block text-sm font-semibold text-slate-400 mb-2"
+                                    >Título</span
                                 >
-                                    <option value="" disabled selected>-- Cambiar Artista --</option
-                                    >
-                                    {#each verifiedArtists as artist}
-                                        <option value={artist.uid}>{artist.displayName}</option>
-                                    {/each}
+                                <input
+                                    type="text"
+                                    bind:value={editingAlbum.title}
+                                    class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary-500 outline-none"
+                                />
+                            </label>
+
+                            <label class="block">
+                                <span class="block text-sm font-semibold text-slate-400 mb-2"
+                                    >Categoría</span
+                                >
+                                <select
+                                    bind:value={editingAlbum.category}
+                                    class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary-500 outline-none"
+                                >
+                                    <option value="musica">Música</option>
+                                    <option value="juegos">Juegos / Focus</option>
+                                    <option value="ambiente">Ambiente</option>
                                 </select>
-                            </div>
+                            </label>
 
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <span class="text-xs text-slate-500 block mb-1"
-                                        >Nombre (Display)</span
-                                    >
+                            <!-- Add New Track to This Album -->
+                            <div class="bg-black/30 border border-white/5 rounded-2xl p-4 mt-6">
+                                <h4
+                                    class="text-sm font-bold text-primary-400 mb-3 flex items-center gap-2"
+                                >
+                                    <span>🎵</span> Añadir Canción
+                                </h4>
+                                <div class="space-y-3">
                                     <input
                                         type="text"
-                                        bind:value={editingAlbum.artist}
-                                        class="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-2 text-sm text-white"
+                                        bind:value={newTrackForAlbum.title}
+                                        placeholder="Título de la canción"
+                                        class="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-primary-500 outline-none"
                                     />
-                                </div>
-                                <div>
-                                    <span class="text-xs text-slate-500 block mb-1"
-                                        >ID (Enlace Perfil)</span
-                                    >
                                     <input
-                                        type="text"
-                                        bind:value={editingAlbum.artistId}
-                                        class="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-2 text-sm text-slate-400"
+                                        type="file"
+                                        accept="audio/*"
+                                        on:change={(e) =>
+                                            (newTrackForAlbum.file =
+                                                e.currentTarget.files?.[0] || null)}
+                                        class="w-full text-xs text-slate-400 file:mr-3 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-[10px] file:font-semibold file:bg-primary-500/20 file:text-primary-400"
                                     />
+                                    <button
+                                        on:click={addTrackToAlbum}
+                                        disabled={isEditingAlbum ||
+                                            !newTrackForAlbum.title ||
+                                            !newTrackForAlbum.file}
+                                        class="w-full py-2 bg-primary-500/10 hover:bg-primary-500/20 border border-primary-500/30 text-primary-400 text-xs font-bold rounded-lg transition-all"
+                                    >
+                                        Subir y Añadir Track
+                                    </button>
                                 </div>
                             </div>
-                        </label>
+                        </div>
 
-                        <label class="block">
-                            <span class="block text-sm font-semibold text-slate-400 mb-2"
-                                >Categoría</span
-                            >
-                            <select
-                                bind:value={editingAlbum.category}
-                                class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary-500 outline-none"
-                            >
-                                <option value="musica">Música</option>
-                                <option value="juegos">Juegos / Focus</option>
-                                <option value="ambiente">Ambiente</option>
-                            </select>
-                        </label>
+                        <div class="space-y-5">
+                            <label class="block group cursor-pointer">
+                                <span class="block text-sm font-semibold text-slate-400 mb-2"
+                                    >Portada del Álbum</span
+                                >
+                                <div
+                                    class="relative w-full aspect-square bg-black/40 border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center p-4 overflow-hidden"
+                                >
+                                    {#if editCoverFile}
+                                        <img
+                                            src={URL.createObjectURL(editCoverFile)}
+                                            class="absolute inset-0 w-full h-full object-cover"
+                                            alt="New Preview"
+                                        />
+                                    {:else if editingAlbum.cover}
+                                        <img
+                                            src={editingAlbum.cover}
+                                            class="absolute inset-0 w-full h-full object-cover"
+                                            alt="Current Cover"
+                                        />
+                                    {/if}
+                                    <div
+                                        class="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center"
+                                    >
+                                        <span class="text-white text-xs font-bold"
+                                            >Cambiar Portada</span
+                                        >
+                                    </div>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        class="absolute inset-0 opacity-0 cursor-pointer"
+                                        on:change={(e) =>
+                                            (editCoverFile = e.currentTarget.files?.[0] || null)}
+                                    />
+                                </div>
+                            </label>
+
+                            <div class="bg-black/30 border border-white/5 rounded-2xl p-4">
+                                <h4 class="text-sm font-bold text-slate-400 mb-3">
+                                    Pistas Actuales ({editingAlbum.tracks?.length || 0})
+                                </h4>
+                                <div class="max-h-40 overflow-y-auto custom-scrollbar space-y-2">
+                                    {#if editingAlbum.tracks && editingAlbum.tracks.length > 0}
+                                        {#each editingAlbum.tracks as track}
+                                            <div
+                                                class="flex items-center justify-between gap-2 p-2 bg-white/5 rounded-lg group/track"
+                                            >
+                                                <div class="flex items-center gap-2 min-w-0">
+                                                    <span class="text-primary-500 text-[10px]"
+                                                        >🎵</span
+                                                    >
+                                                    <span
+                                                        class="text-xs text-slate-300 truncate"
+                                                        title={track.title}>{track.title}</span
+                                                    >
+                                                </div>
+                                                <div class="flex items-center gap-1 shrink-0">
+                                                    <button
+                                                        on:click={() => togglePlay(track.file)}
+                                                        class="p-1 hover:text-primary-400 transition-colors"
+                                                    >
+                                                        {playingTrack === track.file ? '⏸' : '▶'}
+                                                    </button>
+                                                    <button
+                                                        on:click={() =>
+                                                            removeTrackFromAlbum(track.id)}
+                                                        class="p-1 hover:text-red-400 transition-colors"
+                                                    >
+                                                        🗑️
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        {/each}
+                                    {:else}
+                                        <p class="text-xs text-slate-600 italic text-center py-4">
+                                            Sin pistas
+                                        </p>
+                                    {/if}
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div
-                        class="flex justify-end items-center gap-4 pt-6 mt-6 border-t border-white/5"
-                    >
+                    <div class="flex justify-end items-center gap-4 pt-6 border-t border-white/5">
                         <button
                             on:click={() => (showEditAlbumForm = false)}
-                            class="px-6 py-2 text-slate-400 hover:text-white font-medium"
+                            class="px-6 py-2 text-slate-400 hover:text-white font-medium transition-colors"
                         >
                             Cancelar
                         </button>
                         <button
                             on:click={saveAlbumChanges}
                             disabled={isEditingAlbum}
-                            class="px-8 py-3 bg-primary-600 hover:bg-primary-500 rounded-xl font-bold text-white shadow-lg disabled:opacity-50"
+                            class="px-8 py-3 bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-500 hover:to-purple-500 rounded-xl font-bold text-white shadow-lg shadow-primary-900/20 transform hover:-translate-y-0.5 transition-all"
                         >
-                            {isEditingAlbum ? 'Guardando...' : 'Guardar Cambios'}
+                            {isEditingAlbum ? 'Guardando cambios...' : '💾 Guardar Todo'}
                         </button>
                     </div>
                 </div>
