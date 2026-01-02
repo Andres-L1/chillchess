@@ -92,7 +92,7 @@
         title = album.title;
         category = album.category || 'Lo-fi';
         coverPreview = album.cover || null;
-        tracks = album.tracks ? [...album.tracks] : [];
+        tracks = album.tracks ? album.tracks.map((t) => ({ title: t.title, url: t.file })) : [];
         showModal = true;
     }
 
@@ -321,12 +321,17 @@
 <!-- Modal -->
 {#if showModal}
     <div
+        role="dialog"
+        aria-modal="true"
         class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
         on:click={() => (showModal = false)}
+        on:keydown={(e) => e.key === 'Escape' && (showModal = false)}
     >
         <div
+            role="document"
             class="bg-[#1a1a1a] rounded-2xl border border-white/20 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
             on:click|stopPropagation
+            on:keydown|stopPropagation
         >
             <div
                 class="p-6 border-b border-white/10 flex items-center justify-between sticky top-0 bg-[#1a1a1a] z-10"
