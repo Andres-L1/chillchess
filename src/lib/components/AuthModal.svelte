@@ -5,6 +5,7 @@
         signInWithEmailAndPassword,
         createUserWithEmailAndPassword,
         updateProfile,
+        sendPasswordResetEmail,
     } from 'firebase/auth';
 
     export let show = false;
@@ -12,13 +13,45 @@
     const dispatch = createEventDispatcher();
 
     let isRegistering = false;
+    let isResettingPassword = false; // New state
+    let resetEmailSent = false; // New state
+
     let email = '';
     let password = '';
     let name = '';
     let error = '';
     let loading = false;
 
+    async function handleResetPassword() {
+        if (!email) {
+            error = 'Ingresa tu correo para enviarte el enlace.';
+            return;
+        }
+        loading = true;
+        error = '';
+        try {
+            await sendPasswordResetEmail(auth, email);
+            resetEmailSent = true;
+        } catch (e: any) {
+            console.error(e);
+            if (e.code === 'auth/user-not-found') {
+                error = 'No encontramos una cuenta con este correo.';
+            } else if (e.code === 'auth/invalid-email') {
+                error = 'El correo no es válido.';
+            } else {
+                error = 'Error al enviar correo: ' + e.message;
+            }
+        } finally {
+            loading = false;
+        }
+    }
+
     async function handleSubmit() {
+        if (isResettingPassword) {
+            await handleResetPassword();
+            return;
+        }
+
         if (!email || !password) {
             error = 'Por favor completa todos los campos';
             return;
@@ -80,11 +113,19 @@
 
     function toggleMode() {
         isRegistering = !isRegistering;
+        isResettingPassword = false;
+        resetEmailSent = false;
         error = '';
     }
 
     function close() {
         dispatch('close');
+        // Reset states just in case
+        setTimeout(() => {
+            isResettingPassword = false;
+            resetEmailSent = false;
+            error = '';
+        }, 300);
     }
 </script>
 
@@ -117,41 +158,53 @@
             <div
                 class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center mb-6 text-3xl shadow-lg"
             >
-                ♟️
+                {isResettingPassword ? '🔑' : '♟️'}
             </div>
 
             <h2 class="text-2xl font-bold font-poppins mb-2 text-center">
-                {isRegistering ? 'Crear Cuenta' : 'Bienvenido'}
+                {#if isResettingPassword}
+                    Recuperar Contraseña
+                {:else}
+                    {isRegistering ? 'Crear Cuenta' : 'Bienvenido'}
+                {/if}
             </h2>
             <p class="text-white/60 text-sm mb-6 leading-relaxed text-center">
-                {isRegistering
-                    ? 'Únete para guardar tu progreso y desbloquear vibes.'
-                    : 'Accede a tu espacio de concentración.'}
+                {#if isResettingPassword}
+                    {resetEmailSent
+                        ? '¡Correo enviado! Revisa tu bandeja de entrada.'
+                        : 'Ingresa tu correo y te enviaremos un enlace para restablecerla.'}
+                {:else}
+                    {isRegistering
+                        ? 'Únete para guardar tu progreso y desbloquear vibes.'
+                        : 'Accede a tu espacio de concentración.'}
+                {/if}
             </p>
 
-            <!-- Toggle -->
-            <div class="flex gap-4 mb-6 bg-white/5 p-1 rounded-xl w-full">
-                <button
-                    class="flex-1 py-2 text-sm font-medium rounded-lg transition-all {!isRegistering
-                        ? 'bg-white/10 text-white shadow-sm'
-                        : 'text-white/40 hover:text-white'}"
-                    on:click={() => {
-                        isRegistering = false;
-                        error = '';
-                    }}
-                    type="button">Entrar</button
-                >
-                <button
-                    class="flex-1 py-2 text-sm font-medium rounded-lg transition-all {isRegistering
-                        ? 'bg-white/10 text-white shadow-sm'
-                        : 'text-white/40 hover:text-white'}"
-                    on:click={() => {
-                        isRegistering = true;
-                        error = '';
-                    }}
-                    type="button">Registrarse</button
-                >
-            </div>
+            <!-- Toggle (Only show if not resetting) -->
+            {#if !isResettingPassword}
+                <div class="flex gap-4 mb-6 bg-white/5 p-1 rounded-xl w-full">
+                    <button
+                        class="flex-1 py-2 text-sm font-medium rounded-lg transition-all {!isRegistering
+                            ? 'bg-white/10 text-white shadow-sm'
+                            : 'text-white/40 hover:text-white'}"
+                        on:click={() => {
+                            isRegistering = false;
+                            error = '';
+                        }}
+                        type="button">Entrar</button
+                    >
+                    <button
+                        class="flex-1 py-2 text-sm font-medium rounded-lg transition-all {isRegistering
+                            ? 'bg-white/10 text-white shadow-sm'
+                            : 'text-white/40 hover:text-white'}"
+                        on:click={() => {
+                            isRegistering = true;
+                            error = '';
+                        }}
+                        type="button">Registrarse</button
+                    >
+                </div>
+            {/if}
 
             {#if error}
                 <div
@@ -161,57 +214,102 @@
                 </div>
             {/if}
 
-            <form on:submit|preventDefault={handleSubmit} class="w-full flex flex-col gap-4">
-                {#if isRegistering}
-                    <div>
+            {#if resetEmailSent && isResettingPassword}
+                <button
+                    on:click={() => {
+                        isResettingPassword = false;
+                        resetEmailSent = false;
+                    }}
+                    class="w-full py-3.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-all"
+                >
+                    Volver al Inicio de Sesión
+                </button>
+            {:else}
+                <form on:submit|preventDefault={handleSubmit} class="w-full flex flex-col gap-4">
+                    {#if !isResettingPassword && isRegistering}
+                        <div>
+                            <input
+                                type="text"
+                                bind:value={name}
+                                placeholder="Nombre de usuario"
+                                class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-blue-500 transition-colors"
+                                required
+                                disabled={loading}
+                            />
+                        </div>
+                    {/if}
+
+                    <div class="relative">
                         <input
-                            type="text"
-                            bind:value={name}
-                            placeholder="Nombre de usuario"
+                            type="email"
+                            bind:value={email}
+                            placeholder="Correo electrónico"
                             class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-blue-500 transition-colors"
                             required
                             disabled={loading}
                         />
                     </div>
-                {/if}
 
-                <div>
-                    <input
-                        type="email"
-                        bind:value={email}
-                        placeholder="Correo electrónico"
-                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-blue-500 transition-colors"
-                        required
-                        disabled={loading}
-                    />
-                </div>
-
-                <div>
-                    <input
-                        type="password"
-                        bind:value={password}
-                        placeholder="Contraseña"
-                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-blue-500 transition-colors"
-                        required
-                        minlength="6"
-                        disabled={loading}
-                    />
-                </div>
-
-                <button
-                    type="submit"
-                    disabled={loading}
-                    class="w-full py-3.5 bg-white text-black font-bold rounded-xl hover:bg-slate-100 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-white/20 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
-                >
-                    {#if loading}
-                        <span
-                            class="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"
-                        ></span>
-                    {:else}
-                        {isRegistering ? 'Registrarse' : 'Iniciar Sesión'}
+                    {#if !isResettingPassword}
+                        <div>
+                            <input
+                                type="password"
+                                bind:value={password}
+                                placeholder="Contraseña"
+                                class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-blue-500 transition-colors"
+                                required
+                                minlength="6"
+                                disabled={loading}
+                            />
+                            {#if !isRegistering}
+                                <div class="flex justify-end mt-2">
+                                    <button
+                                        type="button"
+                                        class="text-xs text-white/40 hover:text-white transition-colors"
+                                        on:click={() => {
+                                            isResettingPassword = true;
+                                            error = '';
+                                        }}
+                                    >
+                                        ¿Olvidaste tu contraseña?
+                                    </button>
+                                </div>
+                            {/if}
+                        </div>
                     {/if}
-                </button>
-            </form>
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        class="w-full py-3.5 bg-white text-black font-bold rounded-xl hover:bg-slate-100 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-white/20 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                    >
+                        {#if loading}
+                            <span
+                                class="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"
+                            ></span>
+                        {:else}
+                            {isResettingPassword
+                                ? 'Enviar Enlace'
+                                : isRegistering
+                                  ? 'Registrarse'
+                                  : 'Iniciar Sesión'}
+                        {/if}
+                    </button>
+
+                    {#if isResettingPassword}
+                        <button
+                            type="button"
+                            class="w-full py-2 text-sm text-white/50 hover:text-white transition-colors"
+                            on:click={() => {
+                                isResettingPassword = false;
+                                error = '';
+                            }}
+                        >
+                            Cancelar
+                        </button>
+                    {/if}
+                </form>
+            {/if}
 
             <div
                 class="mt-6 flex justify-center gap-4 text-xs text-white/30 w-full border-t border-white/5 pt-4"
