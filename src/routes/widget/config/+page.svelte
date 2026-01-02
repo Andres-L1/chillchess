@@ -4,18 +4,24 @@
     import { userStore } from '$lib/auth/userStore';
     import { toast } from '$lib/stores/notificationStore';
 
-    let activeTab: 'music' | 'focus' = 'music';
+    let activeTab: 'music' | 'streak' = 'music';
 
+    // Music Config
     let showLogo = true;
+    let showArt = true; // New option
     let opacity = 0.9;
+
+    // Streak Config
+    let streakLabel = 'Días en Directo';
+    let streakUpdateInterval = 5; // minutes check
 
     $: baseUrl = browser ? window.location.origin : '';
     $: uidParam = $userStore.user?.uid ? `&uid=${$userStore.user.uid}` : '';
 
     $: widgetUrl =
         activeTab === 'music'
-            ? `${baseUrl}/widget?theme=dark&size=large&showLogo=${showLogo}&opacity=${opacity}${uidParam}`
-            : `${baseUrl}/widget/focus?uid=${$userStore.user?.uid || ''}`;
+            ? `${baseUrl}/widget?theme=dark&size=large&showLogo=${showLogo}&showArt=${showArt}&opacity=${opacity}${uidParam}`
+            : `${baseUrl}/widget/streak?label=${encodeURIComponent(streakLabel)}${uidParam}`;
 
     async function copyToClipboard() {
         try {
@@ -60,12 +66,12 @@
             </button>
             <button
                 class="px-4 py-2 text-sm font-bold border-b-2 transition-all whitespace-nowrap {activeTab ===
-                'focus'
-                    ? 'border-green-500 text-white'
+                'streak'
+                    ? 'border-orange-500 text-white'
                     : 'border-transparent text-slate-500 hover:text-slate-300'}"
-                on:click={() => (activeTab = 'focus')}
+                on:click={() => (activeTab = 'streak')}
             >
-                🍅 Widget Foco
+                🔥 Widget Días Stream
             </button>
         </div>
 
@@ -98,8 +104,8 @@
                             />
                         </div>
 
-                        <!-- Show Logo -->
-                        <div class="mb-4">
+                        <!-- Show Attributes -->
+                        <div class="space-y-3">
                             <label class="flex items-center gap-3 cursor-pointer select-none">
                                 <input
                                     type="checkbox"
@@ -108,18 +114,36 @@
                                 />
                                 <span class="text-sm">Mostrar logo "ChillChess.app"</span>
                             </label>
+                            <label class="flex items-center gap-3 cursor-pointer select-none">
+                                <input
+                                    type="checkbox"
+                                    bind:checked={showArt}
+                                    class="w-5 h-5 accent-primary-500"
+                                />
+                                <span class="text-sm">Mostrar Portada del Álbum</span>
+                            </label>
                         </div>
                     {:else}
-                        <!-- Focus Config -->
+                        <!-- Streak Config -->
                         <div class="mb-6">
                             <p class="text-sm text-slate-400 mb-4">
-                                Este widget muestra tu temporizador de foco en tiempo real. No
-                                requiere configuración visual extra.
+                                Muestra cuántos días has hecho directo (actividad en app).
                             </p>
-                            <p class="text-xs text-slate-500">
-                                Tip: Para cambiar entre modo FOCUS y BREAK, usa los controles en la
-                                app. El widget se actualizará solo.
-                            </p>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label
+                                        class="block text-xs uppercase text-slate-500 mb-1 font-bold"
+                                        >Texto de etiqueta</label
+                                    >
+                                    <input
+                                        type="text"
+                                        bind:value={streakLabel}
+                                        class="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-orange-500 outline-none transition-colors placeholder:text-slate-600"
+                                        placeholder="Ej: Días Online"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     {/if}
                 </div>
@@ -140,7 +164,7 @@
                         on:click={copyToClipboard}
                         class="w-full py-3 bg-primary-500 hover:bg-primary-600 rounded-lg font-bold transition-colors"
                     >
-                        📋 Copiar URL {activeTab === 'music' ? '(Música)' : '(Foco)'}
+                        📋 Copiar URL {activeTab === 'music' ? '(Música)' : '(Racha)'}
                     </button>
 
                     {#if $userStore.loading}
@@ -187,7 +211,7 @@
                             </li>
                         {:else}
                             <li>
-                                4. Tamaño recomendado: <strong>260px ancho x 120px alto</strong>.
+                                4. Tamaño recomendado: <strong>300px ancho x 100px alto</strong>.
                             </li>
                         {/if}
                     </ol>
@@ -209,15 +233,16 @@
                         ></div>
 
                         {#if $userStore.user}
-                            <div class="relative z-10">
+                            <div class="relative z-10 pl-6">
+                                <!-- Added padding specifically for preview centering visual -->
                                 <iframe
                                     src={widgetUrl}
                                     class="border-0 rounded-xl shadow-2xl overflow-hidden"
                                     style="width: {activeTab === 'music'
                                         ? '460px'
-                                        : '260px'}; height: {activeTab === 'music'
+                                        : '300px'}; height: {activeTab === 'music'
                                         ? '140px'
-                                        : '120px'};"
+                                        : '100px'};"
                                     title="Widget Preview"
                                 ></iframe>
                             </div>

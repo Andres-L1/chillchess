@@ -15,6 +15,7 @@
         doc,
         increment,
         deleteDoc,
+        getDoc, // Added
     } from 'firebase/firestore';
     import { toast } from '$lib/stores/notificationStore';
     import { fade, scale } from 'svelte/transition';
@@ -28,6 +29,8 @@
     // Stats
     $: activeHabitsCount = habits.length;
     $: pendingTasksCount = tasks.filter((t) => !t.completed).length;
+    let totalStreamDays = 0;
+    // Restored totalStreak
     $: totalStreak = habits.reduce((acc, h) => acc + (h.streak || 0), 0);
     $: completedTasksCount = tasks.filter((t) => t.completed).length;
 
@@ -71,6 +74,16 @@
                 .sort(
                     (a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)
                 );
+
+            // Get Stream Days (Activity Map)
+            const userDoc = await getDoc(doc(db, 'users', $userStore.user.uid));
+            if (userDoc.exists()) {
+                const activityMap = userDoc.data().activityMap || {};
+                // Count unique days with any activity
+                totalStreamDays = Object.values(activityMap).filter(
+                    (count: any) => count > 0
+                ).length;
+            }
         } catch (e) {
             console.error('Error loading data', e);
         } finally {
@@ -226,7 +239,7 @@
     <main class="max-w-6xl mx-auto space-y-6">
         <!-- STATS ROW -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <!-- Streak Card -->
+            <!-- Streak Card (Restored) -->
             <div
                 class="bg-[#1e293b] border border-white/5 p-4 rounded-xl flex flex-col items-center justify-center relative overflow-hidden group"
             >
@@ -274,13 +287,27 @@
                 >
             </div>
 
-            <!-- Focus/Finished -->
+            <!-- Stream Days (Replaces Focus/Completed) -->
             <div
-                class="bg-[#1e293b] border border-white/5 p-4 rounded-xl flex flex-col items-center justify-center"
+                class="bg-[#1e293b] border border-white/5 p-4 rounded-xl flex flex-col items-center justify-center relative overflow-hidden group"
             >
-                <span class="text-3xl font-bold text-purple-400">{completedTasksCount}</span>
-                <span class="text-xs text-slate-400 font-medium uppercase tracking-wider"
-                    >Completadas</span
+                <div
+                    class="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
+                ></div>
+                <span class="text-3xl font-bold text-white">{totalStreamDays}</span>
+                <span
+                    class="text-xs text-purple-400 font-medium uppercase tracking-wider flex items-center gap-1"
+                >
+                    <!-- Camera Icon -->
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        />
+                    </svg>
+                    Días Stream</span
                 >
             </div>
         </div>
