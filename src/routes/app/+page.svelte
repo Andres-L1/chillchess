@@ -52,19 +52,25 @@
         try {
             const qHabits = query(
                 collection(db, 'habits'),
-                where('userId', '==', $userStore.user.uid),
-                orderBy('createdAt', 'desc')
+                where('userId', '==', $userStore.user.uid)
             );
             const habitsSnap = await getDocs(qHabits);
-            habits = habitsSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            habits = habitsSnap.docs
+                .map((doc) => ({ id: doc.id, ...doc.data() }))
+                .sort(
+                    (a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)
+                );
 
             const qTasks = query(
                 collection(db, 'tasks'),
-                where('userId', '==', $userStore.user.uid),
-                orderBy('createdAt', 'desc')
+                where('userId', '==', $userStore.user.uid)
             );
             const tasksSnap = await getDocs(qTasks);
-            tasks = tasksSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            tasks = tasksSnap.docs
+                .map((doc) => ({ id: doc.id, ...doc.data() }))
+                .sort(
+                    (a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)
+                );
         } catch (e) {
             console.error('Error loading data', e);
         } finally {
