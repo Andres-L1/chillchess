@@ -1,29 +1,23 @@
 <script lang="ts">
-    import { audioStore } from "$lib/audio/store";
-    import { slide } from "svelte/transition";
-    import { onMount, createEventDispatcher } from "svelte";
+    import { audioStore } from '$lib/audio/store';
+    import { slide } from 'svelte/transition';
+    import { onMount, createEventDispatcher } from 'svelte';
 
-    import MiniPlayer from "./player/MiniPlayer.svelte";
-    import TrackInfo from "./player/TrackInfo.svelte";
-    import PlaybackControls from "./player/PlaybackControls.svelte";
-    import ProgressBar from "./player/ProgressBar.svelte";
-    import VolumeControl from "./player/VolumeControl.svelte";
+    import MiniPlayer from './player/MiniPlayer.svelte';
+    import TrackInfo from './player/TrackInfo.svelte';
+    import PlaybackControls from './player/PlaybackControls.svelte';
+    import ProgressBar from './player/ProgressBar.svelte';
+    import VolumeControl from './player/VolumeControl.svelte';
 
     const dispatch = createEventDispatcher();
 
-    import {
-        favoritesStore,
-        toggleFavorite,
-        isFavorite,
-    } from "$lib/data/favorites";
+    import { favoritesStore, toggleFavorite, isFavorite } from '$lib/data/favorites';
 
     let showVolumeSlider = false;
     let isCollapsed = false;
 
     $: currentTrack = $audioStore.playlist[$audioStore.currentTrackIndex];
-    $: isTrackFavorite = currentTrack?.id
-        ? isFavorite(currentTrack.id, $favoritesStore)
-        : false;
+    $: isTrackFavorite = currentTrack?.id ? isFavorite(currentTrack.id, $favoritesStore) : false;
     let isClosed = false;
 
     // Re-open player automatically when track changes
@@ -52,8 +46,7 @@
             {currentTrack}
             onExpand={() => (isCollapsed = false)}
             isFavorite={isTrackFavorite}
-            onFavoriteClick={() =>
-                currentTrack?.id && toggleFavorite(currentTrack.id)}
+            onFavoriteClick={() => currentTrack?.id && toggleFavorite(currentTrack.id)}
             onClose={closePlayer}
         />
         <!-- Note: MiniPlayer needs to support onClose prop or we wrap it. 
@@ -65,8 +58,9 @@
         <!-- FLOATING DOCK PLAYER -->
         <!-- FLOATING DOCK PLAYER -->
         <div
-            transition:slide={{ duration: 400, axis: "y" }}
-            class="fixed bottom-2 md:bottom-6 left-1/2 -translate-x-1/2 w-[95%] md:w-auto md:min-w-[700px] max-w-5xl z-[100] flex flex-col items-center"
+            transition:slide={{ duration: 400, axis: 'y' }}
+            class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[95%] md:w-auto md:min-w-[700px] max-w-5xl z-[100] flex flex-col items-center"
+            style="padding-bottom: env(safe-area-inset-bottom, 20px);"
         >
             <!-- Control Handle (Minimize & Close) -->
             <div class="flex items-end gap-1 -mb-[1px] z-10">
@@ -117,31 +111,34 @@
                     class="relative z-10 w-full p-3 md:px-6 flex items-center justify-between gap-3 md:gap-12"
                 >
                     <!-- Left: Track Info & Favorite -->
-                    <div class="flex-shrink-0">
+                    <div class="flex-1 min-w-0 md:flex-initial md:w-auto">
                         <TrackInfo
                             {currentTrack}
                             isFavorite={isTrackFavorite}
                             onFavoriteClick={() =>
-                                currentTrack?.id &&
-                                toggleFavorite(currentTrack.id)}
-                            onShowTracks={() => dispatch("showTracks")}
+                                currentTrack?.id && toggleFavorite(currentTrack.id)}
+                            onShowTracks={() => dispatch('showTracks')}
                         />
                     </div>
 
                     <!-- Center: Controls & Progress -->
-                    <div
-                        class="flex-1 flex flex-col justify-center max-w-md w-full"
-                    >
+                    <div class="flex-none md:flex-1 flex flex-col justify-center max-w-md w-auto">
                         <div class="flex items-center justify-center mb-2">
                             <PlaybackControls />
                         </div>
-                        <div class="w-full px-2">
+                        <div class="w-full px-2 hidden md:block">
+                            <!-- Progress Bar mostly useful on Desktop or if space permits -->
+                            <ProgressBar />
+                        </div>
+                        <div class="w-24 px-2 block md:hidden">
+                            <!-- Mini Progress on mobile? Or hidden? -->
+                            <!-- Let's keep it but maybe smaller or rely on info -->
                             <ProgressBar />
                         </div>
                     </div>
 
-                    <!-- Right: Volume Control - Now visible on mobile too -->
-                    <div class="flex-shrink-0 flex items-center">
+                    <!-- Right: Volume Control - Hidden on mobile -->
+                    <div class="hidden md:flex flex-shrink-0 items-center">
                         <VolumeControl />
                     </div>
                 </div>

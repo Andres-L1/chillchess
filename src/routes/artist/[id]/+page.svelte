@@ -263,16 +263,18 @@
         <!-- Songs Section (NEW) -->
         {#if flatTracks.length > 0}
             <div class="mb-12 animate-fade-in">
-                <div class="flex items-center justify-between mb-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                     <div class="flex items-center gap-4">
                         <h2 class="text-3xl font-bold">Canciones</h2>
-                        <div class="text-sm text-slate-500 bg-white/5 px-3 py-1 rounded-full">
+                        <div
+                            class="text-sm text-slate-500 bg-white/5 px-3 py-1 rounded-full whitespace-nowrap"
+                        >
                             {flatTracks.length} tracks • {formattedDuration}
                         </div>
                     </div>
                     <button
                         on:click={playArtistMix}
-                        class="bg-primary-500 hover:bg-primary-400 text-white px-6 py-2 rounded-full font-bold flex items-center gap-2 transition-all shadow-lg hover:shadow-primary-500/20 transform hover:-translate-y-0.5"
+                        class="w-full md:w-auto bg-primary-500 hover:bg-primary-400 text-white px-6 py-2 rounded-full font-bold flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-primary-500/20 transform hover:-translate-y-0.5"
                     >
                         <span>▶</span> Reproducir Todo
                     </button>
