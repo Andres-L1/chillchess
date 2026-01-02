@@ -134,5 +134,20 @@ service cloud.firestore {
       allow read: if true; // Public read for OBS
       allow write: if request.auth != null && request.auth.uid == userId;
     }
+    // ============================================
+    // Tracker / Productivity App
+    // ============================================
+    match /habits/{habitId} {
+        allow read, delete, update: if isSignedIn() && resource.data.userId == request.auth.uid;
+        allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+    }
+    match /tasks/{taskId} {
+        allow read, delete, update: if isSignedIn() && resource.data.userId == request.auth.uid;
+        allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+    }
+    match /focus_sessions/{sessionId} {
+        allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+        allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+    }
   }
 }
