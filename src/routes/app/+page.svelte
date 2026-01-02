@@ -2,252 +2,390 @@
     import { onMount } from 'svelte';
     import { userStore } from '$lib/auth/userStore';
     import { db } from '$lib/firebase';
-    import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
-    import FocusTimer from '$lib/components/focus/FocusTimer.svelte';
+    import {
+        collection,
+        query,
+        where,
+        orderBy,
+        limit,
+        getDocs,
+        addDoc,
+        serverTimestamp,
+        updateDoc,
+        doc,
+        increment,
+    } from 'firebase/firestore';
+    import { toast } from '$lib/stores/notificationStore';
+    import { fade, slide } from 'svelte/transition';
     import BackIcon from '$lib/components/icons/BackIcon.svelte';
-    import { fade, fly } from 'svelte/transition';
 
-    let showTimer = false;
-    let recentSessions: any[] = [];
+    let habits: any[] = [];
+    let tasks: any[] = [];
     let loading = true;
 
-    // Load sessions logic
-    async function loadSessions() {
+    // Forms
+    let showHabitForm = false;
+    let showTaskForm = false;
+    let newHabitTitle = '';
+    let newTaskTitle = '';
+
+    // Mock XP (Connect to real user profile later)
+    let currentXP = 0;
+    let level = 1;
+
+    async function loadData() {
         if (!$userStore.user) return;
         loading = true;
         try {
-            const q = query(
-                collection(db, 'focus_sessions'),
+            // Load Habits
+            const qHabits = query(
+                collection(db, 'habits'),
                 where('userId', '==', $userStore.user.uid),
-                orderBy('createdAt', 'desc'),
-                limit(10)
+                orderBy('createdAt', 'desc')
             );
-            const querySnapshot = await getDocs(q);
-            recentSessions = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            const habitsSnap = await getDocs(qHabits);
+            habits = habitsSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+            // Load Tasks
+            const qTasks = query(
+                collection(db, 'tasks'),
+                where('userId', '==', $userStore.user.uid),
+                orderBy('createdAt', 'desc')
+            );
+            const tasksSnap = await getDocs(qTasks);
+            tasks = tasksSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+            // Calculate XP (Simple mock logic)
+            currentXP = habits.length * 10 + tasks.filter((t) => t.completed).length * 5;
         } catch (e) {
-            console.error('Error loading sessions:', e);
+            console.error('Error loading data', e);
         } finally {
             loading = false;
         }
     }
 
-    // Refresh when closing timer to show new session
-    function closeTimer() {
-        showTimer = false;
-        loadSessions();
-    }
-
     onMount(() => {
-        if ($userStore.user) {
-            loadSessions();
-        }
+        if ($userStore.user) loadData();
     });
 
-    $: if ($userStore.user && !loading && recentSessions.length === 0) {
-        loadSessions();
+    async function createHabit() {
+        if (!newHabitTitle.trim() || !$userStore.user) return;
+        try {
+            await addDoc(collection(db, 'habits'), {
+                userId: $userStore.user.uid,
+                title: newHabitTitle,
+                streak: 0,
+                createdAt: serverTimestamp(),
+            });
+            toast.success('Hábito creado (+10 XP)');
+            newHabitTitle = '';
+            showHabitForm = false;
+            loadData();
+        } catch (e) {
+            toast.error('Error al crear hábito');
+        }
     }
 
-    function formatDuration(seconds: number) {
-        const h = Math.floor(seconds / 3600);
-        const m = Math.floor((seconds % 3600) / 60);
-        if (h > 0) return `${h}h ${m}m`;
-        return `${m}m`;
+    async function createTask() {
+        if (!newTaskTitle.trim() || !$userStore.user) return;
+        try {
+            await addDoc(collection(db, 'tasks'), {
+                userId: $userStore.user.uid,
+                title: newTaskTitle,
+                completed: false,
+                createdAt: serverTimestamp(),
+            });
+            toast.success('Tarea añadida');
+            newTaskTitle = '';
+            showTaskForm = false;
+            loadData();
+        } catch (e) {
+            toast.error('Error al crear tarea');
+        }
     }
 
-    function formatDate(timestamp: any) {
-        if (!timestamp) return '';
-        // Handle Firestore timestamp or JS Date
-        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-        return new Intl.DateTimeFormat('es-ES', {
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        }).format(date);
+    async function toggleTask(task: any) {
+        // Toggle UI immediately for responsiveness
+        task.completed = !task.completed;
+        tasks = tasks; // Trigger reactivity
+
+        try {
+            await updateDoc(doc(db, 'tasks', task.id), {
+                completed: task.completed,
+            });
+            if (task.completed) toast.success('Tarea completada (+5 XP)');
+            loadData(); // Reload to sync generic
+        } catch (e) {
+            console.error(e);
+            task.completed = !task.completed; // Revert
+        }
     }
 </script>
 
-{#if showTimer}
-    <div transition:fade={{ duration: 300 }} class="fixed inset-0 z-50 bg-[#0B1120]">
-        <FocusTimer on:close={closeTimer} />
-    </div>
-{:else}
-    <div class="min-h-screen bg-[#0B1120] text-white font-poppins selection:bg-orange-500/30">
-        <!-- Dashboard Header -->
-        <header
-            class="p-6 md:p-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
+<div
+    class="min-h-screen bg-[#0B1120] text-white font-poppins selection:bg-orange-500/30 p-6 md:p-12 pb-32"
+>
+    <!-- Header -->
+    <header class="max-w-4xl mx-auto mb-12">
+        <a
+            href="/"
+            class="inline-flex items-center gap-2 text-slate-500 hover:text-white mb-8 transition-colors text-sm font-medium uppercase tracking-wider"
         >
-            <div>
-                <a
-                    href="/"
-                    class="flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition-colors font-medium text-sm uppercase tracking-wider group"
-                >
-                    <BackIcon size="xs" />
-                    <span class="group-hover:-translate-x-1 transition-transform">Volver</span>
-                </a>
-                <h1 class="text-3xl md:text-5xl font-light tracking-tight mb-2">
-                    Hola, <span class="font-medium text-white"
-                        >{$userStore.user?.displayName?.split(' ')[0] || 'Viajero'}</span
-                    >
-                </h1>
-                <p class="text-slate-400 font-light text-lg">Tu historial de enfoque.</p>
-            </div>
+            <BackIcon size="sm" />
+            <span>Volver</span>
+        </a>
 
-            <!-- Quick Start Button -->
-            <button
-                on:click={() => (showTimer = true)}
-                class="hidden md:flex items-center gap-3 bg-white text-black px-8 py-4 rounded-full hover:scale-105 transition-transform font-bold tracking-wide shadow-[0_0_30px_rgba(255,255,255,0.15)] group"
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-400 to-red-600"></div>
+            <h1 class="text-3xl md:text-4xl font-bold">Crea un hábito o una tarea.</h1>
+        </div>
+
+        <p class="text-slate-400 text-lg mb-8 leading-relaxed">
+            <strong class="text-orange-400">Hábitos:</strong> Cosas que quieres repetir (Ej: "Leer
+            10 páginas").<br />
+            <strong class="text-blue-400">Tareas:</strong> Cosas únicas por hacer (Ej: "Cancelar suscripción").
+        </p>
+
+        <!-- XP Bar -->
+        <div class="mb-12">
+            <div
+                class="flex justify-between text-xs font-bold uppercase tracking-widest text-slate-500 mb-2"
             >
-                <svg
-                    class="w-6 h-6 group-hover:rotate-90 transition-transform"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    ><path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M12 4v16m8-8H4"
-                    /></svg
-                >
-                <span>NUEVA SESIÓN</span>
-            </button>
-        </header>
-
-        <main class="px-6 md:px-12 max-w-6xl mx-auto pb-24">
-            <!-- Stats Row (Simple) -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-                <div
-                    class="p-6 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors"
-                >
-                    <div
-                        class="text-slate-400 text-[10px] uppercase tracking-widest font-bold mb-2"
-                    >
-                        Sesiones
-                    </div>
-                    <div class="text-3xl md:text-4xl font-light">{recentSessions.length}</div>
-                </div>
-                <div
-                    class="p-6 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors"
-                >
-                    <div
-                        class="text-slate-400 text-[10px] uppercase tracking-widest font-bold mb-2"
-                    >
-                        Tiempo Total
-                    </div>
-                    <div class="text-3xl md:text-4xl font-light flex items-baseline gap-1">
-                        {Math.floor(
-                            recentSessions.reduce((acc, s) => acc + (s.duration || 0), 0) / 60
-                        )}<span class="text-sm text-slate-500 font-medium">min</span>
-                    </div>
-                </div>
+                <span>Nivel {Math.floor(currentXP / 100) + 1}</span>
+                <span>{currentXP % 100} / 100 XP</span>
             </div>
+            <div class="h-2 bg-white/5 rounded-full overflow-hidden">
+                <div
+                    class="h-full bg-gradient-to-r from-orange-500 to-red-500 transition-all duration-1000"
+                    style="width: {currentXP % 100}%"
+                ></div>
+            </div>
+        </div>
+    </header>
 
-            <!-- Activity Feed -->
-            <div class="mb-8">
-                <h2 class="text-xl font-medium mb-6 flex items-center gap-2 text-slate-200">
-                    <svg
-                        class="w-5 h-5 text-orange-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        ><path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                        /></svg
-                    >
-                    Actividad Reciente
-                </h2>
-
-                {#if loading}
-                    <div class="space-y-4 animate-pulse">
-                        <div class="h-20 bg-white/5 rounded-xl w-full"></div>
-                        <div class="h-20 bg-white/5 rounded-xl w-full"></div>
-                        <div class="h-20 bg-white/5 rounded-xl w-full"></div>
-                    </div>
-                {:else if recentSessions.length === 0}
-                    <div
-                        class="text-center py-20 border border-dashed border-white/10 rounded-2xl text-slate-500 bg-white/[0.02]"
-                    >
-                        <p class="mb-4">No hay sesiones registradas aún.</p>
-                        <button
-                            on:click={() => (showTimer = true)}
-                            class="text-orange-400 hover:text-orange-300 underline underline-offset-4 font-medium"
-                            >Empezar ahora</button
+    <main class="max-w-4xl mx-auto space-y-6">
+        <!-- Create Habit Card -->
+        <div
+            class="bg-[#0F172A] border border-white/5 rounded-2xl overflow-hidden hover:border-orange-500/50 transition-all group"
+        >
+            {#if !showHabitForm}
+                <button
+                    on:click={() => (showHabitForm = true)}
+                    class="w-full p-6 flex items-center justify-between text-left"
+                >
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500"
                         >
+                            <!-- Repeat Icon -->
+                            <svg
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                ><path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                /></svg
+                            >
+                        </div>
+                        <span class="font-medium text-lg">Crea un hábito</span>
                     </div>
+                    <div class="flex items-center gap-4">
+                        <span
+                            class="px-3 py-1 rounded bg-orange-500/20 text-orange-400 text-xs font-bold"
+                            >+10 XP</span
+                        >
+                        <div
+                            class="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg font-medium text-sm transition-colors"
+                        >
+                            Añadir hábito
+                        </div>
+                    </div>
+                </button>
+            {:else}
+                <div class="p-6 bg-orange-500/5 animate-fade-in">
+                    <form on:submit|preventDefault={createHabit} class="flex gap-4">
+                        <input
+                            bind:value={newHabitTitle}
+                            placeholder="Ej: Meditar 10 minutos..."
+                            class="flex-1 bg-transparent border-b border-orange-500/30 py-2 text-lg focus:outline-none focus:border-orange-500 placeholder:text-slate-600"
+                            autoFocus
+                        />
+                        <button
+                            type="submit"
+                            class="px-6 py-2 bg-orange-600 text-white rounded-lg font-bold"
+                            >Guardar</button
+                        >
+                        <button
+                            type="button"
+                            on:click={() => (showHabitForm = false)}
+                            class="text-slate-500 hover:text-white">Cancelar</button
+                        >
+                    </form>
+                </div>
+            {/if}
+        </div>
+
+        <!-- Create Task Card -->
+        <div
+            class="bg-[#0F172A] border border-white/5 rounded-2xl overflow-hidden hover:border-blue-500/50 transition-all group"
+        >
+            {#if !showTaskForm}
+                <button
+                    on:click={() => (showTaskForm = true)}
+                    class="w-full p-6 flex items-center justify-between text-left"
+                >
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500"
+                        >
+                            <!-- Check Icon -->
+                            <svg
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                ><path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                /></svg
+                            >
+                        </div>
+                        <span class="font-medium text-lg">Crea una tarea</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span
+                            class="px-3 py-1 rounded bg-blue-500/20 text-blue-400 text-xs font-bold"
+                            >+5 XP</span
+                        >
+                        <div
+                            class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium text-sm transition-colors"
+                        >
+                            Agregar tarea
+                        </div>
+                    </div>
+                </button>
+            {:else}
+                <div class="p-6 bg-blue-500/5 animate-fade-in">
+                    <form on:submit|preventDefault={createTask} class="flex gap-4">
+                        <input
+                            bind:value={newTaskTitle}
+                            placeholder="Ej: Enviar reporte mensual..."
+                            class="flex-1 bg-transparent border-b border-blue-500/30 py-2 text-lg focus:outline-none focus:border-blue-500 placeholder:text-slate-600"
+                            autoFocus
+                        />
+                        <button
+                            type="submit"
+                            class="px-6 py-2 bg-blue-600 text-white rounded-lg font-bold"
+                            >Guardar</button
+                        >
+                        <button
+                            type="button"
+                            on:click={() => (showTaskForm = false)}
+                            class="text-slate-500 hover:text-white">Cancelar</button
+                        >
+                    </form>
+                </div>
+            {/if}
+        </div>
+
+        <!-- LISTS -->
+        <div class="pt-8 grid md:grid-cols-2 gap-8">
+            <!-- Habits List -->
+            <div>
+                <h3
+                    class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2"
+                >
+                    <span class="w-2 h-2 rounded-full bg-orange-500"></span> Tus Hábitos
+                </h3>
+                {#if habits.length === 0}
+                    <div class="text-slate-600 italic text-sm">No tienes hábitos activos.</div>
                 {:else}
                     <div class="space-y-3">
-                        {#each recentSessions as session, i}
+                        {#each habits as habit}
                             <div
-                                in:fly={{ y: 20, delay: i * 50 }}
-                                class="group flex items-center justify-between p-5 bg-[#0F172A] border border-white/5 rounded-2xl hover:border-white/20 transition-all hover:bg-white/[0.07]"
+                                class="p-4 rounded-xl border border-white/5 bg-white/[0.02] flex items-center justify-between group hover:border-orange-500/30 transition-colors"
                             >
-                                <div class="flex items-center gap-5">
-                                    <div
-                                        class="w-12 h-12 rounded-full bg-slate-800/50 border border-white/5 flex items-center justify-center text-orange-500 shadow-inner group-hover:scale-110 transition-transform"
-                                    >
-                                        <!-- Check icon if completed, else simple dot -->
-                                        {#if session.completed}
-                                            <svg
-                                                class="w-5 h-5 text-green-400"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                                ><path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M5 13l4 4L19 7"
-                                                /></svg
-                                            >
-                                        {:else}
-                                            <div class="w-2 h-2 rounded-full bg-orange-500"></div>
-                                        {/if}
-                                    </div>
-                                    <div>
-                                        <h3 class="font-bold text-white text-lg">
-                                            {session.task || 'Sesión de Enfoque'}
-                                        </h3>
-                                        <p class="text-xs text-slate-500 font-mono mt-0.5">
-                                            {formatDate(session.createdAt)}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <div
-                                        class="font-mono text-xl text-white font-light tracking-tight"
-                                    >
-                                        {formatDuration(session.duration)}
-                                    </div>
-                                    <div
-                                        class="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-1 opacity-60"
-                                    >
-                                        TIMER
-                                    </div>
+                                <span class="font-medium text-slate-200">{habit.title}</span>
+                                <div
+                                    class="flex items-center gap-2 text-xs text-orange-400 font-bold bg-orange-500/10 px-2 py-1 rounded"
+                                >
+                                    Racha: {habit.streak || 0}
                                 </div>
                             </div>
                         {/each}
                     </div>
                 {/if}
             </div>
-        </main>
 
-        <!-- Mobile FAB -->
-        <button
-            on:click={() => (showTimer = true)}
-            class="md:hidden fixed bottom-8 right-8 w-16 h-16 bg-white text-black rounded-full shadow-[0_10px_40px_rgba(255,255,255,0.3)] flex items-center justify-center z-40 active:scale-90 transition-transform"
+            <!-- Tasks List -->
+            <div>
+                <h3
+                    class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2"
+                >
+                    <span class="w-2 h-2 rounded-full bg-blue-500"></span> Tus Tareas
+                </h3>
+                {#if tasks.length === 0}
+                    <div class="text-slate-600 italic text-sm">No tienes tareas pendientes.</div>
+                {:else}
+                    <div class="space-y-3">
+                        {#each tasks as task}
+                            <button
+                                on:click={() => toggleTask(task)}
+                                class="w-full text-left p-4 rounded-xl border border-white/5 bg-white/[0.02] flex items-center gap-4 group hover:bg-white/5 transition-all {task.completed
+                                    ? 'opacity-50'
+                                    : ''}"
+                            >
+                                <div
+                                    class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors {task.completed
+                                        ? 'border-blue-500 bg-blue-500 text-white'
+                                        : 'border-slate-600 group-hover:border-blue-400'}"
+                                >
+                                    {#if task.completed}
+                                        <svg
+                                            class="w-3 h-3"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                            ><path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="3"
+                                                d="M5 13l4 4L19 7"
+                                            /></svg
+                                        >
+                                    {/if}
+                                </div>
+                                <span
+                                    class="font-medium {task.completed
+                                        ? 'line-through text-slate-500'
+                                        : 'text-slate-200'}">{task.title}</span
+                                >
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </div>
+        </div>
+
+        <!-- Locked Content Stub -->
+        <div
+            class="mt-8 p-4 rounded-xl border border-dashed border-white/10 flex items-center justify-center gap-3 text-slate-500 text-sm opacity-60"
         >
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                 ><path
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"
-                    d="M12 4v16m8-8H4"
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                 /></svg
             >
-        </button>
-    </div>
-{/if}
+            <span>El nivel 2 desbloquea la comunidad</span>
+        </div>
+    </main>
+</div>
