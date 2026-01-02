@@ -10,18 +10,28 @@ service firebase.storage {
     }
 
     // ============================================
+    // ALBUMS & TRACKS
+    // ============================================
+    match /albums/{artistId}/{allPaths=**} {
+      // Public read so everyone can listen/see covers
+      allow read: if true;
+      
+      // Write access:
+      // 1. Admins (custom claim or explicit list would be better, but we rely on Auth for now)
+      // 2. The artist themselves (must be authenticated and own the folder)
+      allow write: if request.auth != null 
+                   && (request.auth.uid == artistId || firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin == true);
+    }
+    
+    // ============================================
     // MUSIC SUBMISSIONS
     // ============================================
     // Path structure used in code: submissions/{userId}/{timestamp}/{filename}
     match /submissions/{userId}/{allPaths=**} {
-       // Permite escribir solo al dueño de la carpeta
-       // Limita el tamaño de archivo a 50MB para evitar abusos
+       // ... existing rules ...
        allow write: if request.auth != null 
                     && request.auth.uid == userId
                     && request.resource.size < 50 * 1024 * 1024;
-       
-       // Permite leer al dueño (para verificar subida)
-       // El Admin accederá a los archivos mediante DownloadURLs firmadas, que no requieren reglas de lectura pública
        allow read: if request.auth != null && request.auth.uid == userId;
     }
   }
