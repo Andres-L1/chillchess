@@ -112,9 +112,9 @@
 
             let intensity = 0;
             if (count > 0) intensity = 1;
-            if (count > 2) intensity = 2;
-            if (count > 5) intensity = 3;
-            if (count > 8) intensity = 4;
+            if (count > 1) intensity = 2; // More sensitive levels
+            if (count > 3) intensity = 3;
+            if (count > 5) intensity = 4;
 
             tempCal.push({ date: key, count, intensity });
         }
@@ -244,9 +244,9 @@
                 <div class="flex flex-wrap justify-center md:justify-start gap-6 mb-6">
                     <div class="text-center md:text-left">
                         <div class="text-2xl font-bold text-orange-500">
-                            {calendar.reduce((acc, d) => acc + d.count, 0)}
+                            {calendar.filter((d) => d.count > 0).length}
                         </div>
-                        <div class="text-sm text-slate-500">Actividad</div>
+                        <div class="text-sm text-slate-500">Días Activos</div>
                     </div>
                     {#if artistAlbums.length > 0}
                         <div class="text-center md:text-left">
