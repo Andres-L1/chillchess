@@ -18,25 +18,34 @@
 
     $: currentTrack = $audioStore.playlist[$audioStore.currentTrackIndex];
     $: isTrackFavorite = currentTrack?.id ? isFavorite(currentTrack.id, $favoritesStore) : false;
+
+    // Persistent close state using localStorage
     let isClosed = false;
 
-    // Re-open player automatically when track changes
-    $: if (currentTrack) {
-        // We don't force open on every reactive update, only if track ID changes
-        // Ideally logic would be here, but for now let's just ensure it shows if hidden logic is simple
-        // Actually, simplistic approach: if currentTrack changes ID, set isClosed = false.
-    }
+    onMount(() => {
+        // Restore close state from localStorage
+        const savedClosedState = localStorage.getItem('chillchess_player_closed');
+        if (savedClosedState === 'true') {
+            isClosed = true;
+        }
+    });
 
     // Better reactivity for "New Track -> Open Player"
     let lastTrackId: string | undefined;
     $: if (currentTrack?.id !== lastTrackId) {
         lastTrackId = currentTrack?.id;
-        isClosed = false;
+        // Only auto-open if a new track actually started playing
+        if (currentTrack?.id) {
+            isClosed = false;
+            localStorage.setItem('chillchess_player_closed', 'false');
+        }
     }
 
     function closePlayer() {
         audioStore.update((s) => ({ ...s, isPlaying: false }));
         isClosed = true;
+        // Persist the closed state
+        localStorage.setItem('chillchess_player_closed', 'true');
     }
 </script>
 

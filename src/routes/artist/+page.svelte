@@ -782,9 +782,6 @@
                     >
                         {saving ? 'Guardando...' : '💾 Guardar Perfil'}
                     </button>
-                    <p class="text-center text-[10px] text-slate-600 font-mono mt-4 select-all">
-                        UID: {$userStore.user?.uid}
-                    </p>
                 </div>
 
                 <!-- Right: Live Preview -->
