@@ -208,6 +208,7 @@
             {:else}
                 <div class="p-6 bg-orange-500/5 animate-fade-in">
                     <form on:submit|preventDefault={createHabit} class="flex gap-4">
+                        <!-- svelte-ignore a11y-autofocus -->
                         <input
                             bind:value={newHabitTitle}
                             placeholder="Ej: Meditar 10 minutos..."
@@ -273,6 +274,7 @@
             {:else}
                 <div class="p-6 bg-blue-500/5 animate-fade-in">
                     <form on:submit|preventDefault={createTask} class="flex gap-4">
+                        <!-- svelte-ignore a11y-autofocus -->
                         <input
                             bind:value={newTaskTitle}
                             placeholder="Ej: Enviar reporte mensual..."
