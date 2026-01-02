@@ -109,6 +109,17 @@
         }))
     );
 
+    $: totalDurationSeconds = flatTracks.reduce((acc, t) => acc + (t.duration || 0), 0);
+    $: formattedDuration = formatTime(totalDurationSeconds);
+
+    function formatTime(seconds: number) {
+        if (!seconds) return '--';
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        if (h > 0) return `${h}h ${m}m`;
+        return `${m}m`;
+    }
+
     function playArtistMix() {
         audioStore.update((s) => ({
             ...s,
@@ -256,7 +267,7 @@
                     <div class="flex items-center gap-4">
                         <h2 class="text-3xl font-bold">Canciones</h2>
                         <div class="text-sm text-slate-500 bg-white/5 px-3 py-1 rounded-full">
-                            {flatTracks.length} tracks
+                            {flatTracks.length} tracks • {formattedDuration}
                         </div>
                     </div>
                     <button
