@@ -283,8 +283,58 @@
             </div>
         {:else if showPreview}
             <!-- Preview Mode -->
-            <div class="flex justify-center py-12">
-                <ArtistCard profile={previewProfile} {isPro} isPreview={true} />
+            <div class="space-y-6 max-w-5xl mx-auto">
+                <div class="flex justify-center">
+                    <ArtistCard profile={previewProfile} {isPro} isPreview={true} />
+                </div>
+
+                <!-- Activity Heatmap in Preview -->
+                <div class="bg-[#1a1a1a] rounded-2xl border border-white/10 p-6">
+                    <h2 class="text-xl font-bold mb-4">Tu Actividad (Tracker)</h2>
+                    <div class="pb-4">
+                        <div
+                            class="inline-grid grid-rows-7 grid-flow-col gap-1 w-full"
+                            style="grid-auto-columns: minmax(0, 1fr);"
+                        >
+                            {#each calendar as day}
+                                {@const date = new Date(day.date)}
+                                {@const dayName = date.toLocaleDateString('es-ES', {
+                                    weekday: 'short',
+                                    day: 'numeric',
+                                    month: 'short',
+                                })}
+                                <div
+                                    class="aspect-square rounded-sm transition-all hover:scale-125 max-w-[12px] max-h-[12px]"
+                                    style="background-color: {day.intensity === 0
+                                        ? '#334155'
+                                        : day.intensity === 1
+                                          ? '#fed7aa'
+                                          : day.intensity === 2
+                                            ? '#fb923c'
+                                            : day.intensity === 3
+                                              ? '#f97316'
+                                              : '#ea580c'}; opacity: {day.intensity === 0
+                                        ? 0.3
+                                        : 1}"
+                                    title="{dayName}: {day.count > 0
+                                        ? day.count + ' actividades'
+                                        : 'Sin actividad'}"
+                                ></div>
+                            {/each}
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-end gap-2 text-xs text-slate-500 mt-2">
+                        <span>Off</span>
+                        <div class="flex gap-1">
+                            <div class="w-2 h-2 rounded-sm bg-[#334155] opacity-30"></div>
+                            <div class="w-2 h-2 rounded-sm bg-[#fed7aa]"></div>
+                            <div class="w-2 h-2 rounded-sm bg-[#fb923c]"></div>
+                            <div class="w-2 h-2 rounded-sm bg-[#f97316]"></div>
+                            <div class="w-2 h-2 rounded-sm bg-[#ea580c]"></div>
+                        </div>
+                        <span>On Fire</span>
+                    </div>
+                </div>
             </div>
         {:else}
             <!-- Edit Mode -->
@@ -344,11 +394,20 @@
                     <!-- Activity Heatmap Card (NEW) -->
                     <div class="bg-[#1a1a1a] rounded-2xl border border-white/10 p-6">
                         <h2 class="text-xl font-bold mb-4">Tu Actividad (Tracker)</h2>
-                        <div class="overflow-x-auto pb-4">
-                            <div class="inline-grid grid-rows-7 grid-flow-col gap-1 min-w-max">
+                        <div class="pb-4">
+                            <div
+                                class="inline-grid grid-rows-7 grid-flow-col gap-1 w-full"
+                                style="grid-auto-columns: minmax(0, 1fr);"
+                            >
                                 {#each calendar as day}
+                                    {@const date = new Date(day.date)}
+                                    {@const dayName = date.toLocaleDateString('es-ES', {
+                                        weekday: 'short',
+                                        day: 'numeric',
+                                        month: 'short',
+                                    })}
                                     <div
-                                        class="w-3 h-3 rounded-sm transition-all hover:scale-125"
+                                        class="aspect-square rounded-sm transition-all hover:scale-125 max-w-[12px] max-h-[12px]"
                                         style="background-color: {day.intensity === 0
                                             ? '#334155'
                                             : day.intensity === 1
@@ -360,7 +419,9 @@
                                                   : '#ea580c'}; opacity: {day.intensity === 0
                                             ? 0.3
                                             : 1}"
-                                        title="{day.date}: {day.count} pts"
+                                        title="{dayName}: {day.count > 0
+                                            ? day.count + ' actividades'
+                                            : 'Sin actividad'}"
                                     ></div>
                                 {/each}
                             </div>

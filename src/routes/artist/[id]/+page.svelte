@@ -288,11 +288,20 @@
             >
                 Actividad (ChillChess Tracker)
             </h2>
-            <div class="overflow-x-auto pb-4">
-                <div class="inline-grid grid-rows-7 grid-flow-col gap-1 min-w-max">
+            <div class="pb-4">
+                <div
+                    class="inline-grid grid-rows-7 grid-flow-col gap-1 w-full"
+                    style="grid-auto-columns: minmax(0, 1fr);"
+                >
                     {#each calendar as day}
+                        {@const date = new Date(day.date)}
+                        {@const dayName = date.toLocaleDateString('es-ES', {
+                            weekday: 'short',
+                            day: 'numeric',
+                            month: 'short',
+                        })}
                         <div
-                            class="w-3 h-3 md:w-4 md:h-4 rounded-sm transition-all hover:scale-125 ring-0 hover:ring-1 ring-white/50"
+                            class="aspect-square rounded-sm transition-all hover:scale-125 max-w-[14px] max-h-[14px] ring-0 hover:ring-1 ring-white/50"
                             style="background-color: {day.intensity === 0
                                 ? '#334155'
                                 : day.intensity === 1
@@ -302,7 +311,9 @@
                                     : day.intensity === 3
                                       ? '#f97316'
                                       : '#ea580c'}; opacity: {day.intensity === 0 ? 0.3 : 1}"
-                            title="{day.date}: {day.count} pts"
+                            title="{dayName}: {day.count > 0
+                                ? day.count + ' actividades'
+                                : 'Sin actividad'}"
                         ></div>
                     {/each}
                 </div>
