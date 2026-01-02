@@ -257,10 +257,10 @@
                 class="mb-8 flex items-center gap-2 px-4 py-1.5 bg-white/5 border border-white/10 rounded-full backdrop-blur-md animate-fade-in-down transition-opacity duration-700"
                 class:opacity-0={hideUI}
             >
-                <span class="text-pink-400 animate-pulse">🌸</span>
+                <span class="text-orange-400 animate-pulse">🔥</span>
                 <span
                     class="text-[10px] md:text-xs font-bold tracking-[0.2em] text-slate-300 uppercase"
-                    >Focus Timer</span
+                    >Modo Enfoque</span
                 >
             </div>
 
@@ -285,7 +285,7 @@
                         stroke-width="0.5"
                         class="text-slate-700/50"
                     />
-                    <!-- Indicator (Glowy Blue/Indigo) -->
+                    <!-- Indicator (Glowy Orange) -->
                     <circle
                         cx="50"
                         cy="50"
@@ -296,15 +296,15 @@
                         stroke-dasharray="301.6"
                         stroke-dashoffset={((focusDuration - timeLeft) / focusDuration) * 301.6}
                         stroke-linecap="round"
-                        class="filter drop-shadow-[0_0_8px_rgba(99,102,241,0.6)] transition-all duration-1000 ease-linear origin-center"
+                        class="filter drop-shadow-[0_0_8px_rgba(249,115,22,0.6)] transition-all duration-1000 ease-linear origin-center"
                         class:animate-pulse={!timerRunning &&
                             timeLeft < focusDuration &&
                             timeLeft > 0}
                     />
                     <defs>
                         <linearGradient id="gradient-timer" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stop-color="#6366f1" />
-                            <stop offset="100%" stop-color="#a855f7" />
+                            <stop offset="0%" stop-color="#f97316" />
+                            <stop offset="100%" stop-color="#ef4444" />
                         </linearGradient>
                     </defs>
                 </svg>
@@ -317,9 +317,9 @@
                         {formatTime(timeLeft)}
                     </div>
                     <div
-                        class="text-indigo-300/60 text-[10px] md:text-xs font-bold tracking-[0.25em] uppercase mt-4"
+                        class="text-orange-300/60 text-[10px] md:text-xs font-bold tracking-[0.25em] uppercase mt-4"
                     >
-                        {Math.floor(focusDuration / 60)} MIN SESSION
+                        {Math.floor(focusDuration / 60)} MINUTOS
                     </div>
                 </div>
 
@@ -337,7 +337,7 @@
                     <div class="flex flex-col items-center gap-8">
                         <button
                             on:click={startTimer}
-                            class="w-16 h-16 md:w-20 md:h-20 bg-indigo-600 hover:bg-indigo-500 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(99,102,241,0.4)] hover:shadow-[0_0_50px_rgba(99,102,241,0.6)] hover:scale-105 transition-all text-white group"
+                            class="w-16 h-16 md:w-20 md:h-20 bg-orange-600 hover:bg-orange-500 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(249,115,22,0.4)] hover:shadow-[0_0_50px_rgba(249,115,22,0.6)] hover:scale-105 transition-all text-white group"
                         >
                             <svg
                                 class="w-8 h-8 ml-1 group-hover:scale-110 transition-transform"
@@ -394,9 +394,9 @@
                     <!-- I'm Done (Complete) -->
                     <button
                         on:click={completeTimer}
-                        class="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs md:text-sm font-bold rounded-xl shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all tracking-wide uppercase"
+                        class="px-6 py-3 bg-orange-600 hover:bg-orange-500 text-white text-xs md:text-sm font-bold rounded-xl shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 hover:-translate-y-0.5 transition-all tracking-wide uppercase"
                     >
-                        ¡Terminé!
+                        ¡He terminado!
                     </button>
                 {/if}
             </div>
@@ -858,17 +858,6 @@
             var(--tw-gradient-via),
             var(--tw-gradient-to)
         );
-    }
-
-    /* Remove input arrows */
-    input[type='number']::-webkit-inner-spin-button,
-    input[type='number']::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-    input[type='number'] {
-        -moz-appearance: textfield;
-        appearance: textfield;
     }
 
     @keyframes breathe {
