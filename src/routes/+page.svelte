@@ -1,24 +1,24 @@
 <script lang="ts">
-    import { audioStore, setVibe, type VibePreset } from "$lib/audio/store";
-    import AuthModal from "$lib/components/AuthModal.svelte";
-    import PaywallModal from "$lib/components/PaywallModal.svelte";
-    import { userStore, logout } from "$lib/auth/userStore";
-    import { userSubscription } from "$lib/subscription/userSubscription";
-    import SettingsIcon from "$lib/components/icons/SettingsIcon.svelte";
-    import UserIcon from "$lib/components/icons/UserIcon.svelte";
-    import HeartIcon from "$lib/components/icons/HeartIcon.svelte";
-    import BulbIcon from "$lib/components/icons/BulbIcon.svelte";
-    import SendIcon from "$lib/components/icons/SendIcon.svelte";
-    import BoltIcon from "$lib/components/icons/BoltIcon.svelte";
-    import StarIcon from "$lib/components/icons/StarIcon.svelte";
-    import MusicIcon from "$lib/components/icons/MusicIcon.svelte";
-    import EyeIcon from "$lib/components/icons/EyeIcon.svelte";
-    import VerifiedBadge from "$lib/components/VerifiedBadge.svelte";
-    import FounderBadge from "$lib/components/FounderBadge.svelte";
+    import { audioStore, setVibe, type VibePreset } from '$lib/audio/store';
+    import AuthModal from '$lib/components/AuthModal.svelte';
+    import PaywallModal from '$lib/components/PaywallModal.svelte';
+    import { userStore, logout } from '$lib/auth/userStore';
+    import { userSubscription } from '$lib/subscription/userSubscription';
+    import SettingsIcon from '$lib/components/icons/SettingsIcon.svelte';
+    import UserIcon from '$lib/components/icons/UserIcon.svelte';
+    import HeartIcon from '$lib/components/icons/HeartIcon.svelte';
+    import BulbIcon from '$lib/components/icons/BulbIcon.svelte';
+    import SendIcon from '$lib/components/icons/SendIcon.svelte';
+    import BoltIcon from '$lib/components/icons/BoltIcon.svelte';
+    import StarIcon from '$lib/components/icons/StarIcon.svelte';
+    import MusicIcon from '$lib/components/icons/MusicIcon.svelte';
+    import EyeIcon from '$lib/components/icons/EyeIcon.svelte';
+    import VerifiedBadge from '$lib/components/VerifiedBadge.svelte';
+    import FounderBadge from '$lib/components/FounderBadge.svelte';
 
     let showAuthModal = false;
     let showPaywall = false;
-    let blockedFeature: "vibe" | "games" = "vibe";
+    let blockedFeature: 'vibe' | 'games' = 'vibe';
     let mobileMenuOpen = false;
     let showUserMenu = false; // New state for desktop user dropdown
 
@@ -32,7 +32,7 @@
         const isVibeBlocked = !$userSubscription.canAccessVibe(vibeId);
 
         if (isVibeBlocked) {
-            blockedFeature = "vibe";
+            blockedFeature = 'vibe';
             showPaywall = true;
             return;
         }
@@ -46,11 +46,7 @@
 </script>
 
 <AuthModal show={showAuthModal} on:close={() => (showAuthModal = false)} />
-<PaywallModal
-    show={showPaywall}
-    {blockedFeature}
-    on:close={() => (showPaywall = false)}
-/>
+<PaywallModal show={showPaywall} {blockedFeature} on:close={() => (showPaywall = false)} />
 
 <svelte:head>
     <title>ChillChess - Música Lo-Fi, Ambient y Jazz para Concentrarse</title>
@@ -85,13 +81,9 @@
 </svelte:head>
 
 <!-- Changed Background to Midnight Blue and allowed scrolling -->
-<div
-    class="min-h-screen bg-[#0B1120] text-slate-200 font-poppins overflow-x-hidden"
->
+<div class="min-h-screen bg-[#0B1120] text-slate-200 font-poppins overflow-x-hidden">
     <!-- Navbar Responsive -->
-    <nav
-        class="relative flex justify-between items-center px-4 md:px-8 py-6 max-w-7xl mx-auto"
-    >
+    <nav class="relative flex justify-between items-center px-4 md:px-8 py-6 max-w-7xl mx-auto">
         <!-- Logo -->
         <div class="flex items-center gap-3 z-20">
             <!-- Unified Logo for both Mobile and Desktop -->
@@ -101,43 +93,26 @@
                 class="h-8 md:h-10 w-auto hover:scale-105 transition-transform duration-300"
             />
 
-            <span
-                class="text-xs uppercase bg-white/10 px-2 py-1 rounded-md text-slate-400"
+            <span class="text-xs uppercase bg-white/10 px-2 py-1 rounded-md text-slate-400"
                 >Beta v0.3</span
             >
         </div>
 
         <!-- Desktop Menu -->
-        <div
-            class="hidden md:flex gap-6 text-sm font-medium text-slate-400 items-center"
-        >
-            <a href="/roadmap" class="hover:text-primary-400 transition-colors"
-                >Roadmap</a
-            >
+        <div class="hidden md:flex gap-6 text-sm font-medium text-slate-400 items-center">
+            <a href="/roadmap" class="hover:text-primary-400 transition-colors">Roadmap</a>
 
             {#if $userStore.isLoggedIn}
-                <a
-                    href="/coleccion"
-                    class="hover:text-primary-400 transition-colors"
-                    >Colección</a
-                >
-                <a href="/app" class="hover:text-primary-400 transition-colors"
-                    >Ambiente</a
-                >
-                <a
-                    href="/rooms"
-                    class="hover:text-primary-400 transition-colors">🎵 Salas</a
-                >
-                <a
-                    href="/patches"
-                    class="hover:text-primary-400 transition-colors">Parches</a
-                >
+                <a href="/coleccion" class="hover:text-primary-400 transition-colors">Colección</a>
+                <a href="/app" class="hover:text-primary-400 transition-colors">Tracker</a>
+                <a href="/rooms" class="hover:text-primary-400 transition-colors">🎵 Salas</a>
+                <a href="/patches" class="hover:text-primary-400 transition-colors">Parches</a>
                 <!-- Pricing CTA -->
                 <a
                     href="/pricing"
                     class="bg-primary-500 hover:bg-primary-600 text-white px-4 py-1.5 rounded-full font-bold transition-all shadow-lg shadow-primary-500/20 hover:scale-105 ml-2 flex items-center gap-1"
                 >
-                    {#if $userSubscription?.tier === "free"}
+                    {#if $userSubscription?.tier === 'free'}
                         <BoltIcon size="sm" gradient={false} />
                         <span>Mejorar Plan</span>
                     {:else}
@@ -146,10 +121,7 @@
                     {/if}
                 </a>
             {:else}
-                <a
-                    href="/pricing"
-                    class="hover:text-primary-400 transition-colors">Planes</a
-                >
+                <a href="/pricing" class="hover:text-primary-400 transition-colors">Planes</a>
             {/if}
 
             {#if $userSubscription?.profile?.isAdmin}
@@ -172,31 +144,26 @@
                         <div
                             class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white shadow-inner"
                         >
-                            {$userStore.user?.displayName?.[0]?.toUpperCase() ||
-                                "U"}
+                            {$userStore.user?.displayName?.[0]?.toUpperCase() || 'U'}
                         </div>
 
-                        <div
-                            class="flex flex-col items-start leading-none mr-2"
-                        >
+                        <div class="flex flex-col items-start leading-none mr-2">
                             <span
                                 class="text-xs font-bold text-white tracking-wide flex items-center gap-1"
                             >
-                                {$userStore.user?.displayName || "Usuario"}
+                                {$userStore.user?.displayName || 'Usuario'}
                                 <div class="flex items-center gap-1">
                                     {#if $userSubscription.profile?.isVerified && ($userSubscription.profile?.showVerifiedBadge ?? true)}
                                         <VerifiedBadge size="sm" />
                                     {/if}
-                                    {#if $userSubscription.tier === "pro" && ($userSubscription.profile?.showFounderBadge ?? true)}
+                                    {#if $userSubscription.tier === 'pro' && ($userSubscription.profile?.showFounderBadge ?? true)}
                                         <FounderBadge size="sm" />
                                     {/if}
                                 </div>
                             </span>
-                            <span
-                                class="text-[10px] uppercase font-bold text-slate-400"
-                            >
-                                {$userSubscription?.tier === "free"
-                                    ? "Plan Gratuito"
+                            <span class="text-[10px] uppercase font-bold text-slate-400">
+                                {$userSubscription?.tier === 'free'
+                                    ? 'Plan Gratuito'
                                     : $userSubscription?.tier}
                             </span>
                         </div>
@@ -258,7 +225,7 @@
                                 🐛
                                 <span>Reportar Errores</span>
                             </a>
-                            {#if $userSubscription.tier === "pro"}
+                            {#if $userSubscription.tier === 'pro'}
                                 <a
                                     href="/proposals"
                                     class="px-4 py-2 text-purple-300 hover:text-purple-200 hover:bg-purple-500/10 text-left flex items-center gap-2"
@@ -318,12 +285,7 @@
             aria-label="Menu"
         >
             {#if mobileMenuOpen}
-                <svg
-                    class="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                         stroke-linecap="round"
                         stroke-linejoin="round"
@@ -332,12 +294,7 @@
                     />
                 </svg>
             {:else}
-                <svg
-                    class="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                         stroke-linecap="round"
                         stroke-linejoin="round"
@@ -377,7 +334,7 @@
                             on:click={() => (mobileMenuOpen = false)}
                             class="py-3 px-4 hover:bg-white/5 rounded-lg transition-colors text-slate-300 hover:text-white"
                         >
-                            Ambiente
+                            Tracker
                         </a>
                         <a
                             href="/rooms"
@@ -399,7 +356,7 @@
                             on:click={() => (mobileMenuOpen = false)}
                             class="py-3 px-4 bg-primary-500/10 hover:bg-primary-500 text-primary-500 hover:text-white rounded-lg transition-colors font-bold flex items-center gap-2 mt-2"
                         >
-                            {#if $userSubscription?.tier === "free"}
+                            {#if $userSubscription?.tier === 'free'}
                                 <BoltIcon size="sm" gradient={false} />
                                 <span>Mejorar Plan</span>
                             {:else}
@@ -414,10 +371,7 @@
                         target="_blank"
                         class="py-3 px-4 hover:bg-[#5865F2]/10 rounded-lg transition-colors text-slate-300 hover:text-[#5865F2] flex items-center gap-3 border-t border-white/5 mt-2"
                     >
-                        <svg
-                            class="w-5 h-5"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"
                             ><path
                                 d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.018.077.077 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.018.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.086 2.157 2.419 0 1.334-.956 2.419-2.157 2.419zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.086 2.157 2.419 0 1.334-.946 2.419-2.157 2.419z"
                             /></svg
@@ -448,13 +402,11 @@
                                 <div
                                     class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-sm font-bold text-white shadow-inner"
                                 >
-                                    {$userStore.user?.displayName?.[0]?.toUpperCase() ||
-                                        "U"}
+                                    {$userStore.user?.displayName?.[0]?.toUpperCase() || 'U'}
                                 </div>
                                 <div class="flex flex-col leading-tight">
                                     <span class="text-sm font-bold text-white">
-                                        {$userStore.user?.displayName ||
-                                            "Usuario"}
+                                        {$userStore.user?.displayName || 'Usuario'}
                                     </span>
                                     <span class="text-xs text-slate-400">
                                         Configurar Perfil >
@@ -485,7 +437,7 @@
                                 <span class="text-lg">🐛</span>
                                 <span>Reportar Errores</span>
                             </a>
-                            {#if $userSubscription.tier === "pro"}
+                            {#if $userSubscription.tier === 'pro'}
                                 <a
                                     href="/proposals"
                                     class="flex items-center gap-3 mb-3 text-sm font-bold text-purple-300 hover:text-purple-200 px-1"
@@ -583,9 +535,7 @@
         </div>
 
         <!-- CTA Buttons -->
-        <div
-            class="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8 relative z-10"
-        >
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8 relative z-10">
             {#if !$userStore.isLoggedIn}
                 <button
                     on:click={openAuth}
@@ -618,8 +568,8 @@
                 La atmósfera perfecta para tu audiencia
             </h2>
             <p class="text-slate-400 max-w-2xl mx-auto text-lg">
-                ChillChess te da el control total del ambiente. Sin sorpresas,
-                sin cortes y seguras para tu contenido.
+                ChillChess te da el control total del ambiente. Sin sorpresas, sin cortes y seguras
+                para tu contenido.
             </p>
         </div>
 
@@ -633,13 +583,10 @@
                 >
                     <div class="text-2xl">🎥</div>
                 </div>
-                <h3 class="text-2xl font-bold text-slate-100 mb-3">
-                    100% Stream Safe
-                </h3>
+                <h3 class="text-2xl font-bold text-slate-100 mb-3">100% Stream Safe</h3>
                 <p class="text-slate-400 leading-relaxed text-sm">
-                    Utiliza nuestra música en tus directos de Twitch, YouTube o
-                    Kick. Solo pedimos créditos en la descripción. ¡Cero
-                    strikes!
+                    Utiliza nuestra música en tus directos de Twitch, YouTube o Kick. Solo pedimos
+                    créditos en la descripción. ¡Cero strikes!
                 </p>
             </div>
 
@@ -652,13 +599,10 @@
                 >
                     <MusicIcon size="md" />
                 </div>
-                <h3 class="text-2xl font-bold text-slate-100 mb-3">
-                    Radio Sin Cortes
-                </h3>
+                <h3 class="text-2xl font-bold text-slate-100 mb-3">Radio Sin Cortes</h3>
                 <p class="text-slate-400 leading-relaxed text-sm">
-                    Olvídate de cambiar de canción a mitad de una partida. Flujo
-                    continuo de Lo-Fi y Jazz para mantener el "vibe" durante
-                    horas.
+                    Olvídate de cambiar de canción a mitad de una partida. Flujo continuo de Lo-Fi y
+                    Jazz para mantener el "vibe" durante horas.
                 </p>
             </div>
 
@@ -671,13 +615,10 @@
                 >
                     <EyeIcon size="md" />
                 </div>
-                <h3 class="text-2xl font-bold text-slate-100 mb-3">
-                    Estética Visual
-                </h3>
+                <h3 class="text-2xl font-bold text-slate-100 mb-3">Estética Visual</h3>
                 <p class="text-slate-400 leading-relaxed text-sm">
-                    Fondos animados y elegantes que puedes capturar en tu OBS
-                    para darle un toque profesional a tus escenas de "Just
-                    Chatting" o "Be Right Back".
+                    Fondos animados y elegantes que puedes capturar en tu OBS para darle un toque
+                    profesional a tus escenas de "Just Chatting" o "Be Right Back".
                 </p>
             </div>
 
@@ -685,9 +626,7 @@
             <div
                 class="group bg-[#131b2e]/60 backdrop-blur-xl p-8 rounded-3xl border border-white/5 hover:border-purple-500/30 transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-purple-500/10 lg:col-span-2"
             >
-                <div
-                    class="flex flex-col md:flex-row gap-6 items-start md:items-center"
-                >
+                <div class="flex flex-col md:flex-row gap-6 items-start md:items-center">
                     <div
                         class="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-white flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform"
                     >
@@ -697,12 +636,9 @@
                         <h3 class="text-2xl font-bold text-slate-100 mb-2">
                             Apoya a Artistas Reales
                         </h3>
-                        <p
-                            class="text-slate-400 leading-relaxed text-sm max-w-xl"
-                        >
-                            Al usar ChillChess, ayudas a músicos independientes
-                            a ser escuchados. Una comunidad real detrás de cada
-                            beat.
+                        <p class="text-slate-400 leading-relaxed text-sm max-w-xl">
+                            Al usar ChillChess, ayudas a músicos independientes a ser escuchados.
+                            Una comunidad real detrás de cada beat.
                         </p>
                     </div>
                 </div>
@@ -715,12 +651,9 @@
                 <div class="mb-4">
                     <StarIcon size="md" gradient={true} />
                 </div>
-                <h3 class="text-xl font-bold text-white mb-2">
-                    Gratis para Empezar
-                </h3>
+                <h3 class="text-xl font-bold text-white mb-2">Gratis para Empezar</h3>
                 <p class="text-slate-400 text-sm">
-                    Biblioteca básica gratuita y planes Pro para desbloquear
-                    todo.
+                    Biblioteca básica gratuita y planes Pro para desbloquear todo.
                 </p>
             </div>
         </div>
@@ -735,8 +668,7 @@
                 Listo para mejorar tu Stream?
             </h2>
             <p class="text-slate-400 mb-8 max-w-xl mx-auto">
-                Únete a otros creadores que ya usan ChillChess para sus fondos
-                musicales.
+                Únete a otros creadores que ya usan ChillChess para sus fondos musicales.
             </p>
             <a
                 href="/coleccion"
@@ -753,14 +685,8 @@
             class="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-8 text-center md:text-left"
         >
             <div class="space-y-2">
-                <div
-                    class="flex items-center gap-2 justify-center md:justify-start opacity-80"
-                >
-                    <img
-                        src="/logo-desktop.png"
-                        alt="Logo"
-                        class="h-6 w-auto"
-                    />
+                <div class="flex items-center gap-2 justify-center md:justify-start opacity-80">
+                    <img src="/logo-desktop.png" alt="Logo" class="h-6 w-auto" />
                 </div>
                 <p class="text-sm text-slate-500">
                     &copy; 2025 ChillChess. Todos los derechos reservados.
@@ -770,25 +696,19 @@
                 >
                     <MusicIcon size="sm" />
                     <span>
-                        Nuestra música es de uso libre en Streams. Te pedimos
-                        por favor que nos menciones como
-                        <span class="text-slate-500 font-medium"
-                            >ChillChess</span
-                        > en tu descripción.
+                        Nuestra música es de uso libre en Streams. Te pedimos por favor que nos
+                        menciones como
+                        <span class="text-slate-500 font-medium">ChillChess</span> en tu descripción.
                     </span>
                 </p>
             </div>
             <div
                 class="flex flex-col md:flex-row gap-4 md:gap-8 text-sm font-medium items-center md:items-start"
             >
-                <a
-                    href="/legal/cookies"
-                    class="text-slate-500 hover:text-white transition-colors"
+                <a href="/legal/cookies" class="text-slate-500 hover:text-white transition-colors"
                     >Política de Cookies</a
                 >
-                <a
-                    href="/legal/terms"
-                    class="text-slate-500 hover:text-white transition-colors"
+                <a href="/legal/terms" class="text-slate-500 hover:text-white transition-colors"
                     >Términos y Condiciones</a
                 >
                 <a
@@ -797,11 +717,7 @@
                     rel="noopener noreferrer"
                     class="text-slate-500 hover:text-[#5865F2] transition-colors flex items-center gap-2"
                 >
-                    <svg
-                        class="w-4 h-4"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                    >
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                         <path
                             d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.018.077.077 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.018.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.086 2.157 2.419 0 1.334-.956 2.419-2.157 2.419zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.086 2.157 2.419 0 1.334-.946 2.419-2.157 2.419z"
                         />

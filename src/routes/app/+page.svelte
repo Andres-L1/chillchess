@@ -29,9 +29,7 @@
     let newHabitTitle = '';
     let newTaskTitle = '';
 
-    // Mock XP (Connect to real user profile later)
-    let currentXP = 0;
-    let level = 1;
+    // Mock XP Removed
 
     async function loadData() {
         if (!$userStore.user) return;
@@ -54,9 +52,6 @@
             );
             const tasksSnap = await getDocs(qTasks);
             tasks = tasksSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-
-            // Calculate XP (Simple mock logic)
-            currentXP = habits.length * 10 + tasks.filter((t) => t.completed).length * 5;
         } catch (e) {
             console.error('Error loading data', e);
         } finally {
@@ -77,12 +72,28 @@
                 streak: 0,
                 createdAt: serverTimestamp(),
             });
-            toast.success('Hábito creado (+10 XP)');
+            toast.success('Hábito creado');
             newHabitTitle = '';
             showHabitForm = false;
             loadData();
         } catch (e) {
             toast.error('Error al crear hábito');
+        }
+    }
+
+    async function incrementHabit(habit: any) {
+        // Optimistic UI
+        habit.streak = (habit.streak || 0) + 1;
+        habits = habits;
+        try {
+            await updateDoc(doc(db, 'habits', habit.id), {
+                streak: increment(1),
+                lastCompleted: serverTimestamp(),
+            });
+            toast.success('¡Bien hecho!');
+        } catch (e) {
+            habit.streak -= 1; // Revert
+            toast.error('Error al actualizar');
         }
     }
 
@@ -113,7 +124,7 @@
             await updateDoc(doc(db, 'tasks', task.id), {
                 completed: task.completed,
             });
-            if (task.completed) toast.success('Tarea completada (+5 XP)');
+            if (task.completed) toast.success('Tarea completada');
             loadData(); // Reload to sync generic
         } catch (e) {
             console.error(e);
@@ -145,22 +156,6 @@
             10 páginas").<br />
             <strong class="text-blue-400">Tareas:</strong> Cosas únicas por hacer (Ej: "Cancelar suscripción").
         </p>
-
-        <!-- XP Bar -->
-        <div class="mb-12">
-            <div
-                class="flex justify-between text-xs font-bold uppercase tracking-widest text-slate-500 mb-2"
-            >
-                <span>Nivel {Math.floor(currentXP / 100) + 1}</span>
-                <span>{currentXP % 100} / 100 XP</span>
-            </div>
-            <div class="h-2 bg-white/5 rounded-full overflow-hidden">
-                <div
-                    class="h-full bg-gradient-to-r from-orange-500 to-red-500 transition-all duration-1000"
-                    style="width: {currentXP % 100}%"
-                ></div>
-            </div>
-        </div>
     </header>
 
     <main class="max-w-4xl mx-auto space-y-6">
@@ -194,10 +189,6 @@
                         <span class="font-medium text-lg">Crea un hábito</span>
                     </div>
                     <div class="flex items-center gap-4">
-                        <span
-                            class="px-3 py-1 rounded bg-orange-500/20 text-orange-400 text-xs font-bold"
-                            >+10 XP</span
-                        >
                         <div
                             class="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg font-medium text-sm transition-colors"
                         >
@@ -260,10 +251,6 @@
                         <span class="font-medium text-lg">Crea una tarea</span>
                     </div>
                     <div class="flex items-center gap-4">
-                        <span
-                            class="px-3 py-1 rounded bg-blue-500/20 text-blue-400 text-xs font-bold"
-                            >+5 XP</span
-                        >
                         <div
                             class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium text-sm transition-colors"
                         >
@@ -310,16 +297,29 @@
                 {:else}
                     <div class="space-y-3">
                         {#each habits as habit}
-                            <div
-                                class="p-4 rounded-xl border border-white/5 bg-white/[0.02] flex items-center justify-between group hover:border-orange-500/30 transition-colors"
+                            <button
+                                on:click={() => incrementHabit(habit)}
+                                class="w-full text-left p-4 rounded-xl border border-white/5 bg-white/[0.02] flex items-center justify-between group hover:border-orange-500/30 transition-all hover:bg-white/5"
                             >
                                 <span class="font-medium text-slate-200">{habit.title}</span>
                                 <div
-                                    class="flex items-center gap-2 text-xs text-orange-400 font-bold bg-orange-500/10 px-2 py-1 rounded"
+                                    class="flex items-center gap-2 text-xs text-slate-400 font-bold bg-white/5 px-3 py-1.5 rounded group-hover:bg-orange-500 group-hover:text-white transition-colors"
                                 >
-                                    Racha: {habit.streak || 0}
+                                    <svg
+                                        class="w-3 h-3"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                        ><path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="3"
+                                            d="M5 13l4 4L19 7"
+                                        /></svg
+                                    >
+                                    <span>{habit.streak || 0}</span>
                                 </div>
-                            </div>
+                            </button>
                         {/each}
                     </div>
                 {/if}
