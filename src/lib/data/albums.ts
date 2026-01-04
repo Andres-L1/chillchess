@@ -10,6 +10,7 @@ export interface Track {
 export type AlbumCategory = 'musica' | 'juegos' | 'ambiente';
 
 export interface Album {
+    artistId?: string; // Optional: Link to artist profile
     id: string;
     title: string;
     artist: string;
@@ -31,6 +32,7 @@ export interface Album {
 export const ALBUMS: Album[] = [
     {
         id: 'asap-forever',
+        artistId: 'julyactv-official',
         title: 'ASAP is forever',
         artist: 'JULYACTV',
         cover: '/assets/images/covers/asap.jpg',

@@ -7,8 +7,9 @@
         toggleShuffle,
         toggleRepeat,
     } from '$lib/audio/store';
-    import { slide } from 'svelte/transition';
+    import { slide, fade } from 'svelte/transition';
     import { onMount, createEventDispatcher } from 'svelte';
+    import { goto } from '$app/navigation';
     import { getAlbumById } from '$lib/data/albums';
 
     import MiniPlayer from './player/MiniPlayer.svelte';
@@ -30,6 +31,7 @@
     }
 
     let showVolumeSlider = false;
+    let showMobileOptions = false;
     let isCollapsed = false;
     let showTrackList = false;
 
@@ -488,6 +490,7 @@
                     </div>
 
                     <button
+                        on:click={() => (showMobileOptions = true)}
                         class="p-2 w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center text-slate-300 transition-colors"
                         aria-label="Opciones"
                     >
@@ -833,6 +836,104 @@
                     {/if}
                 </div>
             </div>
+
+            <!-- Mobile Options Menu Overlay -->
+            {#if showMobileOptions}
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <!-- svelte-ignore a11y-no-static-element-interactions -->
+                <div
+                    class="absolute inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end justify-center"
+                    transition:fade={{ duration: 200 }}
+                    on:click={() => (showMobileOptions = false)}
+                >
+                    <div
+                        class="bg-[#1e293b] w-full rounded-t-3xl border-t border-white/10 p-6 space-y-2 mb-0 safe-area-bottom shadow-2xl"
+                        on:click|stopPropagation
+                        transition:slide={{ axis: 'y', duration: 200 }}
+                    >
+                        <div class="flex items-center gap-4 mb-6 border-b border-white/5 pb-4">
+                            <div class="w-12 h-12 rounded-lg bg-slate-800 overflow-hidden">
+                                <img
+                                    src={currentTrack.cover || resolvedCover || '/logo-mobile.png'}
+                                    class="w-full h-full object-cover"
+                                    alt=""
+                                />
+                            </div>
+                            <div class="min-w-0">
+                                <h3 class="text-white font-bold truncate max-w-[200px]">
+                                    {currentTrack.title}
+                                </h3>
+                                <p class="text-slate-400 text-sm">{currentTrack.artist}</p>
+                            </div>
+                        </div>
+
+                        {#if currentAlbum?.artistId}
+                            <button
+                                class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white transition-colors text-left"
+                                on:click={() => {
+                                    showMobileOptions = false;
+                                    isCollapsed = true; // Minimize player
+                                    goto(`/artist/${currentAlbum.artistId}`);
+                                }}
+                            >
+                                <svg
+                                    class="w-6 h-6 text-slate-400"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                    />
+                                </svg>
+                                <span>Ver perfil del Artista</span>
+                            </button>
+                        {/if}
+
+                        <button
+                            class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white transition-colors text-left"
+                            on:click={() => {
+                                if (navigator.share) {
+                                    navigator.share({
+                                        title: currentTrack.title,
+                                        text: `Escucha ${currentTrack.title} de ${currentTrack.artist} en ChillChess`,
+                                        url: window.location.href,
+                                    });
+                                } else {
+                                    navigator.clipboard.writeText(window.location.href);
+                                    alert('Enlace copiado');
+                                }
+                                showMobileOptions = false;
+                            }}
+                        >
+                            <svg
+                                class="w-6 h-6 text-slate-400"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                                />
+                            </svg>
+                            <span>Compartir canción</span>
+                        </button>
+
+                        <button
+                            class="w-full p-3 mt-4 text-center font-bold text-slate-300 hover:text-white border-t border-white/5 pt-4"
+                            on:click={() => (showMobileOptions = false)}
+                        >
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            {/if}
         </div>
     {/if}
 {/if}
