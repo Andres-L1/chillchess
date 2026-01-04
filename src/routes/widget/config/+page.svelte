@@ -4,24 +4,33 @@
     import { userStore } from '$lib/auth/userStore';
     import { toast } from '$lib/stores/notificationStore';
 
-    let activeTab: 'music' | 'streak' = 'music';
+    let activeTab: 'music' | 'streak' | 'room' = 'music';
 
     // Music Config
     let showLogo = true;
-    let showArt = true; // New option
+    let showArt = true;
     let opacity = 0.9;
 
     // Streak Config
     let streakLabel = 'Días en Directo';
-    let streakUpdateInterval = 5; // minutes check
+    // let streakUpdateInterval = 5;
+
+    // Room Config
+    let inputRoomId = '';
+    let showRoomCode = true;
 
     $: baseUrl = browser ? window.location.origin : '';
     $: uidParam = $userStore.user?.uid ? `&uid=${$userStore.user.uid}` : '';
 
-    $: widgetUrl =
-        activeTab === 'music'
-            ? `${baseUrl}/widget?theme=dark&size=large&showLogo=${showLogo}&showArt=${showArt}&opacity=${opacity}${uidParam}`
-            : `${baseUrl}/widget/streak?label=${encodeURIComponent(streakLabel)}${uidParam}`;
+    $: widgetUrl = (() => {
+        if (activeTab === 'music') {
+            return `${baseUrl}/widget?theme=dark&size=large&showLogo=${showLogo}&showArt=${showArt}&opacity=${opacity}${uidParam}`;
+        } else if (activeTab === 'room') {
+            return `${baseUrl}/widget/room?id=${inputRoomId}&code=${showRoomCode}&theme=dark`;
+        } else {
+            return `${baseUrl}/widget/streak?label=${encodeURIComponent(streakLabel)}${uidParam}`;
+        }
+    })();
 
     async function copyToClipboard() {
         try {
@@ -66,6 +75,15 @@
             </button>
             <button
                 class="px-4 py-2 text-sm font-bold border-b-2 transition-all whitespace-nowrap {activeTab ===
+                'room'
+                    ? 'border-primary-500 text-white'
+                    : 'border-transparent text-slate-500 hover:text-slate-300'}"
+                on:click={() => (activeTab = 'room')}
+            >
+                👥 Widget Sala
+            </button>
+            <button
+                class="px-4 py-2 text-sm font-bold border-b-2 transition-all whitespace-nowrap {activeTab ===
                 'streak'
                     ? 'border-orange-500 text-white'
                     : 'border-transparent text-slate-500 hover:text-slate-300'}"
@@ -87,8 +105,6 @@
                                 Configurado óptimamente para mostrar track y visualizador.
                             </p>
                         </div>
-
-                        <!-- Opacity -->
                         <div class="mb-4">
                             <label for="opacity-slider" class="block text-sm font-medium mb-2"
                                 >Opacidad: {(opacity * 100).toFixed(0)}%</label
@@ -103,8 +119,6 @@
                                 class="w-full accent-primary-500"
                             />
                         </div>
-
-                        <!-- Show Attributes -->
                         <div class="space-y-3">
                             <label class="flex items-center gap-3 cursor-pointer select-none">
                                 <input
@@ -123,13 +137,45 @@
                                 <span class="text-sm">Mostrar Portada del Álbum</span>
                             </label>
                         </div>
+                    {:else if activeTab === 'room'}
+                        <div class="mb-6">
+                            <p class="text-sm text-slate-400 mb-4">
+                                Muestra qué se escucha en tu Sala y los participantes.
+                            </p>
+                            <div class="space-y-4">
+                                <div>
+                                    <label
+                                        for="room-id"
+                                        class="block text-xs uppercase text-slate-500 mb-1 font-bold"
+                                        >ID de la Sala</label
+                                    >
+                                    <input
+                                        id="room-id"
+                                        type="text"
+                                        bind:value={inputRoomId}
+                                        class="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-primary-500 outline-none transition-colors placeholder:text-slate-600"
+                                        placeholder="Pega aquí el ID de tu sala..."
+                                    />
+                                    <p class="text-[10px] text-slate-500 mt-1">
+                                        Lo encontrarás en la URL de tu sala: /rooms/[ID]
+                                    </p>
+                                </div>
+                                <label class="flex items-center gap-3 cursor-pointer select-none">
+                                    <input
+                                        type="checkbox"
+                                        bind:checked={showRoomCode}
+                                        class="w-5 h-5 accent-primary-500"
+                                    />
+                                    <span class="text-sm">Mostrar Nombre de Sala</span>
+                                </label>
+                            </div>
+                        </div>
                     {:else}
                         <!-- Streak Config -->
                         <div class="mb-6">
                             <p class="text-sm text-slate-400 mb-4">
                                 Muestra cuántos días has hecho directo (actividad en app).
                             </p>
-
                             <div class="space-y-4">
                                 <div>
                                     <label
@@ -167,7 +213,11 @@
                         on:click={copyToClipboard}
                         class="w-full py-3 bg-primary-500 hover:bg-primary-600 rounded-lg font-bold transition-colors"
                     >
-                        📋 Copiar URL {activeTab === 'music' ? '(Música)' : '(Racha)'}
+                        📋 Copiar URL {activeTab === 'music'
+                            ? '(Música)'
+                            : activeTab === 'room'
+                              ? '(Sala)'
+                              : '(Racha)'}
                     </button>
 
                     {#if $userStore.loading}
@@ -176,7 +226,7 @@
                         >
                             <span>🔄</span> Verificando sesión...
                         </p>
-                    {:else if !$userStore.user}
+                    {:else if !$userStore.user && activeTab !== 'room'}
                         <div
                             class="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-center"
                         >
@@ -184,14 +234,8 @@
                                 ⚠️ No detectamos tu sesión
                             </p>
                             <p class="text-xs text-slate-400 mb-2">
-                                Para sincronizar, necesitas estar logueado.
+                                Para sincronizar, necesitas estar logueado (Excepto widget sala).
                             </p>
-                            <button
-                                on:click={() => goto('/login')}
-                                class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1 rounded text-white transition-colors"
-                            >
-                                Iniciar Sesión →
-                            </button>
                         </div>
                     {/if}
                 </div>
@@ -204,11 +248,9 @@
                     </h3>
                     <ol class="text-sm space-y-2 text-slate-300">
                         <li>1. Copia la URL de arriba.</li>
-                        <li>
-                            2. En OBS: Añade una fuente → <strong>Browser Source</strong>
-                        </li>
+                        <li>2. En OBS: Añade una fuente → <strong>Browser Source</strong></li>
                         <li>3. Pega la URL en el campo "URL".</li>
-                        {#if activeTab === 'music'}
+                        {#if activeTab === 'music' || activeTab === 'room'}
                             <li>
                                 4. Tamaño recomendado: <strong>450px ancho x 120px alto</strong>.
                             </li>
@@ -235,15 +277,15 @@
                             class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2070')] bg-cover bg-center opacity-20 blur-sm group-hover:opacity-30 transition-opacity"
                         ></div>
 
-                        {#if $userStore.user}
+                        {#if $userStore.user || activeTab === 'room'}
                             <div class="relative z-10 pl-6">
-                                <!-- Added padding specifically for preview centering visual -->
                                 <iframe
                                     src={widgetUrl}
                                     class="border-0 rounded-xl shadow-2xl overflow-hidden"
-                                    style="width: {activeTab === 'music'
+                                    style="width: {activeTab === 'music' || activeTab === 'room'
                                         ? '460px'
-                                        : '300px'}; height: {activeTab === 'music'
+                                        : '300px'}; height: {activeTab === 'music' ||
+                                    activeTab === 'room'
                                         ? '140px'
                                         : '100px'};"
                                     title="Widget Preview"
@@ -257,7 +299,7 @@
                                     Inicia sesión para ver la preview real
                                 </p>
                                 <p class="text-xs text-slate-400 mt-2">
-                                    Los widgets necesitan tu ID de usuario para saber qué mostrar.
+                                    Los widgets necesitan tu ID de usuario.
                                 </p>
                             </div>
                         {/if}
