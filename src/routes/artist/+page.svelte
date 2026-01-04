@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import { onMount, onDestroy } from 'svelte';
     import { userStore } from '$lib/auth/userStore';
     import { userSubscription } from '$lib/subscription/userSubscription';
     import { goto } from '$app/navigation';
@@ -12,6 +12,7 @@
         query,
         where,
         getDocs,
+        onSnapshot,
     } from 'firebase/firestore';
     import { db } from '$lib/firebase';
     import type { ArtistProfile, SocialLink } from '$lib/types/artist';
@@ -49,6 +50,8 @@
     let activityMap: Record<string, number> = {};
     let calendar: { date: string; count: number; intensity: number }[] = [];
 
+    let unsubscribe: () => void;
+
     onMount(async () => {
         // Check auth
         if (!$userStore.user) {
@@ -56,136 +59,96 @@
             return;
         }
 
-        // Check if pro
         isPro = $userSubscription.tier === 'pro';
-
-        // Load badge preferences from user profile (users collection)
         showVerifiedBadge = $userSubscription.profile?.showVerifiedBadge ?? true;
         showFounderBadge = $userSubscription.profile?.showFounderBadge ?? true;
 
-        // ========================================
-        // DYNAMIC PROFILE LOOKUP (Auto-Migration)
-        // ========================================
-        // This searches for the user's artist profile intelligently:
-        // 1. First by userId field (supports custom IDs like 'JULYACTV')
-        // 2. Then by document ID = UID (current standard)
-        // This auto-syncs legacy profiles without manual migration
         try {
-            let profileDoc;
-            let profileId: string | null = null;
+            // =========================================================
+            // SIMPLIFIED & DETERMINISTIC PROFILE LOADING
+            // =========================================================
+            // Source of Truth: The 'artistProfileId' field in 'users/{uid}'
 
-            // STEP 1: Search by userId field (Strongest Link)
-            const artistsQuery = query(
-                collection(db, 'artists'),
-                where('userId', '==', $userStore.user.uid)
-            );
-            const userSnapshot = await getDocs(artistsQuery);
-            const userProfiles = userSnapshot.docs.map((d) => ({ ref: d, data: d.data() }));
+            const userRef = doc(db, 'users', $userStore.user!.uid);
+            const userDoc = await getDoc(userRef);
+            const userData = userDoc.exists() ? userDoc.data() : {};
 
-            // STEP 2: Search by Artist Name (Legacy/Claim)
-            // We ALWAYS check this to find better profiles (like verified ones) even if a UID profile exists
-            // This fixes "Split Brain" where a new empty UID profile hides an existing legacy profile
-            let nameProfiles: { ref: any; data: any }[] = [];
-            if ($userStore.user.displayName) {
-                const nameQuery = query(
-                    collection(db, 'artists'),
-                    where('artistName', '==', $userStore.user?.displayName)
-                );
-                const nameSnapshot = await getDocs(nameQuery);
+            let targetId = userData.artistProfileId;
 
-                // Filter out duplicates and profiles owned by others
-                nameProfiles = nameSnapshot.docs
-                    .filter((d) => !userProfiles.find((p) => p.ref.id === d.id)) // Not already found
-                    .filter((d) => !d.data().userId || d.data().userId === $userStore.user?.uid) // Not owned by others
-                    .map((d) => ({ ref: d, data: d.data() }));
-            }
+            // If not linked yet, find the best candidate to link
+            if (!targetId) {
+                console.log('No linked profile found. Searching candidates...');
 
-            // STEP 3: Fallback check for UID document
-            let uidProfile = null;
-            // Only check if we haven't found a UID profile in step 1
-            if (!userProfiles.find((p) => p.ref.id === $userStore.user?.uid)) {
-                const uidDoc = await getDoc(doc(db, 'artists', $userStore.user?.uid));
+                // 1. Try UID (Standard)
+                const uidDoc = await getDoc(doc(db, 'artists', $userStore.user!.uid));
+
+                // 2. Try Slug (Legacy recovery)
+                let slugDoc = null;
+                if ($userStore.user!.displayName) {
+                    const slug = $userStore
+                        .user!.displayName!.toLowerCase()
+                        .replace(/[^a-z0-9]+/g, '-');
+                    slugDoc = await getDoc(doc(db, 'artists', slug));
+                }
+
                 if (uidDoc.exists()) {
-                    // Avoid duplicates
-                    if (!nameProfiles.find((p) => p.ref.id === uidDoc.id)) {
-                        uidProfile = { ref: uidDoc, data: uidDoc.data() };
+                    targetId = $userStore.user.uid;
+                } else if (slugDoc && slugDoc.exists() && !slugDoc.data().userId) {
+                    // Claim orphan legacy profile
+                    targetId = slugDoc.id;
+                    toast.success('Perfil antiguo recuperado automáticamente');
+                } else {
+                    // Create New
+                    targetId = $userStore.user.uid;
+                }
+
+                // SAVE THE LINK PERMANENTLY
+                if (userDoc.exists()) {
+                    await updateDoc(userRef, { artistProfileId: targetId });
+                }
+            }
+
+            currentProfileId = targetId;
+            console.log('✅ Working with Profile ID:', currentProfileId);
+
+            if (!currentProfileId) return;
+
+            // REAL-TIME SUBSCRIPTION
+            unsubscribe = onSnapshot(doc(db, 'artists', currentProfileId), (docSnap) => {
+                if (docSnap.exists()) {
+                    profile = docSnap.data() as ArtistProfile;
+
+                    // Update local form state to match DB
+                    if (!saving) {
+                        // Don't overwrite if user is typing
+                        artistName = profile.artistName || '';
+                        bio = profile.bio || '';
+                        avatarUrl = profile.avatarUrl || '';
+                        bannerUrl = profile.bannerUrl || '';
+                        themeColor = profile.themeColor || '#9333EA';
+                        accentColor = profile.accentColor || '#A855F7';
+                        socialLinks = profile.socialLinks || [];
                     }
+                } else {
+                    // New profile, init defaults
+                    artistName = $userStore.user!.displayName || 'Mi Nombre';
+                    bio = 'Artista en ChillChess';
                 }
-            }
+                loading = false;
+            });
 
-            // MERGE ALL CANDIDATES
-            const allCandidates = [...userProfiles, ...nameProfiles];
-            if (uidProfile) allCandidates.push(uidProfile);
-
-            if (allCandidates.length > 0) {
-                // Find the best profile match
-                // Priority:
-                // 1. Verified Profile (Always wins)
-                // 2. Custom ID/Slug (e.g. 'julyactv-official') - Prefer over generic UID
-                // 3. Any profile with my UserID already linked
-                // 4. First available
-
-                const verifiedProfile = allCandidates.find((p) => p.data.isVerified);
-                const customIdProfile = allCandidates.find(
-                    (p) => p.ref.id !== $userStore.user?.uid
-                );
-                const linkedProfile = allCandidates.find(
-                    (p) => p.data.userId === $userStore.user?.uid
-                );
-
-                const bestMatch =
-                    verifiedProfile || customIdProfile || linkedProfile || allCandidates[0];
-
-                profileDoc = bestMatch.ref;
-                profileId = profileDoc.id;
-
-                console.log(
-                    `✅ Selected profile: ${profileId} from ${allCandidates.length} candidates`
-                );
-
-                if (bestMatch !== linkedProfile && !bestMatch.data.userId) {
-                    toast.success('Perfil antiguo vinculado automáticamente');
-                }
-            } else {
-                // No existing profile - will create new one on save
-                artistName = $userStore.user.displayName || 'Mi Nombre';
-                bio = 'Artista en ChillChess';
-                currentProfileId = $userStore.user?.uid; // Default to UID for new profiles
-                console.log('📝 Creating new profile draft');
-            }
-
-            // Store the resolved profile ID for saving later
-            currentProfileId = profileId;
-
-            if (profileDoc && profileDoc.exists()) {
-                profile = profileDoc.data() as ArtistProfile;
-                // Ensure profile is reactive
-                artistName = profile.artistName || '';
-                bio = profile.bio || '';
-                avatarUrl = profile.avatarUrl || '';
-                bannerUrl = profile.bannerUrl || '';
-                themeColor = profile.themeColor || '#9333EA';
-                accentColor = profile.accentColor || '#A855F7';
-                socialLinks = profile.socialLinks || [];
-            } else {
-                // No existing profile - will create new one on save
-                artistName = $userStore.user.displayName || 'Mi Nombre';
-                bio = 'Artista en ChillChess';
-                currentProfileId = $userStore.user.uid; // Default to UID for new profiles
-            }
-
-            // Load activity data for heatmap
-            const userDoc = await getDoc(doc(db, 'users', $userStore.user.uid));
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                activityMap = userData.activityMap || {};
-                generateCalendar();
-            }
-        } catch (e) {
-            console.error('Error loading profile:', e);
-        } finally {
+            // Load activity map (One-time fetch is fine for stats)
+            activityMap = userData.activityMap || {};
+            generateCalendar();
+        } catch (e: any) {
+            console.error('Error in profile setup:', e);
+            toast.error('Error cargando perfil: ' + e.message);
             loading = false;
         }
+    });
+
+    onDestroy(() => {
+        if (unsubscribe) unsubscribe();
     });
 
     function generateCalendar() {
