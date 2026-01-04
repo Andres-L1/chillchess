@@ -167,13 +167,35 @@
     <title>Artistas Verificados | ChillChess</title>
 </svelte:head>
 
-<div class="min-h-screen bg-midnight-900 text-white font-poppins pb-32 pt-24 px-4 md:px-12">
-    <div class="max-w-7xl mx-auto">
+    // Search
+    let searchQuery = '';
+    
+    $: filteredArtists = verifiedArtists.filter(artist => {
+        if (!searchQuery) return true;
+        const q = searchQuery.toLowerCase();
+        return (
+            artist.artistName.toLowerCase().includes(q) || 
+            (artist.bio && artist.bio.toLowerCase().includes(q))
+        );
+    });
+
+    // ... (rest of the script logic remains, just update the template to loop over filteredArtists)
+</script>
+
+<svelte:head>
+    <title>Artistas Verificados | ChillChess</title>
+</svelte:head>
+
+<div class="min-h-screen bg-midnight-900 text-white font-poppins pb-32 pt-24 px-4 md:px-12 relative overflow-hidden">
+    <!-- Ambient Background -->
+    <div class="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-primary-900/10 to-transparent pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto relative z-10">
         <!-- Back Button -->
         <div class="mb-8">
             <a
                 href="/"
-                class="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors group"
+                class="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors group px-4 py-2 rounded-full hover:bg-white/5"
             >
                 <svg
                     class="w-5 h-5 transition-transform group-hover:-translate-x-1"
@@ -194,176 +216,140 @@
 
         <!-- Header -->
         <header class="mb-12 text-center">
-            <div class="inline-flex items-center justify-center mb-4">
-                <!-- Microphone SVG Icon -->
-                <svg
-                    class="w-16 h-16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                >
-                    <defs>
-                        <linearGradient id="micGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#FF7B3D;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#FFB347;stop-opacity:1" />
-                        </linearGradient>
-                    </defs>
-                    <!-- Microphone body -->
-                    <rect
-                        x="9"
-                        y="2"
-                        width="6"
-                        height="11"
-                        rx="3"
-                        stroke="url(#micGradient)"
-                        stroke-width="2"
-                        fill="none"
-                    />
-                    <!-- Microphone stand -->
-                    <path d="M12 19v3M8 22h8" stroke="url(#micGradient)" stroke-width="2" />
-                    <!-- Sound waves -->
-                    <path
-                        d="M19 10v2a7 7 0 0 1-14 0v-2"
-                        stroke="url(#micGradient)"
-                        stroke-width="2"
-                    />
-                </svg>
-            </div>
-            <h1 class="text-4xl md:text-5xl font-bold mb-4">
-                Artistas <span class="text-primary-500">Verificados</span>
+            <h1 class="text-4xl md:text-6xl font-bold mb-6 tracking-tight">
+                Voces de <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-orange-400">ChillChess</span>
             </h1>
-            <p class="text-slate-400 text-lg max-w-2xl mx-auto">
-                Conoce a los creadores detrás de la música de ChillChess. Artistas verificados con
-                contenido original y de calidad.
+            <p class="text-slate-400 text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
+                Descubre a los artistas verificados que crean la atmósfera perfecta para tu concentración.
             </p>
+
+            <!-- Search Bar -->
+            <div class="max-w-md mx-auto relative group">
+                <div class="absolute inset-0 bg-primary-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        bind:value={searchQuery}
+                        placeholder="Buscar artista o género..." 
+                        class="w-full bg-[#0B1120] border border-white/10 rounded-2xl px-6 py-4 pl-14 text-white placeholder-slate-500 focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/50 transition-all outline-none shadow-xl"
+                    />
+                    <svg class="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+            </div>
         </header>
 
-        <!-- Stats -->
-        {#if verifiedArtists.length > 0}
-            <div class="flex justify-center gap-8 mb-12">
+        <!-- Stats (Optional - only show if no search) -->
+        {#if !searchQuery && verifiedArtists.length > 0}
+            <div class="flex justify-center gap-12 mb-16 border-b border-white/5 pb-8">
                 <div class="text-center">
-                    <div class="text-3xl font-bold text-primary-500">
+                    <div class="text-3xl font-bold text-white mb-1">
                         {verifiedArtists.length}
                     </div>
-                    <div class="text-sm text-slate-500">Artistas Verificados</div>
+                    <div class="text-xs font-bold uppercase tracking-widest text-primary-500">Artistas</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-3xl font-bold text-primary-500">
+                    <div class="text-3xl font-bold text-white mb-1">
                         {totalAlbumsCount}
                     </div>
-                    <div class="text-sm text-slate-500">Álbumes Totales</div>
+                    <div class="text-xs font-bold uppercase tracking-widest text-primary-500">Lanzamientos</div>
                 </div>
             </div>
         {/if}
 
         <!-- Artists Grid -->
-        {#if verifiedArtists.length === 0}
-            <div class="text-center py-20 bg-white/5 rounded-3xl border border-white/10">
-                <div class="inline-flex justify-center mb-4 text-slate-600">
+        {#if filteredArtists.length === 0}
+            <div class="text-center py-32">
+                <div class="inline-flex justify-center mb-6 text-slate-700">
                     <MusicIcon size="xl" />
                 </div>
-                <h3 class="text-2xl font-bold mb-2">Próximamente</h3>
-                <p class="text-slate-400">Los artistas verificados aparecerán aquí pronto.</p>
+                <h3 class="text-2xl font-bold mb-2">No se encontraron artistas</h3>
+                <p class="text-slate-400">Intenta con otra búsqueda.</p>
             </div>
         {:else}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in-up">
-                {#each verifiedArtists as artist}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in-up">
+                {#each filteredArtists as artist}
                     {@const artistAlbums = getAlbumsForArtist(artist, allAlbumsList)}
                     {@const totalTracks = artistAlbums.reduce(
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         (sum, album) => sum + (album.tracks?.length || 0),
                         0
                     )}
 
                     <button
                         on:click={() => goto(`/artist/${artist.id || artist.userId}`)}
-                        class="group bg-white/5 hover:bg-white/10 border border-white/10 hover:border-primary-500/50 rounded-2xl p-6 transition-all hover:scale-105 active:scale-95 text-left"
+                        class="group relative bg-[#151b2e] border border-white/5 rounded-3xl overflow-hidden hover:border-primary-500/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary-900/20 text-left h-full flex flex-col"
                     >
-                        <!-- Artist Avatar -->
-                        <div class="flex items-start gap-4 mb-4">
-                            <div
-                                class="w-20 h-20 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-3xl shadow-lg shrink-0"
-                            >
-                                {#if artist.avatarUrl}
-                                    <img
-                                        src={artist.avatarUrl}
-                                        alt={artist.artistName}
-                                        class="w-full h-full rounded-full object-cover"
-                                    />
-                                {:else}
-                                    <MusicIcon size="xl" gradient={true} />
-                                {/if}
+                        <!-- Banner Area (Background) -->
+                        <div class="absolute top-0 left-0 w-full h-32 overflow-hidden opacity-40 group-hover:opacity-60 transition-opacity">
+                            {#if artist.bannerUrl}
+                                <img src={artist.bannerUrl} alt="" class="w-full h-full object-cover blur-sm group-hover:blur-0 transition-all duration-500 scale-105 group-hover:scale-110" />
+                            {:else}
+                                <div class="w-full h-full bg-gradient-to-br from-primary-900/50 to-purple-900/50"></div>
+                            {/if}
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#151b2e] to-transparent"></div>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="relative z-10 p-6 flex flex-col h-full">
+                            
+                            <!-- Header: Avatar + Badge -->
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="w-20 h-20 rounded-2xl bg-[#0B1120] p-1 shadow-xl ring-1 ring-white/10 group-hover:ring-primary-500/50 transition-all">
+                                    {#if artist.avatarUrl}
+                                        <img
+                                            src={artist.avatarUrl}
+                                            alt={artist.artistName}
+                                            class="w-full h-full rounded-xl object-cover"
+                                        />
+                                    {:else}
+                                        <div class="w-full h-full rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center text-2xl font-bold text-slate-500">
+                                            {artist.artistName[0]}
+                                        </div>
+                                    {/if}
+                                </div>
+                                
+                                <VerifiedBadge />
                             </div>
 
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <h3 class="text-xl font-bold text-white truncate">
-                                        {artist.artistName}
-                                    </h3>
-                                    <div class="flex-shrink-0 relative z-10">
-                                        <VerifiedBadge size="sm" />
-                                    </div>
-                                </div>
-                                <p class="text-sm text-slate-400 line-clamp-2">
-                                    {artist.bio || 'Artista de ChillChess'}
+                            <!-- Info -->
+                            <div class="mb-6 flex-1">
+                                <h3 class="text-2xl font-bold text-white mb-2 group-hover:text-primary-400 transition-colors truncate">
+                                    {artist.artistName}
+                                </h3>
+                                <p class="text-sm text-slate-400 line-clamp-2 leading-relaxed">
+                                    {artist.bio || 'Artista verificado de la comunidad ChillChess.'}
                                 </p>
                             </div>
-                        </div>
 
-                        <!-- Stats -->
-                        <div class="flex gap-4 text-sm text-slate-500 mb-4">
-                            <div class="flex items-center gap-1.5">
-                                <AlbumIcon size="sm" />
-                                <span
-                                    >{artistAlbums.length} álbum{artistAlbums.length !== 1
-                                        ? 'es'
-                                        : ''}</span
-                                >
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <MusicIcon size="sm" />
-                                <span>{totalTracks} canciones</span>
-                            </div>
-                        </div>
-
-                        <!-- Albums Preview -->
-                        {#if artistAlbums.length > 0}
-                            <div class="flex gap-2 overflow-x-auto pb-2">
-                                {#each artistAlbums.slice(0, 3) as album}
-                                    <div
-                                        class="w-16 h-16 rounded-lg overflow-hidden shrink-0 ring-2 ring-white/10 group-hover:ring-primary-500/50 transition-all"
-                                    >
-                                        <img
-                                            src={getCoverUrl(album)}
-                                            alt={album.title}
-                                            class="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                {/each}
-                                {#if artistAlbums.length > 3}
-                                    <div
-                                        class="w-16 h-16 rounded-lg bg-white/10 shrink-0 flex items-center justify-center text-xs font-bold text-slate-400"
-                                    >
-                                        +{artistAlbums.length - 3}
-                                    </div>
-                                {/if}
-                            </div>
-                        {/if}
-
-                        <!-- CTA -->
-                        <div class="mt-4 flex items-center justify-between text-sm">
-                            <span
-                                class="text-primary-400 font-medium group-hover:text-primary-300 transition-colors"
-                            >
-                                Ver Perfil →
-                            </span>
-                            {#if artist.followerCount}
-                                <span class="text-slate-500">
-                                    {artist.followerCount} seguidores
+                            <!-- Metrics Pills -->
+                            <div class="flex flex-wrap gap-2 mb-6">
+                                <span class="px-3 py-1 rounded-full bg-white/5 text-xs font-medium text-slate-300 border border-white/5 flex items-center gap-2">
+                                    <AlbumIcon size="sm" /> 
+                                    {artistAlbums.length} lanzamientos
                                 </span>
+                                <span class="px-3 py-1 rounded-full bg-white/5 text-xs font-medium text-slate-300 border border-white/5 flex items-center gap-2">
+                                    <MusicIcon size="sm" /> 
+                                    {totalTracks} pistas
+                                </span>
+                            </div>
+
+                            <!-- Latest Release Preview -->
+                            {#if artistAlbums.length > 0}
+                                <div class="pt-4 border-t border-white/5">
+                                    <p class="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-3">Último lanzamiento</p>
+                                    <div class="flex items-center gap-3 bg-white/5 p-2 rounded-xl group-hover:bg-white/10 transition-colors">
+                                        <img
+                                            src={getCoverUrl(artistAlbums[0])}
+                                            alt=""
+                                            class="w-10 h-10 rounded-lg object-cover bg-black/50"
+                                        />
+                                        <div class="min-w-0">
+                                            <p class="text-sm font-bold text-white truncate">{artistAlbums[0].title}</p>
+                                            <p class="text-xs text-slate-400">{getAlbumsForArtist(artist, allAlbumsList)[0].tracks?.length || 0} canciones</p>
+                                        </div>
+                                    </div>
+                                </div>
                             {/if}
                         </div>
                     </button>
