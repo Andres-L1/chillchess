@@ -87,14 +87,24 @@
 
     // Robust matcher for the grid
     // We pass 'albums' explicitly to trigger Svelte reactivity in the template when the list updates
+    function getTimestampMillis(val: any): number {
+        if (!val) return 0;
+        if (typeof val === 'number') return val;
+        if (typeof val.toMillis === 'function') return val.toMillis();
+        if (val instanceof Date) return val.getTime();
+        if (val.seconds) return val.seconds * 1000;
+        return 0;
+    }
+
+    // Robust matcher for the grid + Sorting
     function getAlbumsForArtist(artist: ArtistProfile, albums: Album[]) {
         if (!artist || !albums) return [];
-        return albums.filter((album) => {
+
+        const matches = albums.filter((album) => {
             // Cast to any to access artistId if interface update hasn't propagated or is missing
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const a = album as any;
-            // Match by string ID (e.g. 'julyactv-official') OR by UID (e.g. '78sdf87s6df')
-            // This covers both legacy and new split-brain fix scenarios
+            // Match by string ID OR UID
             const idMatch =
                 a.artistId && (a.artistId === artist.id || a.artistId === artist.userId);
             const nameMatch =
@@ -103,6 +113,11 @@
                 album.artist.trim().toLowerCase() === artist.artistName.trim().toLowerCase();
             return idMatch || nameMatch;
         });
+
+        // Sort by newest first
+        return matches.sort(
+            (a, b) => getTimestampMillis(b.createdAt) - getTimestampMillis(a.createdAt)
+        );
     }
 
     // ============================================
