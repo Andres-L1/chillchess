@@ -90,7 +90,7 @@
             on:click={() => goto('/')}
             class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-8"
         >
-            <BackIcon class="w-5 h-5" />
+            <BackIcon size="md" />
             <span>Volver al Inicio</span>
         </button>
 
