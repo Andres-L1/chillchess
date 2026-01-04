@@ -25,10 +25,9 @@ let functions: Functions;
 try {
     app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-    // Initialize Firestore immediately (lightweight)
+    // Initialize Auth, Firestore, and Functions
+    auth = getAuth(app);
     db = getFirestore(app);
-
-    // Initialize Functions
     functions = getFunctions(app);
 
     // Conectar emuladores si estamos en local
@@ -36,27 +35,9 @@ try {
         connectFunctionsEmulator(functions, "localhost", 5001);
     }
 
-    // DEFERRED: Auth initialization only when needed
-    // This prevents the auth iframe from loading on the landing page
-    let authInitialized = false;
-
-    const initAuth = () => {
-        if (!authInitialized && app) {
-            auth = getAuth(app);
-            setPersistence(auth, browserLocalPersistence).catch((error) => {
-                console.warn("Auth Persistence Error:", error);
-            });
-            authInitialized = true;
-        }
-        return auth;
-    };
-
-    // Lazy getter that initializes auth on first access
-    Object.defineProperty(globalThis, '_firebase_auth_instance', {
-        get() {
-            return initAuth();
-        },
-        configurable: true
+    // Set persistence
+    setPersistence(auth, browserLocalPersistence).catch((error) => {
+        console.warn("Auth Persistence Error:", error);
     });
 
 
