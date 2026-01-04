@@ -42,6 +42,7 @@
         totalUsers: 0,
         proUsers: 0,
         totalAlbums: 0,
+        totalSingles: 0,
         verifiedArtists: 0,
         pendingSubmissions: 0,
         pendingProposals: 0,
@@ -93,7 +94,11 @@
             stats = {
                 totalUsers,
                 proUsers: proUsers + premiumUsers,
-                totalAlbums: $audioStore.availableAlbums.length,
+                totalAlbums: $audioStore.availableAlbums.filter((a) => (a.tracks?.length || 0) > 1)
+                    .length,
+                totalSingles: $audioStore.availableAlbums.filter(
+                    (a) => (a.tracks?.length || 0) <= 1
+                ).length,
                 verifiedArtists,
                 pendingSubmissions,
                 pendingProposals,
@@ -357,16 +362,32 @@
                                 <MusicIcon size="lg" />
                             </div>
                             <div class="relative z-10">
-                                <h3 class="text-slate-400 text-sm font-medium">Álbumes Activos</h3>
-                                <p class="text-3xl font-bold text-white mt-1">
-                                    {stats.totalAlbums}
-                                </p>
-                                <div class="mt-2 text-xs flex items-center gap-2">
-                                    <span
-                                        class="text-orange-400 bg-orange-400/10 px-1.5 py-0.5 rounded font-bold"
-                                    >
-                                        {stats.verifiedArtists} Artistas
-                                    </span>
+                                <h3 class="text-slate-400 text-sm font-medium">Catálogo Musical</h3>
+                                <div class="flex items-baseline gap-2 mt-1">
+                                    <p class="text-3xl font-bold text-white">
+                                        {stats.totalAlbums + stats.totalSingles}
+                                    </p>
+                                    <span class="text-xs text-slate-500">Total</span>
+                                </div>
+                                <div class="mt-3 flex flex-wrap gap-2 text-xs">
+                                    <div class="bg-white/5 rounded px-2 py-1">
+                                        <span class="text-orange-400 font-bold"
+                                            >{stats.totalAlbums}</span
+                                        >
+                                        Álbumes
+                                    </div>
+                                    <div class="bg-white/5 rounded px-2 py-1">
+                                        <span class="text-blue-400 font-bold"
+                                            >{stats.totalSingles}</span
+                                        >
+                                        Singles
+                                    </div>
+                                    <div class="bg-white/5 rounded px-2 py-1">
+                                        <span class="text-green-400 font-bold"
+                                            >{stats.verifiedArtists}</span
+                                        >
+                                        Artistas
+                                    </div>
                                 </div>
                             </div>
                         </div>

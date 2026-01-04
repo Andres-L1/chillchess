@@ -82,24 +82,66 @@
                 // 1. Try UID (Standard)
                 const uidDoc = await getDoc(doc(db, 'artists', $userStore.user!.uid));
 
-                // 2. Try Slug (Legacy recovery)
-                let slugDoc = null;
+                // 2. Enhanced Discovery (Name + Variant Slugs)
+                let foundDocs: any[] = [];
+
+                // A. Exact Name Query
                 if ($userStore.user!.displayName) {
-                    const slug = $userStore
+                    try {
+                        const qName = query(
+                            collection(db, 'artists'),
+                            where('artistName', '==', $userStore.user!.displayName)
+                        );
+                        const snaps = await getDocs(qName);
+                        snaps.forEach((d) => foundDocs.push(d));
+                    } catch (e) {
+                        console.warn('Name query failed', e);
+                    }
+
+                    // B. Slug Variations
+                    const baseSlug = $userStore
                         .user!.displayName!.toLowerCase()
                         .replace(/[^a-z0-9]+/g, '-');
-                    slugDoc = await getDoc(doc(db, 'artists', slug));
+                    const vars = [baseSlug, baseSlug + '-official', baseSlug + 'official'];
+
+                    for (const s of vars) {
+                        try {
+                            const d = await getDoc(doc(db, 'artists', s));
+                            if (d.exists()) foundDocs.push(d);
+                        } catch (e) {}
+                    }
                 }
 
-                if (uidDoc.exists()) {
-                    targetId = $userStore.user.uid;
-                } else if (slugDoc && slugDoc.exists() && !slugDoc.data().userId) {
-                    // Claim orphan legacy profile
-                    targetId = slugDoc.id;
-                    toast.success('Perfil antiguo recuperado automáticamente');
+                // C. UID Profile
+                if (uidDoc.exists()) foundDocs.push(uidDoc);
+
+                // Deduplicate & Sort
+                const unique = new Map();
+                foundDocs.forEach((d) => unique.set(d.id, d));
+                const candidates = Array.from(unique.values());
+
+                if (candidates.length > 0) {
+                    // Sort: Verified first, then followers
+                    candidates.sort((a, b) => {
+                        const dA = a.data();
+                        const dB = b.data();
+                        return (
+                            (dB.isVerified ? 1 : 0) - (dA.isVerified ? 1 : 0) ||
+                            (dB.followerCount || 0) - (dA.followerCount || 0)
+                        );
+                    });
+
+                    const best = candidates[0];
+                    // Check ownership (not owned by OTHER user)
+                    if (!best.data().userId || best.data().userId === $userStore.user!.uid) {
+                        targetId = best.id;
+                        if (best.id !== $userStore.user!.uid)
+                            toast.success('Perfil oficial vinculado');
+                    } else {
+                        targetId = $userStore.user!.uid; // Taken, fallback to UID
+                    }
                 } else {
-                    // Create New
-                    targetId = $userStore.user.uid;
+                    targetId = $userStore.user!.uid; // New
                 }
 
                 // SAVE THE LINK PERMANENTLY
