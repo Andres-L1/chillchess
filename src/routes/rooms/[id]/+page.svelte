@@ -225,13 +225,23 @@
         if (unsubscribeStore) unsubscribeStore();
         if (inactivityTimer) clearTimeout(inactivityTimer);
 
-        if ($userStore.user) {
+        if ($userStore.user && room) {
             const roomRef = doc(db, 'listeningRooms', roomId);
+            const pKeys = Object.keys(room.participants || {});
+            const amILast = pKeys.length <= 1 && pKeys.includes($userStore.user.uid);
+
             try {
-                await updateDoc(roomRef, {
-                    [`participants.${$userStore.user.uid}`]: deleteField(),
-                });
-            } catch (e) {}
+                if (amILast) {
+                    await deleteDoc(roomRef);
+                    // Messages left orphaned
+                } else {
+                    await updateDoc(roomRef, {
+                        [`participants.${$userStore.user.uid}`]: deleteField(),
+                    });
+                }
+            } catch (e) {
+                console.error(e);
+            }
         }
     });
 </script>

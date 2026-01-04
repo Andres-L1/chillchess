@@ -46,10 +46,12 @@ try {
         connectFunctionsEmulator(functions, "localhost", 5001);
     }
 
-    // Set persistence
-    setPersistence(auth, browserLocalPersistence).catch((error) => {
-        console.warn("Auth Persistence Error:", error);
-    });
+    // Set persistence (Browser only)
+    if (typeof window !== 'undefined') {
+        setPersistence(auth, browserLocalPersistence).catch((error) => {
+            console.warn("Auth Persistence Error:", error);
+        });
+    }
 
 
 } catch (e) {
