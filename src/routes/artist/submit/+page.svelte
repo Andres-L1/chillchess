@@ -401,10 +401,14 @@
 
                     <div class="space-y-6">
                         <div>
-                            <label class="block text-sm font-medium mb-2 text-slate-300">
+                            <label
+                                for="release-title"
+                                class="block text-sm font-medium mb-2 text-slate-300"
+                            >
                                 Título del Álbum o Single
                             </label>
                             <input
+                                id="release-title"
                                 type="text"
                                 bind:value={releaseTitle}
                                 placeholder="Ej. Midnight Lofi Sessions"
@@ -413,10 +417,14 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium mb-2 text-slate-300">
+                            <label
+                                for="genre-select"
+                                class="block text-sm font-medium mb-2 text-slate-300"
+                            >
                                 Género Principal
                             </label>
                             <select
+                                id="genre-select"
                                 bind:value={genre}
                                 class="w-full bg-[#0B1120] border border-white/10 rounded-xl px-4 py-3 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all"
                             >
@@ -438,10 +446,14 @@
 
                         {#if genre === 'Otra'}
                             <div class="animate-fade-in">
-                                <label class="block text-sm font-medium mb-2 text-slate-300">
+                                <label
+                                    for="custom-genre"
+                                    class="block text-sm font-medium mb-2 text-slate-300"
+                                >
                                     Especifica el género
                                 </label>
                                 <input
+                                    id="custom-genre"
                                     type="text"
                                     bind:value={customGenre}
                                     placeholder="Ej. Future Garage"
@@ -473,6 +485,9 @@
                     <div class="grid md:grid-cols-2 gap-6">
                         <!-- Cover Upload -->
                         <div
+                            role="button"
+                            tabindex="0"
+                            aria-label="Upload cover image by clicking or dragging"
                             class="relative aspect-square bg-[#0B1120] rounded-xl overflow-hidden border-2 border-dashed transition-all {coverDragging
                                 ? 'border-primary-500 bg-primary-500/10'
                                 : 'border-white/20 hover:border-primary-500/50'} group cursor-pointer"
@@ -571,6 +586,9 @@
                     <!-- Audio Upload Zone -->
                     {#if audioFiles.length === 0}
                         <div
+                            role="button"
+                            tabindex="0"
+                            aria-label="Upload audio files by clicking or dragging"
                             class="relative border-2 border-dashed rounded-xl p-12 transition-all {audioDragging
                                 ? 'border-primary-500 bg-primary-500/10'
                                 : 'border-white/20 hover:border-primary-500/50'} bg-[#0B1120]/50 text-center"
