@@ -157,6 +157,18 @@
         return 'https://via.placeholder.com/300x300/1e293b/cbd5e1?text=Album';
     }
 
+    // Search
+    let searchQuery = '';
+
+    $: filteredArtists = verifiedArtists.filter((artist) => {
+        if (!searchQuery) return true;
+        const q = searchQuery.toLowerCase();
+        return (
+            artist.artistName.toLowerCase().includes(q) ||
+            (artist.bio && artist.bio.toLowerCase().includes(q))
+        );
+    });
+
     onDestroy(() => {
         if (unsubscribeArtists) unsubscribeArtists();
         if (unsubscribeAlbums) unsubscribeAlbums();
@@ -167,28 +179,13 @@
     <title>Artistas Verificados | ChillChess</title>
 </svelte:head>
 
-    // Search
-    let searchQuery = '';
-    
-    $: filteredArtists = verifiedArtists.filter(artist => {
-        if (!searchQuery) return true;
-        const q = searchQuery.toLowerCase();
-        return (
-            artist.artistName.toLowerCase().includes(q) || 
-            (artist.bio && artist.bio.toLowerCase().includes(q))
-        );
-    });
-
-    // ... (rest of the script logic remains, just update the template to loop over filteredArtists)
-</script>
-
-<svelte:head>
-    <title>Artistas Verificados | ChillChess</title>
-</svelte:head>
-
-<div class="min-h-screen bg-midnight-900 text-white font-poppins pb-32 pt-24 px-4 md:px-12 relative overflow-hidden">
+<div
+    class="min-h-screen bg-midnight-900 text-white font-poppins pb-32 pt-24 px-4 md:px-12 relative overflow-hidden"
+>
     <!-- Ambient Background -->
-    <div class="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-primary-900/10 to-transparent pointer-events-none"></div>
+    <div
+        class="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-primary-900/10 to-transparent pointer-events-none"
+    ></div>
 
     <div class="max-w-7xl mx-auto relative z-10">
         <!-- Back Button -->
@@ -217,24 +214,40 @@
         <!-- Header -->
         <header class="mb-12 text-center">
             <h1 class="text-4xl md:text-6xl font-bold mb-6 tracking-tight">
-                Voces de <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-orange-400">ChillChess</span>
+                Voces de <span
+                    class="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-orange-400"
+                    >ChillChess</span
+                >
             </h1>
             <p class="text-slate-400 text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
-                Descubre a los artistas verificados que crean la atmósfera perfecta para tu concentración.
+                Descubre a los artistas verificados que crean la atmósfera perfecta para tu
+                concentración.
             </p>
 
             <!-- Search Bar -->
             <div class="max-w-md mx-auto relative group">
-                <div class="absolute inset-0 bg-primary-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div
+                    class="absolute inset-0 bg-primary-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                ></div>
                 <div class="relative">
-                    <input 
-                        type="text" 
+                    <input
+                        type="text"
                         bind:value={searchQuery}
-                        placeholder="Buscar artista o género..." 
+                        placeholder="Buscar artista o género..."
                         class="w-full bg-[#0B1120] border border-white/10 rounded-2xl px-6 py-4 pl-14 text-white placeholder-slate-500 focus:border-primary-500/50 focus:ring-1 focus:ring-primary-500/50 transition-all outline-none shadow-xl"
                     />
-                    <svg class="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    <svg
+                        class="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        />
                     </svg>
                 </div>
             </div>
@@ -247,13 +260,17 @@
                     <div class="text-3xl font-bold text-white mb-1">
                         {verifiedArtists.length}
                     </div>
-                    <div class="text-xs font-bold uppercase tracking-widest text-primary-500">Artistas</div>
+                    <div class="text-xs font-bold uppercase tracking-widest text-primary-500">
+                        Artistas
+                    </div>
                 </div>
                 <div class="text-center">
                     <div class="text-3xl font-bold text-white mb-1">
                         {totalAlbumsCount}
                     </div>
-                    <div class="text-xs font-bold uppercase tracking-widest text-primary-500">Lanzamientos</div>
+                    <div class="text-xs font-bold uppercase tracking-widest text-primary-500">
+                        Lanzamientos
+                    </div>
                 </div>
             </div>
         {/if}
@@ -281,21 +298,32 @@
                         class="group relative bg-[#151b2e] border border-white/5 rounded-3xl overflow-hidden hover:border-primary-500/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary-900/20 text-left h-full flex flex-col"
                     >
                         <!-- Banner Area (Background) -->
-                        <div class="absolute top-0 left-0 w-full h-32 overflow-hidden opacity-40 group-hover:opacity-60 transition-opacity">
+                        <div
+                            class="absolute top-0 left-0 w-full h-32 overflow-hidden opacity-40 group-hover:opacity-60 transition-opacity"
+                        >
                             {#if artist.bannerUrl}
-                                <img src={artist.bannerUrl} alt="" class="w-full h-full object-cover blur-sm group-hover:blur-0 transition-all duration-500 scale-105 group-hover:scale-110" />
+                                <img
+                                    src={artist.bannerUrl}
+                                    alt=""
+                                    class="w-full h-full object-cover blur-sm group-hover:blur-0 transition-all duration-500 scale-105 group-hover:scale-110"
+                                />
                             {:else}
-                                <div class="w-full h-full bg-gradient-to-br from-primary-900/50 to-purple-900/50"></div>
+                                <div
+                                    class="w-full h-full bg-gradient-to-br from-primary-900/50 to-purple-900/50"
+                                ></div>
                             {/if}
-                            <div class="absolute inset-0 bg-gradient-to-t from-[#151b2e] to-transparent"></div>
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-[#151b2e] to-transparent"
+                            ></div>
                         </div>
 
                         <!-- Content -->
                         <div class="relative z-10 p-6 flex flex-col h-full">
-                            
                             <!-- Header: Avatar + Badge -->
                             <div class="flex justify-between items-start mb-4">
-                                <div class="w-20 h-20 rounded-2xl bg-[#0B1120] p-1 shadow-xl ring-1 ring-white/10 group-hover:ring-primary-500/50 transition-all">
+                                <div
+                                    class="w-20 h-20 rounded-2xl bg-[#0B1120] p-1 shadow-xl ring-1 ring-white/10 group-hover:ring-primary-500/50 transition-all"
+                                >
                                     {#if artist.avatarUrl}
                                         <img
                                             src={artist.avatarUrl}
@@ -303,18 +331,22 @@
                                             class="w-full h-full rounded-xl object-cover"
                                         />
                                     {:else}
-                                        <div class="w-full h-full rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center text-2xl font-bold text-slate-500">
+                                        <div
+                                            class="w-full h-full rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center text-2xl font-bold text-slate-500"
+                                        >
                                             {artist.artistName[0]}
                                         </div>
                                     {/if}
                                 </div>
-                                
+
                                 <VerifiedBadge />
                             </div>
 
                             <!-- Info -->
                             <div class="mb-6 flex-1">
-                                <h3 class="text-2xl font-bold text-white mb-2 group-hover:text-primary-400 transition-colors truncate">
+                                <h3
+                                    class="text-2xl font-bold text-white mb-2 group-hover:text-primary-400 transition-colors truncate"
+                                >
                                     {artist.artistName}
                                 </h3>
                                 <p class="text-sm text-slate-400 line-clamp-2 leading-relaxed">
@@ -324,12 +356,16 @@
 
                             <!-- Metrics Pills -->
                             <div class="flex flex-wrap gap-2 mb-6">
-                                <span class="px-3 py-1 rounded-full bg-white/5 text-xs font-medium text-slate-300 border border-white/5 flex items-center gap-2">
-                                    <AlbumIcon size="sm" /> 
+                                <span
+                                    class="px-3 py-1 rounded-full bg-white/5 text-xs font-medium text-slate-300 border border-white/5 flex items-center gap-2"
+                                >
+                                    <AlbumIcon size="sm" />
                                     {artistAlbums.length} lanzamientos
                                 </span>
-                                <span class="px-3 py-1 rounded-full bg-white/5 text-xs font-medium text-slate-300 border border-white/5 flex items-center gap-2">
-                                    <MusicIcon size="sm" /> 
+                                <span
+                                    class="px-3 py-1 rounded-full bg-white/5 text-xs font-medium text-slate-300 border border-white/5 flex items-center gap-2"
+                                >
+                                    <MusicIcon size="sm" />
                                     {totalTracks} pistas
                                 </span>
                             </div>
@@ -337,16 +373,27 @@
                             <!-- Latest Release Preview -->
                             {#if artistAlbums.length > 0}
                                 <div class="pt-4 border-t border-white/5">
-                                    <p class="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-3">Último lanzamiento</p>
-                                    <div class="flex items-center gap-3 bg-white/5 p-2 rounded-xl group-hover:bg-white/10 transition-colors">
+                                    <p
+                                        class="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-3"
+                                    >
+                                        Último lanzamiento
+                                    </p>
+                                    <div
+                                        class="flex items-center gap-3 bg-white/5 p-2 rounded-xl group-hover:bg-white/10 transition-colors"
+                                    >
                                         <img
                                             src={getCoverUrl(artistAlbums[0])}
                                             alt=""
                                             class="w-10 h-10 rounded-lg object-cover bg-black/50"
                                         />
                                         <div class="min-w-0">
-                                            <p class="text-sm font-bold text-white truncate">{artistAlbums[0].title}</p>
-                                            <p class="text-xs text-slate-400">{getAlbumsForArtist(artist, allAlbumsList)[0].tracks?.length || 0} canciones</p>
+                                            <p class="text-sm font-bold text-white truncate">
+                                                {artistAlbums[0].title}
+                                            </p>
+                                            <p class="text-xs text-slate-400">
+                                                {getAlbumsForArtist(artist, allAlbumsList)[0].tracks
+                                                    ?.length || 0} canciones
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
