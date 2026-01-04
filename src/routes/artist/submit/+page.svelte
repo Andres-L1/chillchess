@@ -21,6 +21,7 @@
     let releaseTitle = '';
     let genre = 'Lo-fi Hip Hop';
     let customGenre = '';
+    let category: 'musica' | 'juegos' | 'ambiente' = 'musica';
     let coverFile: File | null = null;
     let coverPreview: string | null = null;
 
@@ -241,6 +242,7 @@
                 artistName: $userStore.user?.displayName || 'Unknown',
                 releaseTitle: releaseTitle.trim(),
                 genre: genre === 'Otra' ? customGenre.trim() : genre,
+                category,
                 r2CoverKey: coverData.key,
                 r2AudioKeys: uploadedAudio,
                 coverUrl: null,
@@ -461,6 +463,47 @@
                                 />
                             </div>
                         {/if}
+
+                        <div>
+                            <span class="block text-sm font-medium mb-2 text-slate-300">
+                                Tipo de Contenido
+                            </span>
+                            <div class="grid grid-cols-3 gap-3">
+                                <button
+                                    type="button"
+                                    on:click={() => (category = 'musica')}
+                                    class="p-3 rounded-xl border-2 transition-all {category ===
+                                    'musica'
+                                        ? 'border-primary-500 bg-primary-500/10'
+                                        : 'border-white/10 bg-white/5 hover:border-white/20'}"
+                                >
+                                    <div class="text-2xl mb-1">🎵</div>
+                                    <div class="text-xs font-medium">Música</div>
+                                </button>
+                                <button
+                                    type="button"
+                                    on:click={() => (category = 'juegos')}
+                                    class="p-3 rounded-xl border-2 transition-all {category ===
+                                    'juegos'
+                                        ? 'border-purple-500 bg-purple-500/10'
+                                        : 'border-white/10 bg-white/5 hover:border-white/20'}"
+                                >
+                                    <div class="text-2xl mb-1">🎮</div>
+                                    <div class="text-xs font-medium">Juegos</div>
+                                </button>
+                                <button
+                                    type="button"
+                                    on:click={() => (category = 'ambiente')}
+                                    class="p-3 rounded-xl border-2 transition-all {category ===
+                                    'ambiente'
+                                        ? 'border-green-500 bg-green-500/10'
+                                        : 'border-white/10 bg-white/5 hover:border-white/20'}"
+                                >
+                                    <div class="text-2xl mb-1">🌿</div>
+                                    <div class="text-xs font-medium">Ambiente</div>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <button

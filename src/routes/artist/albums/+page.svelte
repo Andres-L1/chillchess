@@ -31,6 +31,7 @@
     // Form state
     let title = '';
     let category = 'Lo-fi';
+    let albumCategory: 'musica' | 'juegos' | 'ambiente' = 'musica';
     let coverFile: File | null = null;
     let coverPreview: string | null = null;
     let tracks: Array<{ title: string; url: string }> = [];
@@ -91,6 +92,7 @@
         editingAlbum = album;
         title = album.title;
         category = album.category || 'Lo-fi';
+        albumCategory = (album as any).albumCategory || 'musica';
         coverPreview = album.cover || null;
         tracks = album.tracks ? album.tracks.map((t) => ({ title: t.title, url: t.file })) : [];
         showModal = true;
@@ -99,6 +101,7 @@
     function resetForm() {
         title = '';
         category = 'Lo-fi';
+        albumCategory = 'musica';
         coverFile = null;
         coverPreview = null;
         tracks = [];
@@ -219,6 +222,7 @@
                 r2CoverKey: r2CoverKey,
                 storageProvider: 'cloudflare_r2',
                 ...(category && { category }), // Only include if defined
+                albumCategory,
                 tracks: tracks.map((t, idx) => ({
                     id: `track-${idx + 1}`,
                     title: t.title,
@@ -440,6 +444,46 @@
                         <option>Jazz Hop</option>
                         <option>Study Beats</option>
                     </select>
+                </div>
+
+                <!-- Album Category (Tipo de Contenido) -->
+                <div>
+                    <span class="block text-sm font-medium mb-2">Tipo de Contenido</span>
+                    <div class="grid grid-cols-3 gap-3">
+                        <button
+                            type="button"
+                            on:click={() => (albumCategory = 'musica')}
+                            class="p-3 rounded-xl border-2 transition-all {albumCategory ===
+                            'musica'
+                                ? 'border-primary-500 bg-primary-500/10'
+                                : 'border-white/10 bg-white/5 hover:border-white/20'}"
+                        >
+                            <div class="text-2xl mb-1">🎵</div>
+                            <div class="text-xs font-medium">Música</div>
+                        </button>
+                        <button
+                            type="button"
+                            on:click={() => (albumCategory = 'juegos')}
+                            class="p-3 rounded-xl border-2 transition-all {albumCategory ===
+                            'juegos'
+                                ? 'border-purple-500 bg-purple-500/10'
+                                : 'border-white/10 bg-white/5 hover:border-white/20'}"
+                        >
+                            <div class="text-2xl mb-1">🎮</div>
+                            <div class="text-xs font-medium">Juegos</div>
+                        </button>
+                        <button
+                            type="button"
+                            on:click={() => (albumCategory = 'ambiente')}
+                            class="p-3 rounded-xl border-2 transition-all {albumCategory ===
+                            'ambiente'
+                                ? 'border-green-500 bg-green-500/10'
+                                : 'border-white/10 bg-white/5 hover:border-white/20'}"
+                        >
+                            <div class="text-2xl mb-1">🌿</div>
+                            <div class="text-xs font-medium">Ambiente</div>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Cover -->
