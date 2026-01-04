@@ -33,6 +33,7 @@
     import GreetingHeader from './components/GreetingHeader.svelte';
     import HabitsWidget from './components/HabitsWidget.svelte';
     import HabitModal from './components/HabitModal.svelte';
+    import OnboardingTour from './components/OnboardingTour.svelte';
 
     let habits: Habit[] = [];
     let loading = true;
@@ -51,6 +52,10 @@
     let showHabitModal = false;
     let editingHabit: Habit | null = null;
     let showDeleteConfirm = false;
+
+    // Onboarding Tour
+    let showTour = false;
+    const TOUR_COMPLETED_KEY = 'chillchess-app-tour-completed';
 
     // Defaults
     const defaultHabit: Partial<Habit> = {
@@ -135,8 +140,21 @@
             registerServiceWorker().then(() => {
                 console.log('Service Worker ready for local notifications');
             });
+
+            // Check if user has completed tour
+            const tourCompleted = localStorage.getItem(TOUR_COMPLETED_KEY);
+            if (!tourCompleted) {
+                setTimeout(() => {
+                    showTour = true;
+                }, 500);
+            }
         }
     });
+
+    function completeTour() {
+        localStorage.setItem(TOUR_COMPLETED_KEY, 'true');
+        showTour = false;
+    }
 
     import { userSubscription } from '$lib/subscription/userSubscription';
     import PaywallModal from '$lib/components/PaywallModal.svelte';
@@ -324,7 +342,7 @@
     <main class="max-w-4xl mx-auto pb-24 relative">
         <!-- Header -->
         <div class="mb-8">
-            <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center justify-between mb-2" data-tour="stats">
                 <h1
                     class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-500"
                 >
@@ -333,6 +351,7 @@
 
                 <!-- Botón de notificaciones -->
                 <button
+                    data-tour="notification-btn"
                     on:click={enableNotifications}
                     class="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-medium transition-all flex items-center gap-2"
                     title="Activar recordatorios"
@@ -390,15 +409,18 @@
         </div>
 
         <!-- Main Content -->
-        <HabitsWidget
-            habits={filteredHabits}
-            onOpenModal={openHabitModal}
-            onToggleDay={toggleHabitDay}
-        />
+        <div data-tour="habits-list">
+            <HabitsWidget
+                habits={filteredHabits}
+                onOpenModal={openHabitModal}
+                onToggleDay={toggleHabitDay}
+            />
+        </div>
     </main>
 
     <!-- FAB -->
     <button
+        data-tour="new-habit"
         on:click={() => openHabitModal(null)}
         class="fixed bottom-8 right-8 md:bottom-12 md:right-12 w-14 h-14 bg-gradient-to-tr from-orange-500 to-amber-400 rounded-full shadow-lg shadow-orange-500/20 flex items-center justify-center text-black transition-transform hover:scale-105 active:scale-95 z-50"
     >
@@ -493,4 +515,9 @@
         title="Límite de Hábitos Pro"
         message="Has alcanzado el límite de 2 hábitos activos. Suscríbete a PRO para desbloquear hábitos ilimitados."
     />
+
+    <!-- Onboarding Tour -->
+    {#if showTour}
+        <OnboardingTour on:complete={completeTour} />
+    {/if}
 </div>
