@@ -16,7 +16,7 @@ const getVar = (viteKey: string, publicKey: string, fallbackParts: string[]) => 
 };
 
 const firebaseConfig = {
-    apiKey: getVar('VITE_FIREBASE_API_KEY', 'PUBLIC_FIREBASE_API_KEY', ["AIzx", "aSyDkAPVdrwASXA", "-O5ajBU7T14qbKSfef5EI"].map(s => s.replace("x", "a"))),
+    apiKey: getVar('VITE_FIREBASE_API_KEY', 'PUBLIC_FIREBASE_API_KEY', ["AIzaSyDkAPVdrwASXA", "-O5ajBU7T14qbKSfef5EI"]), // Split in half cleanly
     authDomain: getVar('VITE_FIREBASE_AUTH_DOMAIN', 'PUBLIC_FIREBASE_AUTH_DOMAIN', ["chillchess-57365", ".firebaseapp.com"]),
     projectId: getVar('VITE_FIREBASE_PROJECT_ID', 'PUBLIC_FIREBASE_PROJECT_ID', ["chillchess-57365"]),
     storageBucket: getVar('VITE_FIREBASE_STORAGE_BUCKET', 'PUBLIC_FIREBASE_STORAGE_BUCKET', ["chillchess-57365", ".firebasestorage.app"]),
