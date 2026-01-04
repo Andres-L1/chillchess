@@ -2,15 +2,15 @@
     import { onMount } from 'svelte';
     import { userStore } from '$lib/auth/userStore';
     import { goto } from '$app/navigation';
-    import { db, storage } from '$lib/firebase';
+    import { db } from '$lib/firebase';
     import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-    import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
     import { userSubscription } from '$lib/subscription/userSubscription';
     import PaywallModal from '$lib/components/PaywallModal.svelte';
     import { toast } from '$lib/stores/notificationStore';
 
     let uploading = false;
     let uploadProgress = 0;
+    let uploadStage = '';
     let showPaywall = false;
     let currentStep = 1;
 
@@ -24,9 +24,17 @@
     let coverFile: File | null = null;
     let coverPreview: string | null = null;
 
-    // Audio Files (Direct Upload)
-    let audioFiles: File[] = [];
-    let tracklist = '';
+    // Audio Files
+    interface AudioFile {
+        file: File;
+        title: string;
+        preview?: string;
+    }
+    let audioFiles: AudioFile[] = [];
+
+    // Drag & Drop States
+    let coverDragging = false;
+    let audioDragging = false;
 
     onMount(() => {
         if (!$userStore.user) {
@@ -34,44 +42,79 @@
         }
     });
 
+    // Cover Upload Handlers
     function handleCoverSelect(e: Event) {
         const input = e.target as HTMLInputElement;
         if (input.files && input.files[0]) {
-            const file = input.files[0];
-            if (file.size > 5 * 1024 * 1024) {
-                // 5MB limit
-                toast.warning('La portada no puede superar los 5MB');
-                return;
-            }
-            coverFile = file;
-            const reader = new FileReader();
-            reader.onload = (e) => (coverPreview = e.target?.result as string);
-            reader.readAsDataURL(file);
+            processCoverFile(input.files[0]);
         }
     }
 
+    function handleCoverDrop(e: DragEvent) {
+        e.preventDefault();
+        coverDragging = false;
+        const file = e.dataTransfer?.files[0];
+        if (file && file.type.startsWith('image/')) {
+            processCoverFile(file);
+        } else {
+            toast.warning('Por favor sube solo archivos de imagen');
+        }
+    }
+
+    function processCoverFile(file: File) {
+        if (file.size > 5 * 1024 * 1024) {
+            toast.warning('La portada no puede superar los 5MB');
+            return;
+        }
+        coverFile = file;
+        const reader = new FileReader();
+        reader.onload = (e) => (coverPreview = e.target?.result as string);
+        reader.readAsDataURL(file);
+    }
+
+    // Audio Upload Handlers
     function handleAudioSelect(e: Event) {
         const input = e.target as HTMLInputElement;
         if (input.files) {
-            const files = Array.from(input.files);
-            const validFiles = files.filter((file) => {
-                // 500MB hard limit for R2
-                if (file.size > 500 * 1024 * 1024) {
-                    toast.warning(`El archivo ${file.name} es demasiado grande. Máximo 500MB.`);
-                    return false;
-                }
-                return true;
-            });
-
-            audioFiles = validFiles;
-
-            // Auto-generate tracklist from filenames
-            if (validFiles.length > 0) {
-                tracklist = validFiles
-                    .map((file, idx) => `${idx + 1}. ${file.name.replace(/\.(mp3|wav|m4a)$/i, '')}`)
-                    .join('\n');
-            }
+            processAudioFiles(Array.from(input.files));
         }
+    }
+
+    function handleAudioDrop(e: DragEvent) {
+        e.preventDefault();
+        audioDragging = false;
+        const files = e.dataTransfer?.files;
+        if (files) {
+            processAudioFiles(Array.from(files));
+        }
+    }
+
+    function processAudioFiles(files: File[]) {
+        const validFiles = files.filter((file) => {
+            if (file.size > 500 * 1024 * 1024) {
+                toast.warning(`${file.name} es demasiado grande. Máximo 500MB.`);
+                return false;
+            }
+            if (!file.type.startsWith('audio/')) {
+                toast.warning(`${file.name} no es un archivo de audio válido.`);
+                return false;
+            }
+            return true;
+        });
+
+        audioFiles = validFiles.map((file) => ({
+            file,
+            title: file.name.replace(/\.(mp3|wav|m4a)$/i, ''),
+            preview: URL.createObjectURL(file),
+        }));
+    }
+
+    function removeAudioFile(index: number) {
+        audioFiles = audioFiles.filter((_, i) => i !== index);
+    }
+
+    function updateTrackTitle(index: number, newTitle: string) {
+        audioFiles[index].title = newTitle;
     }
 
     function canProceedToStep(step: number): boolean {
@@ -86,14 +129,11 @@
         return audioFiles.length > 0;
     }
 
-    async function uploadToFirebase(file: File, folder: string) {
-        const fileRef = ref(storage, `${folder}/${file.name}`);
-        const snapshot = await uploadBytes(fileRef, file);
-        const url = await getDownloadURL(snapshot.ref);
-        return { key: url, name: file.name, size: file.size, type: file.type };
-    }
-
-    async function uploadToR2(file: File, folder: string) {
+    async function uploadToR2WithProgress(
+        file: File,
+        folder: string,
+        onProgress?: (percent: number) => void
+    ) {
         // 1. Get signed URL
         const res = await fetch('/api/r2/sign-url', {
             method: 'POST',
@@ -112,20 +152,33 @@
 
         const { uploadUrl, key } = await res.json();
 
-        // 2. Upload to R2
-        const uploadRes = await fetch(uploadUrl, {
-            method: 'PUT',
-            body: file,
-            headers: {
-                'Content-Type': file.type,
-            },
+        // 2. Upload to R2 with progress tracking
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+
+            xhr.upload.addEventListener('progress', (e) => {
+                if (e.lengthComputable && onProgress) {
+                    const percent = (e.loaded / e.total) * 100;
+                    onProgress(percent);
+                }
+            });
+
+            xhr.addEventListener('load', () => {
+                if (xhr.status === 200) {
+                    resolve({ key, name: file.name, size: file.size, type: file.type });
+                } else {
+                    reject(new Error('Error subiendo archivo a R2'));
+                }
+            });
+
+            xhr.addEventListener('error', () => {
+                reject(new Error('Error de red al subir archivo'));
+            });
+
+            xhr.open('PUT', uploadUrl);
+            xhr.setRequestHeader('Content-Type', file.type);
+            xhr.send(file);
         });
-
-        if (!uploadRes.ok) {
-            throw new Error('Error subiendo archivo a R2');
-        }
-
-        return { key, name: file.name, size: file.size, type: file.type };
     }
 
     async function submitRelease() {
@@ -139,80 +192,72 @@
         if (!confirm('¿Estás seguro de enviar esta música para revisión?')) return;
 
         uploading = true;
-        uploadProgress = 5;
+        uploadProgress = 0;
 
         try {
             const userId = $userStore.user?.uid;
-
-            // Generate a unique submission ID based on timestamp
             const timestamp = Date.now();
-            // R2 Folder Structure: submissions/{userId}/{timestamp}/
-            // Note: The /api/r2/sign-url endpoint appends userId, so we just pass 'submissions'
-            // and the filename will handle uniqueness or the server logic will.
-            // Let's standardise on passing a clean folder path.
-            const r2Folder = 'submissions';
 
-            let coverData;
-            let uploadedAudio = [];
+            // Step 1: Upload Cover
+            uploadStage = 'Subiendo portada...';
+            const coverData: any = await uploadToR2WithProgress(
+                coverFile,
+                'submissions',
+                (percent) => {
+                    uploadProgress = Math.floor(percent * 0.2); // 0-20%
+                }
+            );
 
-            // --- R2 UPLOAD FLOW (Exclusive) ---
-
-            // 1. Upload Cover
-            // We prepend a timestamp to the filename to avoid collisions if they upload same file twice
-            const coverExtension = coverFile.name.split('.').pop();
-            const coverFileName = `cover_${timestamp}.${coverExtension}`;
-
-            // Create a new File object with the unique name for the upload helper
-            const renamedCover = new File([coverFile], coverFileName, { type: coverFile.type });
-
-            console.log('Subiendo portada a R2...');
-            coverData = await uploadToR2(renamedCover, r2Folder);
-            uploadProgress = 20;
-
-            // 2. Upload Audio Tracks
-            const totalFiles = audioFiles.length;
+            // Step 2: Upload Audio Files
+            uploadStage = 'Subiendo archivos de audio...';
+            const uploadedAudio = [];
             for (let i = 0; i < audioFiles.length; i++) {
-                const file = audioFiles[i];
-                // Sanitize filename: replace spaces with underscores, remove special chars
-                const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-                const audioFileName = `track_${i + 1}_${timestamp}_${sanitizedName}`;
-                const renamedAudio = new File([file], audioFileName, { type: file.type });
+                const audioFile = audioFiles[i];
+                uploadStage = `Subiendo ${audioFile.title} (${i + 1}/${audioFiles.length})...`;
 
-                console.log(`Subiendo pista ${i + 1}/${totalFiles} a R2...`);
-                const data = await uploadToR2(renamedAudio, r2Folder);
-                uploadedAudio.push(data);
+                const audioData: any = await uploadToR2WithProgress(
+                    audioFile.file,
+                    'submissions',
+                    (percent) => {
+                        const baseProgress = 20;
+                        const audioProgress = (percent / audioFiles.length) * 70;
+                        const fileOffset = (i / audioFiles.length) * 70;
+                        uploadProgress = Math.floor(baseProgress + fileOffset + audioProgress);
+                    }
+                );
 
-                // Calculate progress: 20% (start) + (fraction of audio done * 70%)
-                uploadProgress = 20 + ((i + 1) / totalFiles) * 70;
+                uploadedAudio.push({
+                    ...audioData,
+                    title: audioFile.title,
+                });
             }
 
-            // 3. Save Metadata to Firestore
-            // We store R2 keys which are cleaner and cheaper.
-            await addDoc(collection(db, 'musicSubmissions'), {
+            // Step 3: Save to Firestore
+            uploadStage = 'Guardando información...';
+            uploadProgress = 95;
+
+            await addDoc(collection(db, 'submissions'), {
                 userId,
-                artistId: userId,
-                artistName: $userStore.user?.displayName || 'Unknown Artist',
-                artistEmail: $userStore.user?.email,
-                releaseTitle,
-                genre: genre === 'Otra' ? customGenre : genre,
-
-                // Media References (R2)
+                artistName: $userStore.user?.displayName || 'Unknown',
+                releaseTitle: releaseTitle.trim(),
+                genre: genre === 'Otra' ? customGenre.trim() : genre,
                 r2CoverKey: coverData.key,
-                r2AudioKeys: uploadedAudio, // Array of { key, name, size, type }
-
-                // Legacy fields for compatibility (optional, or just omit)
+                r2AudioKeys: uploadedAudio,
                 coverUrl: null,
                 audioFiles: null,
-
-                tracklist: tracklist.trim(),
+                tracklist: audioFiles.map((f) => f.title).join('\n'),
                 submissionType: 'r2_direct',
                 status: 'pending',
                 submittedAt: serverTimestamp(),
             });
 
             uploadProgress = 100;
+            uploadStage = '¡Completado!';
             toast.success('✅ ¡Música enviada con éxito! La revisaremos pronto.');
-            goto('/artist');
+
+            setTimeout(() => {
+                goto('/artist');
+            }, 1500);
         } catch (e: any) {
             console.error('Error upload:', e);
             toast.error('Error al enviar: ' + e.message);
@@ -256,7 +301,7 @@
     </div>
 {:else}
     <div
-        class="min-h-screen bg-gradient-to-br from-[#0B1120] via-[#0f1729] to-[#0B1120] text-white font-poppins p-4 md:p-8"
+        class="min-h-screen bg-gradient-to-br from-[#0B1120] via-[#0f1729] to-[#0B1120] text-white font-poppins p-4 md:p-8 pb-32"
     >
         <div class="max-w-4xl mx-auto">
             <!-- Header -->
@@ -264,9 +309,10 @@
                 <div>
                     <a
                         href="/artist"
-                        class="text-slate-400 hover:text-white mb-2 inline-flex items-center gap-2 text-sm py-2 px-1 -ml-1"
+                        class="text-slate-400 hover:text-white mb-2 inline-flex items-center gap-2 text-sm py-2 px-1 -ml-1 group"
                     >
-                        <span>←</span> Volver al Panel
+                        <span class="group-hover:-translate-x-1 transition-transform">←</span> Volver
+                        al Panel
                     </a>
                     <h1
                         class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent"
@@ -286,7 +332,7 @@
 
             <!-- Progress Steps -->
             <div
-                class="flex items-center justify-between mb-8 bg-[#1a1a1a]/50 backdrop-blur-xl rounded-2xl p-6 border border-white/5"
+                class="flex items-center justify-between mb-8 bg-[#1a1a1a]/50 backdrop-blur-xl rounded-2xl p-4 md:p-6 border border-white/5"
             >
                 {#each [1, 2, 3] as step}
                     <div class="flex items-center {step < 3 ? 'flex-1' : ''}">
@@ -296,7 +342,7 @@
                                 step
                                     ? 'bg-primary-500 text-white scale-110 shadow-lg shadow-primary-500/50'
                                     : currentStep > step
-                                      ? 'bg-primary-600 text-white'
+                                      ? 'bg-green-500 text-white'
                                       : 'bg-white/10 text-slate-500'}"
                             >
                                 {currentStep > step ? '✓' : step}
@@ -353,11 +399,11 @@
                         <span class="text-2xl">📝</span> Información del Lanzamiento
                     </h2>
 
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="md:col-span-2">
-                            <span class="block text-sm font-medium mb-2 text-slate-300"
-                                >Título del Álbum o Single</span
-                            >
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-slate-300">
+                                Título del Álbum o Single
+                            </label>
                             <input
                                 type="text"
                                 bind:value={releaseTitle}
@@ -366,10 +412,10 @@
                             />
                         </div>
 
-                        <div class="md:col-span-2">
-                            <span class="block text-sm font-medium mb-2 text-slate-300"
-                                >Género Principal</span
-                            >
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-slate-300">
+                                Género Principal
+                            </label>
                             <select
                                 bind:value={genre}
                                 class="w-full bg-[#0B1120] border border-white/10 rounded-xl px-4 py-3 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all"
@@ -391,39 +437,23 @@
                         </div>
 
                         {#if genre === 'Otra'}
-                            <div class="md:col-span-2 animate-fade-in">
-                                <span class="block text-sm font-medium mb-2 text-slate-300">
+                            <div class="animate-fade-in">
+                                <label class="block text-sm font-medium mb-2 text-slate-300">
                                     Especifica el género
-                                </span>
+                                </label>
                                 <input
                                     type="text"
                                     bind:value={customGenre}
-                                    placeholder="Ej. Jazzy Lo-fi, Neo-Soul..."
-                                    class="w-full bg-[#0B1120] border border-primary-500/30 rounded-xl px-4 py-3 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all"
+                                    placeholder="Ej. Future Garage"
+                                    class="w-full bg-[#0B1120] border border-white/10 rounded-xl px-4 py-3 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all"
                                 />
                             </div>
                         {/if}
                     </div>
 
-                    <!-- Validation feedback -->
-                    {#if releaseTitle.trim() === ''}
-                        <div class="text-sm text-slate-400 flex items-center gap-2">
-                            <span class="text-red-400">○</span> Ingresa un título para continuar
-                        </div>
-                    {:else if genre === 'Otra' && customGenre.trim() === ''}
-                        <div class="text-sm text-slate-400 flex items-center gap-2">
-                            <span class="text-red-400">○</span> Especifica el género personalizado
-                        </div>
-                    {:else}
-                        <div class="text-sm text-primary-400 flex items-center gap-2">
-                            <span>✓</span> Listo para continuar
-                        </div>
-                    {/if}
-
                     <button
                         on:click={() => (currentStep = 2)}
-                        disabled={releaseTitle.trim() === '' ||
-                            (genre === 'Otra' && customGenre.trim() === '')}
+                        disabled={!canProceedToStep(2)}
                         class="w-full py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg transition-all shadow-lg shadow-primary-900/20"
                     >
                         Continuar →
@@ -431,18 +461,24 @@
                 </div>
             {/if}
 
-            <!-- Step 2: Cover -->
+            <!-- Step 2: Cover Art -->
             {#if currentStep === 2}
                 <div
                     class="bg-[#1a1a1a]/80 backdrop-blur-xl rounded-2xl border border-white/10 p-6 md:p-8 space-y-6 animate-fade-in"
                 >
                     <h2 class="text-xl font-bold flex items-center gap-2">
-                        <span class="text-2xl">🎨</span> Portada del Álbum
+                        <span class="text-2xl">🖼️</span> Portada del Álbum
                     </h2>
 
-                    <div class="flex flex-col md:flex-row gap-6 items-start">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Cover Upload -->
                         <div
-                            class="w-full md:w-64 aspect-square bg-[#0B1120] rounded-2xl border-2 border-dashed border-white/20 flex items-center justify-center overflow-hidden relative group cursor-pointer hover:border-primary-500/50 transition-all"
+                            class="relative aspect-square bg-[#0B1120] rounded-xl overflow-hidden border-2 border-dashed transition-all {coverDragging
+                                ? 'border-primary-500 bg-primary-500/10'
+                                : 'border-white/20 hover:border-primary-500/50'} group cursor-pointer"
+                            on:dragover|preventDefault={() => (coverDragging = true)}
+                            on:dragleave={() => (coverDragging = false)}
+                            on:drop={handleCoverDrop}
                         >
                             {#if coverPreview}
                                 <img
@@ -457,9 +493,12 @@
                                     <span class="text-sm">Cambiar</span>
                                 </div>
                             {:else}
-                                <div class="text-center p-6">
+                                <div
+                                    class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center"
+                                >
                                     <span class="text-4xl mb-2 block">🖼️</span>
-                                    <p class="text-sm text-slate-400">Haz clic para subir</p>
+                                    <p class="text-sm text-slate-400">Arrastra o haz clic</p>
+                                    <p class="text-xs text-slate-500 mt-1">Máx 5MB</p>
                                 </div>
                             {/if}
                             <input
@@ -470,7 +509,8 @@
                             />
                         </div>
 
-                        <div class="flex-1 space-y-3">
+                        <!-- Requirements -->
+                        <div class="flex flex-col justify-center space-y-3">
                             <h3 class="font-bold text-white">Requisitos de la Imagen</h3>
                             <ul class="text-sm text-slate-400 space-y-2">
                                 <li class="flex items-center gap-2">
@@ -488,7 +528,7 @@
                             </ul>
                             {#if coverPreview}
                                 <div
-                                    class="bg-primary-500/10 border border-primary-500/20 rounded-lg p-3 text-primary-400 text-sm flex items-center gap-2"
+                                    class="bg-green-500/10 border border-green-500/20 rounded-lg p-3 text-green-400 text-sm flex items-center gap-2"
                                 >
                                     <span>✓</span> Portada cargada correctamente
                                 </div>
@@ -514,7 +554,7 @@
                 </div>
             {/if}
 
-            <!-- Step 3: Download Link & Tracklist -->
+            <!-- Step 3: Audio Files -->
             {#if currentStep === 3}
                 <div
                     class="bg-[#1a1a1a]/80 backdrop-blur-xl rounded-2xl border border-white/10 p-6 md:p-8 space-y-6 animate-fade-in"
@@ -528,70 +568,101 @@
                         </p>
                     </div>
 
-                    <div class="space-y-6">
-                        <!-- Audio File Upload -->
-                        <div>
-                            <label
-                                for="audio-files"
-                                class="block text-sm font-medium mb-2 text-slate-300"
-                            >
-                                Archivos de Audio (Arrastra o haz click)
-                            </label>
-                            <div
-                                class="relative border-2 border-dashed border-white/20 rounded-xl p-8 hover:border-primary-500 transition-all bg-[#0B1120]/50"
-                            >
+                    <!-- Audio Upload Zone -->
+                    {#if audioFiles.length === 0}
+                        <div
+                            class="relative border-2 border-dashed rounded-xl p-12 transition-all {audioDragging
+                                ? 'border-primary-500 bg-primary-500/10'
+                                : 'border-white/20 hover:border-primary-500/50'} bg-[#0B1120]/50 text-center"
+                            on:dragover|preventDefault={() => (audioDragging = true)}
+                            on:dragleave={() => (audioDragging = false)}
+                            on:drop={handleAudioDrop}
+                        >
+                            <input
+                                type="file"
+                                multiple
+                                accept="audio/mpeg,audio/wav,audio/mp4,audio/x-m4a,.mp3,.wav,.m4a"
+                                on:change={handleAudioSelect}
+                                class="absolute inset-0 opacity-0 cursor-pointer"
+                            />
+                            <div class="space-y-3">
+                                <div class="text-5xl">🎧</div>
+                                <p class="text-white font-medium">
+                                    Arrastra archivos de audio aquí
+                                </p>
+                                <p class="text-sm text-slate-400">o haz clic para seleccionar</p>
+                                <p class="text-xs text-slate-500">
+                                    MP3, WAV, M4A • Máx 500MB por archivo
+                                </p>
+                            </div>
+                        </div>
+                    {:else}
+                        <!-- Track List -->
+                        <div class="space-y-3">
+                            {#each audioFiles as audio, i}
+                                <div
+                                    class="bg-[#0B1120] border border-white/10 rounded-xl p-4 flex items-center gap-4 group hover:border-primary-500/30 transition-all"
+                                >
+                                    <div class="text-2xl text-slate-400 w-8 text-center">
+                                        {i + 1}
+                                    </div>
+
+                                    <div class="flex-1 space-y-2">
+                                        <input
+                                            type="text"
+                                            bind:value={audio.title}
+                                            on:input={(e) =>
+                                                updateTrackTitle(i, e.currentTarget.value)}
+                                            class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all"
+                                        />
+                                        {#if audio.preview}
+                                            <audio
+                                                src={audio.preview}
+                                                controls
+                                                class="w-full h-8 rounded"
+                                            />
+                                        {/if}
+                                    </div>
+
+                                    <button
+                                        on:click={() => removeAudioFile(i)}
+                                        class="p-2 hover:bg-red-500/10 text-red-500 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                                        title="Eliminar"
+                                    >
+                                        <svg
+                                            class="w-5 h-5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12"
+                                            />
+                                        </svg>
+                                    </button>
+                                </div>
+                            {/each}
+
+                            <!-- Add More Button -->
+                            <div class="relative">
                                 <input
-                                    id="audio-files"
                                     type="file"
                                     multiple
                                     accept="audio/mpeg,audio/wav,audio/mp4,audio/x-m4a,.mp3,.wav,.m4a"
                                     on:change={handleAudioSelect}
                                     class="absolute inset-0 opacity-0 cursor-pointer"
                                 />
-                                <div class="text-center">
-                                    <span class="text-4xl mb-2 block">🎧</span>
-                                    {#if audioFiles.length > 0}
-                                        <p class="text-primary-400 font-bold mb-2">
-                                            ✓ {audioFiles.length} archivo(s) seleccionado(s)
-                                        </p>
-                                        <ul class="text-xs text-slate-400 space-y-1">
-                                            {#each audioFiles as file}
-                                                <li>
-                                                    {file.name} ({(file.size / 1024 / 1024).toFixed(
-                                                        2
-                                                    )} MB)
-                                                </li>
-                                            {/each}
-                                        </ul>
-                                    {:else}
-                                        <p class="text-sm text-slate-400">
-                                            Arrastra archivos aquí o haz clic para seleccionar
-                                        </p>
-                                    {/if}
-                                </div>
+                                <button
+                                    class="w-full py-3 border-2 border-dashed border-white/20 hover:border-primary-500 rounded-xl text-slate-400 hover:text-white transition-all font-medium"
+                                >
+                                    + Agregar más archivos
+                                </button>
                             </div>
                         </div>
-
-                        <!-- Tracklist Textarea -->
-                        <div>
-                            <label
-                                for="tracklist"
-                                class="block text-sm font-medium mb-2 text-slate-300"
-                            >
-                                Lista de Canciones (Tracklist)
-                            </label>
-                            <textarea
-                                id="tracklist"
-                                bind:value={tracklist}
-                                placeholder="1. Intro - 2:30&#10;2. Midnight Vibes - 3:45&#10;3. ..."
-                                rows="6"
-                                class="w-full bg-[#0B1120] border border-white/10 rounded-xl px-4 py-3 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-all resize-none font-mono text-sm"
-                            ></textarea>
-                            <p class="text-xs text-slate-500 mt-2">
-                                Escribe el nombre de las canciones en orden.
-                            </p>
-                        </div>
-                    </div>
+                    {/if}
 
                     <div class="flex gap-3">
                         <button
@@ -602,18 +673,42 @@
                         </button>
                         <button
                             on:click={submitRelease}
-                            disabled={uploading || audioFiles.length === 0}
-                            class="flex-1 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg shadow-lg shadow-primary-900/20 transition-all flex items-center justify-center gap-3"
+                            disabled={audioFiles.length === 0 || uploading}
+                            class="flex-1 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg transition-all shadow-lg shadow-green-900/20"
                         >
-                            {#if uploading}
-                                <div
-                                    class="animate-spin rounded-full h-5 w-5 border-2 border-white/20 border-t-white"
-                                ></div>
-                                <span>Enviando...</span>
-                            {:else}
-                                <span>🚀 Finalizar Envío</span>
-                            {/if}
+                            {uploading ? 'Subiendo...' : '🚀 Enviar para Revisión'}
                         </button>
+                    </div>
+                </div>
+            {/if}
+
+            <!-- Upload Progress Overlay -->
+            {#if uploading}
+                <div
+                    class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4"
+                >
+                    <div
+                        class="bg-[#1a1a1a] rounded-2xl border border-white/10 p-8 max-w-md w-full space-y-6"
+                    >
+                        <div class="text-center space-y-2">
+                            <div class="text-4xl mb-4 animate-bounce">📤</div>
+                            <h3 class="text-xl font-bold">{uploadStage}</h3>
+                            <p class="text-sm text-slate-400">No cierres esta ventana</p>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-400">Progreso</span>
+                                <span class="text-primary-400 font-bold">{uploadProgress}%</span>
+                            </div>
+                            <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                                <div
+                                    class="h-full bg-gradient-to-r from-primary-500 to-primary-600 transition-all duration-300 ease-out"
+                                    style="width: {uploadProgress}%"
+                                ></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             {/if}
