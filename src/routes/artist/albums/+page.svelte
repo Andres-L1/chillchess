@@ -135,6 +135,43 @@
         tracks = tracks.filter((_, i) => i !== index);
     }
 
+    const PUBLIC_R2_DOMAIN = 'https://pub-e58e51867b4c44f58a32c407eb8cca7c.r2.dev';
+
+    async function uploadToR2(file: File, folder: string) {
+        // 1. Get signed URL
+        const res = await fetch('/api/r2/sign-url', {
+            method: 'POST',
+            body: JSON.stringify({
+                fileName: file.name,
+                fileType: file.type,
+                fileSize: file.size,
+                folder: folder,
+            }),
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || 'Error obteniendo URL de subida');
+        }
+
+        const { uploadUrl, key } = await res.json();
+
+        // 2. Upload to R2
+        const uploadRes = await fetch(uploadUrl, {
+            method: 'PUT',
+            body: file,
+            headers: {
+                'Content-Type': file.type,
+            },
+        });
+
+        if (!uploadRes.ok) {
+            throw new Error('Error subiendo archivo a R2');
+        }
+
+        return `${PUBLIC_R2_DOMAIN}/${key}`;
+    }
+
     async function saveAlbum() {
         if (!$userStore.user) return;
         if (!title.trim()) {
@@ -146,13 +183,19 @@
 
         try {
             let coverUrl = editingAlbum?.cover || '';
+            let r2CoverKey = editingAlbum?.r2CoverKey || null;
 
             // Upload cover if changed
             if (coverFile) {
-                const timestamp = Date.now();
-                const coverRef = ref(storage, `albums/${$userStore.user.uid}/${timestamp}_cover`);
-                const snapshot = await uploadBytes(coverRef, coverFile);
-                coverUrl = await getDownloadURL(snapshot.ref);
+                // Determine folder: existing albums might want to overwrite or version?
+                // For simplicity and cache busting, we use a new timestamped key
+                const folder = `covers/${$userStore.user.uid}`;
+
+                // Upload to R2 and get Public URL
+                coverUrl = await uploadToR2(coverFile, folder);
+
+                // Extract Key from URL for metadata (optional but good practice)
+                r2CoverKey = coverUrl.replace(`${PUBLIC_R2_DOMAIN}/`, '');
             }
 
             const albumData = {
@@ -160,6 +203,8 @@
                 artist: $userStore.user.displayName || 'Unknown Artist',
                 artistId: $userStore.user.uid,
                 cover: coverUrl,
+                r2CoverKey: r2CoverKey,
+                storageProvider: 'cloudflare_r2',
                 category,
                 tracks: tracks.map((t, idx) => ({
                     id: `track-${idx + 1}`,
@@ -167,13 +212,13 @@
                     url: t.url,
                     duration: 0,
                 })),
-                releaseDate: Date.now(),
                 updatedAt: Date.now(),
             };
 
             if (modalMode === 'create') {
                 await addDoc(collection(db, 'albums'), {
                     ...albumData,
+                    releaseDate: Date.now(),
                     createdAt: serverTimestamp(),
                 });
                 toast.success('✅ Álbum creado');
