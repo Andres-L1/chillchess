@@ -30,8 +30,29 @@
         file: File;
         title: string;
         preview?: string;
+        duration?: number;
     }
     let audioFiles: AudioFile[] = [];
+
+    // Helper to get duration
+    function getAudioDuration(url: string): Promise<number> {
+        return new Promise((resolve) => {
+            const audio = new Audio(url);
+            audio.onloadedmetadata = () => {
+                if (audio.duration === Infinity) {
+                    audio.currentTime = 1e101;
+                    audio.ontimeupdate = () => {
+                        audio.ontimeupdate = null;
+                        resolve(audio.duration);
+                        audio.currentTime = 0;
+                    };
+                } else {
+                    resolve(audio.duration);
+                }
+            };
+            audio.onerror = () => resolve(0);
+        });
+    }
 
     // Drag & Drop States
     let coverDragging = false;
@@ -63,6 +84,10 @@
     }
 
     function processCoverFile(file: File) {
+        validateAndSetCover(file);
+    }
+
+    function validateAndSetCover(file: File) {
         if (file.size > 5 * 1024 * 1024) {
             toast.warning('La portada no puede superar los 5MB');
             return;
@@ -74,26 +99,14 @@
     }
 
     // Audio Upload Handlers
-    function handleAudioSelect(e: Event) {
-        const input = e.target as HTMLInputElement;
-        if (input.files) {
-            processAudioFiles(Array.from(input.files));
-        }
-    }
+    async function handleAudioSelect(e: Event) {
+        const target = e.target as HTMLInputElement;
+        if (!target.files) return;
 
-    function handleAudioDrop(e: DragEvent) {
-        e.preventDefault();
-        audioDragging = false;
-        const files = e.dataTransfer?.files;
-        if (files) {
-            processAudioFiles(Array.from(files));
-        }
-    }
-
-    function processAudioFiles(files: File[]) {
+        const files = Array.from(target.files);
         const validFiles = files.filter((file) => {
             if (file.size > 500 * 1024 * 1024) {
-                toast.warning(`${file.name} es demasiado grande. Máximo 500MB.`);
+                toast.warning(`${file.name} es demasiado grande (Máx 500MB).`);
                 return false;
             }
             if (!file.type.startsWith('audio/')) {
@@ -103,11 +116,32 @@
             return true;
         });
 
-        audioFiles = validFiles.map((file) => ({
-            file,
-            title: file.name.replace(/\.(mp3|wav|m4a)$/i, ''),
-            preview: URL.createObjectURL(file),
-        }));
+        const newFiles = await Promise.all(
+            validFiles.map(async (file) => {
+                const preview = URL.createObjectURL(file);
+                const duration = await getAudioDuration(preview);
+                return {
+                    file,
+                    title: file.name.replace(/\.(mp3|wav|m4a)$/i, ''),
+                    preview,
+                    duration,
+                };
+            })
+        );
+
+        audioFiles = [...audioFiles, ...newFiles];
+    }
+
+    function handleAudioDrop(e: DragEvent) {
+        e.preventDefault();
+        audioDragging = false;
+        const files = e.dataTransfer?.files;
+        if (files) {
+            // processAudioFiles(Array.from(files)); // This function is removed, logic moved to handleAudioSelect
+            // Re-using handleAudioSelect logic for drop
+            const input = { files: Array.from(files) } as HTMLInputElement;
+            handleAudioSelect({ target: input } as unknown as Event);
+        }
     }
 
     function removeAudioFile(index: number) {
@@ -230,6 +264,7 @@
                 uploadedAudio.push({
                     ...audioData,
                     title: audioFile.title,
+                    duration: audioFile.duration || 0,
                 });
             }
 

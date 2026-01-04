@@ -208,13 +208,21 @@
         }))
     );
     $: totalDurationSeconds = flatTracks.reduce((acc, t) => acc + (t.duration || 0), 0);
-    $: formattedDuration = formatTime(totalDurationSeconds);
+    $: formattedDuration = formatTotalDuration(totalDurationSeconds);
 
-    function formatTime(seconds: number) {
-        if (!seconds) return '--';
+    function formatTotalDuration(seconds: number) {
+        if (!seconds) return '';
         const h = Math.floor(seconds / 3600);
         const m = Math.floor((seconds % 3600) / 60);
+        if (h === 0 && m === 0) return '';
         return h > 0 ? `${h}h ${m}m` : `${m}m`;
+    }
+
+    function formatTrackDuration(seconds: number) {
+        if (!seconds) return '--:--';
+        const m = Math.floor(seconds / 60);
+        const s = Math.floor(seconds % 60);
+        return `${m}:${s.toString().padStart(2, '0')}`;
     }
 
     function playArtistMix() {
@@ -509,8 +517,14 @@
                     <div class="flex items-end justify-between mb-8">
                         <div>
                             <h2 class="text-3xl font-bold text-white mb-2">Canciones</h2>
-                            <p class="text-slate-500 text-sm">
-                                {flatTracks.length} canciones disponibles
+                            <p class="text-slate-500 text-sm flex items-center gap-2">
+                                <span>{flatTracks.length} canciones disponibles</span>
+                                {#if totalDurationSeconds > 0}
+                                    <span class="w-1 h-1 rounded-full bg-slate-700"></span>
+                                    <span class="text-slate-400 font-medium"
+                                        >🕐 {formatTotalDuration(totalDurationSeconds)}</span
+                                    >
+                                {/if}
                             </p>
                         </div>
                     </div>
@@ -573,7 +587,7 @@
                                         <td
                                             class="px-6 py-4 text-sm text-slate-500 text-right font-mono"
                                         >
-                                            {formatTime(track.duration || 0)}
+                                            {formatTrackDuration(track.duration || 0)}
                                         </td>
                                     </tr>
                                 {/each}
