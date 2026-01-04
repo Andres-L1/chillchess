@@ -225,32 +225,10 @@
     </div>
 {:else if room}
     <div class="relative min-h-screen w-full overflow-hidden bg-[#0a0a0a] font-poppins">
-        <!-- Dynamic Ambient Background -->
-        {#if room.currentTrack}
-            {@const currentAlbum = $audioStore.availableAlbums.find(
-                (a) => a.id === room?.currentTrack?.albumId
-            )}
-            {#if currentAlbum}
-                <div
-                    class="absolute inset-0 z-0 opacity-40 transition-all duration-[2s] scale-110"
-                    style="
-                    background-image: url('{currentAlbum.cover}'); 
-                    background-size: cover; 
-                    background-position: center;
-                    filter: blur(80px);
-                "
-                ></div>
-            {/if}
-        {:else}
-            <div class="absolute inset-0 z-0 opacity-30">
-                <ChillBackground />
-            </div>
-        {/if}
-
-        <!-- Dark Overlay -->
-        <div
-            class="absolute inset-0 z-0 bg-black/40 bg-gradient-to-b from-black/20 via-transparent to-black/80"
-        ></div>
+        <!-- Static Background (ChillChess Standard) -->
+        <div class="absolute inset-0 z-0 opacity-40">
+            <ChillBackground />
+        </div>
 
         <!-- Content Container -->
         <div class="relative z-10 flex flex-col min-h-screen p-6 md:p-12">
@@ -347,7 +325,7 @@
                         <div class="relative group cursor-default mb-10">
                             <!-- Glow Effect -->
                             <div
-                                class="absolute inset-0 bg-primary-500/30 blur-[60px] rounded-full opacity-50 group-hover:opacity-75 transition-opacity duration-1000"
+                                class="absolute inset-0 bg-primary-500/20 blur-[60px] rounded-full opacity-20 group-hover:opacity-40 transition-opacity duration-1000"
                             ></div>
 
                             <!-- Image -->
