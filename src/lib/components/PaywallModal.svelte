@@ -1,30 +1,31 @@
 <script lang="ts">
-    import { createEventDispatcher } from "svelte";
-    import { TIERS } from "$lib/subscription/tiers";
+    import { createEventDispatcher } from 'svelte';
+    import { TIERS } from '$lib/subscription/tiers';
 
     export let show = false;
-    export let blockedFeature: "vibe" | "games" = "vibe";
+    export let blockedFeature: 'vibe' | 'games' = 'vibe';
+    export let title = 'Contenido Premium';
+    export let message = '';
 
     const dispatch = createEventDispatcher();
 
     function close() {
-        dispatch("close");
+        dispatch('close');
     }
 
     function upgradeToPro() {
-        window.location.href = "/pricing";
+        window.location.href = '/pricing';
     }
 
     $: featureText =
-        blockedFeature === "vibe"
-            ? "Este ambiente es exclusivo para usuarios Pro"
-            : "Has alcanzado el límite de partidas diarias";
+        message ||
+        (blockedFeature === 'vibe'
+            ? 'Este ambiente es exclusivo para usuarios Pro'
+            : 'Has alcanzado el límite de partidas diarias');
 </script>
 
 {#if show}
-    <div
-        class="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
-    >
+    <div class="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
         <!-- Backdrop -->
         <button
             class="absolute inset-0 w-full h-full bg-black/70 backdrop-blur-sm cursor-default"
@@ -40,7 +41,7 @@
             tabindex="-1"
             class="relative w-full max-w-md bg-[#0B1120]/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden border border-white/10 z-10 my-auto"
             on:click|stopPropagation
-            on:keydown={(e) => e.key === "Escape" && close()}
+            on:keydown={(e) => e.key === 'Escape' && close()}
         >
             <!-- Close Button -->
             <button
@@ -59,7 +60,7 @@
                     🔒
                 </div>
                 <h2 class="text-xl sm:text-2xl font-bold text-white mb-2">
-                    Contenido Premium
+                    {title}
                 </h2>
                 <p class="text-slate-400 text-xs sm:text-sm">
                     {featureText}
@@ -82,26 +83,18 @@
                             class="bg-[#1e293b]/80 backdrop-blur-xl rounded-xl sm:rounded-2xl p-4 sm:p-5 border-2 border-blue-500/50 hover:border-blue-400 transition-all hover:shadow-2xl hover:shadow-blue-500/20 mt-2"
                         >
                             <div class="text-center mb-3 sm:mb-4">
-                                <h3
-                                    class="text-base sm:text-lg font-bold text-white mb-2"
-                                >
+                                <h3 class="text-base sm:text-lg font-bold text-white mb-2">
                                     ChillChess Pro
                                 </h3>
                                 <div
                                     class="flex items-baseline justify-center gap-1.5 sm:gap-2 mb-1"
                                 >
-                                    <span
-                                        class="text-3xl sm:text-4xl font-bold text-white"
+                                    <span class="text-3xl sm:text-4xl font-bold text-white"
                                         >€19.99</span
                                     >
-                                    <span
-                                        class="text-slate-400 text-sm sm:text-base"
-                                        >/año</span
-                                    >
+                                    <span class="text-slate-400 text-sm sm:text-base">/año</span>
                                 </div>
-                                <p
-                                    class="text-xs sm:text-sm text-blue-400 font-medium"
-                                >
+                                <p class="text-xs sm:text-sm text-blue-400 font-medium">
                                     Solo €1.66/mes
                                 </p>
                             </div>
@@ -117,9 +110,7 @@
                                             class="text-blue-400 text-sm sm:text-base shrink-0 mt-0.5"
                                             >✓</span
                                         >
-                                        <span class="leading-snug"
-                                            >{feature}</span
-                                        >
+                                        <span class="leading-snug">{feature}</span>
                                     </li>
                                 {/each}
                             </ul>

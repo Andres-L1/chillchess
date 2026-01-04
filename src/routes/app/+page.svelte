@@ -138,12 +138,22 @@
         }
     });
 
-    function openHabitModal(habit: Habit | null = null) {
+    import { userSubscription } from '$lib/subscription/userSubscription';
+    import PaywallModal from '$lib/components/PaywallModal.svelte';
+
+    let showPaywall = false;
+    $: isPro = ['pro', 'premium', 'lifetime'].includes($userSubscription.tier);
+
+    function openHabitModal(habit: Habit | null) {
+        if (!habit && !isPro && activeHabitsCount >= 2) {
+            showPaywall = true;
+            return;
+        }
+
+        editingHabit = habit;
         if (habit) {
-            editingHabit = habit;
             formDataHabit = { ...habit };
         } else {
-            editingHabit = null;
             formDataHabit = {
                 ...defaultHabit,
                 position: habits.length,
@@ -477,4 +487,10 @@
             </div>
         </div>
     {/if}
+
+    <PaywallModal
+        bind:show={showPaywall}
+        title="Límite de Hábitos Pro"
+        message="Has alcanzado el límite de 2 hábitos activos. Suscríbete a PRO para desbloquear hábitos ilimitados."
+    />
 </div>

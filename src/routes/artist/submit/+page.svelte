@@ -139,7 +139,7 @@
         if (files) {
             // processAudioFiles(Array.from(files)); // This function is removed, logic moved to handleAudioSelect
             // Re-using handleAudioSelect logic for drop
-            const input = { files: Array.from(files) } as HTMLInputElement;
+            const input = { files: Array.from(files) } as unknown as HTMLInputElement;
             handleAudioSelect({ target: input } as unknown as Event);
         }
     }

@@ -138,17 +138,7 @@
 
             {#if $userStore.isLoggedIn}
                 <a href="/coleccion" class="hover:text-primary-400 transition-colors">Colección</a>
-                {#if $userSubscription?.profile?.isAdmin}
-                    <a href="/app" class="hover:text-primary-400 transition-colors">Tracker</a>
-                {:else}
-                    <span
-                        class="text-slate-600 cursor-not-allowed flex items-center gap-1"
-                        title="Próximamente"
-                    >
-                        Tracker
-                        <span class="text-[9px] bg-slate-800 px-1 rounded text-slate-500">DEV</span>
-                    </span>
-                {/if}
+                <a href="/app" class="hover:text-primary-400 transition-colors">Tracker</a>
                 <a href="/rooms" class="hover:text-primary-400 transition-colors">🎵 Salas</a>
                 <a href="/patches" class="hover:text-primary-400 transition-colors">Parches</a>
                 <!-- Pricing CTA -->
@@ -380,25 +370,13 @@
                         </a>
                         <!-- Artists moved inside collection conceptually, removing link here or nesting? Keeping simpler for mobile too -->
 
-                        {#if $userSubscription?.profile?.isAdmin}
-                            <a
-                                href="/app"
-                                on:click={() => (mobileMenuOpen = false)}
-                                class="py-3 px-4 hover:bg-white/5 rounded-lg transition-colors text-slate-300 hover:text-white"
-                            >
-                                Tracker
-                            </a>
-                        {:else}
-                            <div
-                                class="py-3 px-4 text-slate-600 cursor-not-allowed flex items-center justify-between"
-                            >
-                                <span>Tracker</span>
-                                <span
-                                    class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-500 font-bold"
-                                    >PRÓXIMAMENTE</span
-                                >
-                            </div>
-                        {/if}
+                        <a
+                            href="/app"
+                            on:click={() => (mobileMenuOpen = false)}
+                            class="py-3 px-4 hover:bg-white/5 rounded-lg transition-colors text-slate-300 hover:text-white"
+                        >
+                            Tracker
+                        </a>
                         <a
                             href="/rooms"
                             on:click={() => (mobileMenuOpen = false)}
