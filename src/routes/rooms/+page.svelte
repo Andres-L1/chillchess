@@ -96,13 +96,13 @@
                     <p class="mt-4 text-slate-400">Cargando salas...</p>
                 </div>
             {:else if rooms.length === 0}
-                <div class="bg-white/5 border border-white/10 rounded-3xl p-16 text-center">
-                    <div class="text-6xl mb-4">🎵</div>
+                <div class="py-16 text-center">
+                    <div class="text-6xl mb-4 opacity-50">🎵</div>
                     <h2 class="text-2xl font-bold mb-2">No hay salas activas</h2>
                     <p class="text-slate-400 mb-6">Sé el primero en crear una sala de escucha</p>
                     <button
                         on:click={() => goto('/rooms/create')}
-                        class="px-8 py-3 bg-primary-500 hover:bg-primary-600 rounded-full font-bold transition-all"
+                        class="px-8 py-3 bg-primary-500 hover:bg-primary-600 rounded-full font-bold transition-all shadow-lg hover:shadow-primary-500/25"
                     >
                         Crear Primera Sala
                     </button>

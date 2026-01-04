@@ -1,11 +1,26 @@
 <script lang="ts">
     import { page } from '$app/stores';
     import { goto } from '$app/navigation';
-    import { onMount, onDestroy } from 'svelte';
+    import { onMount, onDestroy, afterUpdate } from 'svelte';
     import { userStore } from '$lib/auth/userStore';
     import { audioStore, playAlbum } from '$lib/audio/store';
     import ChillBackground from '$lib/components/ChillBackground.svelte';
     import { toast } from '$lib/stores/notificationStore';
+    import { db } from '$lib/firebase';
+    import {
+        doc,
+        onSnapshot,
+        updateDoc,
+        serverTimestamp,
+        collection,
+        addDoc,
+        query,
+        orderBy,
+        limit,
+        deleteField,
+        deleteDoc,
+    } from 'firebase/firestore';
+    import { fly, fade } from 'svelte/transition';
 
     const roomId = $page.params.id;
 
@@ -20,6 +35,7 @@
             trackIndex: number;
             isPlaying: boolean;
             timestamp: any;
+            title?: string;
         } | null;
     }
 
@@ -28,34 +44,115 @@
     let isHost = false;
     let unsubscribe: (() => void) | null = null;
     let participantsList: { uid: string; name: string }[] = [];
-    let showMusicSelector = false; // NEW
 
-    function selectAlbum(albumId: string) {
-        playAlbum(albumId);
-        showMusicSelector = false;
+    // UI States
+    let showMusicSelector = false;
+    let selectedAlbumForBrowsing: any | null = null;
+    let showChat = false;
+
+    // Chat
+    let messages: any[] = [];
+    let newMessage = '';
+    let chatUnsubscribe: (() => void) | null = null;
+    let chatContainer: HTMLElement;
+
+    // Host Logic
+    let unsubscribeStore: (() => void) | null = null;
+    let inactivityTimer: any;
+    const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 min
+
+    function resetInactivityTimer() {
+        if (inactivityTimer) clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(() => {
+            if ($audioStore.isPlaying) {
+                resetInactivityTimer();
+                return;
+            }
+            closeRoom(true);
+        }, INACTIVITY_LIMIT);
     }
 
-    // Reactive Sync Logic (Robust for guests)
+    function copyRoomLink() {
+        const link = `${window.location.origin}/rooms/${roomId}`;
+        navigator.clipboard.writeText(link);
+        toast.success('Enlace copiado al portapapeles');
+    }
+
+    async function closeRoom(isAuto = false) {
+        if (!isHost) return;
+        if (!isAuto && !confirm('¿Cerrar sala y desconectar a todos?')) return;
+
+        try {
+            await deleteDoc(doc(db, 'listeningRooms', roomId));
+            toast.success(isAuto ? 'Sala cerrada por inactividad' : 'Sala cerrada');
+            goto('/rooms');
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    // Music Selector
+    function browseAlbum(album: any) {
+        selectedAlbumForBrowsing = album;
+    }
+
+    function selectTrack(albumId: string, trackIndex: number) {
+        playAlbum(albumId);
+        // Force track index update slightly delayed to ensure playlist loaded
+        setTimeout(() => {
+            audioStore.update((s) => ({ ...s, currentTrackIndex: trackIndex, isPlaying: true }));
+        }, 150);
+        showMusicSelector = false;
+        selectedAlbumForBrowsing = null;
+    }
+
+    function selectAlbum(albumId: string) {
+        selectTrack(albumId, 0);
+    }
+
+    // Chat Logic
+    function toggleChat() {
+        showChat = !showChat;
+        if (showChat && !chatUnsubscribe) {
+            const msgsRef = collection(db, 'listeningRooms', roomId, 'messages');
+            const q = query(msgsRef, orderBy('timestamp', 'asc'), limit(50));
+            chatUnsubscribe = onSnapshot(q, (snap) => {
+                messages = snap.docs.map((d) => d.data());
+            });
+        }
+    }
+
+    async function sendMessage() {
+        if (!newMessage.trim()) return;
+        const text = newMessage.trim();
+        newMessage = '';
+        try {
+            await addDoc(collection(db, 'listeningRooms', roomId, 'messages'), {
+                text,
+                senderId: $userStore.user?.uid || 'anon',
+                senderName: $userStore.user?.displayName || 'Usuario',
+                timestamp: serverTimestamp(),
+            });
+        } catch (e) {
+            console.error(e);
+            toast.error('Error enviando mensaje');
+        }
+    }
+
+    $: if (messages && chatContainer) {
+        setTimeout(() => (chatContainer.scrollTop = chatContainer.scrollHeight), 50);
+    }
+
+    // Sync Logic
     $: if (room && !isHost && room.currentTrack && $audioStore.availableAlbums.length > 0) {
         const remote = room.currentTrack;
         const local = $audioStore;
-
-        // 1. Sync Album/Track
         if (remote.albumId !== local.currentAlbumId) {
             playAlbum(remote.albumId);
-            // Force track index immediately
-            audioStore.update((s) => ({
-                ...s,
-                currentTrackIndex: remote.trackIndex,
-            }));
+            audioStore.update((s) => ({ ...s, currentTrackIndex: remote.trackIndex }));
         } else if (remote.trackIndex !== local.currentTrackIndex) {
-            audioStore.update((s) => ({
-                ...s,
-                currentTrackIndex: remote.trackIndex,
-            }));
+            audioStore.update((s) => ({ ...s, currentTrackIndex: remote.trackIndex }));
         }
-
-        // 2. Sync Playback State
         if (remote.isPlaying !== local.isPlaying) {
             audioStore.update((s) => ({ ...s, isPlaying: remote.isPlaying }));
         }
@@ -67,33 +164,24 @@
             return;
         }
 
-        const { doc, onSnapshot, updateDoc, serverTimestamp } = await import('firebase/firestore');
-        const { db } = await import('$lib/firebase');
-
         const roomRef = doc(db, 'listeningRooms', roomId);
 
-        // Listen to room changes
         unsubscribe = onSnapshot(roomRef, (snapshot) => {
             if (!snapshot.exists()) {
                 toast.error('Esta sala no existe.');
                 goto('/rooms');
                 return;
             }
-
             const data = snapshot.data() as RoomData;
             room = data;
             isHost = data.hostId === $userStore.user?.uid;
-
-            // Update participants list
-            participantsList = Object.entries(data.participants).map(([uid, info]) => ({
+            participantsList = Object.entries(data.participants || {}).map(([uid, info]) => ({
                 uid,
                 name: info.displayName,
             }));
-
             loading = false;
         });
 
-        // Add self to participants if not already
         if ($userStore.user) {
             try {
                 await updateDoc(roomRef, {
@@ -103,106 +191,49 @@
                     },
                 });
             } catch (err) {
-                console.error('Error joining room:', err);
+                console.error(err);
             }
         }
-
-        // If host, sync local state to Firestore
-        if (isHost) {
-            resetInactivityTimer(); // Start timer
-
-            const unsubscribeStore = audioStore.subscribe(async (state) => {
-                resetInactivityTimer(); // Reset on activity
-
-                if (!state.currentAlbumId) return;
-
-                const currentTrack = state.playlist[state.currentTrackIndex];
-
-                try {
-                    await updateDoc(roomRef, {
-                        currentTrack: {
-                            albumId: state.currentAlbumId,
-                            trackIndex: state.currentTrackIndex,
-                            isPlaying: state.isPlaying,
-                            title: currentTrack?.title || 'Unknown',
-                            timestamp: serverTimestamp(),
-                        },
-                    });
-                } catch (err) {
-                    console.error('Error syncing:', err);
-                }
-            });
-
-            // Clean up store subscription on unmount
-            onDestroy(() => {
-                unsubscribeStore();
-                if (inactivityTimer) clearTimeout(inactivityTimer);
-            });
-        }
     });
+
+    $: if (isHost && !unsubscribeStore && room) {
+        resetInactivityTimer();
+        const roomRef = doc(db, 'listeningRooms', roomId);
+        unsubscribeStore = audioStore.subscribe(async (state) => {
+            resetInactivityTimer();
+            if (!state.currentAlbumId) return;
+            const currentTrack = state.playlist[state.currentTrackIndex];
+            try {
+                await updateDoc(roomRef, {
+                    currentTrack: {
+                        albumId: state.currentAlbumId,
+                        trackIndex: state.currentTrackIndex,
+                        isPlaying: state.isPlaying,
+                        title: currentTrack?.title || 'Unknown',
+                        timestamp: serverTimestamp(),
+                    },
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        });
+    }
 
     onDestroy(async () => {
         if (unsubscribe) unsubscribe();
+        if (chatUnsubscribe) chatUnsubscribe();
+        if (unsubscribeStore) unsubscribeStore();
+        if (inactivityTimer) clearTimeout(inactivityTimer);
 
-        // Remove self from participants
-        if ($userStore.isLoggedIn && $userStore.user) {
+        if ($userStore.user) {
+            const roomRef = doc(db, 'listeningRooms', roomId);
             try {
-                const { doc, updateDoc, deleteField } = await import('firebase/firestore');
-                const { db } = await import('$lib/firebase');
-                const roomRef = doc(db, 'listeningRooms', roomId);
-
                 await updateDoc(roomRef, {
                     [`participants.${$userStore.user.uid}`]: deleteField(),
                 });
-            } catch (err) {
-                console.error('Error leaving room:', err);
-            }
+            } catch (e) {}
         }
     });
-
-    function copyRoomLink() {
-        const link = `${window.location.origin}/rooms/${roomId}`;
-        navigator.clipboard.writeText(link);
-        toast.success('Enlace copiado al portapapeles');
-    }
-
-    async function closeRoom(isAuto = false) {
-        if (
-            !isAuto &&
-            !confirm(
-                '¿Estás seguro de que quieres cerrar esta sala permanentemente? Todos los participantes serán desconectados.'
-            )
-        )
-            return;
-
-        try {
-            const { doc, deleteDoc } = await import('firebase/firestore');
-            const { db } = await import('$lib/firebase');
-            await deleteDoc(doc(db, 'listeningRooms', roomId));
-            toast.success(
-                isAuto ? 'Sala cerrada por inactividad (15 min)' : 'Sala cerrada exitosamente'
-            );
-            goto('/rooms');
-        } catch (err) {
-            console.error('Error closing room:', err);
-            toast.error('Error al cerrar la sala');
-        }
-    }
-
-    let inactivityTimer: any;
-    const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 min
-
-    function resetInactivityTimer() {
-        if (inactivityTimer) clearTimeout(inactivityTimer);
-        inactivityTimer = setTimeout(() => {
-            // Check if music is playing. If so, don't close.
-            if ($audioStore.isPlaying) {
-                resetInactivityTimer();
-                return;
-            }
-            closeRoom(true);
-        }, INACTIVITY_LIMIT);
-    }
 </script>
 
 <svelte:head>
@@ -224,13 +255,19 @@
         </div>
     </div>
 {:else if room}
-    <div class="relative min-h-screen w-full overflow-hidden bg-[#0a0a0a] font-poppins">
+    <!-- Main Room Interface -->
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <div
+        class="relative min-h-screen w-full overflow-hidden bg-[#0a0a0a] font-poppins transition-all duration-300"
+        class:mr-80={showChat}
+    >
         <!-- Static Background (ChillChess Standard) -->
         <div class="absolute inset-0 z-0 opacity-40">
             <ChillBackground />
         </div>
 
-        <!-- Content Container -->
+        <!-- Content -->
         <div class="relative z-10 flex flex-col min-h-screen p-6 md:p-12">
             <!-- Header -->
             <header class="flex justify-between items-center mb-12">
@@ -258,54 +295,33 @@
                             on:click={() => (showMusicSelector = true)}
                             class="px-5 py-2.5 bg-primary-500 hover:bg-primary-600 shadow-lg shadow-primary-500/20 rounded-full text-white font-bold text-sm transition-all hover:scale-105 flex items-center gap-2"
                         >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-                                />
-                            </svg>
-                            <span class="hidden md:inline">Cambiar Música</span>
+                            <span>🎵</span>
+                            <span class="hidden md:inline">Música</span>
                         </button>
                     {/if}
                     <button
-                        on:click={copyRoomLink}
-                        class="p-2.5 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all hover:scale-105 backdrop-blur-md"
-                        title="Copiar Enlace"
+                        on:click={toggleChat}
+                        class="px-4 py-2.5 bg-white/10 hover:bg-white/20 rounded-full text-white font-bold text-sm transition-colors border border-white/10 flex items-center gap-2 {showChat
+                            ? 'bg-white/20'
+                            : ''}"
                     >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            ><path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                            /></svg
-                        >
+                        <span>💬</span>
+                        <span class="hidden md:inline">Chat</span>
+                    </button>
+                    <button
+                        on:click={copyRoomLink}
+                        class="p-2.5 bg-white/5 hover:bg-white/10 rounded-full text-white/80 hover:text-white transition-colors border border-white/5"
+                        title="Copiar enlace"
+                    >
+                        📋
                     </button>
                     {#if isHost}
                         <button
-                            on:click={() => closeRoom(false)}
-                            class="p-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-full transition-all hover:scale-105 backdrop-blur-md border border-red-500/20"
+                            on:click={() => closeRoom()}
+                            class="p-2.5 bg-red-500/10 hover:bg-red-500/20 rounded-full text-red-500 hover:text-red-400 transition-colors border border-red-500/20"
                             title="Cerrar Sala"
                         >
-                            <svg
-                                class="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                ><path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12"
-                                /></svg
-                            >
+                            🚫
                         </button>
                     {/if}
                 </div>
@@ -320,170 +336,233 @@
                     {@const currentTrack =
                         currentAlbum?.tracks?.[room?.currentTrack?.trackIndex ?? 0]}
 
-                    {#if currentAlbum && currentTrack}
-                        <!-- Large Album Art with Glow -->
-                        <div class="relative group cursor-default mb-10">
-                            <!-- Glow Effect -->
-                            <div
-                                class="absolute inset-0 bg-primary-500/20 blur-[60px] rounded-full opacity-20 group-hover:opacity-40 transition-opacity duration-1000"
-                            ></div>
-
-                            <!-- Image -->
-                            <img
-                                src={currentAlbum.cover}
-                                alt={currentAlbum.title}
-                                class="relative z-10 w-[280px] h-[280px] md:w-[450px] md:h-[450px] object-cover rounded-[32px] shadow-[0_30px_60px_-10px_rgba(0,0,0,0.6)] border border-white/10 animate-float-slow"
-                            />
-
-                            <!-- Playing Status Badge -->
-                            <div
-                                class="absolute -bottom-6 left-1/2 -translate-x-1/2 z-20 px-4 py-1.5 bg-black/60 backdrop-blur-xl border border-white/10 rounded-full flex items-center gap-2 shadow-xl"
-                            >
+                    {#if currentAlbum}
+                        <!-- Player Card -->
+                        <div class="flex flex-col items-center max-w-2xl w-full">
+                            <div class="relative group cursor-default mb-8">
+                                <!-- Subtle Glow -->
+                                <div
+                                    class="absolute inset-0 bg-primary-500/20 blur-[50px] rounded-full opacity-20 group-hover:opacity-40 transition-opacity"
+                                ></div>
+                                <img
+                                    src={currentAlbum.cover}
+                                    alt={currentAlbum.title}
+                                    class="relative z-10 w-[260px] h-[260px] md:w-[320px] md:h-[320px] object-cover rounded-[32px] shadow-2xl border border-white/10"
+                                />
                                 {#if room.currentTrack.isPlaying}
-                                    <span class="relative flex h-3 w-3">
-                                        <span
-                                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
-                                        ></span>
-                                        <span
-                                            class="relative inline-flex rounded-full h-3 w-3 bg-green-500"
-                                        ></span>
-                                    </span>
-                                    <span
-                                        class="text-xs font-bold text-white uppercase tracking-wider"
-                                        >En directo</span
+                                    <div
+                                        class="absolute -bottom-4 left-1/2 -translate-x-1/2 z-20 px-3 py-1 bg-green-500/90 backdrop-blur text-black font-bold text-xs rounded-full uppercase tracking-widest shadow-lg animate-pulse"
                                     >
-                                {:else}
-                                    <span class="w-3 h-3 bg-yellow-500 rounded-full"></span>
-                                    <span
-                                        class="text-xs font-bold text-white uppercase tracking-wider"
-                                        >Pausado</span
-                                    >
+                                        En directo
+                                    </div>
                                 {/if}
                             </div>
-                        </div>
 
-                        <!-- Info -->
-                        <div class="text-center max-w-2xl px-4">
-                            <h2
-                                class="text-3xl md:text-5xl font-bold text-white mb-3 tracking-tight drop-shadow-xl"
-                            >
-                                {currentTrack.title}
-                            </h2>
-                            <p class="text-xl md:text-2xl text-white/70 font-medium">
-                                {currentTrack.artist || currentAlbum.artist}
-                            </p>
+                            <div class="text-center space-y-2 mb-8">
+                                <h2
+                                    class="text-3xl md:text-4xl font-bold tracking-tight px-4 truncate max-w-full"
+                                >
+                                    {room.currentTrack.title || 'Música desconocida'}
+                                </h2>
+                                <p class="text-lg text-slate-400">
+                                    {currentAlbum.artist}
+                                </p>
+                            </div>
                         </div>
                     {/if}
                 {:else}
-                    <!-- Empty State -->
-                    <div class="text-center">
+                    <div
+                        class="flex flex-col items-center text-center p-8 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-md"
+                    >
                         <div
-                            class="w-32 h-32 mx-auto bg-white/5 rounded-full flex items-center justify-center mb-6 animate-pulse"
+                            class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center text-4xl mb-4"
                         >
-                            <span class="text-4xl">🎵</span>
+                            🎵
                         </div>
-                        <h2 class="text-2xl font-bold text-white mb-2">Sala en silencio</h2>
-                        <p class="text-slate-400 max-w-md mx-auto">
-                            {#if isHost}
-                                Selecciona música para comenzar la sesión.
-                                <br />
-                                <button
-                                    on:click={() => (showMusicSelector = true)}
-                                    class="mt-4 px-6 py-2 bg-white/10 hover:bg-white/20 rounded-full text-white font-bold transition-all"
-                                >
-                                    Elegir Música
-                                </button>
-                            {:else}
-                                Esperando al anfitrión...
-                            {/if}
+                        <h2 class="text-2xl font-bold mb-2">Sala en silencio</h2>
+                        <p class="text-slate-400 mb-6">
+                            Selecciona música para comenzar la sesión.
                         </p>
+                        {#if isHost}
+                            <button
+                                on:click={() => (showMusicSelector = true)}
+                                class="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-full font-bold transition-all border border-white/10"
+                            >
+                                Elegir Música
+                            </button>
+                        {/if}
                     </div>
                 {/if}
             </main>
 
             <!-- Footer: Participants -->
-            <footer class="mt-12">
-                <div class="flex justify-center flex-wrap gap-2 md:gap-4">
-                    {#each participantsList as participant (participant.uid)}
+            <footer class="mt-12 flex flex-col items-center gap-4">
+                <div class="flex flex-wrap items-center justify-center gap-3">
+                    {#each participantsList as p}
                         <div
-                            class="group relative pl-1 pr-4 py-1 bg-black/40 hover:bg-surface-800/80 backdrop-blur-xl border border-white/5 rounded-full flex items-center gap-3 transition-all cursor-default"
+                            class="px-4 py-2 bg-white/5 border border-white/10 rounded-full flex items-center gap-2 backdrop-blur-sm"
                         >
                             <div
-                                class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white shadow-lg"
-                            >
-                                {participant.name[0]?.toUpperCase()}
-                            </div>
-                            <div class="flex flex-col">
-                                <span class="text-xs font-bold text-white leading-tight"
-                                    >{participant.name}</span
-                                >
+                                class="w-2 h-2 rounded-full {p.uid === room.hostId
+                                    ? 'bg-yellow-500'
+                                    : 'bg-green-500'}"
+                            ></div>
+                            <span class="text-sm font-medium text-slate-200">
+                                {p.name}
+                                {p.uid === $userStore.user?.uid ? '(Tú)' : ''}
+                            </span>
+                            {#if p.uid === room.hostId}
                                 <span
-                                    class="text-[10px] text-primary-400 font-medium leading-tight"
+                                    class="text-[10px] bg-yellow-500/20 text-yellow-500 px-1.5 py-0.5 rounded ml-1 font-bold"
+                                    >HOST</span
                                 >
-                                    {participant.uid === room.hostId ? 'Host Sync' : 'Oyente'}
-                                </span>
-                            </div>
-
-                            {#if participant.uid === $userStore.user?.uid}
-                                <div
-                                    class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 border-2 border-[#0B1120] rounded-full"
-                                ></div>
                             {/if}
                         </div>
                     {/each}
                 </div>
-                <p class="text-center text-white/20 text-xs mt-6 uppercase tracking-widest">
-                    ChillChess Listening Room • Live Sync
-                </p>
             </footer>
         </div>
+    </div>
 
-        <!-- Music Selector Modal (For Host) -->
-        {#if showMusicSelector}
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <!-- Right Chat Sidebar -->
+    {#if showChat}
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <div
+            class="fixed inset-y-0 right-0 w-80 bg-[#0f172a] border-l border-white/10 z-30 flex flex-col shadow-2xl"
+            transition:fly={{ x: 300, duration: 300 }}
+        >
             <div
-                class="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-4 animate-fade-in"
-                on:click={() => (showMusicSelector = false)}
+                class="p-4 border-b border-white/10 flex justify-between items-center bg-[#0B1120]"
             >
-                <!-- svelte-ignore a11y-click-events-have-key-events -->
-                <!-- svelte-ignore a11y-no-static-element-interactions -->
-                <div
-                    class="bg-[#1e293b] border border-white/10 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden"
-                    on:click|stopPropagation
+                <h3 class="font-bold flex items-center gap-2">💬 Chat de Sala</h3>
+                <button on:click={() => (showChat = false)} class="p-2 hover:bg-white/10 rounded-lg"
+                    >✕</button
                 >
-                    <div
-                        class="p-6 border-b border-white/10 flex justify-between items-center bg-[#0f172a]"
-                    >
-                        <h3 class="text-xl font-bold flex items-center gap-2">
-                            <span>📀</span> Elegir Álbum
-                        </h3>
-                        <button
-                            on:click={() => (showMusicSelector = false)}
-                            class="p-2 hover:bg-white/10 rounded-full transition-colors"
-                        >
-                            <svg
-                                class="w-6 h-6"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12"
-                                />
-                            </svg>
-                        </button>
-                    </div>
+            </div>
 
-                    <div class="flex-1 overflow-y-auto p-6 bg-[#0B1120]">
+            <div class="flex-1 overflow-y-auto p-4 space-y-4" bind:this={chatContainer}>
+                {#each messages as msg}
+                    <div class="flex flex-col items-start animate-fade-in">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span
+                                class="text-xs font-bold {msg.senderId === room.hostId
+                                    ? 'text-yellow-500'
+                                    : 'text-primary-400'}"
+                            >
+                                {msg.senderName}
+                            </span>
+                            <span class="text-[10px] text-slate-600">
+                                {msg.timestamp
+                                    ? new Date(msg.timestamp.seconds * 1000).toLocaleTimeString(
+                                          [],
+                                          { hour: '2-digit', minute: '2-digit' }
+                                      )
+                                    : ''}
+                            </span>
+                        </div>
+                        <p
+                            class="text-sm text-slate-300 bg-white/5 px-3 py-2 rounded-lg rounded-tl-none break-words max-w-full"
+                        >
+                            {msg.text}
+                        </p>
+                    </div>
+                {/each}
+                {#if messages.length === 0}
+                    <div class="text-center py-10 opacity-30">
+                        <p class="text-4xl mb-2">👋</p>
+                        <p class="text-sm">Di hola a la sala</p>
+                    </div>
+                {/if}
+            </div>
+
+            <div class="p-4 border-t border-white/10 bg-[#0B1120]">
+                <form on:submit|preventDefault={sendMessage} class="flex gap-2">
+                    <input
+                        bind:value={newMessage}
+                        class="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-2 text-sm focus:border-primary-500 outline-none transition-colors"
+                        placeholder="Escribe un mensaje..."
+                    />
+                    <button
+                        type="submit"
+                        class="p-2 bg-primary-500 hover:bg-primary-600 rounded-full text-white transition-colors"
+                    >
+                        ➤
+                    </button>
+                </form>
+            </div>
+        </div>
+    {/if}
+
+    <!-- Music Selector Modal -->
+    {#if showMusicSelector}
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <div
+            class="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-4 animate-fade-in"
+            on:click={() => (showMusicSelector = false)}
+        >
+            <div
+                class="bg-[#1e293b] border border-white/10 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden"
+                on:click|stopPropagation
+            >
+                <div
+                    class="p-6 border-b border-white/10 flex justify-between items-center bg-[#0f172a]"
+                >
+                    <h3 class="text-xl font-bold flex items-center gap-2">
+                        {#if selectedAlbumForBrowsing}
+                            <button
+                                on:click={() => (selectedAlbumForBrowsing = null)}
+                                class="hover:text-primary-400 transition-colors">Albums</button
+                            >
+                            <span class="text-slate-500">/</span>
+                            <span>{selectedAlbumForBrowsing.title}</span>
+                        {:else}
+                            <span>📀</span> Elegir Álbum
+                        {/if}
+                    </h3>
+                    <button
+                        on:click={() => (showMusicSelector = false)}
+                        class="p-2 hover:bg-white/10 rounded-full transition-colors">✕</button
+                    >
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-6 bg-[#0B1120]">
+                    {#if selectedAlbumForBrowsing}
+                        <!-- Tracks View -->
+                        <div class="space-y-2">
+                            {#each selectedAlbumForBrowsing.tracks || [] as track, i}
+                                <button
+                                    on:click={() => selectTrack(selectedAlbumForBrowsing.id, i)}
+                                    class="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left group"
+                                >
+                                    <div class="flex items-center gap-4">
+                                        <span
+                                            class="w-6 text-center text-slate-500 group-hover:text-primary-400 font-mono text-sm"
+                                            >{i + 1}</span
+                                        >
+                                        <div>
+                                            <div
+                                                class="font-bold text-slate-200 group-hover:text-white"
+                                            >
+                                                {track.title}
+                                            </div>
+                                            <div class="text-xs text-slate-500">
+                                                {track.artist || selectedAlbumForBrowsing.artist}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs text-slate-500">Reproducir ▶</span>
+                                </button>
+                            {/each}
+                        </div>
+                    {:else}
+                        <!-- Albums Grid -->
                         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                             {#each $audioStore.availableAlbums as album}
                                 <button
-                                    on:click={() => selectAlbum(album.id)}
-                                    class="group relative aspect-square rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:scale-105 border border-white/5"
+                                    on:click={() => browseAlbum(album)}
+                                    class="group relative aspect-square rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:scale-105 border border-white/5 text-left"
                                 >
                                     <img
                                         src={album.cover}
@@ -498,13 +577,17 @@
                                         >
                                             {album.title}
                                         </p>
+                                        <p class="text-xs text-slate-400">Ver canciones</p>
                                     </div>
                                 </button>
                             {/each}
                         </div>
-                    </div>
+                    {/if}
                 </div>
             </div>
-        {/if}
-    </div>
+        </div>
+    {/if}
+{:else}
+    <!-- Error State -->
+    <div class="text-center p-20 text-red-400">Error al cargar la sala</div>
 {/if}
