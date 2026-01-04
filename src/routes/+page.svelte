@@ -1,5 +1,6 @@
 <script lang="ts">
     import { audioStore, setVibe, type VibePreset } from '$lib/audio/store';
+    import { goto } from '$app/navigation';
     import AuthModal from '$lib/components/AuthModal.svelte';
     import PaywallModal from '$lib/components/PaywallModal.svelte';
     import { userStore, logout } from '$lib/auth/userStore';
@@ -724,6 +725,128 @@
                 <p class="text-slate-400 text-sm">
                     Biblioteca básica gratuita y planes Pro para desbloquear todo.
                 </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Artist Collaboration Section -->
+    <section class="max-w-7xl mx-auto px-4 md:px-8 py-20 relative z-10 border-t border-white/5">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <div class="space-y-6">
+                <div
+                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold uppercase tracking-wider"
+                >
+                    <span class="animate-pulse">●</span> Founders Program
+                </div>
+                <h2 class="text-3xl md:text-5xl font-bold text-white leading-tight">
+                    ¿Creas Música? <br />
+                    Sé un
+                    <span
+                        class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400"
+                        >Artista Fundador</span
+                    >
+                </h2>
+                <p class="text-slate-400 text-lg leading-relaxed">
+                    Estamos construyendo la plataforma definitiva para música de concentración.
+                    Buscamos creadores de <strong>Lo-Fi, Synthwave, Ambient, Jazz</strong> y más que
+                    quieran crecer con nosotros desde el día 1.
+                </p>
+
+                <div class="grid sm:grid-cols-2 gap-6 pt-4">
+                    <div class="flex gap-4">
+                        <div
+                            class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-xl"
+                        >
+                            🔥
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white">Visibilidad Real</h4>
+                            <p class="text-sm text-slate-500">
+                                Destaca sin competir contra millones de tracks.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div
+                            class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-xl"
+                        >
+                            💎
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white">Badge Fundador</h4>
+                            <p class="text-sm text-slate-500">
+                                Estatus permanente y exclusivo en tu perfil.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-6">
+                    <button
+                        on:click={() =>
+                            $userStore.isLoggedIn ? goto('/artist/submit') : openAuth()}
+                        class="px-8 py-4 bg-white text-black font-bold rounded-xl hover:scale-105 transition-all shadow-lg hover:shadow-white/20 flex items-center gap-2"
+                    >
+                        <span>Aplicar como Artista</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            ><path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M17 8l4 4m0 0l-4 4m4-4H3"
+                            /></svg
+                        >
+                    </button>
+                    <p class="text-xs text-slate-500 mt-3 ml-1">
+                        * Aceptamos demos de todos los géneros instrumentales.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Artist Visual/Card -->
+            <div class="relative">
+                <div
+                    class="absolute inset-0 bg-purple-600/20 blur-[100px] rounded-full pointer-events-none"
+                ></div>
+                <div
+                    class="bg-[#131b2e]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-8 relative hover:-translate-y-2 transition-transform duration-500"
+                >
+                    <!-- Mock Artist Card -->
+                    <div class="flex items-center gap-4 mb-6">
+                        <div
+                            class="w-16 h-16 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 shadow-lg"
+                        ></div>
+                        <div>
+                            <div class="h-4 w-32 bg-white/20 rounded mb-2"></div>
+                            <div class="h-3 w-20 bg-white/10 rounded"></div>
+                        </div>
+                        <div
+                            class="ml-auto px-3 py-1 bg-purple-500/20 text-purple-400 text-xs font-bold rounded-full border border-purple-500/30"
+                        >
+                            FOUNDER
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="h-12 bg-white/5 rounded-xl flex items-center px-4">
+                            <div class="w-8 h-8 rounded bg-white/10 mr-4"></div>
+                            <div class="h-2 w-24 bg-white/10 rounded"></div>
+                        </div>
+                        <div class="h-12 bg-white/5 rounded-xl flex items-center px-4">
+                            <div class="w-8 h-8 rounded bg-white/10 mr-4"></div>
+                            <div class="h-2 w-24 bg-white/10 rounded"></div>
+                        </div>
+                        <div class="h-12 bg-white/5 rounded-xl flex items-center px-4 opacity-50">
+                            <div class="w-8 h-8 rounded bg-white/10 mr-4"></div>
+                            <div class="h-2 w-24 bg-white/10 rounded"></div>
+                        </div>
+                    </div>
+                    <div
+                        class="mt-8 pt-6 border-t border-white/10 flex justify-between items-center text-sm"
+                    >
+                        <span class="text-slate-400">Total Reproducciones</span>
+                        <span class="text-white font-mono font-bold">12,458</span>
+                    </div>
+                </div>
             </div>
         </div>
     </section>

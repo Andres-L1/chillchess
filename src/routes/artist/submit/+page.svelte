@@ -128,6 +128,33 @@
         return { key, name: file.name, size: file.size, type: file.type };
     }
 
+    async function uploadToR2(file: File, folderPath: string) {
+        const res = await fetch('/api/r2/sign-url', {
+            method: 'POST',
+            body: JSON.stringify({
+                fileName: file.name,
+                fileType: file.type,
+                folder: folderPath,
+            }),
+        });
+        if (!res.ok) throw new Error('Failed to get upload URL');
+        const { uploadUrl, key } = await res.json();
+
+        const upload = await fetch(uploadUrl, {
+            method: 'PUT',
+            body: file,
+            headers: { 'Content-Type': file.type },
+        });
+        if (!upload.ok) throw new Error('Failed to upload to R2');
+
+        return {
+            key,
+            name: file.name,
+            size: file.size,
+            type: file.type,
+        };
+    }
+
     async function submitRelease() {
         if (!releaseTitle.trim() || !coverFile || audioFiles.length === 0) {
             toast.warning(
@@ -144,83 +171,71 @@
         try {
             const userId = $userStore.user?.uid;
 
-            // Check if we need R2 (any file > 50MB)
-            const FIREBASE_LIMIT = 50 * 1024 * 1024;
-            const useR2 = audioFiles.some((f) => f.size > FIREBASE_LIMIT);
-
-            // Use different base path strategy depending on provider
-            // Firebase: submissions/userId/timestamp
-            // R2: submissions (logic handled in sign-url to append userId)
+            // Generate a unique submission ID based on timestamp
             const timestamp = Date.now();
-            const firebaseBasePath = `submissions/${userId}/${timestamp}`;
-            const r2Folder = 'submissions'; // userId will be appended by server
+            // R2 Folder Structure: submissions/{userId}/{timestamp}/
+            // Note: The /api/r2/sign-url endpoint appends userId, so we just pass 'submissions'
+            // and the filename will handle uniqueness or the server logic will.
+            // Let's standardise on passing a clean folder path.
+            const r2Folder = 'submissions';
 
             let coverData;
             let uploadedAudio = [];
 
-            if (useR2) {
-                // --- R2 UPLOAD FLOW ---
+            // --- R2 UPLOAD FLOW (Exclusive) ---
 
-                // Upload Cover
-                coverData = await uploadToR2(coverFile, r2Folder);
-                uploadProgress = 20;
+            // 1. Upload Cover
+            // We prepend a timestamp to the filename to avoid collisions if they upload same file twice
+            const coverExtension = coverFile.name.split('.').pop();
+            const coverFileName = `cover_${timestamp}.${coverExtension}`;
 
-                // Upload Audio
-                const totalFiles = audioFiles.length;
-                for (let i = 0; i < audioFiles.length; i++) {
-                    const file = audioFiles[i];
-                    const data = await uploadToR2(file, r2Folder);
-                    uploadedAudio.push(data);
-                    uploadProgress = 20 + ((i + 1) / totalFiles) * 70;
-                }
+            // Create a new File object with the unique name for the upload helper
+            const renamedCover = new File([coverFile], coverFileName, { type: coverFile.type });
 
-                // Save Metadata (R2 Format)
-                await addDoc(collection(db, 'musicSubmissions'), {
-                    userId,
-                    artistId: userId,
-                    artistName: $userStore.user?.displayName || 'Unknown Artist',
-                    artistEmail: $userStore.user?.email,
-                    releaseTitle,
-                    genre: genre === 'Otra' ? customGenre : genre,
-                    r2CoverKey: coverData.key,
-                    r2AudioKeys: uploadedAudio, // { key, name, size }
-                    tracklist: tracklist.trim(),
-                    submissionType: 'r2_direct',
-                    status: 'pending',
-                    submittedAt: serverTimestamp(),
-                });
-            } else {
-                // --- FIREBASE UPLOAD FLOW (Legacy/Small files) ---
+            console.log('Subiendo portada a R2...');
+            coverData = await uploadToR2(renamedCover, r2Folder);
+            uploadProgress = 20;
 
-                // Upload Cover
-                coverData = await uploadToFirebase(coverFile, firebaseBasePath);
-                uploadProgress = 20;
+            // 2. Upload Audio Tracks
+            const totalFiles = audioFiles.length;
+            for (let i = 0; i < audioFiles.length; i++) {
+                const file = audioFiles[i];
+                // Sanitize filename: replace spaces with underscores, remove special chars
+                const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+                const audioFileName = `track_${i + 1}_${timestamp}_${sanitizedName}`;
+                const renamedAudio = new File([file], audioFileName, { type: file.type });
 
-                // Upload Audio
-                const totalFiles = audioFiles.length;
-                for (let i = 0; i < audioFiles.length; i++) {
-                    const file = audioFiles[i];
-                    const data = await uploadToFirebase(file, firebaseBasePath);
-                    uploadedAudio.push(data);
-                    uploadProgress = 20 + ((i + 1) / totalFiles) * 70;
-                }
+                console.log(`Subiendo pista ${i + 1}/${totalFiles} a R2...`);
+                const data = await uploadToR2(renamedAudio, r2Folder);
+                uploadedAudio.push(data);
 
-                // Save Metadata (Firebase Format)
-                await addDoc(collection(db, 'musicSubmissions'), {
-                    userId,
-                    artistId: userId,
-                    artistName: $userStore.user?.displayName || 'Unknown Artist',
-                    artistEmail: $userStore.user?.email,
-                    releaseTitle,
-                    genre: genre === 'Otra' ? customGenre : genre,
-                    coverUrl: coverData.key,
-                    audioFiles: uploadedAudio,
-                    tracklist: tracklist.trim(),
-                    submissionType: 'firebase_direct',
-                    status: 'pending',
-                    submittedAt: serverTimestamp(),
-                });
+                // Calculate progress: 20% (start) + (fraction of audio done * 70%)
+                uploadProgress = 20 + ((i + 1) / totalFiles) * 70;
             }
+
+            // 3. Save Metadata to Firestore
+            // We store R2 keys which are cleaner and cheaper.
+            await addDoc(collection(db, 'musicSubmissions'), {
+                userId,
+                artistId: userId,
+                artistName: $userStore.user?.displayName || 'Unknown Artist',
+                artistEmail: $userStore.user?.email,
+                releaseTitle,
+                genre: genre === 'Otra' ? customGenre : genre,
+
+                // Media References (R2)
+                r2CoverKey: coverData.key,
+                r2AudioKeys: uploadedAudio, // Array of { key, name, size, type }
+
+                // Legacy fields for compatibility (optional, or just omit)
+                coverUrl: null,
+                audioFiles: null,
+
+                tracklist: tracklist.trim(),
+                submissionType: 'r2_direct',
+                status: 'pending',
+                submittedAt: serverTimestamp(),
+            });
 
             uploadProgress = 100;
             toast.success('✅ ¡Música enviada con éxito! La revisaremos pronto.');
