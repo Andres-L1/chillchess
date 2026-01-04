@@ -169,7 +169,7 @@
             return album.cover;
         }
 
-        return 'https://via.placeholder.com/300x300/1e293b/cbd5e1?text=Album';
+        return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Crect width='300' height='300' fill='%231e293b'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='24' fill='%23cbd5e1' font-weight='bold'%3EChillChess%3C/text%3E%3C/svg%3E";
     }
 
     // Search
