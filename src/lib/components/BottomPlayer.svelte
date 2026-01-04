@@ -383,10 +383,10 @@
                 <!-- Close Button (Absolute) -->
                 <button
                     on:click|stopPropagation={closePlayer}
-                    class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full text-white flex items-center justify-center shadow-lg opacity-0 group-hover/mini:opacity-100 transition-all hover:bg-red-600 z-50 hover:scale-110"
+                    class="absolute -top-3 -right-3 w-8 h-8 bg-red-500 rounded-full text-white flex items-center justify-center shadow-lg opacity-100 md:opacity-0 md:group-hover/mini:opacity-100 transition-all hover:bg-red-600 z-50 hover:scale-110"
                     title="Cerrar reproductor"
                 >
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                         ><path
                             stroke-linecap="round"
                             stroke-linejoin="round"

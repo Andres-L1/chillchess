@@ -308,7 +308,7 @@
             ></div>
 
             <!-- Navigation -->
-            <div class="absolute top-12 left-6 z-20">
+            <div class="absolute top-24 md:top-12 left-6 z-20">
                 <a
                     href="/artists"
                     class="inline-flex items-center gap-2 px-4 py-2 bg-black/40 hover:bg-black/60 backdrop-blur-md border border-white/5 rounded-full transition-all text-white/90 hover:text-white text-sm font-medium"
