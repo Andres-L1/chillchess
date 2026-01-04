@@ -9,6 +9,19 @@
 
     const patches: Patch[] = [
         {
+            version: 'v0.9.5',
+            date: '04 Ene 2026',
+            title: 'The Productivity Update',
+            type: 'major',
+            changes: [
+                '📊 Tracker de Hábitos (Beta): Nueva herramienta integrada para seguir tus rutinas. (Free: 2 hábitos, Pro: Ilimitados).',
+                '⏱️ Playlist Duration: Visualiza el tiempo total de las discografías en los perfiles de artista.',
+                '🎨 Categorías Personalizadas: Los artistas ahora pueden definir sus propios géneros musicales al subir álbumes.',
+                '🐛 Corrección Error 500: Solucionado el problema de carga (SSR) en perfiles de artista.',
+                '📱 Mobile Menu: Acceso directo al Tracker habilitado para dispositivos móviles.',
+            ],
+        },
+        {
             version: 'v0.6',
             date: '03 Ene 2026',
             title: 'The Artist Profile Update',

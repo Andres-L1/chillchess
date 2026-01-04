@@ -10,6 +10,22 @@
     const roadmapItems: RoadmapItem[] = [
         // --- COMPLETADO (Enero 2026) ---
         {
+            title: 'Tracker de Hábitos (Beta)',
+            description:
+                'Nueva herramienta de productividad integrada para mantener tus rutinas mientras escuchas. (Free: 2 hábitos, Pro: Ilimitados).',
+            status: 'done',
+            date: 'Enero 2026',
+            category: 'tech',
+        },
+        {
+            title: 'Duración de Listas',
+            description:
+                'Cálculo automático y visualización del tiempo total de reproducción en perfiles de artistas y álbumes.',
+            status: 'done',
+            date: 'Enero 2026',
+            category: 'music',
+        },
+        {
             title: 'Perfil de Artista 2.0',
             description:
                 'Rediseño visual completo de la página pública de artista con banners, mejor navegación y estética "Glow".',
