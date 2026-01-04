@@ -368,6 +368,41 @@
                                     {currentAlbum.artist}
                                 </p>
                             </div>
+
+                            <!-- Volume Control -->
+                            <div
+                                class="flex items-center gap-4 w-full max-w-xs px-4 animate-fade-in delay-100 mb-4"
+                            >
+                                <button
+                                    on:click={() =>
+                                        audioStore.update((s) => ({ ...s, isMuted: !s.isMuted }))}
+                                    class="text-slate-400 hover:text-white transition-colors"
+                                >
+                                    {#if $audioStore.isMuted || $audioStore.musicVolume === 0}
+                                        🔇
+                                    {:else if $audioStore.musicVolume < 0.5}
+                                        🔉
+                                    {:else}
+                                        🔊
+                                    {/if}
+                                </button>
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="1"
+                                    step="0.01"
+                                    value={$audioStore.isMuted ? 0 : $audioStore.musicVolume}
+                                    on:input={(e) => {
+                                        const val = +e.currentTarget.value;
+                                        audioStore.update((s) => ({
+                                            ...s,
+                                            musicVolume: val,
+                                            isMuted: val === 0,
+                                        }));
+                                    }}
+                                    class="flex-1 h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white hover:[&::-webkit-slider-thumb]:bg-primary-500 [&::-webkit-slider-thumb]:transition-colors"
+                                />
+                            </div>
                         </div>
                     {/if}
                 {:else}
