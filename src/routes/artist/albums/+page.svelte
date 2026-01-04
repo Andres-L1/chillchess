@@ -202,7 +202,7 @@
             if (coverFile) {
                 // Determine folder: existing albums might want to overwrite or version?
                 // For simplicity and cache busting, we use a new timestamped key
-                const folder = `covers/${$userStore.user.uid}`;
+                const folder = `albums/${$userStore.user.uid}`;
 
                 // Upload to R2 and get Public URL
                 coverUrl = await uploadToR2(coverFile, folder);
