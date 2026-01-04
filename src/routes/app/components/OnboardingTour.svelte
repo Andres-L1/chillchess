@@ -131,9 +131,9 @@
 
     <!-- Tooltip flotante -->
     <div
-        class="fixed z-[10000] max-w-md"
+        class="fixed z-[10000] w-full md:w-auto md:max-w-md px-4 md:px-0"
         style="
-            {targetRect
+            {targetRect && window.innerWidth >= 768
             ? currentStepData.position === 'bottom'
                 ? `top: ${targetRect.bottom + 20}px; left: ${targetRect.left + targetRect.width / 2}px; transform: translateX(-50%);`
                 : currentStepData.position === 'right'
@@ -141,12 +141,12 @@
                   : currentStepData.position === 'left'
                     ? `top: ${targetRect.top}px; right: ${window.innerWidth - targetRect.left + 20}px;`
                     : `bottom: ${window.innerHeight - targetRect.top + 20}px; left: ${targetRect.left + targetRect.width / 2}px; transform: translateX(-50%);`
-            : 'top: 50%; left: 50%; transform: translate(-50%, -50%);'}
+            : 'top: auto; bottom: 20px; left: 0; right: 0; transform: none;'} 
         "
         transition:fly={{ y: 20, duration: 400 }}
     >
         <div
-            class="bg-gradient-to-br from-slate-800 to-slate-900 border border-primary-500/30 rounded-2xl p-6 shadow-2xl"
+            class="bg-gradient-to-br from-slate-800 to-slate-900 border border-primary-500/30 rounded-2xl p-4 md:p-6 shadow-2xl max-w-full"
         >
             <!-- Progreso -->
             <div class="flex items-center gap-2 mb-4">
@@ -160,57 +160,59 @@
             </div>
 
             <!-- Icono -->
-            <div class="text-5xl mb-3 text-center animate-bounce-subtle">
+            <div class="text-4xl md:text-5xl mb-2 md:mb-3 text-center animate-bounce-subtle">
                 {currentStepData.icon}
             </div>
 
             <!-- Contenido -->
-            <h3 class="text-xl font-bold text-white mb-2 text-center">
+            <h3 class="text-lg md:text-xl font-bold text-white mb-2 text-center">
                 {currentStepData.title}
             </h3>
-            <p class="text-slate-300 text-sm leading-relaxed mb-6 text-center">
+            <p class="text-slate-300 text-xs md:text-sm leading-relaxed mb-4 md:mb-6 text-center">
                 {currentStepData.description}
             </p>
 
             <!-- Controles -->
-            <div class="flex items-center justify-between gap-3">
+            <div
+                class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2 md:gap-3"
+            >
                 <button
                     on:click={skipTour}
-                    class="px-4 py-2 text-slate-400 hover:text-white transition-colors text-sm font-medium"
+                    class="px-4 py-2 text-slate-400 hover:text-white transition-colors text-xs md:text-sm font-medium order-2 md:order-1"
                 >
                     Saltar tutorial
                 </button>
 
-                <div class="flex gap-2">
+                <div class="flex gap-2 order-1 md:order-2">
                     {#if !isFirstStep}
                         <button
                             on:click={prevStep}
-                            class="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors text-white font-medium text-sm"
+                            class="flex-1 md:flex-none px-4 py-2.5 md:py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors text-white font-medium text-xs md:text-sm"
                         >
-                            ← Anterior
+                            ← <span class="hidden md:inline">Anterior</span>
                         </button>
                     {/if}
 
                     {#if isLastStep}
                         <button
                             on:click={completeTour}
-                            class="px-6 py-2 bg-primary-500 hover:bg-primary-600 rounded-lg transition-all shadow-lg shadow-primary-500/25 text-white font-bold text-sm"
+                            class="flex-1 md:flex-none px-6 py-2.5 md:py-2 bg-primary-500 hover:bg-primary-600 rounded-lg transition-all shadow-lg shadow-primary-500/25 text-white font-bold text-xs md:text-sm"
                         >
                             ¡Empezar! 🚀
                         </button>
                     {:else}
                         <button
                             on:click={nextStep}
-                            class="px-4 py-2 bg-primary-500 hover:bg-primary-600 rounded-lg transition-all shadow-lg shadow-primary-500/25 text-white font-bold text-sm"
+                            class="flex-1 md:flex-none px-4 py-2.5 md:py-2 bg-primary-500 hover:bg-primary-600 rounded-lg transition-all shadow-lg shadow-primary-500/25 text-white font-bold text-xs md:text-sm"
                         >
-                            Siguiente →
+                            <span class="hidden md:inline">Siguiente</span> →
                         </button>
                     {/if}
                 </div>
             </div>
 
             <!-- Contador -->
-            <div class="text-center mt-3 text-xs text-slate-500">
+            <div class="text-center mt-2 md:mt-3 text-[10px] md:text-xs text-slate-500">
                 Paso {currentStep + 1} de {steps.length}
             </div>
         </div>

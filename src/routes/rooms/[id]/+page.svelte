@@ -270,7 +270,7 @@
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div
         class="relative min-h-screen w-full overflow-hidden bg-[#0a0a0a] font-poppins transition-all duration-300"
-        class:mr-80={showChat}
+        class:md:mr-80={showChat}
     >
         <!-- Static Background (ChillChess Standard) -->
         <div class="absolute inset-0 z-0 opacity-40">
@@ -474,7 +474,7 @@
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <!-- svelte-ignore a11y-no-static-element-interactions -->
         <div
-            class="fixed inset-y-0 right-0 w-80 bg-[#0f172a] border-l border-white/10 z-30 flex flex-col shadow-2xl"
+            class="fixed inset-y-0 right-0 w-full md:w-80 bg-[#0f172a] border-l border-white/10 z-30 flex flex-col shadow-2xl"
             transition:fly={{ x: 300, duration: 300 }}
         >
             <div
