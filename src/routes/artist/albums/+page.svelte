@@ -218,7 +218,7 @@
                 cover: coverUrl,
                 r2CoverKey: r2CoverKey,
                 storageProvider: 'cloudflare_r2',
-                category,
+                ...(category && { category }), // Only include if defined
                 tracks: tracks.map((t, idx) => ({
                     id: `track-${idx + 1}`,
                     title: t.title,
