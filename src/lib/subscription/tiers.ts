@@ -20,7 +20,7 @@ export const TIERS: Record<SubscriptionTier, TierConfig> = {
         priceValue: 0,
         billing: 'Para siempre',
         features: [
-            'Selección rotativa de música',
+            'Catálogo Musical Completo',
             'Widget para OBS/Streaming',
             'Salas de Escucha Privadas',
             'Favoritos (hasta 20)',
@@ -37,7 +37,6 @@ export const TIERS: Record<SubscriptionTier, TierConfig> = {
         priceValue: 19.99,
         billing: 'año',
         features: [
-            'Catálogo Musical Completo',
             'Salas Públicas & Host Control',
             'Descargas Ilimitadas (WAV/MP3)',
             'Artist Hub: Sube tu Música',
