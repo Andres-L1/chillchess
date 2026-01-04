@@ -15,7 +15,7 @@
     } from 'firebase/firestore';
     import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
     import type { Album } from '$lib/data/albums';
-    import { onMount, tick } from 'svelte';
+    import { onMount, onDestroy, tick } from 'svelte';
     import { fly } from 'svelte/transition';
 
     // --- CREATE ALBUM STATE ---
@@ -384,43 +384,63 @@
     let isUploading = false;
     let uploadProgress = 0;
 
-    onMount(async () => {
-        await Promise.all([loadCatalog(), loadVerifiedArtists()]);
+    import { onSnapshot } from 'firebase/firestore';
+
+    // Subscription toggles
+    let unsubscribeCatalog: () => void;
+    let unsubscribeArtists: () => void;
+
+    onMount(() => {
+        // Init Realtime Listeners
+        subscribeToCatalog();
+        subscribeToVerifiedArtists();
     });
 
-    async function loadVerifiedArtists() {
+    onDestroy(() => {
+        if (unsubscribeCatalog) unsubscribeCatalog();
+        if (unsubscribeArtists) unsubscribeArtists();
+    });
+
+    function subscribeToVerifiedArtists() {
         try {
-            // Updated Query: Filter by 'isVerified' boolean flag
-            // This matches the logic in VerifyTab.svelte
             const q = query(collection(db, 'users'), where('isVerified', '==', true));
 
-            const snap = await getDocs(q);
-            verifiedArtists = snap.docs.map((d) => {
-                const data = d.data();
-                return {
-                    uid: d.id,
-                    displayName: data.displayName || data.username || 'Sin Nombre',
-                    photoURL: data.photoURL,
-                    isFounder:
-                        data.subscriptionTier === 'pro' || data.subscriptionTier === 'premium',
-                };
+            unsubscribeArtists = onSnapshot(q, (snap) => {
+                verifiedArtists = snap.docs.map((d) => {
+                    const data = d.data();
+                    return {
+                        uid: d.id,
+                        displayName: data.displayName || data.username || 'Sin Nombre',
+                        photoURL: data.photoURL,
+                        isFounder:
+                            data.subscriptionTier === 'pro' || data.subscriptionTier === 'premium',
+                    };
+                });
+                console.log('Verified Artists updated:', verifiedArtists.length);
             });
-
-            console.log('Verified Artists loaded:', verifiedArtists.length);
         } catch (e) {
-            console.warn('Error loading verified artists:', e);
+            console.warn('Error subscribing to verified artists:', e);
         }
     }
 
-    async function loadCatalog() {
+    function subscribeToCatalog() {
         loadingCatalog = true;
         try {
             const q = query(collection(db, 'creatorCatalog'), orderBy('createdAt', 'desc'));
-            const snap = await getDocs(q);
-            catalogTracks = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+            unsubscribeCatalog = onSnapshot(
+                q,
+                (snap) => {
+                    catalogTracks = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+                    loadingCatalog = false;
+                },
+                (error) => {
+                    console.error('Catalog realtime error:', error);
+                    loadingCatalog = false;
+                }
+            );
         } catch (e) {
-            console.error('Error loading catalog:', e);
-        } finally {
+            console.error('Error subscribing to catalog:', e);
             loadingCatalog = false;
         }
     }
@@ -479,7 +499,6 @@
             const fileInputs = document.querySelectorAll('input[type="file"]');
             fileInputs.forEach((input: any) => (input.value = ''));
 
-            await loadCatalog();
             setTimeout(() => (statusMessage = ''), 3000);
         } catch (e: any) {
             console.error(e);
@@ -637,12 +656,7 @@
                                 </div>
                                 <p class="text-xs text-slate-500 mt-2">
                                     ¿No encuentras al artista? Asegúrate de que tenga el rol
-                                    'artist' o esté 'verificado'.
-                                    <button
-                                        on:click={loadVerifiedArtists}
-                                        class="text-primary-400 underline hover:text-primary-300 ml-1"
-                                        >Recargar lista</button
-                                    >
+                                    'verificado'.
                                 </p>
                             </label>
 
@@ -1182,10 +1196,15 @@
                         <h3 class="font-bold text-slate-200">
                             Catálogo Actual ({catalogTracks.length})
                         </h3>
-                        <button
-                            on:click={loadCatalog}
-                            class="text-xs text-purple-400 hover:text-purple-300">Actualizar</button
-                        >
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="w-2 h-2 rounded-full bg-green-500 animate-pulse"
+                                title="Actualización en tiempo real"
+                            ></span>
+                            <span class="text-[10px] text-slate-500 uppercase tracking-wider"
+                                >Live</span
+                            >
+                        </div>
                     </div>
 
                     {#if loadingCatalog}
