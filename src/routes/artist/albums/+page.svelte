@@ -135,14 +135,27 @@
         tracks = tracks.filter((_, i) => i !== index);
     }
 
+    function moveTrack(index: number, direction: number) {
+        if (index + direction < 0 || index + direction >= tracks.length) return;
+        const newTracks = [...tracks];
+        const temp = newTracks[index];
+        newTracks[index] = newTracks[index + direction];
+        newTracks[index + direction] = temp;
+        tracks = newTracks;
+    }
+
     const PUBLIC_R2_DOMAIN = 'https://pub-e58e51867b4c44f58a32c407eb8cca7c.r2.dev';
 
     async function uploadToR2(file: File, folder: string) {
+        // Sanitize filename to prevent R2/URL issues and add timestamp for uniqueness/cache-busting
+        const timestamp = Date.now();
+        const safeName = `${timestamp}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+
         // 1. Get signed URL
         const res = await fetch('/api/r2/sign-url', {
             method: 'POST',
             body: JSON.stringify({
-                fileName: file.name,
+                fileName: safeName,
                 fileType: file.type,
                 fileSize: file.size,
                 folder: folder,
@@ -466,17 +479,49 @@
                     >
                     <div id="tracks-list" class="space-y-2 mb-3">
                         {#each tracks as track, i}
-                            <div class="flex items-center gap-2 bg-[#0B1120] p-3 rounded-lg">
-                                <span class="text-slate-500 text-sm shrink-0">{i + 1}.</span>
-                                <div class="flex-1 min-w-0">
-                                    <p class="font-medium text-sm truncate">{track.title}</p>
-                                    <p class="text-xs text-slate-500 truncate">{track.url}</p>
+                            <div
+                                class="flex items-center gap-2 bg-[#0B1120] p-3 rounded-lg border border-white/5 group-hover:border-white/10 transition-colors"
+                            >
+                                <!-- Reorder Controls -->
+                                <div class="flex flex-col gap-1 mr-1">
+                                    <button
+                                        type="button"
+                                        on:click={() => moveTrack(i, -1)}
+                                        disabled={i === 0}
+                                        class="text-slate-500 hover:text-white disabled:opacity-30 disabled:hover:text-slate-500"
+                                        >▲</button
+                                    >
+                                    <button
+                                        type="button"
+                                        on:click={() => moveTrack(i, 1)}
+                                        disabled={i === tracks.length - 1}
+                                        class="text-slate-500 hover:text-white disabled:opacity-30 disabled:hover:text-slate-500"
+                                        >▼</button
+                                    >
+                                </div>
+                                <span class="text-slate-500 text-sm shrink-0 w-6 text-center"
+                                    >{i + 1}.</span
+                                >
+
+                                <div class="flex-1 min-w-0 flex flex-col gap-1">
+                                    <input
+                                        type="text"
+                                        bind:value={track.title}
+                                        class="font-medium text-sm bg-transparent border-b border-transparent hover:border-white/20 focus:border-primary-500 focus:outline-none w-full transition-colors"
+                                        placeholder="Título del track"
+                                    />
+                                    <input
+                                        type="text"
+                                        bind:value={track.url}
+                                        class="text-xs text-slate-500 bg-transparent border-b border-transparent hover:border-white/20 focus:border-primary-500 focus:outline-none w-full transition-colors"
+                                        placeholder="URL del audio"
+                                    />
                                 </div>
                                 <button
                                     type="button"
                                     on:click={() => removeTrack(i)}
-                                    class="text-red-400 hover:text-red-300 w-8 h-8 flex items-center justify-center hover:bg-red-500/10 rounded transition-all shrink-0"
-                                    aria-label="Eliminar track {track.title}"
+                                    class="text-red-400 hover:text-red-300 w-8 h-8 flex items-center justify-center hover:bg-red-500/10 rounded transition-all shrink-0 ml-2"
+                                    aria-label="Eliminar track"
                                 >
                                     ✕
                                 </button>
