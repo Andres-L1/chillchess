@@ -1,4 +1,5 @@
 import { writable } from 'svelte/store';
+import type { SubscriptionTier } from '$lib/types/subscription';
 
 // Store para guardar IDs de canciones favoritas
 // Persiste en localStorage para simplicidad
@@ -14,15 +15,34 @@ if (isBrowser) {
     });
 }
 
-export function toggleFavorite(trackId: string) {
+const FREE_FAVORITES_LIMIT = 20;
+
+export function toggleFavorite(trackId: string, tier: SubscriptionTier = 'free'): { success: boolean; error?: string } {
+    let result = { success: true, error: undefined as string | undefined };
+
     favoritesStore.update(current => {
         if (current.includes(trackId)) {
+            // Removing is always allowed
             return current.filter(id => id !== trackId);
         }
+
+        // Adding: check limit for free users
+        if (tier === 'free' && current.length >= FREE_FAVORITES_LIMIT) {
+            result = { success: false, error: `Límite alcanzado: Los usuarios Free pueden tener hasta ${FREE_FAVORITES_LIMIT} favoritos. Actualiza a Pro para favoritos ilimitados.` };
+            return current; // Don't add
+        }
+
         return [...current, trackId];
     });
+
+    return result;
 }
 
 export function isFavorite(trackId: string, favorites: string[]): boolean {
     return favorites.includes(trackId);
+}
+
+export function canAddMoreFavorites(currentCount: number, tier: SubscriptionTier): boolean {
+    if (tier === 'pro') return true;
+    return currentCount < FREE_FAVORITES_LIMIT;
 }

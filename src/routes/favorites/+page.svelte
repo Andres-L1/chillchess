@@ -2,6 +2,7 @@
     import { favoritesStore, toggleFavorite } from '$lib/data/favorites';
     import { ALBUMS, type Track } from '$lib/data/albums';
     import { playPlaylist, audioStore } from '$lib/audio/store';
+    import { userSubscription } from '$lib/subscription/userSubscription';
 
     // Flatten tracks y añadir info del álbum
     interface AugmentedTrack extends Track {
@@ -34,6 +35,13 @@
             currentAlbumId: undefined,
             isPlaying: true,
         }));
+    }
+
+    function handleFavoriteToggle(trackId: string) {
+        const result = toggleFavorite(trackId, $userSubscription.tier);
+        if (!result.success && result.error) {
+            alert(result.error);
+        }
     }
 </script>
 
@@ -132,7 +140,7 @@
                             </div>
 
                             <button
-                                on:click={() => toggleFavorite(track.id || '')}
+                                on:click={() => handleFavoriteToggle(track.id || '')}
                                 class="text-rose-500 hover:text-white hover:bg-rose-500 p-2 rounded-full transition-colors mr-2"
                                 title="Quitar de favoritos"
                             >

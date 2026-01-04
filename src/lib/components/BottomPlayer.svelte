@@ -20,6 +20,14 @@
     const dispatch = createEventDispatcher();
 
     import { favoritesStore, toggleFavorite, isFavorite } from '$lib/data/favorites';
+    import { userSubscription } from '$lib/subscription/userSubscription';
+
+    function handleFavoriteToggle(trackId: string) {
+        const result = toggleFavorite(trackId, $userSubscription.tier);
+        if (!result.success && result.error) {
+            alert(result.error);
+        }
+    }
 
     let showVolumeSlider = false;
     let isCollapsed = false;
@@ -93,7 +101,7 @@
             {currentTrack}
             onExpand={() => (isCollapsed = false)}
             isFavorite={isTrackFavorite}
-            onFavoriteClick={() => currentTrack?.id && toggleFavorite(currentTrack.id)}
+            onFavoriteClick={() => currentTrack?.id && handleFavoriteToggle(currentTrack.id)}
             onClose={closePlayer}
         />
         <!-- Note: MiniPlayer needs to support onClose prop or we wrap it. 
@@ -144,7 +152,7 @@
                             {currentTrack}
                             isFavorite={isTrackFavorite}
                             onFavoriteClick={() =>
-                                currentTrack?.id && toggleFavorite(currentTrack.id)}
+                                currentTrack?.id && handleFavoriteToggle(currentTrack.id)}
                             onShowTracks={() => (showTrackList = !showTrackList)}
                         />
                     </div>
@@ -583,7 +591,7 @@
                                 </div>
                                 <button
                                     on:click={() =>
-                                        currentTrack?.id && toggleFavorite(currentTrack.id)}
+                                        currentTrack?.id && handleFavoriteToggle(currentTrack.id)}
                                     class="w-10 h-10 active:scale-90 transition-transform flex items-center justify-center"
                                 >
                                     <svg

@@ -23,7 +23,7 @@ export const TIERS: Record<SubscriptionTier, TierConfig> = {
             'Selección rotativa de música',
             'Widget para OBS/Streaming',
             'Salas de Escucha Privadas',
-            'Favoritos (hasta 50)',
+            'Favoritos (hasta 20)',
             'Perfil Básico',
         ],
         maxGamesDaily: Infinity,

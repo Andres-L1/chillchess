@@ -105,6 +105,13 @@
     }
 
     import CollectionAlbumCard from '$lib/components/CollectionAlbumCard.svelte';
+
+    function handleFavoriteToggle(trackId: string) {
+        const result = toggleFavorite(trackId, $userSubscription.tier);
+        if (!result.success && result.error) {
+            alert(result.error);
+        }
+    }
 </script>
 
 <svelte:head>
@@ -471,7 +478,7 @@
                                 <div class="opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
                                         on:click|stopPropagation={() =>
-                                            toggleFavorite(track.id || '')}
+                                            handleFavoriteToggle(track.id || '')}
                                         class="p-2 hover:bg-white/10 rounded-full {isFavorite(
                                             track.id || '',
                                             $favoritesStore
