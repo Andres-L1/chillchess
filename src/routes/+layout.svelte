@@ -58,7 +58,7 @@
         {#if !$page.url.pathname.match(/^\/rooms\/[a-zA-Z0-9]+$/)}
             <BottomPlayer />
         {/if}
-        <MusicToast />
+
         <ToastContainer />
         <CookieConsent />
         <AudioSync />

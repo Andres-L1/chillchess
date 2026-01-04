@@ -53,11 +53,24 @@
     function handleAudioSelect(e: Event) {
         const input = e.target as HTMLInputElement;
         if (input.files) {
-            audioFiles = Array.from(input.files);
+            const files = Array.from(input.files);
+            const validFiles = files.filter((file) => {
+                // 500MB hard limit for R2
+                if (file.size > 500 * 1024 * 1024) {
+                    toast.warning(`El archivo ${file.name} es demasiado grande. Máximo 500MB.`);
+                    return false;
+                }
+                return true;
+            });
+
+            audioFiles = validFiles;
+
             // Auto-generate tracklist from filenames
-            tracklist = audioFiles
-                .map((file, idx) => `${idx + 1}. ${file.name.replace(/\.(mp3|wav|m4a)$/i, '')}`)
-                .join('\n');
+            if (validFiles.length > 0) {
+                tracklist = validFiles
+                    .map((file, idx) => `${idx + 1}. ${file.name.replace(/\.(mp3|wav|m4a)$/i, '')}`)
+                    .join('\n');
+            }
         }
     }
 
@@ -80,6 +93,41 @@
         return { key: url, name: file.name, size: file.size, type: file.type };
     }
 
+    async function uploadToR2(file: File, folder: string) {
+        // 1. Get signed URL
+        const res = await fetch('/api/r2/sign-url', {
+            method: 'POST',
+            body: JSON.stringify({
+                fileName: file.name,
+                fileType: file.type,
+                fileSize: file.size,
+                folder: folder,
+            }),
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || 'Error obteniendo URL de subida');
+        }
+
+        const { uploadUrl, key } = await res.json();
+
+        // 2. Upload to R2
+        const uploadRes = await fetch(uploadUrl, {
+            method: 'PUT',
+            body: file,
+            headers: {
+                'Content-Type': file.type,
+            },
+        });
+
+        if (!uploadRes.ok) {
+            throw new Error('Error subiendo archivo a R2');
+        }
+
+        return { key, name: file.name, size: file.size, type: file.type };
+    }
+
     async function submitRelease() {
         if (!releaseTitle.trim() || !coverFile || audioFiles.length === 0) {
             toast.warning(
@@ -95,39 +143,84 @@
 
         try {
             const userId = $userStore.user?.uid;
+
+            // Check if we need R2 (any file > 50MB)
+            const FIREBASE_LIMIT = 50 * 1024 * 1024;
+            const useR2 = audioFiles.some((f) => f.size > FIREBASE_LIMIT);
+
+            // Use different base path strategy depending on provider
+            // Firebase: submissions/userId/timestamp
+            // R2: submissions (logic handled in sign-url to append userId)
             const timestamp = Date.now();
-            const basePath = `submissions/${userId}/${timestamp}`;
+            const firebaseBasePath = `submissions/${userId}/${timestamp}`;
+            const r2Folder = 'submissions'; // userId will be appended by server
 
-            // Upload Cover to Firebase
-            const coverData = await uploadToFirebase(coverFile, basePath);
-            uploadProgress = 20;
+            let coverData;
+            let uploadedAudio = [];
 
-            // Upload Audio Files to Firebase
-            const uploadedAudio = [];
-            const totalFiles = audioFiles.length;
+            if (useR2) {
+                // --- R2 UPLOAD FLOW ---
 
-            for (let i = 0; i < audioFiles.length; i++) {
-                const file = audioFiles[i];
-                const data = await uploadToFirebase(file, basePath);
-                uploadedAudio.push(data);
-                uploadProgress = 20 + ((i + 1) / totalFiles) * 70;
+                // Upload Cover
+                coverData = await uploadToR2(coverFile, r2Folder);
+                uploadProgress = 20;
+
+                // Upload Audio
+                const totalFiles = audioFiles.length;
+                for (let i = 0; i < audioFiles.length; i++) {
+                    const file = audioFiles[i];
+                    const data = await uploadToR2(file, r2Folder);
+                    uploadedAudio.push(data);
+                    uploadProgress = 20 + ((i + 1) / totalFiles) * 70;
+                }
+
+                // Save Metadata (R2 Format)
+                await addDoc(collection(db, 'musicSubmissions'), {
+                    userId,
+                    artistId: userId,
+                    artistName: $userStore.user?.displayName || 'Unknown Artist',
+                    artistEmail: $userStore.user?.email,
+                    releaseTitle,
+                    genre: genre === 'Otra' ? customGenre : genre,
+                    r2CoverKey: coverData.key,
+                    r2AudioKeys: uploadedAudio, // { key, name, size }
+                    tracklist: tracklist.trim(),
+                    submissionType: 'r2_direct',
+                    status: 'pending',
+                    submittedAt: serverTimestamp(),
+                });
+            } else {
+                // --- FIREBASE UPLOAD FLOW (Legacy/Small files) ---
+
+                // Upload Cover
+                coverData = await uploadToFirebase(coverFile, firebaseBasePath);
+                uploadProgress = 20;
+
+                // Upload Audio
+                const totalFiles = audioFiles.length;
+                for (let i = 0; i < audioFiles.length; i++) {
+                    const file = audioFiles[i];
+                    const data = await uploadToFirebase(file, firebaseBasePath);
+                    uploadedAudio.push(data);
+                    uploadProgress = 20 + ((i + 1) / totalFiles) * 70;
+                }
+
+                // Save Metadata (Firebase Format)
+                await addDoc(collection(db, 'musicSubmissions'), {
+                    userId,
+                    artistId: userId,
+                    artistName: $userStore.user?.displayName || 'Unknown Artist',
+                    artistEmail: $userStore.user?.email,
+                    releaseTitle,
+                    genre: genre === 'Otra' ? customGenre : genre,
+                    coverUrl: coverData.key,
+                    audioFiles: uploadedAudio,
+                    tracklist: tracklist.trim(),
+                    submissionType: 'firebase_direct',
+                    status: 'pending',
+                    submittedAt: serverTimestamp(),
+                });
             }
-
-            // Save Metadata to Firestore
-            await addDoc(collection(db, 'musicSubmissions'), {
-                userId, // Required for Firestore Rules
-                artistId: userId,
-                artistName: $userStore.user?.displayName || 'Unknown Artist',
-                artistEmail: $userStore.user?.email,
-                releaseTitle,
-                genre: genre === 'Otra' ? customGenre : genre,
-                coverUrl: coverData.key, // Store direct URL
-                audioFiles: uploadedAudio, // Store array of { key: url, name, size }
-                tracklist: tracklist.trim(),
-                submissionType: 'firebase_direct',
-                status: 'pending',
-                submittedAt: serverTimestamp(),
-            });
 
             uploadProgress = 100;
             toast.success('✅ ¡Música enviada con éxito! La revisaremos pronto.');

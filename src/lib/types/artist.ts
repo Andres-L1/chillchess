@@ -5,6 +5,7 @@ export interface SocialLink {
 }
 
 export interface ArtistProfile {
+    id?: string; // Document ID (slug)
     userId: string;
     artistName: string;
     bio: string;

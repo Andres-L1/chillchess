@@ -15,7 +15,9 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase safely
-let app;
+import type { FirebaseApp } from 'firebase/app';
+
+let app: FirebaseApp | undefined;
 let auth: Auth;
 let db: Firestore;
 let functions: Functions;
@@ -51,4 +53,4 @@ try {
     console.warn("Storage init failed:", e);
 }
 
-export { auth, db, functions, storage };
+export { app, auth, db, functions, storage };

@@ -3,6 +3,7 @@ export interface Track {
     title: string;
     artist: string;
     file: string;
+    cover?: string; // Optional per-track cover (for singles)
     duration?: number;
 }
 
@@ -22,6 +23,8 @@ export interface Album {
     isPremium?: boolean; // Requires Pro subscription
     category: AlbumCategory; // New field for categorization
     createdAt?: any; // Timestamp from Firestore
+    r2CoverKey?: string; // Optional for migrated albums
+    storageProvider?: 'cloudflare_r2' | 'external_link' | 'firebase'; // New field for R2 integration
 }
 
 export const ALBUMS: Album[] = [

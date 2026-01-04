@@ -11,7 +11,7 @@
  * - TTFB (Time to First Byte)
  */
 
-import { onCLS, onFCP, onFID, onLCP, onTTFB, type Metric } from 'web-vitals';
+import { onCLS, onFCP, onINP, onLCP, onTTFB, type Metric } from 'web-vitals';
 import { logger } from '$lib/utils/logger';
 import { dev } from '$app/environment';
 
@@ -92,7 +92,7 @@ export function initWebVitals() {
 
     // Track all Core Web Vitals
     onCLS(reportWebVitals);
-    onFID(reportWebVitals);
+    onINP(reportWebVitals);
     onLCP(reportWebVitals);
     onFCP(reportWebVitals);
     onTTFB(reportWebVitals);
@@ -124,7 +124,7 @@ export function measurePerformance(name: string, startMark: string, endMark: str
 
             return measure.duration;
         } catch (error) {
-            logger.warn('Failed to measure performance', error);
+            logger.warn('Failed to measure performance', { error });
         }
     }
     return null;
@@ -135,7 +135,7 @@ export function measurePerformance(name: string, startMark: string, endMark: str
  */
 export const PERFORMANCE_BUDGETS = {
     LCP: 2500, // Good: <2.5s
-    FID: 100, // Good: <100ms
+    INP: 200, // Good: <200ms
     CLS: 0.1, // Good: <0.1
     FCP: 1800, // Good: <1.8s
     TTFB: 800, // Good: <800ms

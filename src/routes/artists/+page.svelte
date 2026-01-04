@@ -29,7 +29,7 @@
         unsubscribeArtists = onSnapshot(qArtists, (querySnapshot) => {
             verifiedArtists = [];
             querySnapshot.forEach((doc) => {
-                verifiedArtists.push({ ...doc.data() } as ArtistProfile);
+                verifiedArtists.push({ id: doc.id, ...doc.data() } as ArtistProfile);
             });
         });
 
@@ -68,11 +68,16 @@
         const relevantAlbums = allAlbumsList.filter((album) => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const a = album as any;
-            return verifiedArtists.some(
-                (artist) =>
-                    (a.artistId && a.artistId === artist.userId) ||
-                    (a.artist && a.artist.toLowerCase() === artist.artistName.toLowerCase())
-            );
+            return verifiedArtists.some((artist) => {
+                // Match by string ID (slug) OR by UID
+                const idMatch =
+                    a.artistId && (a.artistId === artist.id || a.artistId === artist.userId);
+                const nameMatch =
+                    album.artist &&
+                    artist.artistName &&
+                    album.artist.trim().toLowerCase() === artist.artistName.trim().toLowerCase();
+                return idMatch || nameMatch;
+            });
         });
         totalAlbumsCount = relevantAlbums.length;
     }
@@ -88,13 +93,68 @@
             // Cast to any to access artistId if interface update hasn't propagated or is missing
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const a = album as any;
-            const idMatch = a.artistId && a.artistId === artist.userId;
+            // Match by string ID (e.g. 'julyactv-official') OR by UID (e.g. '78sdf87s6df')
+            // This covers both legacy and new split-brain fix scenarios
+            const idMatch =
+                a.artistId && (a.artistId === artist.id || a.artistId === artist.userId);
             const nameMatch =
                 album.artist &&
                 artist.artistName &&
-                album.artist.toLowerCase() === artist.artistName.toLowerCase();
+                album.artist.trim().toLowerCase() === artist.artistName.trim().toLowerCase();
             return idMatch || nameMatch;
         });
+    }
+
+    // ============================================
+    // R2 Cover URL Resolution
+    // ============================================
+    let coverUrlsMap = new Map<string, string>();
+
+    async function fetchR2CoverUrl(r2Key: string): Promise<string | null> {
+        try {
+            const res = await fetch('/api/r2/get-url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key: r2Key }),
+            });
+
+            if (!res.ok) return null;
+
+            const { url } = await res.json();
+            return url;
+        } catch (err) {
+            console.error('Error fetching R2 cover:', err);
+            return null;
+        }
+    }
+
+    // Fetch R2 covers when albums list changes
+    $: {
+        allAlbumsList.forEach(async (album) => {
+            const anyAlbum = album as any;
+
+            if (anyAlbum.r2CoverKey && !coverUrlsMap.has(anyAlbum.r2CoverKey)) {
+                const signedUrl = await fetchR2CoverUrl(anyAlbum.r2CoverKey);
+                if (signedUrl) {
+                    coverUrlsMap.set(anyAlbum.r2CoverKey, signedUrl);
+                    coverUrlsMap = coverUrlsMap;
+                }
+            }
+        });
+    }
+
+    function getCoverUrl(album: Album): string {
+        const a = album as any;
+
+        if (a.r2CoverKey && coverUrlsMap.has(a.r2CoverKey)) {
+            return coverUrlsMap.get(a.r2CoverKey)!;
+        }
+
+        if (album.cover) {
+            return album.cover;
+        }
+
+        return 'https://via.placeholder.com/300x300/1e293b/cbd5e1?text=Album';
     }
 
     onDestroy(() => {
@@ -219,7 +279,7 @@
                     )}
 
                     <button
-                        on:click={() => goto(`/artist/${artist.userId}`)}
+                        on:click={() => goto(`/artist/${artist.id || artist.userId}`)}
                         class="group bg-white/5 hover:bg-white/10 border border-white/10 hover:border-primary-500/50 rounded-2xl p-6 transition-all hover:scale-105 active:scale-95 text-left"
                     >
                         <!-- Artist Avatar -->
@@ -277,7 +337,7 @@
                                         class="w-16 h-16 rounded-lg overflow-hidden shrink-0 ring-2 ring-white/10 group-hover:ring-primary-500/50 transition-all"
                                     >
                                         <img
-                                            src={album.cover}
+                                            src={getCoverUrl(album)}
                                             alt={album.title}
                                             class="w-full h-full object-cover"
                                         />

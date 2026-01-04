@@ -13,6 +13,7 @@
     $: favoriteTracks = ALBUMS.flatMap((album) =>
         (album.tracks || []).map((track) => ({
             ...track,
+            cover: track.cover || album.cover,
             albumCover: album.cover,
             albumTitle: album.title,
         }))
@@ -116,7 +117,7 @@
 
                             <div class="min-w-0 flex items-center gap-4">
                                 <img
-                                    src={track.albumCover}
+                                    src={track.cover}
                                     alt={track.albumTitle}
                                     class="w-10 h-10 rounded shadow-sm object-cover"
                                 />

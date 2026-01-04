@@ -1,29 +1,46 @@
 <script lang="ts">
-    import { audioStore } from "$lib/audio/store";
-    import { getAlbumById } from "$lib/data/albums";
+    import { audioStore } from '$lib/audio/store';
+    import { getAlbumById } from '$lib/data/albums';
 
     export let currentTrack: any;
     export let isFavorite: boolean;
     export let onFavoriteClick: () => void;
     export let onShowTracks: () => void;
 
-    $: currentAlbum = $audioStore.currentAlbumId
-        ? getAlbumById($audioStore.currentAlbumId)
-        : null;
+    $: currentAlbum = $audioStore.currentAlbumId ? getAlbumById($audioStore.currentAlbumId) : null;
+    let resolvedCover = '/logo-mobile.png';
+
+    $: if (currentAlbum) {
+        if (currentAlbum.cover) {
+            resolvedCover = currentAlbum.cover;
+        } else if (currentAlbum.r2CoverKey) {
+            // Resolve R2 URL asynchronously
+            fetch(`/api/r2/get-url?key=${encodeURIComponent(currentAlbum.r2CoverKey)}`)
+                .then((res) => res.json())
+                .then((data) => {
+                    if (data.url) resolvedCover = data.url;
+                })
+                .catch((err) => console.error('Error resolving cover in TrackInfo', err));
+        } else {
+            resolvedCover = '/logo-mobile.png';
+        }
+    } else if (currentTrack?.cover) {
+        resolvedCover = currentTrack.cover;
+    }
 </script>
 
 <div class="flex items-center gap-4 w-1/3 min-w-0">
     <!-- Album Cover & Expand Button -->
-    <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-    <div
+    <button
+        type="button"
         on:click={onShowTracks}
         class="hidden sm:relative sm:flex w-14 h-14 bg-white/5 rounded-lg items-center justify-center shrink-0 overflow-hidden cursor-pointer group shadow-lg shadow-black/40 border border-white/10"
         title="Ver lista de canciones"
     >
-        {#if currentAlbum}
+        {#if resolvedCover}
             <img
-                src={currentAlbum.cover}
-                alt={currentAlbum.title}
+                src={resolvedCover}
+                alt={currentAlbum?.title || currentTrack.title}
                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
             />
             <!-- Overlay Icon on Hover -->
@@ -55,7 +72,7 @@
                 >
             </div>
         {/if}
-    </div>
+    </button>
 
     <div class="min-w-0 flex-1">
         <div class="font-bold text-sm sm:text-base truncate text-white">

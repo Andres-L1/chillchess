@@ -1,17 +1,17 @@
 <script lang="ts">
-    import { audioStore } from "$lib/audio/store";
-    import { onMount } from "svelte";
-    import { page } from "$app/stores";
+    import { audioStore } from '$lib/audio/store';
+    import { onMount } from 'svelte';
+    import { page } from '$app/stores';
 
-    import { db } from "$lib/firebase";
-    import { doc, onSnapshot } from "firebase/firestore";
+    import { db } from '$lib/firebase';
+    import { doc, onSnapshot } from 'firebase/firestore';
 
     // Query params for customization
-    $: theme = $page.url.searchParams.get("theme") || "dark";
-    $: size = $page.url.searchParams.get("size") || "medium";
-    $: showLogo = $page.url.searchParams.get("showLogo") !== "false";
-    $: opacity = parseFloat($page.url.searchParams.get("opacity") || "0.9");
-    $: uid = $page.url.searchParams.get("uid");
+    $: theme = $page.url.searchParams.get('theme') || 'dark';
+    $: size = $page.url.searchParams.get('size') || 'medium';
+    $: showLogo = $page.url.searchParams.get('showLogo') !== 'false';
+    $: opacity = parseFloat($page.url.searchParams.get('opacity') || '0.9');
+    $: uid = $page.url.searchParams.get('uid');
 
     // Local Store Data
     $: playlist = $audioStore.playlist;
@@ -20,9 +20,7 @@
     $: localIsPlaying = $audioStore.isPlaying;
 
     $: currentTrack = playlist && playlist[currentTrackIndex];
-    $: currentAlbum = $audioStore.availableAlbums.find(
-        (a) => a.id === currentAlbumId,
-    );
+    $: currentAlbum = $audioStore.availableAlbums.find((a) => a.id === currentAlbumId);
 
     // Derived Local Info
     $: localTrackInfo =
@@ -42,7 +40,7 @@
 
     onMount(() => {
         if (uid) {
-            const unsub = onSnapshot(doc(db, "nowPlaying", uid), (snap) => {
+            const unsub = onSnapshot(doc(db, 'nowPlaying', uid), (snap) => {
                 if (snap.exists()) {
                     remoteData = snap.data();
                 }
@@ -58,18 +56,16 @@
     // Progress calculation for remote
     $: progress =
         uid && remoteData
-            ? ((remoteData.track.currentTime || 0) /
-                  (remoteData.track.duration || 1)) *
-              100
+            ? ((remoteData.track.currentTime || 0) / (remoteData.track.duration || 1)) * 100
             : $audioStore.duration > 0
               ? ($audioStore.currentTime / $audioStore.duration) * 100
               : 0;
 
     // Size configurations
     const sizes = {
-        compact: { width: "300px", imgSize: "60px", fontSize: "text-sm" },
-        medium: { width: "380px", imgSize: "72px", fontSize: "text-base" },
-        large: { width: "450px", imgSize: "90px", fontSize: "text-lg" },
+        compact: { width: '300px', imgSize: '60px', fontSize: 'text-sm' },
+        medium: { width: '380px', imgSize: '72px', fontSize: 'text-base' },
+        large: { width: '450px', imgSize: '90px', fontSize: 'text-lg' },
     };
 
     $: config = sizes[size as keyof typeof sizes] || sizes.medium;
@@ -91,21 +87,16 @@
         <!-- Background Glow removed for cleaner look -->
 
         <!-- Vinilo Giratorio (Estabilizado) -->
-        <div
-            class="album-container"
-            style="width: {config.imgSize}; height: {config.imgSize};"
-        >
+        <div class="album-container" style="width: {config.imgSize}; height: {config.imgSize};">
             <!-- La animación de giro va AQUÍ, en el contenedor, para no reiniciarse con updates de datos -->
             <div class="relative w-full h-full animate-spin-slow">
                 <img
-                    src={activeTrack.cover || "/logo-mobile.png"}
+                    src={activeTrack.cover || '/logo-mobile-legacy.png'}
                     alt={activeTrack.title}
                     class="w-full h-full object-cover rounded-full shadow-2xl border-[3px] border-white/10"
                 />
                 <!-- Centro del vinilo -->
-                <div
-                    class="absolute inset-0 flex items-center justify-center pointer-events-none"
-                >
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div
                         class="w-[25%] h-[25%] bg-[#0B1120] rounded-full border border-white/20 backdrop-blur-sm shadow-inner"
                     ></div>
@@ -138,7 +129,7 @@
             {#if showLogo}
                 <div class="logo-container mt-2">
                     <img
-                        src="/logo-desktop.png"
+                        src="/logo-desktop-legacy.png"
                         alt="ChillChess"
                         class="h-14 w-auto object-contain opacity-100"
                     />
@@ -164,7 +155,7 @@
                 class="absolute inset-0 bg-primary-500/20 rounded-full blur-2xl opacity-30 animate-pulse"
             ></div>
             <img
-                src="/logo-desktop.png"
+                src="/logo-desktop-legacy.png"
                 alt="ChillChess"
                 class="h-20 w-auto relative z-10 drop-shadow-xl animate-float object-contain"
             />
@@ -268,11 +259,7 @@
 
     .progress-bar {
         height: 100%;
-        background: linear-gradient(
-            90deg,
-            #ff7b3d,
-            #fb923c
-        ); /* Brand Orange Gradient */
+        background: linear-gradient(90deg, #ff7b3d, #fb923c); /* Brand Orange Gradient */
         border-radius: 4px;
         transition: width 0.3s ease;
         box-shadow: 0 0 15px rgba(255, 123, 61, 0.5); /* Orange Glow */

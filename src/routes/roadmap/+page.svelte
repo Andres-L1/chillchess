@@ -10,6 +10,23 @@
     const roadmapItems: RoadmapItem[] = [
         // --- COMPLETADO (Enero 2026) ---
         {
+            title: 'Perfil de Artista 2.0',
+            description:
+                'Rediseño visual completo de la página pública de artista con banners, mejor navegación y estética "Glow".',
+            status: 'done',
+            date: 'Enero 2026',
+            category: 'visual',
+        },
+        {
+            title: 'Nube Híbrida (R2 + Firebase)',
+            description:
+                'Optimización inteligente: Archivos pesados a Cloudflare R2 y ligeros a Firebase para máxima velocidad y ahorro.',
+            status: 'done',
+            date: 'Enero 2026',
+            category: 'tech',
+        },
+
+        {
             title: 'Modo Enfoque Minimalista',
             description:
                 'Rediseño total de la experiencia de concentración con temporizador "Orange Vibe", controles intuitivos y eliminación de distracciones.',

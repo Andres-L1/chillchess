@@ -124,14 +124,16 @@ class Logger {
             [LogLevel.DEBUG]: 'color: #9CA3AF',
             [LogLevel.INFO]: 'color: #3B82F6',
             [LogLevel.WARN]: 'color: #F59E0B',
-            [LogLevel.ERROR]: 'color: #EF4444; font-weight: bold'
+            [LogLevel.ERROR]: 'color: #EF4444; font-weight: bold',
+            [LogLevel.NONE]: 'color: inherit'
         };
 
         const labels = {
             [LogLevel.DEBUG]: '🔍 DEBUG',
             [LogLevel.INFO]: 'ℹ️  INFO',
             [LogLevel.WARN]: '⚠️  WARN',
-            [LogLevel.ERROR]: '❌ ERROR'
+            [LogLevel.ERROR]: '❌ ERROR',
+            [LogLevel.NONE]: 'NONE'
         };
 
         console.log(

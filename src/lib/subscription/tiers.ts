@@ -45,6 +45,7 @@ export const TIERS: Record<SubscriptionTier, TierConfig> = {
             'Vibe Studio: Personalización Total',
             'Interfaz Inmersiva (Ocultar UI)',
             'Insignia de Fundador',
+            'Tracker de hábitos (Próximamente)',
         ],
         maxGamesDaily: Infinity,
         canAccessPremiumVibes: true,

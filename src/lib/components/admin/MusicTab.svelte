@@ -948,86 +948,155 @@
             </div>
         {/if}
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {#each filteredAlbums.slice(0, 50) as album (album.id)}
-                <div
-                    class="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors group"
-                >
-                    <div class="flex gap-4 mb-4">
-                        <div
-                            class="w-20 h-20 rounded-lg overflow-hidden bg-black/50 flex-shrink-0 relative"
-                        >
-                            <img
-                                src={album.cover}
-                                alt={album.title}
-                                class="w-full h-full object-cover"
-                            />
-                            {#if album.isPremium}
-                                <div
-                                    class="absolute top-0 right-0 bg-yellow-500 text-black text-[10px] font-bold px-1.5 py-0.5"
-                                >
-                                    PRO
-                                </div>
-                            {/if}
-                        </div>
-
-                        <div class="overflow-hidden">
-                            <h3 class="font-bold text-white truncate" title={album.title}>
-                                {album.title}
-                            </h3>
-                            <p class="text-sm text-slate-400 truncate">
-                                {album.artist}
-                            </p>
-                            <p class="text-xs text-slate-500 mt-1 capitalize">
-                                {album.category} • {album.tracks?.length || 0} tracks
-                            </p>
-                        </div>
-                    </div>
-
-                    <div
-                        class="bg-black/20 rounded-xl p-3 mb-4 max-h-32 overflow-y-auto custom-scrollbar"
-                    >
-                        {#if album.tracks && album.tracks.length > 0}
-                            {#each album.tracks as track}
-                                <div
-                                    class="flex items-center gap-2 py-1 hover:bg-white/5 rounded px-2 text-xs"
-                                >
-                                    <button
-                                        on:click={() => togglePlay(track.file)}
-                                        class="text-primary-400 hover:text-white"
-                                    >
-                                        {#if playingTrack === track.file}
-                                            ⏸
-                                        {:else}
-                                            ▶
-                                        {/if}
-                                    </button>
-                                    <span class="text-slate-300 truncate">{track.title}</span>
-                                </div>
-                            {/each}
-                        {:else}
-                            <p class="text-xs text-slate-500 text-center py-2">
-                                Sin pistas disponibles
-                            </p>
-                        {/if}
-                    </div>
-
-                    <div class="flex justify-between pt-3 border-t border-white/10">
-                        <button
-                            on:click={() => openEditModal(album)}
-                            class="text-xs flex items-center gap-1 text-primary-400 hover:text-primary-300 px-3 py-1.5 rounded-lg hover:bg-primary-500/10 transition-colors"
-                        >
-                            ✏️ Editar
-                        </button>
-                        <button
-                            on:click={() => deleteAlbum(album)}
-                            class="text-xs flex items-center gap-1 text-red-400 hover:text-red-300 px-3 py-1.5 rounded-lg hover:bg-red-500/10 transition-colors"
-                        >
-                            🗑️ Eliminar
-                        </button>
-                    </div>
+        <!-- TABLE VIEW COMPACT -->
+        <div class="bg-slate-900/50 border border-white/10 rounded-2xl overflow-hidden shadow-xl">
+            {#if filteredAlbums.length === 0}
+                <div class="p-12 text-center text-slate-500">
+                    <div class="text-4xl mb-2 opacity-50">🔍</div>
+                    <p>No se encontraron álbumes</p>
                 </div>
-            {/each}
+            {:else}
+                <table class="w-full text-left border-collapse">
+                    <thead
+                        class="bg-black/40 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-white/5"
+                    >
+                        <tr>
+                            <th class="px-6 py-4 w-20 text-center">Cover</th>
+                            <th class="px-6 py-4">Álbum & Artista</th>
+                            <th class="px-6 py-4">Categoría</th>
+                            <th class="px-6 py-4 text-center">Tracks</th>
+                            <th class="px-6 py-4 text-center">Estado</th>
+                            <th class="px-6 py-4 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5 text-sm">
+                        {#each filteredAlbums.slice(0, 50) as album (album.id)}
+                            <tr class="hover:bg-white/5 transition-colors group">
+                                <td class="px-6 py-3">
+                                    <div
+                                        class="w-12 h-12 rounded-lg bg-black/50 overflow-hidden relative border border-white/10 shadow-sm"
+                                    >
+                                        {#if album.cover}
+                                            <img
+                                                src={album.cover}
+                                                alt={album.title}
+                                                class="w-full h-full object-cover"
+                                                loading="lazy"
+                                                on:error={(e) => {
+                                                    // @ts-ignore
+                                                    e.target.src = '/logo-mobile.png';
+                                                    // @ts-ignore
+                                                    e.target.classList.add(
+                                                        'opacity-50',
+                                                        'grayscale'
+                                                    );
+                                                }}
+                                            />
+                                        {:else if album.r2CoverKey}
+                                            <div
+                                                class="w-full h-full flex items-center justify-center bg-blue-900/50 text-blue-200 text-xs font-bold"
+                                                title="R2 Secured"
+                                            >
+                                                R2
+                                            </div>
+                                        {:else}
+                                            <div
+                                                class="w-full h-full flex items-center justify-center bg-slate-800 text-slate-500 text-lg"
+                                            >
+                                                💿
+                                            </div>
+                                        {/if}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-3">
+                                    <div
+                                        class="font-bold text-white group-hover:text-primary-400 transition-colors cursor-default"
+                                        title={album.title}
+                                    >
+                                        {album.title}
+                                    </div>
+                                    <div
+                                        class="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5"
+                                    >
+                                        {album.artist}
+                                        {#if album.isPremium}
+                                            <span
+                                                class="px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-500 text-[10px] font-bold border border-yellow-500/30"
+                                                >PRO</span
+                                            >
+                                        {/if}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-3">
+                                    <span
+                                        class="px-2.5 py-1 rounded-full bg-white/5 border border-white/5 text-xs text-slate-300 capitalize"
+                                    >
+                                        {album.category || 'Música'}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-3 text-center text-slate-400 font-mono">
+                                    {album.tracks?.length || 0}
+                                </td>
+                                <td class="px-6 py-3 text-center">
+                                    {#if album.r2CoverKey || album.storageProvider === 'cloudflare_r2'}
+                                        <span
+                                            class="text-xs font-bold text-blue-400 bg-blue-400/10 px-2 py-1 rounded border border-blue-400/20"
+                                            >Cloudflare R2</span
+                                        >
+                                    {:else}
+                                        <span
+                                            class="text-xs font-bold text-slate-400 bg-slate-500/10 px-2 py-1 rounded border border-slate-500/20"
+                                            >Standard</span
+                                        >
+                                    {/if}
+                                </td>
+                                <td class="px-6 py-3 text-right">
+                                    <div
+                                        class="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity"
+                                    >
+                                        <button
+                                            on:click={() => openEditModal(album)}
+                                            class="p-2 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition-colors"
+                                            title="Editar"
+                                        >
+                                            <svg
+                                                class="w-4 h-4"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                                ><path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                                ></path></svg
+                                            >
+                                        </button>
+                                        <button
+                                            on:click={() => deleteAlbum(album)}
+                                            class="p-2 hover:bg-red-500/10 rounded-lg text-slate-400 hover:text-red-400 transition-colors"
+                                            title="Eliminar"
+                                        >
+                                            <svg
+                                                class="w-4 h-4"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                                ><path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                ></path></svg
+                                            >
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {/each}
+                    </tbody>
+                </table>
+            {/if}
         </div>
     {:else}
         <!-- CREATORS CATALOG VIEW (NEW) -->

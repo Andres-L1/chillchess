@@ -111,6 +111,25 @@
             goto('/');
         }
     }
+    let resolvedCover: string = '';
+
+    // Reactively update resolvedCover whenever album changes
+    $: if (album) {
+        resolvedCover = album.cover || '/logo-mobile.png';
+        if (!album.cover && (album as any).r2CoverKey) {
+            fetch(`/api/r2/get-url?key=${encodeURIComponent((album as any).r2CoverKey)}`)
+                .then((res) => res.json())
+                .then((data) => {
+                    if (data.url) resolvedCover = data.url;
+                })
+                .catch(console.error);
+        }
+    }
+
+    function handleImageError(e: Event) {
+        const img = e.currentTarget as HTMLImageElement;
+        img.src = '/logo-mobile.png';
+    }
 </script>
 
 <svelte:head>
@@ -171,9 +190,10 @@
                             class="aspect-square rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 mb-6"
                         >
                             <img
-                                src={album.cover}
+                                src={resolvedCover}
                                 alt={album.title}
-                                class="w-full h-full object-cover"
+                                class="w-full h-full object-cover transition-opacity duration-300"
+                                on:error={handleImageError}
                             />
                         </div>
 

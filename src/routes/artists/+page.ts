@@ -11,7 +11,7 @@ export async function load() {
 
         const verifiedArtists: ArtistProfile[] = [];
         querySnapshot.forEach((doc) => {
-            verifiedArtists.push({ ...doc.data() } as ArtistProfile);
+            verifiedArtists.push({ id: doc.id, ...doc.data() } as ArtistProfile);
         });
 
         return {

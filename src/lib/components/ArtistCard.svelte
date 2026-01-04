@@ -189,7 +189,7 @@
         {#if !loadingAlbums && artistAlbums.length > 0}
             <!-- 1. All Tracks (Popular / Latest) -->
             {@const allTracks = artistAlbums.flatMap((a) =>
-                (a.tracks || []).map((t) => ({ ...t, albumCover: a.cover, albumTitle: a.title }))
+                (a.tracks || []).map((t) => ({ ...t, cover: a.cover, albumTitle: a.title }))
             )}
 
             {#if allTracks.length > 0}
@@ -236,7 +236,7 @@
                                     class="w-8 h-8 rounded overflow-hidden bg-black/50 flex-shrink-0 relative group-hover:ring-1 group-hover:ring-primary-500"
                                 >
                                     <img
-                                        src={track.albumCover || '/images/default-album.png'}
+                                        src={track.cover || '/images/default-album.png'}
                                         alt={track.title}
                                         class="w-full h-full object-cover"
                                     />

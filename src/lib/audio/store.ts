@@ -197,7 +197,11 @@ export function playAlbum(albumId: string) {
 
         return {
             ...s,
-            playlist: album.tracks || [],
+            playlist: (album.tracks || []).map((t) => ({
+                ...t,
+                artist: t.artist || album.artist, // Fallback to album artist
+                cover: t.cover || album.cover, // Fallback to album cover (if available)
+            })),
             currentTrackIndex: 0,
             currentAlbumId: albumId,
             isPlaying: true,

@@ -9,6 +9,20 @@
 
     const patches: Patch[] = [
         {
+            version: 'v0.6',
+            date: '03 Ene 2026',
+            title: 'The Artist Profile Update',
+            type: 'major',
+            changes: [
+                '🎨 Perfiles Públicos de Artista: Rediseño completo con estética premium y banners inmersivos.',
+                '🔄 Integración R2: Sistema híbrido de carga (Cloudflare R2 + Firebase) para optimizar costes y rendimiento.',
+                '📱 Reproductor Móvil: Ajustes "Safe Area" para evitar cortes en iPhone y visualización mejorada.',
+                '🔗 Rutas Inteligentes: Priorización automática de perfiles verificados y slugs personalizados.',
+                '🎵 Tracks Toggle: Opción para expandir/contraer la lista completa de canciones en el perfil.',
+                '✨ Correcciones Visuales: Botones con gradientes "Glow" y mejor consistencia UI.',
+            ],
+        },
+        {
             version: 'v0.9',
             date: '02 Ene 2026',
             title: 'The Focus Update',

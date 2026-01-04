@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { SocialLink } from './artist';
+import type { SocialLink } from '$lib/types/artist';
 
 // Social Link Schema
 export const socialLinkSchema = z.object({

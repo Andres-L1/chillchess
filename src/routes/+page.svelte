@@ -14,7 +14,40 @@
     import MusicIcon from '$lib/components/icons/MusicIcon.svelte';
     import EyeIcon from '$lib/components/icons/EyeIcon.svelte';
     import VerifiedBadge from '$lib/components/VerifiedBadge.svelte';
+    import { collection, query, where, getCountFromServer } from 'firebase/firestore';
+    import { db } from '$lib/firebase';
+
+    let adminNotificationCount = 0;
+
+    async function checkAdminNotifications() {
+        if (!$userSubscription?.profile?.isAdmin) return;
+
+        try {
+            // Count pending bugs
+            const bugsQuery = query(
+                collection(db, 'bug_reports'),
+                where('status', '==', 'reported')
+            );
+            const bugsSnap = await getCountFromServer(bugsQuery);
+
+            // Count pending proposals
+            const propsQuery = query(collection(db, 'proposals'), where('status', '==', 'pending'));
+            const propsSnap = await getCountFromServer(propsQuery);
+
+            adminNotificationCount = bugsSnap.data().count + propsSnap.data().count;
+        } catch (e) {
+            console.error('Error fetching admin notifications', e);
+        }
+    }
+
+    onMount(() => {
+        if ($userSubscription?.profile?.isAdmin) {
+            checkAdminNotifications();
+        }
+    });
+
     import FounderBadge from '$lib/components/FounderBadge.svelte';
+    import { onMount } from 'svelte';
 
     let showAuthModal = false;
     let showPaywall = false;
@@ -104,7 +137,17 @@
 
             {#if $userStore.isLoggedIn}
                 <a href="/coleccion" class="hover:text-primary-400 transition-colors">Colección</a>
-                <a href="/app" class="hover:text-primary-400 transition-colors">Tracker</a>
+                {#if $userSubscription?.profile?.isAdmin}
+                    <a href="/app" class="hover:text-primary-400 transition-colors">Tracker</a>
+                {:else}
+                    <span
+                        class="text-slate-600 cursor-not-allowed flex items-center gap-1"
+                        title="Próximamente"
+                    >
+                        Tracker
+                        <span class="text-[9px] bg-slate-800 px-1 rounded text-slate-500">DEV</span>
+                    </span>
+                {/if}
                 <a href="/rooms" class="hover:text-primary-400 transition-colors">🎵 Salas</a>
                 <a href="/patches" class="hover:text-primary-400 transition-colors">Parches</a>
                 <!-- Pricing CTA -->
@@ -127,10 +170,17 @@
             {#if $userSubscription?.profile?.isAdmin}
                 <a
                     href="/admin"
-                    class="text-slate-300 hover:text-primary-400 transition-colors font-bold flex items-center gap-2 bg-white/5 px-2 py-1.5 rounded"
+                    class="text-slate-300 hover:text-primary-400 transition-colors font-bold flex items-center gap-2 bg-white/5 px-2 py-1.5 rounded relative"
                 >
                     <SettingsIcon size="sm" gradient={false} />
                     <span>Admin</span>
+                    {#if adminNotificationCount > 0}
+                        <span
+                            class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white font-bold animate-pulse shadow-lg shadow-red-500/50"
+                        >
+                            {adminNotificationCount}
+                        </span>
+                    {/if}
                 </a>
             {/if}
 
@@ -329,13 +379,25 @@
                         </a>
                         <!-- Artists moved inside collection conceptually, removing link here or nesting? Keeping simpler for mobile too -->
 
-                        <a
-                            href="/app"
-                            on:click={() => (mobileMenuOpen = false)}
-                            class="py-3 px-4 hover:bg-white/5 rounded-lg transition-colors text-slate-300 hover:text-white"
-                        >
-                            Tracker
-                        </a>
+                        {#if $userSubscription?.profile?.isAdmin}
+                            <a
+                                href="/app"
+                                on:click={() => (mobileMenuOpen = false)}
+                                class="py-3 px-4 hover:bg-white/5 rounded-lg transition-colors text-slate-300 hover:text-white"
+                            >
+                                Tracker
+                            </a>
+                        {:else}
+                            <div
+                                class="py-3 px-4 text-slate-600 cursor-not-allowed flex items-center justify-between"
+                            >
+                                <span>Tracker</span>
+                                <span
+                                    class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-500 font-bold"
+                                    >PRÓXIMAMENTE</span
+                                >
+                            </div>
+                        {/if}
                         <a
                             href="/rooms"
                             on:click={() => (mobileMenuOpen = false)}
@@ -387,6 +449,13 @@
                         >
                             <SettingsIcon size="sm" gradient={false} />
                             <span>Admin</span>
+                            {#if adminNotificationCount > 0}
+                                <span
+                                    class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full ml-auto animate-pulse shadow-lg shadow-red-500/50"
+                                >
+                                    {adminNotificationCount}
+                                </span>
+                            {/if}
                         </a>
                     {/if}
 

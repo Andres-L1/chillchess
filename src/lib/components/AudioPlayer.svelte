@@ -48,7 +48,7 @@
         return window.location.origin + path;
     }
 
-    function updateMediaSession(index: number, albumId: string | undefined, playlist: any[]) {
+    async function updateMediaSession(index: number, albumId: string | undefined, playlist: any[]) {
         if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return;
 
         if (playlist.length === 0) {
@@ -60,7 +60,26 @@
         const currentAlbum = $audioStore.availableAlbums.find((a) => a.id === albumId);
 
         if (currentTrack && currentAlbum) {
-            const artUrl = getAbsoluteUrl(currentAlbum.cover);
+            let artUrl = getAbsoluteUrl(currentAlbum.cover || '/logo-mobile.png');
+
+            // Resolve R2 Cover for background playback if needed
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const a = currentAlbum as any;
+            if (a.r2CoverKey && (!a.cover || a.cover.includes('placeholder'))) {
+                try {
+                    const res = await fetch('/api/r2/get-url', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ key: a.r2CoverKey }),
+                    });
+                    if (res.ok) {
+                        const { url } = await res.json();
+                        artUrl = url;
+                    }
+                } catch (e) {
+                    console.error('Failed to resolve R2 cover for Metadata:', e);
+                }
+            }
 
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: currentTrack.title,
@@ -96,33 +115,83 @@
         }
     }
 
-    // Reactively update volumes
+    // State for the currently resolved streaming URL (async)
+    let resolvedStreamUrl = '';
+    let lastResolvedTrackId = ''; // Prevent infinite loops
+
+    // Watch for track changes and resolve URL asynchronously
+    $: currentTrackEntry =
+        $audioStore.playlist.length > 0
+            ? $audioStore.playlist[$audioStore.currentTrackIndex]
+            : null;
+
+    $: if (currentTrackEntry && (currentTrackEntry.id || '') !== lastResolvedTrackId) {
+        // Only resolve if it's a DIFFERENT track
+        lastResolvedTrackId = currentTrackEntry.id || '';
+        resolveAudioUrl(currentTrackEntry);
+    }
+
+    async function resolveAudioUrl(track: any) {
+        // 1. Static file (legacy)
+        if (track.file) {
+            resolvedStreamUrl = track.file;
+            return;
+        }
+        // 2. Direct URL (legacy external)
+        if (track.url) {
+            resolvedStreamUrl = track.url;
+            return;
+        }
+        // 3. R2 Secure Key (New System)
+        if (track.r2Key) {
+            try {
+                // Check cache or fetch new
+                const res = await fetch('/api/r2/get-url', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key: track.r2Key }),
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    console.log('✅ Resolved R2 Audio:', data.url);
+                    resolvedStreamUrl = data.url;
+                } else {
+                    console.error('Failed to resolve R2 audio URL');
+                    resolvedStreamUrl = '';
+                }
+            } catch (err) {
+                console.error('Error resolving audio URL:', err);
+                resolvedStreamUrl = '';
+            }
+            return;
+        }
+
+        resolvedStreamUrl = '';
+    }
+
+    // Reactive Updates: Volume & Playback State
     $: if (musicEl) {
+        // Volume
         musicEl.volume = $audioStore.isMuted ? 0 : $audioStore.musicVolume;
 
-        // Handle Playlist
-        if ($audioStore.playlist.length > 0) {
-            const currentTrack = $audioStore.playlist[$audioStore.currentTrackIndex];
-            const trackSrc = currentTrack.file; // Path relative to static
-
-            // Change source if different
-            // Note: Use getAttribute to avoid full URL matching issues
-            if (musicEl.getAttribute('src') !== trackSrc) {
-                musicEl.src = trackSrc;
+        // Playback & Source Logic
+        if ($audioStore.playlist.length > 0 && resolvedStreamUrl) {
+            // Apply Source to Audio Element
+            if (musicEl.getAttribute('src') !== resolvedStreamUrl) {
+                musicEl.src = resolvedStreamUrl;
                 if ($audioStore.isPlaying) {
                     musicEl.play().catch((e) => console.log('Auto-play blocked:', e));
                 }
             }
 
-            // Play/Pause state
+            // Sync Play/Pause State
             if ($audioStore.isPlaying && musicEl.paused && musicEl.readyState >= 2) {
-                // 2 = HAVE_CURRENT_DATA
                 musicEl.play().catch((e) => console.log('Play error:', e));
             } else if (!$audioStore.isPlaying && !musicEl.paused) {
                 musicEl.pause();
             }
-        } else {
-            // No playlist active -> Stop music
+        } else if ($audioStore.playlist.length === 0) {
+            // No playlist active -> Stop
             musicEl.pause();
             musicEl.src = '';
         }

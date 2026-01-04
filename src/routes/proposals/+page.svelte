@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { userStore } from "$lib/auth/userStore";
-    import { userSubscription } from "$lib/subscription/userSubscription";
-    import { db } from "$lib/firebase";
+    import { userStore } from '$lib/auth/userStore';
+    import { userSubscription } from '$lib/subscription/userSubscription';
+    import { db } from '$lib/firebase';
     import {
         collection,
         addDoc,
@@ -14,8 +14,8 @@
         arrayUnion,
         arrayRemove,
         Timestamp,
-    } from "firebase/firestore";
-    import { onMount, onDestroy } from "svelte";
+    } from 'firebase/firestore';
+    import { onMount, onDestroy } from 'svelte';
 
     interface Proposal {
         id: string;
@@ -26,35 +26,33 @@
         votes: number;
         votersUp: string[];
         votersDown: string[];
-        status: "pending" | "approved" | "rejected" | "implemented";
+        status: 'pending' | 'approved' | 'rejected' | 'implemented';
         createdAt: Date;
-        category: "album" | "feature" | "improvement";
+        category: 'album' | 'feature' | 'improvement';
     }
 
     let proposals: Proposal[] = [];
     let unsubscribe: (() => void) | null = null;
 
     let showNewProposal = false;
-    let newTitle = "";
-    let newDescription = "";
-    let newCategory: "album" | "feature" | "improvement" = "feature";
-    let sortBy: "votes" | "recent" = "votes";
+    let newTitle = '';
+    let newDescription = '';
+    let newCategory: 'album' | 'feature' | 'improvement' = 'feature';
+    let sortBy: 'votes' | 'recent' = 'votes';
     let isSubmitting = false;
 
     $: sortedProposals = [...proposals].sort((a, b) => {
-        if (sortBy === "votes") return b.votes - a.votes;
+        if (sortBy === 'votes') return b.votes - a.votes;
         return b.createdAt.getTime() - a.createdAt.getTime();
     });
 
-    $: isPro =
-        $userSubscription.tier === "pro" ||
-        $userSubscription.tier === "premium";
-    $: currentUserId = $userStore.user?.uid || "";
+    $: isPro = $userSubscription.tier === 'pro';
+    $: currentUserId = $userStore.user?.uid || '';
 
     onMount(() => {
         // Subscribe to proposals collection
-        const proposalsRef = collection(db, "proposals");
-        const q = query(proposalsRef, orderBy("createdAt", "desc"));
+        const proposalsRef = collection(db, 'proposals');
+        const q = query(proposalsRef, orderBy('createdAt', 'desc'));
 
         unsubscribe = onSnapshot(q, (snapshot) => {
             proposals = snapshot.docs.map((docSnap) => {
@@ -80,10 +78,10 @@
         if (unsubscribe) unsubscribe();
     });
 
-    async function vote(proposalId: string, direction: "up" | "down") {
+    async function vote(proposalId: string, direction: 'up' | 'down') {
         if (!currentUserId || !isPro) return;
 
-        const proposalRef = doc(db, "proposals", proposalId);
+        const proposalRef = doc(db, 'proposals', proposalId);
         const proposal = proposals.find((p) => p.id === proposalId);
         if (!proposal) return;
 
@@ -91,7 +89,7 @@
         const hasVotedDown = proposal.votersDown.includes(currentUserId);
 
         try {
-            if (direction === "up") {
+            if (direction === 'up') {
                 if (hasVotedUp) {
                     // Remove upvote
                     await updateDoc(proposalRef, {
@@ -129,85 +127,79 @@
                 }
             }
         } catch (error) {
-            console.error("Error voting:", error);
+            console.error('Error voting:', error);
         }
     }
 
     async function submitProposal() {
-        if (
-            !newTitle.trim() ||
-            !newDescription.trim() ||
-            !currentUserId ||
-            !isPro
-        )
-            return;
+        if (!newTitle.trim() || !newDescription.trim() || !currentUserId || !isPro) return;
 
         isSubmitting = true;
 
         try {
-            await addDoc(collection(db, "proposals"), {
+            await addDoc(collection(db, 'proposals'), {
                 title: newTitle.trim(),
                 description: newDescription.trim(),
-                author: $userStore.user?.displayName || "Usuario Pro",
+                author: $userStore.user?.displayName || 'Usuario Pro',
                 authorUid: currentUserId,
                 votes: 1,
                 votersUp: [currentUserId],
                 votersDown: [],
-                status: "pending",
+                status: 'pending',
                 createdAt: Timestamp.now(),
                 category: newCategory,
             });
 
-            newTitle = "";
-            newDescription = "";
+            newTitle = '';
+            newDescription = '';
             showNewProposal = false;
         } catch (error) {
-            console.error("Error creating proposal:", error);
+            console.error('Error creating proposal:', error);
         } finally {
             isSubmitting = false;
         }
     }
 
-    function getStatusColor(status: Proposal["status"]) {
+    function getStatusColor(status: Proposal['status']) {
         switch (status) {
-            case "approved":
-                return "bg-green-500/20 text-green-300 border-green-500/30";
-            case "rejected":
-                return "bg-red-500/20 text-red-300 border-red-500/30";
-            case "implemented":
-                return "bg-primary-500/20 text-primary-300 border-primary-500/30";
+            case 'approved':
+                return 'bg-green-500/20 text-green-300 border-green-500/30';
+            case 'rejected':
+                return 'bg-red-500/20 text-red-300 border-red-500/30';
+            case 'implemented':
+                return 'bg-primary-500/20 text-primary-300 border-primary-500/30';
             default:
-                return "bg-slate-500/20 text-slate-300 border-slate-500/30";
+                return 'bg-slate-500/20 text-slate-300 border-slate-500/30';
         }
     }
 
-    function getStatusLabel(status: Proposal["status"]) {
+    function getStatusLabel(status: Proposal['status']) {
         switch (status) {
-            case "approved":
-                return "✓ Aprobada";
-            case "rejected":
-                return "✗ Rechazada";
-            case "implemented":
-                return "🎉 Implementada";
+            case 'approved':
+                return '✓ Aprobada';
+            case 'rejected':
+                return '✗ Rechazada';
+            case 'implemented':
+                return '🎉 Implementada';
             default:
-                return "⏳ Pendiente";
+                return '⏳ Pendiente';
         }
     }
 
-    function getCategoryIcon(category: Proposal["category"]) {
+    function getCategoryIcon(category: Proposal['category']) {
         switch (category) {
-            case "album":
-                return "🎵";
-            case "feature":
-                return "⚡";
-            case "improvement":
-                return "🔧";
+            case 'album':
+                return '🎵';
+            case 'feature':
+                return '⚡';
+            case 'improvement':
+                return '🔧';
         }
     }
 
-    function getUserVoteState(proposal: Proposal): "up" | "down" | null {
-        if (proposal.votersUp.includes(currentUserId)) return "up";
-        if (proposal.votersDown.includes(currentUserId)) return "down";
+    function getUserVoteState(proposal: Proposal): 'up' | 'down' | null {
+        if (proposal.votersUp.includes(currentUserId)) return 'up';
+        if (proposal.votersDown.includes(currentUserId)) return 'down';
         return null;
     }
 </script>
@@ -216,9 +208,7 @@
     <title>Propuestas | ChillChess</title>
 </svelte:head>
 
-<div
-    class="min-h-screen bg-[#0B1120] text-white font-poppins pb-32 pt-24 px-4 md:px-8"
->
+<div class="min-h-screen bg-[#0B1120] text-white font-poppins pb-32 pt-24 px-4 md:px-8">
     <div class="max-w-5xl mx-auto">
         <!-- Back Button -->
         <div class="mb-6">
@@ -226,12 +216,7 @@
                 href="/"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all hover:scale-105 active:scale-95"
             >
-                <svg
-                    class="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                         stroke-linecap="round"
                         stroke-linejoin="round"
@@ -264,25 +249,17 @@
             </div>
 
             {#if !$userStore.isLoggedIn}
-                <div
-                    class="bg-red-500/10 border border-red-500/30 rounded-2xl p-6 mt-8"
-                >
+                <div class="bg-red-500/10 border border-red-500/30 rounded-2xl p-6 mt-8">
                     <p class="text-red-300">
-                        Debes <a href="/" class="underline hover:text-red-200"
-                            >iniciar sesión</a
-                        > para ver y votar propuestas.
+                        Debes <a href="/" class="underline hover:text-red-200">iniciar sesión</a> para
+                        ver y votar propuestas.
                     </p>
                 </div>
             {:else if !isPro}
-                <div
-                    class="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-6 mt-8"
-                >
-                    <h3 class="font-bold text-amber-300 mb-2">
-                        🔒 Exclusivo Pro
-                    </h3>
+                <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-6 mt-8">
+                    <h3 class="font-bold text-amber-300 mb-2">🔒 Exclusivo Pro</h3>
                     <p class="text-amber-200/80 mb-4">
-                        Necesitas una suscripción Pro para proponer y votar
-                        features.
+                        Necesitas una suscripción Pro para proponer y votar features.
                     </p>
                     <a
                         href="/pricing"
@@ -301,18 +278,16 @@
             >
                 <div class="flex items-center gap-3">
                     <button
-                        on:click={() => (sortBy = "votes")}
-                        class="px-4 py-2 rounded-xl font-medium transition-all {sortBy ===
-                        'votes'
+                        on:click={() => (sortBy = 'votes')}
+                        class="px-4 py-2 rounded-xl font-medium transition-all {sortBy === 'votes'
                             ? 'bg-primary-500 text-white'
                             : 'bg-white/5 text-slate-400 hover:bg-white/10'}"
                     >
                         🔥 Más Votadas
                     </button>
                     <button
-                        on:click={() => (sortBy = "recent")}
-                        class="px-4 py-2 rounded-xl font-medium transition-all {sortBy ===
-                        'recent'
+                        on:click={() => (sortBy = 'recent')}
+                        class="px-4 py-2 rounded-xl font-medium transition-all {sortBy === 'recent'
                             ? 'bg-primary-500 text-white'
                             : 'bg-white/5 text-slate-400 hover:bg-white/10'}"
                     >
@@ -330,23 +305,15 @@
 
             <!-- New Proposal Form -->
             {#if showNewProposal}
-                <div
-                    class="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8 animate-fade-in"
-                >
-                    <h3 class="text-xl font-bold mb-4">
-                        Proponer Nueva Feature/Álbum
-                    </h3>
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8 animate-fade-in">
+                    <h3 class="text-xl font-bold mb-4">Proponer Nueva Feature/Álbum</h3>
 
                     <div class="space-y-4">
                         <div>
-                            <p
-                                class="block text-sm font-medium text-slate-400 mb-2"
-                            >
-                                Categoría
-                            </p>
+                            <p class="block text-sm font-medium text-slate-400 mb-2">Categoría</p>
                             <div class="flex gap-3" role="group">
                                 <button
-                                    on:click={() => (newCategory = "album")}
+                                    on:click={() => (newCategory = 'album')}
                                     class="px-4 py-2 rounded-xl transition-all {newCategory ===
                                     'album'
                                         ? 'bg-primary-500 text-white'
@@ -355,7 +322,7 @@
                                     🎵 Álbum
                                 </button>
                                 <button
-                                    on:click={() => (newCategory = "feature")}
+                                    on:click={() => (newCategory = 'feature')}
                                     class="px-4 py-2 rounded-xl transition-all {newCategory ===
                                     'feature'
                                         ? 'bg-primary-500 text-white'
@@ -364,8 +331,7 @@
                                     ⚡ Feature
                                 </button>
                                 <button
-                                    on:click={() =>
-                                        (newCategory = "improvement")}
+                                    on:click={() => (newCategory = 'improvement')}
                                     class="px-4 py-2 rounded-xl transition-all {newCategory ===
                                     'improvement'
                                         ? 'bg-primary-500 text-white'
@@ -379,8 +345,7 @@
                         <div>
                             <label
                                 for="proposal-title"
-                                class="block text-sm font-medium text-slate-400 mb-2"
-                                >Título</label
+                                class="block text-sm font-medium text-slate-400 mb-2">Título</label
                             >
                             <input
                                 id="proposal-title"
@@ -414,9 +379,7 @@
                                 disabled={isSubmitting}
                                 class="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-bold rounded-xl transition-all flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {isSubmitting
-                                    ? "Publicando..."
-                                    : "Publicar Propuesta"}
+                                {isSubmitting ? 'Publicando...' : 'Publicar Propuesta'}
                             </button>
                             <button
                                 on:click={() => (showNewProposal = false)}
@@ -432,13 +395,10 @@
             <!-- Proposals List -->
             <div class="space-y-4">
                 {#if proposals.length === 0}
-                    <div
-                        class="text-center py-20 bg-white/5 rounded-2xl border border-white/5"
-                    >
+                    <div class="text-center py-20 bg-white/5 rounded-2xl border border-white/5">
                         <span class="text-4xl block mb-4">💡</span>
                         <p class="text-slate-400">
-                            No hay propuestas aún. ¡Sé el primero en proponer
-                            algo!
+                            No hay propuestas aún. ¡Sé el primero en proponer algo!
                         </p>
                     </div>
                 {/if}
@@ -450,11 +410,9 @@
                     >
                         <div class="flex flex-col md:flex-row gap-6">
                             <!-- Voting -->
-                            <div
-                                class="flex md:flex-col items-center gap-2 md:gap-3"
-                            >
+                            <div class="flex md:flex-col items-center gap-2 md:gap-3">
                                 <button
-                                    on:click={() => vote(proposal.id, "up")}
+                                    on:click={() => vote(proposal.id, 'up')}
                                     class="w-10 h-10 rounded-lg border transition-all active:scale-95 {userVote ===
                                     'up'
                                         ? 'bg-green-500/30 border-green-500/50 text-green-400'
@@ -465,13 +423,12 @@
                                     ▲
                                 </button>
                                 <span
-                                    class="text-2xl font-bold {proposal.votes >
-                                    20
+                                    class="text-2xl font-bold {proposal.votes > 20
                                         ? 'text-blue-400'
                                         : 'text-slate-100'}">{proposal.votes}</span
                                 >
                                 <button
-                                    on:click={() => vote(proposal.id, "down")}
+                                    on:click={() => vote(proposal.id, 'down')}
                                     class="w-10 h-10 rounded-lg border transition-all active:scale-95 {userVote ===
                                     'down'
                                         ? 'bg-red-500/30 border-red-500/50 text-red-400'
@@ -485,33 +442,27 @@
 
                             <!-- Content -->
                             <div class="flex-1 min-w-0">
-                                <div
-                                    class="flex flex-wrap items-start gap-3 mb-3"
-                                >
+                                <div class="flex flex-wrap items-start gap-3 mb-3">
                                     <span class="text-2xl"
-                                        >{getCategoryIcon(
-                                            proposal.category,
-                                        )}</span
+                                        >{getCategoryIcon(proposal.category)}</span
                                     >
                                     <div class="flex-1 min-w-0">
-                                        <h3
-                                            class="text-xl font-bold text-slate-100 mb-1"
-                                        >
+                                        <h3 class="text-xl font-bold text-slate-100 mb-1">
                                             {proposal.title}
                                         </h3>
                                         <p class="text-sm text-slate-400">
                                             Por {proposal.author} • {proposal.createdAt.toLocaleDateString(
-                                                "es-ES",
+                                                'es-ES',
                                                 {
-                                                    day: "numeric",
-                                                    month: "short",
-                                                },
+                                                    day: 'numeric',
+                                                    month: 'short',
+                                                }
                                             )}
                                         </p>
                                     </div>
                                     <span
                                         class="px-3 py-1 rounded-full text-xs font-bold border {getStatusColor(
-                                            proposal.status,
+                                            proposal.status
                                         )}"
                                     >
                                         {getStatusLabel(proposal.status)}

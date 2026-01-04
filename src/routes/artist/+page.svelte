@@ -79,40 +79,79 @@
                 collection(db, 'artists'),
                 where('userId', '==', $userStore.user.uid)
             );
-            const querySnapshot = await getDocs(artistsQuery);
+            const userSnapshot = await getDocs(artistsQuery);
+            const userProfiles = userSnapshot.docs.map((d) => ({ ref: d, data: d.data() }));
 
-            if (!querySnapshot.empty) {
-                profileDoc = querySnapshot.docs[0];
-                profileId = profileDoc.id;
-                console.log(`✅ Found linked profile: ${profileId}`);
-            } else {
-                // STEP 2: Search by Artist Name (Legacy/Claim) - PRIORITIZED OVER UID
-                // We check this BEFORE checking UID doc to prevent using a duplicate empty profile
+            // STEP 2: Search by Artist Name (Legacy/Claim)
+            // We ALWAYS check this to find better profiles (like verified ones) even if a UID profile exists
+            // This fixes "Split Brain" where a new empty UID profile hides an existing legacy profile
+            let nameProfiles: { ref: any; data: any }[] = [];
+            if ($userStore.user.displayName) {
                 const nameQuery = query(
                     collection(db, 'artists'),
-                    where('artistName', '==', $userStore.user.displayName || '')
+                    where('artistName', '==', $userStore.user?.displayName)
                 );
                 const nameSnapshot = await getDocs(nameQuery);
-                const potentialMatch = nameSnapshot.empty
-                    ? null
-                    : nameSnapshot.docs.find(
-                          (d) => !d.data().userId || d.data().userId === $userStore.user?.uid
-                      );
 
-                if (potentialMatch) {
-                    profileDoc = potentialMatch;
-                    profileId = potentialMatch.id;
-                    console.log(`✅ Claimed legacy profile by name: ${profileId}`);
-                    toast.success('Perfil antiguo vinculado automáticamente');
-                } else {
-                    // STEP 3: Fallback to UID Document ID
-                    const uidDoc = await getDoc(doc(db, 'artists', $userStore.user.uid));
-                    if (uidDoc.exists()) {
-                        profileDoc = uidDoc;
-                        profileId = $userStore.user.uid;
-                        console.log(`✅ Found profile by UID: ${profileId}`);
+                // Filter out duplicates and profiles owned by others
+                nameProfiles = nameSnapshot.docs
+                    .filter((d) => !userProfiles.find((p) => p.ref.id === d.id)) // Not already found
+                    .filter((d) => !d.data().userId || d.data().userId === $userStore.user?.uid) // Not owned by others
+                    .map((d) => ({ ref: d, data: d.data() }));
+            }
+
+            // STEP 3: Fallback check for UID document
+            let uidProfile = null;
+            // Only check if we haven't found a UID profile in step 1
+            if (!userProfiles.find((p) => p.ref.id === $userStore.user?.uid)) {
+                const uidDoc = await getDoc(doc(db, 'artists', $userStore.user?.uid));
+                if (uidDoc.exists()) {
+                    // Avoid duplicates
+                    if (!nameProfiles.find((p) => p.ref.id === uidDoc.id)) {
+                        uidProfile = { ref: uidDoc, data: uidDoc.data() };
                     }
                 }
+            }
+
+            // MERGE ALL CANDIDATES
+            const allCandidates = [...userProfiles, ...nameProfiles];
+            if (uidProfile) allCandidates.push(uidProfile);
+
+            if (allCandidates.length > 0) {
+                // Find the best profile match
+                // Priority:
+                // 1. Verified Profile (Always wins)
+                // 2. Custom ID/Slug (e.g. 'julyactv-official') - Prefer over generic UID
+                // 3. Any profile with my UserID already linked
+                // 4. First available
+
+                const verifiedProfile = allCandidates.find((p) => p.data.isVerified);
+                const customIdProfile = allCandidates.find(
+                    (p) => p.ref.id !== $userStore.user?.uid
+                );
+                const linkedProfile = allCandidates.find(
+                    (p) => p.data.userId === $userStore.user?.uid
+                );
+
+                const bestMatch =
+                    verifiedProfile || customIdProfile || linkedProfile || allCandidates[0];
+
+                profileDoc = bestMatch.ref;
+                profileId = profileDoc.id;
+
+                console.log(
+                    `✅ Selected profile: ${profileId} from ${allCandidates.length} candidates`
+                );
+
+                if (bestMatch !== linkedProfile && !bestMatch.data.userId) {
+                    toast.success('Perfil antiguo vinculado automáticamente');
+                }
+            } else {
+                // No existing profile - will create new one on save
+                artistName = $userStore.user.displayName || 'Mi Nombre';
+                bio = 'Artista en ChillChess';
+                currentProfileId = $userStore.user?.uid; // Default to UID for new profiles
+                console.log('📝 Creating new profile draft');
             }
 
             // Store the resolved profile ID for saving later
@@ -366,54 +405,6 @@
                 <div class="flex justify-center">
                     <ArtistCard profile={previewProfile} {isPro} isPreview={true} />
                 </div>
-
-                <!-- Activity Heatmap in Preview -->
-                <div class="bg-[#1a1a1a] rounded-2xl border border-white/10 p-6">
-                    <h2 class="text-xl font-bold mb-4">Tu Actividad (Tracker)</h2>
-                    <div class="pb-4">
-                        <div
-                            class="inline-grid grid-rows-7 grid-flow-col gap-1 w-full"
-                            style="grid-auto-columns: minmax(0, 1fr);"
-                        >
-                            {#each calendar as day}
-                                {@const date = new Date(day.date)}
-                                {@const dayName = date.toLocaleDateString('es-ES', {
-                                    weekday: 'short',
-                                    day: 'numeric',
-                                    month: 'short',
-                                })}
-                                <div
-                                    class="aspect-square rounded-sm transition-all hover:scale-125 max-w-[12px] max-h-[12px]"
-                                    style="background-color: {day.intensity === 0
-                                        ? '#334155'
-                                        : day.intensity === 1
-                                          ? '#fed7aa'
-                                          : day.intensity === 2
-                                            ? '#fb923c'
-                                            : day.intensity === 3
-                                              ? '#f97316'
-                                              : '#ea580c'}; opacity: {day.intensity === 0
-                                        ? 0.3
-                                        : 1}"
-                                    title="{dayName}: {day.count > 0
-                                        ? day.count + ' actividades'
-                                        : 'Sin actividad'}"
-                                ></div>
-                            {/each}
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-end gap-2 text-xs text-slate-500 mt-2">
-                        <span>Off</span>
-                        <div class="flex gap-1">
-                            <div class="w-2 h-2 rounded-sm bg-[#334155] opacity-30"></div>
-                            <div class="w-2 h-2 rounded-sm bg-[#fed7aa]"></div>
-                            <div class="w-2 h-2 rounded-sm bg-[#fb923c]"></div>
-                            <div class="w-2 h-2 rounded-sm bg-[#f97316]"></div>
-                            <div class="w-2 h-2 rounded-sm bg-[#ea580c]"></div>
-                        </div>
-                        <span>On Fire</span>
-                    </div>
-                </div>
             </div>
         {:else}
             <!-- Edit Mode -->
@@ -467,56 +458,6 @@
                                     class="w-full bg-[#0B1120]/50 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none transition-all"
                                 />
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Activity Heatmap Card (NEW) -->
-                    <div class="bg-[#1a1a1a] rounded-2xl border border-white/10 p-6">
-                        <h2 class="text-xl font-bold mb-4">Tu Actividad (Tracker)</h2>
-                        <div class="pb-4">
-                            <div
-                                class="inline-grid grid-rows-7 grid-flow-col gap-1 w-full"
-                                style="grid-auto-columns: minmax(0, 1fr);"
-                            >
-                                {#each calendar as day}
-                                    {@const date = new Date(day.date)}
-                                    {@const dayName = date.toLocaleDateString('es-ES', {
-                                        weekday: 'short',
-                                        day: 'numeric',
-                                        month: 'short',
-                                    })}
-                                    <div
-                                        class="aspect-square rounded-sm transition-all hover:scale-125 max-w-[12px] max-h-[12px]"
-                                        style="background-color: {day.intensity === 0
-                                            ? '#334155'
-                                            : day.intensity === 1
-                                              ? '#fed7aa'
-                                              : day.intensity === 2
-                                                ? '#fb923c'
-                                                : day.intensity === 3
-                                                  ? '#f97316'
-                                                  : '#ea580c'}; opacity: {day.intensity === 0
-                                            ? 0.3
-                                            : 1}"
-                                        title="{dayName}: {day.count > 0
-                                            ? day.count + ' actividades'
-                                            : 'Sin actividad'}"
-                                    ></div>
-                                {/each}
-                            </div>
-                        </div>
-                        <div
-                            class="flex items-center justify-end gap-2 text-xs text-slate-500 mt-2"
-                        >
-                            <span>Off</span>
-                            <div class="flex gap-1">
-                                <div class="w-2 h-2 rounded-sm bg-[#334155] opacity-30"></div>
-                                <div class="w-2 h-2 rounded-sm bg-[#fed7aa]"></div>
-                                <div class="w-2 h-2 rounded-sm bg-[#fb923c]"></div>
-                                <div class="w-2 h-2 rounded-sm bg-[#f97316]"></div>
-                                <div class="w-2 h-2 rounded-sm bg-[#ea580c]"></div>
-                            </div>
-                            <span>On Fire</span>
                         </div>
                     </div>
 
