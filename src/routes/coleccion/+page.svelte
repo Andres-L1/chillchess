@@ -36,12 +36,13 @@
         }, 300);
     }
 
-    // Derived filtered albums
     // Derived filtered albums (Deep Search)
     $: sourceAlbums = $audioStore.availableAlbums.length > 0 ? $audioStore.availableAlbums : ALBUMS;
 
     $: filteredAlbums = sourceAlbums.filter((a) => {
-        const matchesCategory = selectedCategory === 'all' || a.category === selectedCategory;
+        // Use albumCategory for filtering, fallback to 'musica' if not set
+        const albumCat = a.albumCategory || 'musica';
+        const matchesCategory = selectedCategory === 'all' || albumCat === selectedCategory;
 
         if (debouncedSearchQuery === '') return matchesCategory;
 

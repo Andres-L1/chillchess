@@ -21,7 +21,8 @@ export interface Album {
     tag: string;
     description: string;
     isPremium?: boolean; // Requires Pro subscription
-    category: AlbumCategory; // New field for categorization
+    category: string; // GENRE: Lo-fi, Jazz Hop, etc.
+    albumCategory?: AlbumCategory; // TYPE: musica, juegos, ambiente
     createdAt?: any; // Timestamp from Firestore
     r2CoverKey?: string; // Optional for migrated albums
     storageProvider?: 'cloudflare_r2' | 'external_link' | 'firebase'; // New field for R2 integration
@@ -38,7 +39,8 @@ export const ALBUMS: Album[] = [
         description: 'Tributo a ASAP en FamilyRP',
         vibeId: 'asap-forever',
         isPremium: false, // Available for everyone
-        category: 'juegos', // Gaming category
+        category: 'Trap', // Genre
+        albumCategory: 'juegos', // Type
 
         tracks: [
             { id: 'asap-1', title: 'Above It All', artist: 'JULYACTV', file: '/audio/asap/Above It All.wav' },
@@ -64,7 +66,7 @@ export function getAlbumById(id: string): Album | undefined {
 }
 
 export function getAlbumsByCategory(category: AlbumCategory): Album[] {
-    return ALBUMS.filter(album => album.category === category);
+    return ALBUMS.filter(album => (album.albumCategory || 'musica') === category);
 }
 
 export const CATEGORY_LABELS = [

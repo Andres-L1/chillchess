@@ -33,7 +33,7 @@
         title: '',
         artist: '',
         artistId: '',
-        category: 'musica',
+        albumCategory: 'musica',
         cover: '', // Current cover URL
         tracks: [], // Current tracks
     };
@@ -47,7 +47,7 @@
         title: '',
         artist: '', // Name (display)
         artistId: '', // Link to profile
-        category: 'musica',
+        albumCategory: 'musica',
         coverFile: null as File | null,
         tracks: [] as File[],
     };
@@ -115,7 +115,7 @@
             artist: album.artist,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             artistId: (album as any).artistId || '',
-            category: album.category || 'musica',
+            albumCategory: (album as any).albumCategory || 'musica',
             cover: album.cover || '',
             tracks: album.tracks || [],
         };
@@ -136,7 +136,7 @@
                 title: editingAlbum.title,
                 artist: editingAlbum.artist,
                 artistId: editingAlbum.artistId,
-                category: editingAlbum.category,
+                albumCategory: editingAlbum.albumCategory,
                 updatedAt: Date.now(),
             };
 
@@ -290,7 +290,7 @@
                 title: newAlbumData.title,
                 artist: newAlbumData.artist,
                 artistId: newAlbumData.artistId, // Essential for linking to profile
-                category: newAlbumData.category,
+                albumCategory: newAlbumData.albumCategory,
                 cover: coverUrl,
                 tracks: uploadedTracks,
                 createdAt: serverTimestamp(),
@@ -308,7 +308,7 @@
                 title: '',
                 artist: '',
                 artistId: '',
-                category: 'musica',
+                albumCategory: 'musica',
                 coverFile: null,
                 tracks: [],
             };
@@ -666,7 +666,7 @@
                                     >Categoría</span
                                 >
                                 <select
-                                    bind:value={newAlbumData.category}
+                                    bind:value={newAlbumData.albumCategory}
                                     class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary-500 outline-none"
                                 >
                                     <option value="musica">Música</option>
@@ -815,7 +815,7 @@
                                     >Categoría</span
                                 >
                                 <select
-                                    bind:value={editingAlbum.category}
+                                    bind:value={editingAlbum.albumCategory}
                                     class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary-500 outline-none"
                                 >
                                     <option value="musica">Música</option>
@@ -1045,7 +1045,7 @@
                                     <span
                                         class="px-2.5 py-1 rounded-full bg-white/5 border border-white/5 text-xs text-slate-300 capitalize"
                                     >
-                                        {album.category || 'Música'}
+                                        {album.albumCategory || 'Música'}
                                     </span>
                                 </td>
                                 <td class="px-6 py-3 text-center text-slate-400 font-mono">
