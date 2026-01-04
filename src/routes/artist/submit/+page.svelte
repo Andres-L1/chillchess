@@ -128,33 +128,6 @@
         return { key, name: file.name, size: file.size, type: file.type };
     }
 
-    async function uploadToR2(file: File, folderPath: string) {
-        const res = await fetch('/api/r2/sign-url', {
-            method: 'POST',
-            body: JSON.stringify({
-                fileName: file.name,
-                fileType: file.type,
-                folder: folderPath,
-            }),
-        });
-        if (!res.ok) throw new Error('Failed to get upload URL');
-        const { uploadUrl, key } = await res.json();
-
-        const upload = await fetch(uploadUrl, {
-            method: 'PUT',
-            body: file,
-            headers: { 'Content-Type': file.type },
-        });
-        if (!upload.ok) throw new Error('Failed to upload to R2');
-
-        return {
-            key,
-            name: file.name,
-            size: file.size,
-            type: file.type,
-        };
-    }
-
     async function submitRelease() {
         if (!releaseTitle.trim() || !coverFile || audioFiles.length === 0) {
             toast.warning(
