@@ -40,6 +40,33 @@
     // Persistent close state using localStorage
     let isClosed = false;
 
+    async function downloadTrack() {
+        if (!currentTrack) return;
+
+        const isPro = ['pro', 'premium', 'lifetime'].includes($userSubscription.tier);
+
+        if (!isPro) {
+            alert('👑 Descargas disponibles solo para usuarios PRO');
+            return;
+        }
+
+        try {
+            const response = await fetch(currentTrack.file);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `${currentTrack.title} - ${currentTrack.artist}.mp3`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        } catch (e) {
+            console.error('Download error:', e);
+            alert('Error al descargar');
+        }
+    }
+
     onMount(() => {
         // Restore close state from localStorage
         const savedClosedState = localStorage.getItem('chillchess_player_closed');
@@ -172,6 +199,38 @@
                         class="flex flex-shrink-0 items-center gap-4 border-l border-white/10 pl-6"
                     >
                         <VolumeControl />
+
+                        <!-- Download Button (Desktop) -->
+                        <button
+                            on:click={downloadTrack}
+                            class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 {[
+                                'pro',
+                                'premium',
+                                'lifetime',
+                            ].includes($userSubscription.tier)
+                                ? 'text-slate-400 hover:text-white'
+                                : 'text-slate-600 hover:text-slate-400'} transition-colors"
+                            title={['pro', 'premium', 'lifetime'].includes($userSubscription.tier)
+                                ? 'Descargar'
+                                : 'Descarga disponible en PRO'}
+                        >
+                            <svg
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                />
+                            </svg>
+                            {#if !['pro', 'premium', 'lifetime'].includes($userSubscription.tier)}
+                                <span class="absolute -top-1 -right-1 text-[8px]">🔒</span>
+                            {/if}
+                        </button>
 
                         <!-- Close / Minimize Button -->
                         <div class="flex items-center gap-1">
@@ -576,7 +635,33 @@
 
                             <!-- Info Row -->
                             <div class="flex items-center justify-between mb-8 px-2">
-                                <div class="flex-1 pr-6 min-w-0">
+                                <!-- Download Button (Mobile) -->
+                                <button
+                                    on:click={downloadTrack}
+                                    class="w-10 h-10 active:scale-90 transition-transform flex items-center justify-center {[
+                                        'pro',
+                                        'premium',
+                                        'lifetime',
+                                    ].includes($userSubscription.tier)
+                                        ? 'text-slate-400'
+                                        : 'text-slate-600'}"
+                                >
+                                    <svg
+                                        class="w-6 h-6"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                        />
+                                    </svg>
+                                </button>
+
+                                <div class="flex-1 px-4 min-w-0 text-center">
                                     <h2
                                         class="text-2xl font-bold text-white leading-tight font-poppins truncate block"
                                     >

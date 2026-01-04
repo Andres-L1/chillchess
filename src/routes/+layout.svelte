@@ -26,10 +26,29 @@
 
     import { onMount } from 'svelte';
     import { initAudioLibrary, audioStore } from '$lib/audio/store';
+    import { userStore } from '$lib/auth/userStore';
+    import { goto } from '$app/navigation';
 
     onMount(() => {
         initAudioLibrary();
     });
+
+    // START AUTH WALL
+    $: {
+        if (!$userStore.loading) {
+            const path = $page.url.pathname;
+            const isPublic =
+                path === '/' ||
+                path.startsWith('/widget') ||
+                path === '/terms' ||
+                path === '/privacy';
+
+            if (!$userStore.user && !isPublic) {
+                goto('/');
+            }
+        }
+    }
+    // END AUTH WALL
 </script>
 
 <!-- App Shell -->
