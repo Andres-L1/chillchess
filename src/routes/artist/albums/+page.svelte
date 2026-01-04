@@ -28,9 +28,12 @@
     let editingAlbum: Album | null = null;
     let modalMode: 'create' | 'edit' = 'create';
 
+    const GENRES = ['Lo-fi', 'Ambient', 'Chill', 'Jazz Hop', 'Study Beats'];
+
     // Form state
     let title = '';
     let category = 'Lo-fi';
+    let customCategory = '';
     let albumCategory: 'musica' | 'juegos' | 'ambiente' = 'musica';
     let coverFile: File | null = null;
     let coverPreview: string | null = null;
@@ -91,7 +94,15 @@
         modalMode = 'edit';
         editingAlbum = album;
         title = album.title;
-        category = album.category || 'Lo-fi';
+
+        if (GENRES.includes(album.category)) {
+            category = album.category;
+            customCategory = '';
+        } else {
+            category = 'Otra';
+            customCategory = album.category;
+        }
+
         albumCategory = (album as any).albumCategory || 'musica';
         coverPreview = album.cover || null;
         tracks = album.tracks ? album.tracks.map((t) => ({ title: t.title, url: t.file })) : [];
@@ -101,6 +112,7 @@
     function resetForm() {
         title = '';
         category = 'Lo-fi';
+        customCategory = '';
         albumCategory = 'musica';
         coverFile = null;
         coverPreview = null;
@@ -221,7 +233,7 @@
                 cover: coverUrl,
                 r2CoverKey: r2CoverKey,
                 storageProvider: 'cloudflare_r2',
-                ...(category && { category }), // Only include if defined
+                category: category === 'Otra' ? customCategory.trim() : category,
                 albumCategory,
                 tracks: tracks.map((t, idx) => ({
                     id: `track-${idx + 1}`,
@@ -438,12 +450,22 @@
                         bind:value={category}
                         class="w-full bg-[#0B1120] border border-white/10 rounded-xl px-4 py-3 focus:border-primary-500 focus:outline-none text-base"
                     >
-                        <option>Lo-fi</option>
-                        <option>Ambient</option>
-                        <option>Chill</option>
-                        <option>Jazz Hop</option>
-                        <option>Study Beats</option>
+                        {#each GENRES as g}
+                            <option value={g}>{g}</option>
+                        {/each}
+                        <option value="Otra">Otra</option>
                     </select>
+
+                    {#if category === 'Otra'}
+                        <div class="mt-2 animate-fade-in-down">
+                            <input
+                                type="text"
+                                bind:value={customCategory}
+                                placeholder="Especifique el género (ej: Trap, Drill...)"
+                                class="w-full bg-[#0B1120] border border-white/10 rounded-xl px-4 py-3 focus:border-primary-500 focus:outline-none text-base"
+                            />
+                        </div>
+                    {/if}
                 </div>
 
                 <!-- Album Category (Tipo de Contenido) -->
