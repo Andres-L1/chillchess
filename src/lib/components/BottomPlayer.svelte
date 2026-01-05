@@ -791,10 +791,11 @@
                             </div>
 
                             <!-- Bottom Row (Queue & Share) -->
-                            <div class="flex items-center justify-between px-6 pb-10">
+                            <div class="flex items-center justify-between px-6 pb-16 pt-4">
                                 <button
                                     on:click={() => (showTrackList = !showTrackList)}
-                                    class="text-slate-400 hover:text-white transition-colors active:scale-90 p-2"
+                                    class="flex flex-col items-center gap-1 text-slate-400 hover:text-white transition-colors active:scale-90 p-3 rounded-xl hover:bg-white/5"
+                                    aria-label="Ver cola de reproducción"
                                 >
                                     <svg
                                         class="w-6 h-6"
@@ -808,15 +809,16 @@
                                             d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                                         /></svg
                                     >
+                                    <span class="text-[10px] font-medium">Cola</span>
                                 </button>
 
                                 <button
                                     on:click={() => {
                                         navigator.clipboard.writeText(window.location.href);
-                                        // Simple alert for now as we don't have the full share sheet logic yet
                                         alert('Link copiado!');
                                     }}
-                                    class="text-slate-400 hover:text-white transition-colors active:scale-90"
+                                    class="flex flex-col items-center gap-1 text-slate-400 hover:text-white transition-colors active:scale-90 p-3 rounded-xl hover:bg-white/5"
+                                    aria-label="Compartir"
                                 >
                                     <svg
                                         class="w-6 h-6"
@@ -830,6 +832,7 @@
                                             d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
                                         /></svg
                                     >
+                                    <span class="text-[10px] font-medium">Compartir</span>
                                 </button>
                             </div>
                         </div>

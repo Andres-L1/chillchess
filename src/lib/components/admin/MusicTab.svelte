@@ -135,12 +135,15 @@
             const updateData: any = {
                 title: editingAlbum.title,
                 artist: editingAlbum.artist,
-                artistId: editingAlbum.artistId,
                 albumCategory: editingAlbum.albumCategory,
                 updatedAt: Date.now(),
             };
 
-            // Upload new cover if changed
+            // Only add artistId if it has a valid value
+            if (editingAlbum.artistId && editingAlbum.artistId.trim()) {
+                updateData.artistId = editingAlbum.artistId;
+            }
+
             // Upload new cover if changed
             if (editCoverFile) {
                 const timestamp = Date.now();
@@ -151,6 +154,13 @@
                 );
                 editingAlbum.cover = updateData.cover;
             }
+
+            // Filter out undefined values (Firestore doesn't allow undefined)
+            Object.keys(updateData).forEach((key) => {
+                if (updateData[key] === undefined) {
+                    delete updateData[key];
+                }
+            });
 
             const albumRef = doc(db, 'albums', editingAlbum.id);
             await updateDoc(albumRef, updateData);
@@ -328,6 +338,15 @@
     let playingTrack: string | null = null;
     let audio: HTMLAudioElement | null = null;
     let statusMessage = '';
+    let viewMode: 'grid' | 'list' = 'grid';
+    let paginationLimit = 50;
+
+    function loadMore() {
+        paginationLimit += 50;
+    }
+
+    // Reset limit when searching/filtering to ensure best matches are seen first
+    $: if (searchTerm || activeSection) paginationLimit = 50;
 
     $: filteredAlbums = $audioStore.availableAlbums.filter((album) => {
         const term = searchTerm.toLowerCase();
@@ -569,18 +588,63 @@
 
     {#if activeSection === 'library'}
         <!-- LIBRARY VIEW (EXISTING CODE) -->
+        <!-- FILTER & ACTIONS BAR -->
         <div
-            class="mb-6 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center"
+            class="mb-6 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center bg-black/20 p-4 rounded-2xl border border-white/5"
         >
-            <input
-                type="text"
-                bind:value={searchTerm}
-                placeholder="Buscar por álbum o artista..."
-                class="flex-1 w-full bg-midnight-800 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary-500"
-            />
+            <div class="flex-1 w-full md:w-auto flex items-center gap-4">
+                <div class="relative flex-1 max-w-md group">
+                    <span
+                        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary-400 transition-colors"
+                        >🔍</span
+                    >
+                    <input
+                        type="text"
+                        bind:value={searchTerm}
+                        placeholder="Buscar por álbum, artista o track..."
+                        class="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-white focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all placeholder-slate-600"
+                    />
+                </div>
+                <!-- View Toggle -->
+                <div class="flex bg-black/40 p-1 rounded-lg border border-white/5 shrink-0">
+                    <button
+                        class="p-2 rounded-md transition-all {viewMode === 'grid'
+                            ? 'bg-white/10 text-white shadow'
+                            : 'text-slate-500 hover:text-white'}"
+                        on:click={() => (viewMode = 'grid')}
+                        title="Vista Cuadrícula"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            ><path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                            /></svg
+                        >
+                    </button>
+                    <button
+                        class="p-2 rounded-md transition-all {viewMode === 'list'
+                            ? 'bg-white/10 text-white shadow'
+                            : 'text-slate-500 hover:text-white'}"
+                        on:click={() => (viewMode = 'list')}
+                        title="Vista Lista"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            ><path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16"
+                            /></svg
+                        >
+                    </button>
+                </div>
+            </div>
+
             <button
                 on:click={() => (showCreateAlbumForm = !showCreateAlbumForm)}
-                class="px-6 py-3 bg-primary-500 hover:bg-primary-600 rounded-xl font-bold transition-all shadow-lg flex items-center gap-2"
+                class="px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-400 rounded-xl font-bold text-white shadow-lg shadow-primary-900/20 flex items-center gap-2 transform active:scale-95 transition-all text-sm whitespace-nowrap"
             >
                 {#if showCreateAlbumForm}✕ Cancelar{:else}＋ Nuevo Álbum{/if}
             </button>
@@ -962,14 +1026,104 @@
             </div>
         {/if}
 
-        <!-- TABLE VIEW COMPACT -->
-        <div class="bg-slate-900/50 border border-white/10 rounded-2xl overflow-hidden shadow-xl">
-            {#if filteredAlbums.length === 0}
-                <div class="p-12 text-center text-slate-500">
-                    <div class="text-4xl mb-2 opacity-50">🔍</div>
-                    <p>No se encontraron álbumes</p>
-                </div>
-            {:else}
+        {#if filteredAlbums.length === 0}
+            <div class="py-20 text-center flex flex-col items-center justify-center opacity-50">
+                <div class="text-6xl mb-4 grayscale">💿</div>
+                <h3 class="text-xl font-bold mb-1">No hay álbumes</h3>
+                <p class="text-sm">Prueba otra búsqueda o crea uno nuevo.</p>
+            </div>
+        {:else if viewMode === 'grid'}
+            <!-- GRID VIEW -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                {#each filteredAlbums.slice(0, paginationLimit) as album (album.id)}
+                    <div
+                        class="group bg-[#1a1a1a]/40 border border-white/5 rounded-2xl p-3 hover:bg-[#252525] transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-black/50 relative"
+                    >
+                        <!-- Cover -->
+                        <div
+                            class="aspect-square rounded-xl bg-black overflow-hidden relative mb-3 shadow-lg"
+                        >
+                            <img
+                                src={album.cover || '/logo-mobile.png'}
+                                alt={album.title}
+                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                loading="lazy"
+                            />
+                            <!-- Overlay Actions -->
+                            <div
+                                class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-[2px]"
+                            >
+                                <button
+                                    on:click={() => openEditModal(album)}
+                                    class="p-2 bg-white text-black rounded-full hover:scale-110 transition-transform"
+                                    title="Editar"
+                                >
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                        ><path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                        /></svg
+                                    >
+                                </button>
+                                <button
+                                    on:click={() => deleteAlbum(album)}
+                                    class="p-2 bg-red-500 text-white rounded-full hover:scale-110 transition-transform"
+                                    title="Eliminar"
+                                >
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                        ><path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                        /></svg
+                                    >
+                                </button>
+                            </div>
+
+                            <!-- Badges -->
+                            {#if album.isPremium}
+                                <div
+                                    class="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-yellow-500 text-black text-[10px] font-bold shadow-sm"
+                                >
+                                    PRO
+                                </div>
+                            {/if}
+                        </div>
+
+                        <!-- Info -->
+                        <div class="px-1">
+                            <h3 class="font-bold text-white truncate text-sm" title={album.title}>
+                                {album.title}
+                            </h3>
+                            <p class="text-xs text-slate-400 truncate mt-0.5">{album.artist}</p>
+                            <div class="flex items-center gap-2 mt-2 text-[10px] text-slate-500">
+                                <span class="bg-white/5 px-1.5 py-0.5 rounded"
+                                    >{album.tracks?.length || 0} tracks</span
+                                >
+                                {#if album.r2CoverKey || album.storageProvider === 'cloudflare_r2'}
+                                    <span class="text-blue-500/80">R2</span>
+                                {/if}
+                            </div>
+                        </div>
+                    </div>
+                {/each}
+            </div>
+        {:else}
+            <!-- LIST VIEW (Compact Table) -->
+            <div
+                class="bg-slate-900/50 border border-white/10 rounded-2xl overflow-hidden shadow-xl"
+            >
                 <table class="w-full text-left border-collapse">
                     <thead
                         class="bg-black/40 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-white/5"
@@ -984,84 +1138,41 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-white/5 text-sm">
-                        {#each filteredAlbums.slice(0, 50) as album (album.id)}
+                        {#each filteredAlbums.slice(0, paginationLimit) as album (album.id)}
                             <tr class="hover:bg-white/5 transition-colors group">
                                 <td class="px-6 py-3">
                                     <div
-                                        class="w-12 h-12 rounded-lg bg-black/50 overflow-hidden relative border border-white/10 shadow-sm"
+                                        class="w-10 h-10 rounded bg-black/50 overflow-hidden relative border border-white/10 shadow-sm"
                                     >
-                                        {#if album.cover}
-                                            <img
-                                                src={album.cover}
-                                                alt={album.title}
-                                                class="w-full h-full object-cover"
-                                                loading="lazy"
-                                                on:error={(e) => {
-                                                    // @ts-ignore
-                                                    e.target.src = '/logo-mobile.png';
-                                                    // @ts-ignore
-                                                    e.target.classList.add(
-                                                        'opacity-50',
-                                                        'grayscale'
-                                                    );
-                                                }}
-                                            />
-                                        {:else if album.r2CoverKey}
-                                            <div
-                                                class="w-full h-full flex items-center justify-center bg-blue-900/50 text-blue-200 text-xs font-bold"
-                                                title="R2 Secured"
-                                            >
-                                                R2
-                                            </div>
-                                        {:else}
-                                            <div
-                                                class="w-full h-full flex items-center justify-center bg-slate-800 text-slate-500 text-lg"
-                                            >
-                                                💿
-                                            </div>
-                                        {/if}
+                                        <img
+                                            src={album.cover || '/logo-mobile.png'}
+                                            alt={album.title}
+                                            class="w-full h-full object-cover"
+                                            loading="lazy"
+                                        />
                                     </div>
                                 </td>
                                 <td class="px-6 py-3">
                                     <div
-                                        class="font-bold text-white group-hover:text-primary-400 transition-colors cursor-default"
-                                        title={album.title}
+                                        class="font-bold text-white group-hover:text-primary-400 transition-colors"
                                     >
                                         {album.title}
                                     </div>
-                                    <div
-                                        class="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5"
-                                    >
-                                        {album.artist}
-                                        {#if album.isPremium}
-                                            <span
-                                                class="px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-500 text-[10px] font-bold border border-yellow-500/30"
-                                                >PRO</span
-                                            >
-                                        {/if}
-                                    </div>
+                                    <div class="text-xs text-slate-400">{album.artist}</div>
                                 </td>
                                 <td class="px-6 py-3">
                                     <span
-                                        class="px-2.5 py-1 rounded-full bg-white/5 border border-white/5 text-xs text-slate-300 capitalize"
+                                        class="px-2 py-0.5 rounded-full bg-white/5 border border-white/5 text-xs text-slate-400"
                                     >
-                                        {album.albumCategory || 'Música'}
+                                        {album.albumCategory}
                                     </span>
                                 </td>
-                                <td class="px-6 py-3 text-center text-slate-400 font-mono">
+                                <td class="px-6 py-3 text-center text-slate-500 font-mono">
                                     {album.tracks?.length || 0}
                                 </td>
                                 <td class="px-6 py-3 text-center">
-                                    {#if album.r2CoverKey || album.storageProvider === 'cloudflare_r2'}
-                                        <span
-                                            class="text-xs font-bold text-blue-400 bg-blue-400/10 px-2 py-1 rounded border border-blue-400/20"
-                                            >Cloudflare R2</span
-                                        >
-                                    {:else}
-                                        <span
-                                            class="text-xs font-bold text-slate-400 bg-slate-500/10 px-2 py-1 rounded border border-slate-500/20"
-                                            >Standard</span
-                                        >
+                                    {#if album.r2CoverKey}
+                                        <span class="text-[10px] text-blue-400 font-bold">R2</span>
                                     {/if}
                                 </td>
                                 <td class="px-6 py-3 text-right">
@@ -1070,39 +1181,15 @@
                                     >
                                         <button
                                             on:click={() => openEditModal(album)}
-                                            class="p-2 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition-colors"
-                                            title="Editar"
+                                            class="p-1.5 hover:bg-white/10 rounded text-slate-400 hover:text-white"
                                         >
-                                            <svg
-                                                class="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                                ><path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                                ></path></svg
-                                            >
+                                            ✏️
                                         </button>
                                         <button
                                             on:click={() => deleteAlbum(album)}
-                                            class="p-2 hover:bg-red-500/10 rounded-lg text-slate-400 hover:text-red-400 transition-colors"
-                                            title="Eliminar"
+                                            class="p-1.5 hover:bg-red-500/10 rounded text-slate-400 hover:text-red-400"
                                         >
-                                            <svg
-                                                class="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                                ><path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                ></path></svg
-                                            >
+                                            🗑️
                                         </button>
                                     </div>
                                 </td>
@@ -1110,10 +1197,27 @@
                         {/each}
                     </tbody>
                 </table>
-            {/if}
-        </div>
+            </div>
+        {/if}
+
+        <!-- PAGINATION / LOAD MORE FOOTER -->
+        {#if filteredAlbums.length > 0}
+            <div class="mt-6 flex flex-col items-center gap-2">
+                <p class="text-xs text-slate-500">
+                    Mostrando {Math.min(paginationLimit, filteredAlbums.length)} de {filteredAlbums.length}
+                    álbumes
+                </p>
+                {#if filteredAlbums.length > paginationLimit}
+                    <button
+                        on:click={loadMore}
+                        class="px-6 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm font-medium transition-colors text-slate-300 hover:text-white"
+                    >
+                        ↓↓ Cargar más
+                    </button>
+                {/if}
+            </div>
+        {/if}
     {:else}
-        <!-- CREATORS CATALOG VIEW (NEW) -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Upload Form -->
             <div class="bg-white/5 border border-white/10 rounded-2xl p-6 h-fit">

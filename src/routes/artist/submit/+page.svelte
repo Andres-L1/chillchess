@@ -169,9 +169,21 @@
         folder: string,
         onProgress?: (percent: number) => void
     ) {
-        // 1. Get signed URL
+        // 1. Get signed URL with authentication
+        const user = $userStore.user;
+        if (!user) {
+            throw new Error('Usuario no autenticado');
+        }
+
+        // Get Firebase ID token
+        const token = await user.getIdToken();
+
         const res = await fetch('/api/r2/sign-url', {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
             body: JSON.stringify({
                 fileName: file.name,
                 fileType: file.type,

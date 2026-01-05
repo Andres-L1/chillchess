@@ -226,23 +226,35 @@
                 r2CoverKey = coverUrl.replace(`${PUBLIC_R2_DOMAIN}/`, '');
             }
 
-            const albumData = {
+            const albumData: any = {
                 title: title.trim(),
                 artist: $userStore.user.displayName || 'Unknown Artist',
                 artistId: $userStore.user.uid,
-                cover: coverUrl,
-                r2CoverKey: r2CoverKey,
-                storageProvider: 'cloudflare_r2',
+                cover: coverUrl || null,
                 category: category === 'Otra' ? customCategory.trim() : category,
                 albumCategory,
                 tracks: tracks.map((t, idx) => ({
                     id: `track-${idx + 1}`,
                     title: t.title,
                     url: t.url,
+                    file: t.url, // Alias for backward compatibility
                     duration: 0,
                 })),
                 updatedAt: Date.now(),
             };
+
+            // Only add R2 fields if they have valid values
+            if (r2CoverKey) {
+                albumData.r2CoverKey = r2CoverKey;
+                albumData.storageProvider = 'cloudflare_r2';
+            }
+
+            // Filter out undefined values (Firestore doesn't allow undefined)
+            Object.keys(albumData).forEach((key) => {
+                if (albumData[key] === undefined) {
+                    delete albumData[key];
+                }
+            });
 
             if (modalMode === 'create') {
                 await addDoc(collection(db, 'albums'), {
