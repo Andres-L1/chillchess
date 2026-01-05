@@ -24,6 +24,19 @@
 
 <body data-theme="gold-nouveau" class="bg-surface-900 text-surface-50">
 	<div style="display: contents" class="h-full w-full">%sveltekit.body%</div>
+    
+    <!-- EMERGENCY FIX: Clear bloated cache preventing app load -->
+    <script>
+        try {
+            const KEY = 'chillchess_albums_cache';
+            const cache = localStorage.getItem(KEY);
+            if (cache && cache.length > 500000) { // If > 500KB (approx)
+                console.warn('Emergency: Purging bloated cache to fix freeze.');
+                localStorage.removeItem(KEY);
+                localStorage.removeItem('chillchess_cache_version');
+            }
+        } catch(e) { /* Ignore */ }
+    </script>
 </body>
 
 </html>
