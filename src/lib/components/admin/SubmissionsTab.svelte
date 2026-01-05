@@ -348,11 +348,14 @@
                         : [];
                 }
 
-                const albumData = {
+                const albumData: any = {
                     title: submission.releaseTitle,
                     artist: submission.artistName,
                     artistId: targetProfileId, // Use the RESOLVED profile ID (e.g. 'julyactv-official')
-                    cover: submission.coverUrl ?? null, // STRICTLY ensure null if undefined
+                    cover:
+                        submission.coverUrl && submission.coverUrl.length < 5000
+                            ? submission.coverUrl
+                            : null, // SANITIZE: Block base64
                     r2CoverKey: secureCoverKey ?? null, // STRICTLY ensure null if undefined
                     category: submission.genre || 'Chill',
                     tracks: tracksForAlbum,
@@ -364,6 +367,9 @@
                             ? 'cloudflare_r2'
                             : 'external_link',
                 };
+
+                // Double Safety: Remove 'audioFiles' or raw blobs if they crept in
+                delete albumData.audioFiles;
 
                 await addDoc(collection(db, 'albums'), albumData);
 
