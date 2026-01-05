@@ -172,11 +172,14 @@
         // 1. Get signed URL with authentication
         const user = $userStore.user;
         if (!user) {
+            console.error('❌ No user found in userStore');
             throw new Error('Usuario no autenticado');
         }
 
         // Get Firebase ID token
+        console.log('🔑 Getting Firebase ID token for upload...');
         const token = await user.getIdToken();
+        console.log('✅ Token obtained successfully');
 
         const res = await fetch('/api/r2/sign-url', {
             method: 'POST',
@@ -193,8 +196,11 @@
         });
 
         if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.error || 'Error obteniendo URL de subida');
+            const err = await res
+                .json()
+                .catch(() => ({ error: `Error del servidor (${res.status})` }));
+            console.error('❌ Upload URL error:', res.status, err);
+            throw new Error(err.error || `Error del servidor: ${res.status}`);
         }
 
         const { uploadUrl, key } = await res.json();
