@@ -31,16 +31,24 @@
     });
 
     // R2 Resolution Logic - Only fetch when visible
-    $: if (isVisible && !album.cover && (album as any).r2CoverKey) {
-        // Resolve asynchronously
+    let attemptedResolution = false;
+
+    // R2 Resolution Logic - Only fetch when visible and not tried yet
+    $: if (isVisible && !album.cover && (album as any).r2CoverKey && !attemptedResolution) {
+        attemptedResolution = true; // Block subsequent attempts immediately
         const r2Key = (album as any).r2CoverKey;
+
+        // Resolve asynchronously
         fetch(`/api/r2/get-url?key=${encodeURIComponent(r2Key)}`)
-            .then((res) => res.json())
+            .then((res) => {
+                if (!res.ok) throw new Error('Fetch status ' + res.status);
+                return res.json();
+            })
             .then((data) => {
                 if (data.url) resolvedCover = data.url;
             })
             .catch((err) => {
-                console.warn('Failed to resolve cover for', album.title);
+                console.warn('Failed to resolve R2 cover:', err);
                 resolvedCover = '/logo-mobile.png';
             });
     } else if (album.cover) {
