@@ -406,10 +406,13 @@
             }
 
             // ✨ CREATE ALBUM IN COLLECTION
-            const { addDoc, collection: firestoreCollection } = await import('firebase/firestore');
+            // Removed dynamic import, using global imports mostly (need to ensure addDoc is imported)
+            const { addDoc } = await import('firebase/firestore');
 
             let tracksForAlbum = [];
             let secureCoverKey = submission.r2CoverKey;
+
+            console.log('🔄 Logic: Processing tracks...');
 
             if (submission.submissionType === 'r2_direct') {
                 // 🚀 R2 Migration (Move files to permanent folder)
@@ -425,6 +428,12 @@
                         name: f.name,
                     })),
                 ];
+
+                // Validate files
+                if (!filesToMigrate.every((f) => f.key)) {
+                    console.error('Missing keys in filesToMigrate:', filesToMigrate);
+                    throw new Error('Faltan claves de archivo en la metadata del envío');
+                }
 
                 const moveRes = await fetch('/api/r2/approve', {
                     method: 'POST',
@@ -470,6 +479,10 @@
                     : [];
             }
 
+            if (!targetProfileId) {
+                throw new Error('Target Profile ID is undefined');
+            }
+
             const albumData = {
                 title: submission.releaseTitle || 'Untitled Album',
                 artist: submission.artistName || 'Unknown Artist',
@@ -485,7 +498,10 @@
                     submission.submissionType === 'r2_direct' ? 'cloudflare_r2' : 'external_link',
             };
 
-            await addDoc(firestoreCollection(db, 'albums'), albumData);
+            console.log('💾 Saving album to Firestore:', albumData);
+
+            await addDoc(collection(db, 'albums'), albumData);
+            console.log('✅ Album created in Firestore');
 
             statusMessage = `✅ ¡Re-procesado exitosamente! Álbum creado.`;
             dispatch('approved');
