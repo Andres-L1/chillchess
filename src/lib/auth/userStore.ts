@@ -25,6 +25,17 @@ if (typeof window !== 'undefined' && auth) {
             isLoggedIn: !!user
         });
     });
+
+    // FAILSAFE: If Firebase is stuck (token errors, network), stop loading after 6s
+    setTimeout(() => {
+        userStore.update(s => {
+            if (s.loading) {
+                console.warn("Auth initialization timed out, forcing load completion.");
+                return { ...s, loading: false };
+            }
+            return s;
+        });
+    }, 6000);
 } else {
     // Si estamos en server o no hay auth, paramos loading
     userStore.update(s => ({ ...s, loading: false }));
