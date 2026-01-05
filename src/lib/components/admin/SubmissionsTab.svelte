@@ -44,6 +44,34 @@
     let playingAudio: HTMLAudioElement | null = null;
     let playingKey = '';
     let unsubscribe: () => void;
+    let coverUrls = new Map<string, string>(); // Cache for R2 cover URLs
+
+    async function loadR2CoverUrl(key: string): Promise<string | null> {
+        if (coverUrls.has(key)) {
+            return coverUrls.get(key) || null;
+        }
+
+        try {
+            const res = await fetch('/api/r2/get-url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key }),
+            });
+
+            if (!res.ok) {
+                console.error('Failed to get R2 cover URL:', res.status);
+                return null;
+            }
+
+            const { url } = await res.json();
+            coverUrls.set(key, url);
+            coverUrls = coverUrls; // Trigger reactivity
+            return url;
+        } catch (e) {
+            console.error('Error loading R2 cover:', e);
+            return null;
+        }
+    }
 
     async function playR2Audio(key: string) {
         if (playingKey === key && playingAudio) {
@@ -114,6 +142,15 @@
                         ...doc.data(),
                     })) as Submission[];
                     loading = false;
+
+                    // Pre-load cover URLs for pending submissions
+                    submissions
+                        .filter((s) => s.status === 'pending' && s.r2CoverKey)
+                        .forEach((s) => {
+                            if (s.r2CoverKey) {
+                                loadR2CoverUrl(s.r2CoverKey);
+                            }
+                        });
                 },
                 (error) => {
                     console.error('Error realtime:', error);
@@ -557,12 +594,29 @@
                                             class="w-full h-full object-cover"
                                         />
                                     {:else if sub.r2CoverKey}
-                                        <div
-                                            class="w-full h-full flex flex-col items-center justify-center bg-slate-800 text-slate-500 p-2 text-center"
-                                        >
-                                            <span class="text-3xl mb-2">🖼️</span>
-                                            <span class="text-xs">R2 Cover</span>
-                                        </div>
+                                        {#await loadR2CoverUrl(sub.r2CoverKey)}
+                                            <div
+                                                class="w-full h-full flex flex-col items-center justify-center bg-slate-800 text-slate-500 p-2 text-center animate-pulse"
+                                            >
+                                                <span class="text-3xl mb-2">⏳</span>
+                                                <span class="text-xs">Cargando...</span>
+                                            </div>
+                                        {:then coverUrl}
+                                            {#if coverUrl}
+                                                <img
+                                                    src={coverUrl}
+                                                    alt={sub.releaseTitle}
+                                                    class="w-full h-full object-cover"
+                                                />
+                                            {:else}
+                                                <div
+                                                    class="w-full h-full flex flex-col items-center justify-center bg-slate-800 text-slate-500 p-2 text-center"
+                                                >
+                                                    <span class="text-3xl mb-2">⚠️</span>
+                                                    <span class="text-xs">Error cargando</span>
+                                                </div>
+                                            {/if}
+                                        {/await}
                                     {:else}
                                         <div
                                             class="w-full h-full flex items-center justify-center text-4xl"
