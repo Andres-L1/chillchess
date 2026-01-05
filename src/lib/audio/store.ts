@@ -122,15 +122,18 @@ export async function initAudioLibrary() {
                 try {
                     const data = doc.data();
 
-                    // Safety Check 1: Check for massive fields (e.g. someone pasted base64 in a text field)
-                    // limit text fields to reasonably manageable size (e.g., 20KB for a URL/Bio is generous, 1MB is fatal)
-                    const isToxic = Object.values(data).some(val =>
-                        typeof val === 'string' && val.length > 50000
-                    );
+                    // Safety Check 1: Check for massive fields (limit to 250KB per field)
+                    // This allows huge bios/descriptions but blocks High-Res Base64 images (~1MB+)
+                    const isToxic = Object.entries(data).some(([key, val]) => {
+                        if (typeof val === 'string' && val.length > 250000) {
+                            console.error(`[QUARANTINE] Field '${key}' in album ${doc.id} is too large (${Math.round(val.length / 1024)}KB). Limit is 250KB.`);
+                            return true;
+                        }
+                        return false;
+                    });
 
                     if (isToxic) {
-                        console.error(`[QUARANTINE] Album ${doc.id} rejected. Contains massive text fields (potential base64 bomb).`);
-                        return; // Skip this corrupt album
+                        return; // Skip corrupt album
                     }
 
                     safeAlbums.push({ id: doc.id, ...data } as Album);
