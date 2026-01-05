@@ -284,7 +284,7 @@
             uploadStage = 'Guardando información...';
             uploadProgress = 95;
 
-            await addDoc(collection(db, 'submissions'), {
+            await addDoc(collection(db, 'musicSubmissions'), {
                 userId,
                 artistName: $userStore.user?.displayName || 'Unknown',
                 releaseTitle: releaseTitle.trim(),
