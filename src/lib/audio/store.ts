@@ -2,7 +2,7 @@ import { writable } from 'svelte/store';
 import type { Track, Album } from '$lib/data/albums';
 import { ALBUMS } from '$lib/data/albums';
 import { db } from '$lib/firebase';
-import { collection, getDocs, query } from 'firebase/firestore';
+import { collection, getDocs, query, limit, orderBy } from 'firebase/firestore';
 
 export type AmbienceType = 'rain' | 'library' | 'garden' | 'none';
 export type VibePreset = 'noir' | 'library' | 'zen' | 'custom';
@@ -106,7 +106,12 @@ export async function initAudioLibrary() {
 
     // 2. BACKGROUND SYNC: Fetch from Firestore (Stale-while-revalidate)
     try {
-        const q = query(collection(db, 'albums'));
+        // PERF: Limit to 100 most recent albums to prevent freezing on large collections
+        const q = query(
+            collection(db, 'albums'),
+            orderBy('createdAt', 'desc'),
+            limit(100)
+        );
         const snapshot = await getDocs(q);
 
         if (!snapshot.empty) {
@@ -126,8 +131,12 @@ export async function initAudioLibrary() {
 
             // Save to Cache for next time
             if (typeof localStorage !== 'undefined') {
-                localStorage.setItem('chillchess_albums_cache', JSON.stringify(fetchedAlbums));
-                localStorage.setItem('chillchess_cache_version', CACHE_VERSION);
+                try {
+                    localStorage.setItem('chillchess_albums_cache', JSON.stringify(fetchedAlbums));
+                    localStorage.setItem('chillchess_cache_version', CACHE_VERSION);
+                } catch (e) {
+                    console.warn('[AudioLibrary] LocalStorage quota exceeded or error:', e);
+                }
             }
             return;
         }
