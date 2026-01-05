@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { onMount } from 'svelte';
     import { type Album } from '$lib/data/albums';
     import VerifiedBadge from '$lib/components/VerifiedBadge.svelte';
     import { fade } from 'svelte/transition';
@@ -9,9 +10,28 @@
     const dispatch = createEventDispatcher();
 
     let resolvedCover = album.cover || '/logo-mobile.png';
+    let cardElement: HTMLElement;
+    let isVisible = false;
 
-    // R2 Resolution Logic
-    $: if (!album.cover && (album as any).r2CoverKey) {
+    onMount(() => {
+        if (!cardElement) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting) {
+                    isVisible = true;
+                    observer.disconnect(); // Only need to load once
+                }
+            },
+            { rootMargin: '100px' }
+        ); // Preload slightly before appearing
+
+        observer.observe(cardElement);
+        return () => observer.disconnect();
+    });
+
+    // R2 Resolution Logic - Only fetch when visible
+    $: if (isVisible && !album.cover && (album as any).r2CoverKey) {
         // Resolve asynchronously
         const r2Key = (album as any).r2CoverKey;
         fetch(`/api/r2/get-url?key=${encodeURIComponent(r2Key)}`)
@@ -35,6 +55,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 <div
+    bind:this={cardElement}
     in:fade={{ duration: 300 }}
     on:click={() => dispatch('click', album)}
     class="group relative bg-[#181825] rounded-2xl overflow-hidden hover:bg-[#232336] transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/50 cursor-pointer border border-white/5"
