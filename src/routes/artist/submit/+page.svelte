@@ -152,17 +152,11 @@
         audioFiles[index].title = newTitle;
     }
 
-    function canProceedToStep(step: number): boolean {
-        if (step === 2) {
-            const hasValidGenre =
-                genre !== 'Otra' || (genre === 'Otra' && customGenre.trim() !== '');
-            return releaseTitle.trim() !== '' && hasValidGenre;
-        }
-        if (step === 3) {
-            return coverFile !== null;
-        }
-        return audioFiles.length > 0;
-    }
+    // Reactive validation for each step
+    $: hasValidGenre = genre !== 'Otra' || (genre === 'Otra' && customGenre.trim() !== '');
+    $: canProceedFromStep1 = releaseTitle.trim() !== '' && hasValidGenre;
+    $: canProceedFromStep2 = coverFile !== null;
+    $: canProceedFromStep3 = audioFiles.length > 0;
 
     async function uploadToR2WithProgress(
         file: File,
@@ -561,7 +555,7 @@
 
                     <button
                         on:click={() => (currentStep = 2)}
-                        disabled={!canProceedToStep(2)}
+                        disabled={!canProceedFromStep1}
                         class="w-full py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg transition-all shadow-lg shadow-primary-900/20"
                     >
                         Continuar →
@@ -656,7 +650,7 @@
                         </button>
                         <button
                             on:click={() => (currentStep = 3)}
-                            disabled={!coverFile}
+                            disabled={!canProceedFromStep2}
                             class="flex-1 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg transition-all shadow-lg shadow-primary-900/20"
                         >
                             Continuar →
@@ -787,7 +781,7 @@
                         </button>
                         <button
                             on:click={submitRelease}
-                            disabled={audioFiles.length === 0 || uploading}
+                            disabled={!canProceedFromStep3 || uploading}
                             class="flex-1 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg transition-all shadow-lg shadow-green-900/20"
                         >
                             {uploading ? 'Subiendo...' : '🚀 Enviar para Revisión'}
