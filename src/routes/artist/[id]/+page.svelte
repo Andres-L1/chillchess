@@ -26,17 +26,21 @@
     let unsubscribeUser: (() => void) | null = null;
 
     onMount(() => {
+        console.log('🚀 Mounting Artist Profile:', data.artistId);
+        console.log('👤 Artist Data:', artist);
+
         // 1. Listen to Artist Profile changes
         const artistRef = doc(db, 'artists', data.artistId);
         unsubscribeArtist = onSnapshot(artistRef, (docSnap) => {
             if (docSnap.exists()) {
+                console.log('🔄 Artist Profile Updated:', docSnap.data());
                 artist = docSnap.data() as ArtistProfile;
+            } else {
+                console.warn('⚠️ Artist profile document does not exist!');
             }
         });
 
         // 2. Listen to User Activity (Heatmap)
-        // CRITICAL FIX: We must use the REAL userId (UID) linked to the profile,
-        // not the document ID (which might be 'julyactv-official')
         const targetUserId = artist.userId || data.artistId;
         const userRef = doc(db, 'users', targetUserId);
 
@@ -50,10 +54,15 @@
 
         // 3. Listen to Albums changes
         const albumsRef = collection(db, 'albums');
-        // query 1: by Document ID (e.g. 'julyactv-official')
+
+        // Query 1: by Document ID / URL ID
+        console.log('🔍 Query 1: artistId ==', data.artistId);
         const qId = query(albumsRef, where('artistId', '==', data.artistId));
 
-        const updateAlbums = (newDocs: Album[]) => {
+        const updateAlbums = (newDocs: Album[], source: string) => {
+            console.log(`📥 Received ${newDocs.length} albums from [${source}]`);
+            if (newDocs.length > 0) console.log('📄 Sample:', newDocs[0]);
+
             const currentMap = new Map(artistAlbums.map((a) => [a.id, a]));
             newDocs.forEach((a) => currentMap.set(a.id, a));
 
@@ -67,37 +76,42 @@
                 const timeB = (b.createdAt as any)?.seconds || 0;
                 return timeB - timeA;
             });
+            console.log('📊 Total Artist Albums:', artistAlbums.length);
         };
 
         const unsubId = onSnapshot(qId, (snapshot) => {
             const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Album);
-            updateAlbums(docs);
+            updateAlbums(docs, 'Query: ID');
         });
 
-        // query 2: by Artist Name string (Legacy)
+        // Query 2: by Artist Name string (Legacy)
         let unsubName: (() => void) | null = null;
         if (artist.artistName) {
+            console.log('🔍 Query 2: artist (name) ==', artist.artistName);
             const qName = query(albumsRef, where('artist', '==', artist.artistName));
             unsubName = onSnapshot(qName, (snapshot) => {
                 const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Album);
-                updateAlbums(docs);
+                updateAlbums(docs, 'Query: Name');
             });
         }
 
-        // query 3: by User ID (UID) - CRITICAL for retroactive fix
-        // This catches albums approved before the "profile ID fix" was applied
+        // Query 3: by User ID (UID)
         let unsubUid: (() => void) | null = null;
         if (artist.userId && artist.userId !== data.artistId) {
+            console.log('🔍 Query 3: artistId ==', artist.userId);
             const qUid = query(albumsRef, where('artistId', '==', artist.userId));
             unsubUid = onSnapshot(qUid, (snapshot) => {
                 const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Album);
-                updateAlbums(docs);
+                updateAlbums(docs, 'Query: UID');
             });
+        } else {
+            console.log('ℹ️ Skipping Query 3 (UID match or undefined)');
         }
 
         unsubscribeAlbums = () => {
             unsubId();
             if (unsubUid) unsubUid();
+            if (unsubName) unsubName();
         };
     });
 
