@@ -115,30 +115,63 @@ export async function initAudioLibrary() {
         const snapshot = await getDocs(q);
 
         if (!snapshot.empty) {
-            const fetchedAlbums = snapshot.docs.map(doc => {
-                const data = doc.data() as Album;
-                return { ...data, id: doc.id };
+            // QUARANTINE MODE: Validate each album safely
+            const safeAlbums: Album[] = [];
+
+            snapshot.docs.forEach((doc) => {
+                try {
+                    const data = doc.data();
+
+                    // Safety Check 1: Check for massive fields (e.g. someone pasted base64 in a text field)
+                    // limit text fields to reasonably manageable size (e.g., 20KB for a URL/Bio is generous, 1MB is fatal)
+                    const isToxic = Object.values(data).some(val =>
+                        typeof val === 'string' && val.length > 50000
+                    );
+
+                    if (isToxic) {
+                        console.error(`[QUARANTINE] Album ${doc.id} rejected. Contains massive text fields (potential base64 bomb).`);
+                        return; // Skip this corrupt album
+                    }
+
+                    safeAlbums.push({ id: doc.id, ...data } as Album);
+                } catch (err) {
+                    console.error(`[QUARANTINE] Failed to parse album ${doc.id}`, err);
+                }
             });
 
-            console.log(`[AudioLibrary] Synced ${fetchedAlbums.length} albums from Cloud.`);
+            console.log(`[AudioLibrary] Loaded ${safeAlbums.length} safe albums from Firestore.`);
 
-            // Update Store
-            audioStore.update(s => ({
-                ...s,
-                availableAlbums: fetchedAlbums,
-                isLoadingLibrary: false
-            }));
+            if (safeAlbums.length > 0) {
+                audioStore.update((s) => ({
+                    ...s,
+                    availableAlbums: safeAlbums,
+                    isLoadingLibrary: false,
+                }));
 
-            // Save to Cache for next time
-            if (typeof localStorage !== 'undefined') {
-                try {
-                    localStorage.setItem('chillchess_albums_cache', JSON.stringify(fetchedAlbums));
-                    localStorage.setItem('chillchess_cache_version', CACHE_VERSION);
-                } catch (e) {
-                    console.warn('[AudioLibrary] LocalStorage quota exceeded or error:', e);
+                // Update Cache (Safely)
+                if (typeof localStorage !== 'undefined') {
+                    try {
+                        const json = JSON.stringify(safeAlbums);
+                        // Double check total size before caching
+                        if (json.length < 4500000) { // Limit cache to ~4.5MB
+                            localStorage.setItem('chillchess_albums_cache', json);
+                            localStorage.setItem('chillchess_cache_version', CACHE_VERSION);
+                        } else {
+                            console.warn("[Cache] Data too large to cache safely. Skipping localStorage.");
+                        }
+                    } catch (e) {
+                        console.warn("[Cache] Failed to write to localStorage", e);
+                    }
                 }
+            } else {
+                // Fallback if DB is empty or all toxic
+                audioStore.update((s) => ({
+                    ...s,
+                    availableAlbums: ALBUMS, // internal fallback
+                    isLoadingLibrary: false,
+                }));
             }
-            return;
+            return; // Exit if Firestore fetch was attempted and processed
         }
     } catch (e) {
         console.warn("[AudioLibrary] Connection error, keeping cached or static version:", e);
