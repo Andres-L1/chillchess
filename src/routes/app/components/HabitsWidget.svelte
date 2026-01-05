@@ -215,7 +215,7 @@
 
                     <!-- Grid semanal -->
                     <div
-                        class="flex items-center justify-between md:justify-end gap-2 md:gap-3 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 noscroll"
+                        class="w-full md:w-auto mt-4 md:mt-0 grid grid-cols-7 md:flex md:items-center md:justify-end gap-2 md:gap-3"
                     >
                         {#each days as day}
                             {@const status = getDayStatus(habit, day.dateStr)}
@@ -224,7 +224,7 @@
                             <button
                                 on:click={() => !day.isFuture && handleDayClick(habit, day.dateStr)}
                                 disabled={day.isFuture}
-                                class="relative flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 font-bold text-sm
+                                class="relative aspect-square w-full md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all duration-300 font-bold text-xs md:text-sm
                                     {styling.color} {styling.scale} {styling.ring ||
                                     ''} {day.isFuture ? 'opacity-30 cursor-not-allowed' : ''}"
                                 title="{day.dateStr} - {day.isFuture ? 'Futuro' : status}"
