@@ -5,7 +5,8 @@
 	<meta charset="utf-8" />
 	<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 	<link rel="apple-touch-icon" href="%sveltekit.assets%/logo-mobile.png" />
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+	<meta name="viewport"
+		content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 	<meta name="theme-color" content="#0B1120" />
 
 	<!-- Performance: Preconnect to critical origins -->
@@ -24,19 +25,6 @@
 
 <body data-theme="gold-nouveau" class="bg-surface-900 text-surface-50">
 	<div style="display: contents" class="h-full w-full">%sveltekit.body%</div>
-    
-    <!-- EMERGENCY FIX: Clear bloated cache preventing app load -->
-    <script>
-        try {
-            const KEY = 'chillchess_albums_cache';
-            const cache = localStorage.getItem(KEY);
-            if (cache && cache.length > 500000) { // If > 500KB (approx)
-                console.warn('Emergency: Purging bloated cache to fix freeze.');
-                localStorage.removeItem(KEY);
-                localStorage.removeItem('chillchess_cache_version');
-            }
-        } catch(e) { /* Ignore */ }
-    </script>
 </body>
 
 </html>
