@@ -285,15 +285,15 @@
             uploadProgress = 95;
 
             await addDoc(collection(db, 'musicSubmissions'), {
-                userId,
+                userId, // Required by Firestore Rules
+                artistId: userId, // Required by Admin/App Logic
                 artistName: $userStore.user?.displayName || 'Unknown',
                 releaseTitle: releaseTitle.trim(),
                 genre: genre === 'Otra' ? customGenre.trim() : genre,
                 category,
                 r2CoverKey: coverData.key,
                 r2AudioKeys: uploadedAudio,
-                coverUrl: null,
-                audioFiles: null,
+                // Removed legacy null fields (coverUrl, audioFiles)
                 tracklist: audioFiles.map((f) => f.title).join('\n'),
                 submissionType: 'r2_direct',
                 status: 'pending',
