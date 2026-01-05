@@ -76,7 +76,7 @@ export const audioStore = writable<AudioState>(initialState);
 // --- Initialization ---
 
 let isInitialized = false;
-const CACHE_VERSION = "v3_r2_migration"; // Update this when Album/Track schema changes
+const CACHE_VERSION = "v4_perf_emergency_fix"; // BUMPED TO INVALIDATE OLD LARGE CACHE
 
 export async function initAudioLibrary() {
     if (isInitialized) return;
