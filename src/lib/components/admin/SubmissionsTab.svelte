@@ -13,7 +13,9 @@
         getDocs,
         limit,
         where,
+        addDoc,
     } from 'firebase/firestore';
+    import { toast } from '$lib/stores/notificationStore';
 
     const dispatch = createEventDispatcher();
 
@@ -375,8 +377,23 @@
     }
 
     async function reprocessSubmission(submission: Submission) {
-        if (!confirm(`¿Re-procesar "${submission.releaseTitle}"? Esto volverá a crear el álbum.`))
+        if (!confirm('¿Re-procesar este envío? Esto generará el álbum de nuevo.')) return;
+
+        console.log('🚀 Starting reprocess for submission:', submission);
+
+        // DEFENSIVE CHECKS
+        if (!db) {
+            console.error('❌ Firebase DB is not initialized');
+            // Assuming 'toast' is available globally or imported elsewhere
+            // If not, you'd need to add: import { toast } from 'svelte-french-toast'; or similar
+            toast.error('Error interno de conexión (DB missing)');
             return;
+        }
+        if (!submission || !submission.artistId) {
+            console.error('❌ Missing artistId in submission:', submission);
+            toast.error('Error: Datos del envío corruptos (Falta Artist ID)');
+            return;
+        }
 
         try {
             statusMessage = '⏳ Re-procesando envío...';
@@ -406,8 +423,8 @@
             }
 
             // ✨ CREATE ALBUM IN COLLECTION
-            // Removed dynamic import, using global imports mostly (need to ensure addDoc is imported)
-            const { addDoc } = await import('firebase/firestore');
+            // Removed dynamic import completely
+            // const { addDoc } = await import('firebase/firestore');
 
             let tracksForAlbum = [];
             let secureCoverKey = submission.r2CoverKey;
