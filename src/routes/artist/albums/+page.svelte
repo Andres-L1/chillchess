@@ -249,22 +249,36 @@
                 albumData.storageProvider = 'cloudflare_r2';
             }
 
-            // Filter out undefined values (Firestore doesn't allow undefined)
-            Object.keys(albumData).forEach((key) => {
-                if (albumData[key] === undefined) {
-                    delete albumData[key];
+            // Recursive cleaner ensuring NO undefined values exist anywhere
+            function cleanFirestoreData(obj: any): any {
+                if (obj === null || typeof obj !== 'object') {
+                    return obj;
                 }
-            });
+
+                if (Array.isArray(obj)) {
+                    return obj.map(cleanFirestoreData);
+                }
+
+                const cleaned: any = {};
+                for (const key in obj) {
+                    if (obj[key] !== undefined) {
+                        cleaned[key] = cleanFirestoreData(obj[key]);
+                    }
+                }
+                return cleaned;
+            }
+
+            const cleanData = cleanFirestoreData(albumData);
 
             if (modalMode === 'create') {
                 await addDoc(collection(db, 'albums'), {
-                    ...albumData,
+                    ...cleanData,
                     releaseDate: Date.now(),
                     createdAt: serverTimestamp(),
                 });
                 toast.success('✅ Álbum creado');
             } else if (editingAlbum) {
-                await updateDoc(doc(db, 'albums', editingAlbum.id), albumData);
+                await updateDoc(doc(db, 'albums', editingAlbum.id), cleanData);
                 toast.success('✅ Álbum actualizado');
             }
 

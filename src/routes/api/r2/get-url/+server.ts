@@ -3,21 +3,20 @@ import { r2, R2_BUCKET } from '$lib/server/r2';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-export async function POST({ request }) {
-    const { key } = await request.json();
-
+// Shared logic for generating signed URL
+async function generateSignedUrl(key: string) {
     if (!key || typeof key !== 'string') {
-        return json({ error: 'No key provided' }, { status: 400 });
+        throw new Error('No key provided');
     }
 
     // Prevent directory traversal
     if (key.includes('..')) {
-        return json({ error: 'Invalid key' }, { status: 400 });
+        throw new Error('Invalid key');
     }
 
     // Restrict access to known folders
     if (!key.startsWith('submissions/') && !key.startsWith('music/')) {
-        return json({ error: 'Access denied' }, { status: 403 });
+        throw new Error('Access denied');
     }
 
     const command = new GetObjectCommand({
@@ -25,13 +24,35 @@ export async function POST({ request }) {
         Key: key,
     });
 
-    try {
-        // Generate a signed URL valid for 1 hour for playback/viewing
-        const signedUrl = await getSignedUrl(r2, command, { expiresIn: 3600 });
+    // Generate a signed URL valid for 1 hour for playback/viewing
+    return await getSignedUrl(r2, command, { expiresIn: 3600 });
+}
 
+export async function POST({ request }) {
+    try {
+        const { key } = await request.json();
+        const url = await generateSignedUrl(key);
+        return json({ url });
+    } catch (err: any) {
+        if (err.message === 'Access denied') return json({ error: err.message }, { status: 403 });
+        if (err.message === 'Invalid key' || err.message === 'No key provided') return json({ error: err.message }, { status: 400 });
+
+        console.error('Error generating signed URL (POST):', err);
+        return json({ error: 'Failed to generate playback URL' }, { status: 500 });
+    }
+}
+
+export async function GET({ url }) {
+    try {
+        const key = url.searchParams.get('key');
+        // If key is null, generateSignedUrl will throw 'No key provided'
+        const signedUrl = await generateSignedUrl(key || '');
         return json({ url: signedUrl });
-    } catch (err) {
-        console.error('Error generating signed URL:', err);
+    } catch (err: any) {
+        if (err.message === 'Access denied') return json({ error: err.message }, { status: 403 });
+        if (err.message === 'Invalid key' || err.message === 'No key provided') return json({ error: err.message }, { status: 400 });
+
+        console.error('Error generating signed URL (GET):', err);
         return json({ error: 'Failed to generate playback URL' }, { status: 500 });
     }
 }
