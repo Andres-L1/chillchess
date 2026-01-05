@@ -139,10 +139,15 @@
             unsubscribe = onSnapshot(
                 q,
                 (snapshot) => {
-                    submissions = snapshot.docs.map((doc) => ({
-                        id: doc.id,
-                        ...doc.data(),
-                    })) as Submission[];
+                    submissions = snapshot.docs.map((doc) => {
+                        const data = doc.data();
+                        return {
+                            id: doc.id,
+                            ...data,
+                            // Robust fallback for artistId
+                            artistId: data.artistId || data.userId || data.uid || data.authorId,
+                        };
+                    }) as Submission[];
                     loading = false;
 
                     // Pre-load cover URLs for pending submissions
