@@ -71,27 +71,41 @@ setInterval(async () => {
         const today = now.toISOString().split('T')[0];
 
         const db = await openDB();
-        const tx = db.transaction(STORE_NAME, 'readwrite');
-        const store = tx.objectStore(STORE_NAME);
-        const allNotifications = await store.getAll();
 
-        for (const notif of allNotifications) {
-            if (notif.time === currentTime) {
-                if (notif.lastNotified !== today) {
-                    await self.registration.showNotification('🔥 Recordatorio de hábito', {
-                        body: `No olvides: ${notif.habitTitle}`,
-                        icon: '/favicon.png',
-                        badge: '/favicon.png',
-                        tag: `habit-${notif.habitId}`,
-                        requireInteraction: true,
-                        data: {
-                            habitId: notif.habitId,
-                            url: '/app'
-                        }
-                    });
+        // Wrap getAll in a promise that waits for transaction completion
+        const allNotifications = await new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            const store = tx.objectStore(STORE_NAME);
+            const request = store.getAll();
 
-                    notif.lastNotified = today;
-                    await store.put(notif);
+            request.onsuccess = () => resolve(request.result || []);
+            request.onerror = () => reject(request.error);
+        });
+
+        // Only iterate if we have valid data
+        if (Array.isArray(allNotifications)) {
+            for (const notif of allNotifications) {
+                if (notif.time === currentTime) {
+                    if (notif.lastNotified !== today) {
+                        await self.registration.showNotification('🔥 Recordatorio de hábito', {
+                            body: `No olvides: ${notif.habitTitle}`,
+                            icon: '/favicon.png',
+                            badge: '/favicon.png',
+                            tag: `habit-${notif.habitId}`,
+                            requireInteraction: true,
+                            data: {
+                                habitId: notif.habitId,
+                                url: '/app'
+                            }
+                        });
+
+                        // Update lastNotified in a new transaction
+                        const updateDb = await openDB();
+                        const updateTx = updateDb.transaction(STORE_NAME, 'readwrite');
+                        const updateStore = updateTx.objectStore(STORE_NAME);
+                        notif.lastNotified = today;
+                        await updateStore.put(notif);
+                    }
                 }
             }
         }
