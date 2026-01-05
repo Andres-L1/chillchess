@@ -1,9 +1,31 @@
 <script lang="ts">
     import { userStore } from '$lib/auth/userStore';
 
-    $: timeOfDay = new Date().getHours();
+    import { onMount, onDestroy } from 'svelte';
+
+    let timeOfDay = new Date().getHours();
+    let timer: NodeJS.Timeout;
+
+    onMount(() => {
+        // Update every minute (60000ms) to ensure greeting changes
+        timer = setInterval(() => {
+            timeOfDay = new Date().getHours();
+        }, 60000);
+
+        // Initial set
+        timeOfDay = new Date().getHours();
+    });
+
+    onDestroy(() => {
+        if (timer) clearInterval(timer);
+    });
+
     $: greeting =
-        timeOfDay < 12 ? 'Buenos días' : timeOfDay < 18 ? 'Buenas tardes' : 'Buenas noches';
+        timeOfDay >= 5 && timeOfDay < 12
+            ? 'Buenos días'
+            : timeOfDay >= 12 && timeOfDay < 20
+              ? 'Buenas tardes'
+              : 'Buenas noches';
 </script>
 
 <div class="mb-8 relative z-10">

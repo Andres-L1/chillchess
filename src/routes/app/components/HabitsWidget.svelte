@@ -3,20 +3,46 @@
     import { DayType } from '$lib/types/habit';
     import { getDayStatus } from '$lib/utils/habitStats';
 
+    import { onMount, onDestroy } from 'svelte';
+
     export let habits: Habit[] = [];
     export let onOpenModal: (habit: Habit | null) => void;
     export let onToggleDay: (habit: Habit, dateStr: string, currentType: DayType) => void;
 
-    // Generar últimos 7 días
-    const today = new Date();
-    const days = Array.from({ length: 7 }, (_, i) => {
-        const d = new Date(today);
-        d.setDate(today.getDate() - (6 - i));
+    // Generar semana actual (Lunes - Domingo)
+    let today = new Date();
+    let refreshTimer: NodeJS.Timeout;
+
+    function getMonday(d: Date) {
+        d = new Date(d);
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+        return new Date(d.setDate(diff));
+    }
+
+    onMount(() => {
+        refreshTimer = setInterval(() => {
+            const now = new Date();
+            if (now.getDate() !== today.getDate()) {
+                today = now;
+            }
+        }, 60000);
+    });
+
+    onDestroy(() => {
+        if (refreshTimer) clearInterval(refreshTimer);
+    });
+
+    $: monday = getMonday(today);
+    $: days = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
         return {
             dateStr: d.toISOString().split('T')[0],
             dayName: d.toLocaleDateString('es-ES', { weekday: 'narrow' }),
             dayNum: d.getDate(),
-            isToday: i === 6,
+            isToday: d.toDateString() === today.toDateString(),
+            isFuture: d > today,
         };
     });
 
@@ -196,10 +222,12 @@
                             {@const styling = getStatusIcon(status, habit, day.dateStr)}
 
                             <button
-                                on:click={() => handleDayClick(habit, day.dateStr)}
+                                on:click={() => !day.isFuture && handleDayClick(habit, day.dateStr)}
+                                disabled={day.isFuture}
                                 class="relative flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 font-bold text-sm
-                                    {styling.color} {styling.scale} {styling.ring || ''}"
-                                title="{day.dateStr} - {status}"
+                                    {styling.color} {styling.scale} {styling.ring ||
+                                    ''} {day.isFuture ? 'opacity-30 cursor-not-allowed' : ''}"
+                                title="{day.dateStr} - {day.isFuture ? 'Futuro' : status}"
                             >
                                 {#if styling.icon}
                                     <span class="text-base">{styling.icon}</span>

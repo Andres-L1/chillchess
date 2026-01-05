@@ -443,7 +443,7 @@
 
         <!-- MOBILE FULLSCREEN LAYOUT -->
         <div
-            class="md:hidden fixed inset-0 z-[200] flex flex-col safe-area-bottom overflow-hidden bg-slate-900"
+            class="md:hidden fixed top-0 left-0 w-full h-[100dvh] z-[200] flex flex-col safe-area-bottom overflow-hidden bg-slate-900"
             transition:slide={{ duration: 400, axis: 'y' }}
         >
             <!-- 1. Background Blur Layer (Matches current track) -->
@@ -791,10 +791,10 @@
                             </div>
 
                             <!-- Bottom Row (Queue & Share) -->
-                            <div class="flex items-center justify-between px-6 pb-2">
+                            <div class="flex items-center justify-between px-6 pb-10">
                                 <button
                                     on:click={() => (showTrackList = !showTrackList)}
-                                    class="text-slate-400 hover:text-white transition-colors active:scale-90"
+                                    class="text-slate-400 hover:text-white transition-colors active:scale-90 p-2"
                                 >
                                     <svg
                                         class="w-6 h-6"

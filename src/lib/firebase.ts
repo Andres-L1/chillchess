@@ -49,7 +49,7 @@ try {
     // Set persistence (Browser only)
     if (typeof window !== 'undefined') {
         setPersistence(auth, browserLocalPersistence).catch((error) => {
-            console.warn("Auth Persistence Error:", error);
+            console.error("Auth Persistence Error:", error);
         });
     }
 
