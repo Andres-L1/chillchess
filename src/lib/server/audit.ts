@@ -17,7 +17,8 @@ export type AuditAction =
     | 'user_verified'
     | 'system_config_change'
     | 'r2_cleanup'
-    | 'manual_intervention';
+    | 'manual_intervention'
+    | string; // Allow dynamic actions from existing code
 
 interface AuditLogParams {
     action: AuditAction;
@@ -37,5 +38,22 @@ export async function logAudit(params: AuditLogParams) {
     } catch (e) {
         console.error('Failed to write audit log:', e);
         // Don't throw, we don't want to break the main action if logging fails
+    }
+}
+
+export async function logSystem(params: {
+    event: string;
+    level: 'info' | 'warn' | 'error' | 'security';
+    details: Record<string, any>;
+    userId?: string;
+}) {
+    try {
+        await addDoc(collection(db, 'system_logs'), {
+            ...params,
+            timestamp: serverTimestamp(),
+            source: 'server',
+        });
+    } catch (e) {
+        console.error('Failed to write system log:', e);
     }
 }

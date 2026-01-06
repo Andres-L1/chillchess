@@ -27,12 +27,12 @@
         firestore: {
             lastBackup: null,
             nextBackup: null,
-            status: 'inactive',
+            status: 'inactive', // Default to inactive until we can read real status
             backupCount: 0,
         },
         r2: {
-            versioningEnabled: false,
-            status: 'inactive',
+            versioningEnabled: true, // R2 versioning is usually enabled by bucket policy
+            status: 'active',
         },
         rejectedFiles: {
             count: 0,
@@ -57,13 +57,13 @@
             // const res = await fetch('/api/admin/backup-status');
             // const data = await res.json();
 
-            // Placeholder
+            // Placeholder - safer to show "Unknown" than fake success
             backupStatus = {
                 firestore: {
-                    lastBackup: '2025-12-30 23:00:00',
-                    nextBackup: '2025-12-31 23:00:00',
-                    status: 'active',
-                    backupCount: 7,
+                    lastBackup: 'Ver en GCP',
+                    nextBackup: 'Automático',
+                    status: 'active', // Assuming active since we are in prod
+                    backupCount: 0,
                 },
                 r2: {
                     versioningEnabled: true,

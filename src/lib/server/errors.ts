@@ -79,6 +79,8 @@ export function handleAPIError(error: unknown): Response {
     );
 }
 
+import { logAudit as logAuditDb, logSystem as logSystemDb } from './audit';
+
 /**
  * Log a security event for audit purposes
  * In production, this should write to a proper logging service
@@ -87,16 +89,13 @@ export function handleAPIError(error: unknown): Response {
  * @param details - Event details
  */
 export function logSecurityEvent(event: string, details: Record<string, any>): void {
-    const timestamp = new Date().toISOString();
-    const logEntry = {
-        timestamp,
-        event,
-        ...details
-    };
-
-    // For now, just console.log with a clear prefix
-    // TODO: Replace with proper logging service (e.g., Cloud Logging, Sentry)
-    console.log(`[SECURITY] ${JSON.stringify(logEntry)}`);
+    // console.log(`[SECURITY] ${JSON.stringify(details)}`);
+    logSystemDb({
+        event: 'SECURITY_EVENT: ' + event,
+        level: 'security',
+        details,
+        userId: details.userId
+    });
 }
 
 /**
@@ -114,14 +113,12 @@ export function logAudit(params: {
     targetId?: string;
     details?: Record<string, any>;
 }): void {
-    const timestamp = new Date().toISOString();
-    const logEntry = {
-        timestamp,
-        type: 'audit',
-        ...params
-    };
-
-    // For now, just console.log with clear prefix
-    // TODO: Write to Firestore audit_logs collection or external service
-    console.log(`[AUDIT] ${JSON.stringify(logEntry)}`);
+    // console.log(`[AUDIT] ${JSON.stringify(params)}`);
+    logAuditDb({
+        action: params.action,
+        adminId: params.userId, // Map userId to adminId
+        targetId: params.targetId,
+        details: params.details || {}
+    });
 }
+
