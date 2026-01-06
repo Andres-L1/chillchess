@@ -53,8 +53,8 @@ export async function POST({ request, locals }: RequestEvent) {
             ContentType: fileType,
         });
 
-        // Generate a signed URL valid for 5 minutes
-        const signedUrl = await getSignedUrl(r2, command, { expiresIn: 300 });
+        // Generate a signed URL valid for 15 minutes (enough for large audio files)
+        const signedUrl = await getSignedUrl(r2, command, { expiresIn: 900 });
 
         return json({
             uploadUrl: signedUrl,

@@ -199,9 +199,25 @@
 
         const { uploadUrl, key } = await res.json();
 
+        // CORS check: Verify the upload URL is accessible
+        console.log('🌐 Verifying R2 CORS configuration...');
+        try {
+            // Quick OPTIONS preflight to catch CORS issues early
+            await fetch(uploadUrl, { method: 'HEAD' });
+        } catch (corsError) {
+            console.warn(
+                '⚠️ CORS preflight check failed, but continuing (may be expected):',
+                corsError
+            );
+            // Don't block upload, just log
+        }
+
         // 2. Upload to R2 with progress tracking
         return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
+
+            // Add timeout (10 minutes for large audio files)
+            xhr.timeout = 600000; // 10 minutes
 
             xhr.upload.addEventListener('progress', (e) => {
                 if (e.lengthComputable && onProgress) {
@@ -214,12 +230,39 @@
                 if (xhr.status === 200) {
                     resolve({ key, name: file.name, size: file.size, type: file.type });
                 } else {
-                    reject(new Error('Error subiendo archivo a R2'));
+                    console.error(
+                        `❌ R2 Upload failed with status ${xhr.status}`,
+                        xhr.responseText
+                    );
+                    reject(
+                        new Error(`Error subiendo archivo a R2 (${xhr.status}). Intenta de nuevo.`)
+                    );
                 }
             });
 
-            xhr.addEventListener('error', () => {
-                reject(new Error('Error de red al subir archivo'));
+            xhr.addEventListener('error', (event) => {
+                console.error('❌ Network error during R2 upload:', {
+                    fileName: file.name,
+                    fileSize: file.size,
+                    readyState: xhr.readyState,
+                    status: xhr.status,
+                    uploadUrl: uploadUrl.substring(0, 50) + '...',
+                    event,
+                });
+                reject(
+                    new Error(
+                        'Error de red al subir archivo. Verifica tu conexión e intenta de nuevo.'
+                    )
+                );
+            });
+
+            xhr.addEventListener('timeout', () => {
+                console.error('❌ Upload timeout for file:', file.name);
+                reject(
+                    new Error(
+                        'El archivo tardó demasiado en subirse. Verifica tu conexión o intenta con un archivo más pequeño.'
+                    )
+                );
             });
 
             xhr.open('PUT', uploadUrl);
