@@ -91,6 +91,11 @@
         resolvedCoverUrl = '/logo-mobile-legacy.png';
     }
 
+    function handleImageError(e: Event) {
+        const target = e.currentTarget as HTMLImageElement;
+        target.src = '/logo-mobile-legacy.png';
+    }
+
     // Size configurations
     const sizes = {
         compact: { width: '300px', imgSize: '60px', fontSize: 'text-sm' },
@@ -124,11 +129,7 @@
                     src={resolvedCoverUrl || '/logo-mobile-legacy.png'}
                     alt={activeTrack.title}
                     class="w-full h-full object-cover rounded-full shadow-2xl border-[3px] border-white/10"
-                    on:error={(e) => {
-                        // Fallback if image fails to load
-                        const target = e.currentTarget as HTMLImageElement;
-                        target.src = '/logo-mobile-legacy.png';
-                    }}
+                    on:error={handleImageError}
                 />
                 <!-- Centro del vinilo -->
                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
