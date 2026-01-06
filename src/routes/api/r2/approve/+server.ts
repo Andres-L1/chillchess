@@ -14,25 +14,42 @@ export async function POST({ request, locals }: RequestEvent) {
 
         const { submissionId, artistVerifiedName, albumTitle, files } = await request.json();
 
-        if (!files || !Array.isArray(files)) {
-            return json({ error: 'No files provided', code: 'MISSING_FILES' }, { status: 400 });
+        if (!files || !Array.isArray(files) || files.length === 0) {
+            return json({
+                error: 'No hay archivos para migrar',
+                code: 'NO_FILES',
+                detail: 'El envío no tiene archivos R2 para procesar'
+            }, { status: 400 });
         }
 
         // SECURITY: Validate and sanitize artist name and album title
-        const safeArtist = validateArtistName(artistVerifiedName);
-        const safeAlbum = validateAlbumTitle(albumTitle);
+        let safeArtist: string;
+        let safeAlbum: string;
+
+        try {
+            safeArtist = validateArtistName(artistVerifiedName);
+            safeAlbum = validateAlbumTitle(albumTitle);
+        } catch (validationErr: any) {
+            return json({
+                error: 'Datos inválidos',
+                code: 'VALIDATION_ERROR',
+                detail: validationErr.message
+            }, { status: 400 });
+        }
 
         const finalPath = `music/${safeArtist}/${safeAlbum}`;
         const migratedFiles = [];
+        const errors = [];
 
         for (const file of files) {
             // SECURITY: Ensure we are only moving things FROM submissions (temp)
             if (!file.key.startsWith('submissions/')) {
                 console.warn(`SECURITY: Skipping invalid file source: ${file.key}`);
+                errors.push({ file: file.key, error: 'Invalid source folder' });
                 continue;
             }
 
-            // file.key is the current path in 'submissions/...'
+            // file.key is the current path in 'submissions/...
             // We want to move it to 'music/Artist/Album/...'
             const fileName = file.name || file.key.split('/').pop();
             const newKey = `${finalPath}/${fileName}`;
@@ -51,6 +68,11 @@ export async function POST({ request, locals }: RequestEvent) {
                     Key: file.key,
                 }));
 
+                migratedFiles.push({
+                    ...file,
+                    key: newKey,
+                });
+
             } catch (err: any) {
                 // Robustness: If source file doesn't exist, check if it was ALREADY moved (destination exists)
                 if (err.name === 'NoSuchKey' || err.$metadata?.httpStatusCode === 404) {
@@ -61,26 +83,31 @@ export async function POST({ request, locals }: RequestEvent) {
                             Key: newKey
                         }));
                         console.log(`✅ Destination exists. Assuming file was already moved.`);
+
+                        migratedFiles.push({
+                            ...file,
+                            key: newKey,
+                        });
                     } catch (headErr) {
                         console.error(`❌ Critical: Source missing AND Destination missing for ${file.key}`);
+                        errors.push({
+                            file: file.name,
+                            error: 'Archivo no encontrado en submissions ni en destino'
+                        });
 
                         // If it's the cover, skip it with warning
                         if (file.name.match(/\.(jpg|jpeg|png|webp)$/i) || file.key.includes('cover')) {
-                            console.warn('⚠️ Cover file lost. Using placeholder behavior.');
+                            console.warn('⚠️ Cover file lost. Continuing with other files.');
                             continue;
                         } else {
-                            throw new Error(`File lost: ${file.name}`);
+                            throw new Error(`Archivo de audio perdido: ${file.name}. No se pudo completar la migración.`);
                         }
                     }
                 } else {
-                    throw err;
+                    console.error(`R2 operation failed for ${file.key}:`, err);
+                    throw new Error(`Error al migrar ${file.name}: ${err.message}`);
                 }
             }
-
-            migratedFiles.push({
-                ...file,
-                key: newKey,
-            });
         }
 
         // SECURITY: Log approval for audit trail
@@ -92,12 +119,19 @@ export async function POST({ request, locals }: RequestEvent) {
                 artistName: artistVerifiedName,
                 albumTitle,
                 migratedCount: migratedFiles.length,
+                errorCount: errors.length,
                 finalPath
             }
         });
 
-        return json({ success: true, migratedFiles });
+        return json({
+            success: true,
+            migratedFiles,
+            errors: errors.length > 0 ? errors : undefined
+        });
+
     } catch (err: any) {
+        console.error('R2 Approve Error:', err);
         return handleAPIError(err);
     }
 }

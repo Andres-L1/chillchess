@@ -205,6 +205,8 @@
     async function approveSubmission(submission: Submission) {
         if (!confirm(`¿Aprobar "${submission.releaseTitle}" de ${submission.artistName}?`)) return;
 
+        statusMessage = '⏳ Iniciando aprobación...';
+
         try {
             const subRef = doc(db, 'musicSubmissions', submission.id);
             const userRef = doc(db, 'users', submission.artistId);
@@ -235,7 +237,7 @@
             const userSnap = await getDoc(userRef);
 
             if (!userSnap.exists()) {
-                throw new Error('User not found');
+                throw new Error('Usuario no encontrado en la base de datos');
             }
 
             const userData = userSnap.data();
@@ -264,6 +266,7 @@
 
                 const moveRes = await fetch('/api/r2/approve', {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         submissionId: submission.id,
                         artistVerifiedName: submission.artistName,
@@ -272,7 +275,14 @@
                     }),
                 });
 
-                if (!moveRes.ok) throw new Error('Error moviendo archivos en R2');
+                if (!moveRes.ok) {
+                    const errData = await moveRes
+                        .json()
+                        .catch(() => ({ error: 'Error desconocido' }));
+                    throw new Error(
+                        `Error al mover archivos R2: ${errData.error || moveRes.statusText}`
+                    );
+                }
 
                 const { migratedFiles } = await moveRes.json();
 
@@ -322,6 +332,7 @@
             delete albumData.audioFiles;
 
             // PHASE 3: Use Firestore transaction for data consistency
+            statusMessage = '⏳ Guardando cambios en la base de datos...';
             const { runTransaction } = await import('firebase/firestore');
 
             await runTransaction(db, async (transaction) => {
@@ -364,17 +375,40 @@
                 statusMessage = `✅ Envío aprobado (${newApprovedCount}/2 para verificación automática)`;
             }
 
-            statusMessage = `✅ ¡Publicado! Archivos migrados y álbum creado.`;
-
             submission.status = 'approved';
             submissions = submissions;
 
+            if (shouldVerify) {
+                statusMessage = `✅ ¡Aprobado! ${submission.artistName} ahora está VERIFICADO ✓`;
+            } else {
+                statusMessage = `✅ ¡Publicado exitosamente! Álbum creado.`;
+            }
+
+            toast.success(`${submission.releaseTitle} aprobado correctamente`);
             dispatch('approved');
 
-            setTimeout(() => (statusMessage = ''), 6000);
+            setTimeout(() => (statusMessage = ''), 8000);
         } catch (e: any) {
-            statusMessage = '❌ Error: ' + e.message;
-            console.error('Approval error:', e);
+            // ROBUST ERROR HANDLING - Never break the web
+            console.error('❌ Approval error:', e);
+
+            let userMessage = 'Error al aprobar: ';
+            if (e.message.includes('R2') || e.message.includes('archivos')) {
+                userMessage =
+                    '❌ Fallo al migrar archivos. Los archivos permanecen en submissions/. Puedes reintentar.';
+            } else if (e.message.includes('transaction') || e.message.includes('base de datos')) {
+                userMessage = '❌ Fallo al guardar en la base de datos. Intenta aprobar de nuevo.';
+            } else if (e.message.includes('Usuario no encontrado')) {
+                userMessage = '❌ El usuario del artista no existe. Verifica los datos.';
+            } else {
+                userMessage = `❌ Error inesperado: ${e.message}`;
+            }
+
+            statusMessage = userMessage;
+            toast.error(userMessage);
+
+            // Do NOT throw - just show the error and continue
+            // The web should stay functional
         }
     }
 
@@ -535,22 +569,58 @@
     async function rejectSubmission(submission: Submission) {
         if (!confirm(`¿Rechazar "${submission.releaseTitle}"?`)) return;
 
+        statusMessage = '⏳ Rechazando envío...';
+
         try {
+            // Mark as rejected in Firestore
             const subRef = doc(db, 'musicSubmissions', submission.id);
             await updateDoc(subRef, {
                 status: 'rejected',
-                reviewedAt: Date.now(),
+                rejectedAt: Date.now(),
             });
+
+            // Cleanup R2 files if this is an R2 submission
+            if (
+                submission.submissionType === 'r2_direct' &&
+                (submission.r2CoverKey || submission.r2AudioKeys?.length)
+            ) {
+                statusMessage = '⏳ Limpiando archivos...';
+
+                const filesToCleanup = [
+                    submission.r2CoverKey,
+                    ...(submission.r2AudioKeys || []).map((f) => f.key),
+                ].filter(Boolean);
+
+                try {
+                    await fetch('/api/r2/cleanup-submission', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            submissionId: submission.id,
+                            files: filesToCleanup,
+                        }),
+                    });
+                    console.log('✅ R2 files cleaned up for rejected submission');
+                } catch (cleanupErr) {
+                    console.warn('⚠️ File cleanup failed (non-critical):', cleanupErr);
+                    // Non-blocking - continue even if cleanup fails
+                }
+            }
 
             submission.status = 'rejected';
             submissions = submissions;
 
-            statusMessage = `❌ Envío rechazado`;
+            statusMessage = `✅ Envío rechazado correctamente`;
+            toast.success('Envío rechazado y archivos limpiados');
             dispatch('approved');
 
-            setTimeout(() => (statusMessage = ''), 3000);
+            setTimeout(() => (statusMessage = ''), 4000);
         } catch (e: any) {
-            statusMessage = '❌ Error: ' + e.message;
+            console.error('❌ Rejection error:', e);
+            statusMessage = '❌ Error al rechazar: ' + e.message;
+            toast.error('Error al rechazar el envío: ' + e.message);
+
+            // Do NOT throw - web should stay functional
         }
     }
 </script>
