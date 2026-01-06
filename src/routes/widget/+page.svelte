@@ -37,14 +37,24 @@
 
     // Remote Data Sync
     let remoteData: any = null;
+    let widgetError = '';
+    let resolvedCoverUrl = '';
 
     onMount(() => {
         if (uid) {
-            const unsub = onSnapshot(doc(db, 'nowPlaying', uid), (snap) => {
-                if (snap.exists()) {
-                    remoteData = snap.data();
+            const unsub = onSnapshot(
+                doc(db, 'nowPlaying', uid),
+                (snap) => {
+                    widgetError = ''; // Clear error on success
+                    if (snap.exists()) {
+                        remoteData = snap.data();
+                    }
+                },
+                (error) => {
+                    console.error('Widget sync error:', error);
+                    widgetError = 'Conexión perdida';
                 }
-            });
+            );
             return () => unsub();
         }
     });
@@ -53,13 +63,33 @@
     $: activeTrack = uid ? remoteData?.track : localTrackInfo;
     $: isPlaying = uid ? remoteData?.isPlaying : localIsPlaying;
 
-    // Progress calculation for remote
+    // Progress calculation for remote (with safe navigation)
     $: progress =
-        uid && remoteData
+        uid && remoteData?.track
             ? ((remoteData.track.currentTime || 0) / (remoteData.track.duration || 1)) * 100
             : $audioStore.duration > 0
               ? ($audioStore.currentTime / $audioStore.duration) * 100
               : 0;
+
+    // Resolve R2 cover URL if needed
+    $: if (activeTrack?.cover) {
+        if (activeTrack.cover.startsWith('music/') || activeTrack.cover.startsWith('catalog/')) {
+            // This is an R2 key, needs resolution
+            fetch('/api/r2/get-url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key: activeTrack.cover }),
+            })
+                .then((res) => (res.ok ? res.json() : Promise.reject()))
+                .then((data) => (resolvedCoverUrl = data.url))
+                .catch(() => (resolvedCoverUrl = '/logo-mobile-legacy.png'));
+        } else {
+            // Direct URL
+            resolvedCoverUrl = activeTrack.cover;
+        }
+    } else {
+        resolvedCoverUrl = '/logo-mobile-legacy.png';
+    }
 
     // Size configurations
     const sizes = {
@@ -91,9 +121,14 @@
             <!-- La animación de giro va AQUÍ, en el contenedor, para no reiniciarse con updates de datos -->
             <div class="relative w-full h-full animate-spin-slow">
                 <img
-                    src={activeTrack.cover || '/logo-mobile-legacy.png'}
+                    src={resolvedCoverUrl || '/logo-mobile-legacy.png'}
                     alt={activeTrack.title}
                     class="w-full h-full object-cover rounded-full shadow-2xl border-[3px] border-white/10"
+                    on:error={(e) => {
+                        // Fallback if image fails to load
+                        const target = e.currentTarget as HTMLImageElement;
+                        target.src = '/logo-mobile-legacy.png';
+                    }}
                 />
                 <!-- Centro del vinilo -->
                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -142,6 +177,16 @@
             <div class="bar-min bar-1"></div>
             <div class="bar-min bar-2"></div>
             <div class="bar-min bar-3"></div>
+        </div>
+    </div>
+{:else if widgetError}
+    <div
+        class="widget-idle font-poppins flex flex-col items-center justify-center transition-all duration-500"
+        style="width: {config.width}; opacity: {opacity};"
+    >
+        <div class="text-red-400 text-center">
+            <p class="text-lg font-bold mb-2">⚠️ {widgetError}</p>
+            <p class="text-xs text-red-300">Verifica tu conexión</p>
         </div>
     </div>
 {:else}

@@ -12,6 +12,7 @@
 
     let daysCount = 0;
     let loading = true;
+    let error = '';
     let unsubscribe: () => void;
 
     onMount(() => {
@@ -21,15 +22,24 @@
         }
 
         const userRef = doc(db, 'users', uid);
-        unsubscribe = onSnapshot(userRef, (docSnap) => {
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                const activityMap = data.activityMap || {};
-                // Calculate unique active days
-                daysCount = Object.values(activityMap).filter((c: any) => c > 0).length;
+        unsubscribe = onSnapshot(
+            userRef,
+            (docSnap) => {
+                error = ''; // Clear error on success
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const activityMap: Record<string, number> = data.activityMap || {};
+                    // Calculate unique active days
+                    daysCount = Object.values(activityMap).filter((count) => count > 0).length;
+                }
+                loading = false;
+            },
+            (err) => {
+                console.error('Streak sync error:', err);
+                error = 'Error de conexión';
+                loading = false;
             }
-            loading = false;
-        });
+        );
     });
 
     onDestroy(() => {
@@ -43,6 +53,10 @@
     {#if !uid}
         <div class="text-white bg-red-500/80 p-4 rounded-xl text-center">
             <p class="font-bold">Error: Falta UID</p>
+        </div>
+    {:else if error}
+        <div class="text-red-400 bg-red-500/10 border border-red-500/20 p-4 rounded-xl text-center">
+            <p class="font-bold text-sm">⚠️ {error}</p>
         </div>
     {:else if !loading}
         <div

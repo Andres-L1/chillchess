@@ -1,54 +1,65 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { page } from "$app/stores";
-    import { db } from "$lib/firebase";
-    import { doc, onSnapshot } from "firebase/firestore";
-    import "@fontsource/poppins/600.css";
-    import "@fontsource/inter/400.css";
+    import { onMount } from 'svelte';
+    import { page } from '$app/stores';
+    import { db } from '$lib/firebase';
+    import { doc, onSnapshot } from 'firebase/firestore';
+    import '@fontsource/poppins/600.css';
+    import '@fontsource/inter/400.css';
 
-    $: uid = $page.url.searchParams.get("uid");
+    $: uid = $page.url.searchParams.get('uid');
 
     let timerState = {
         timeLeft: 1500,
-        mode: "focus", // 'focus' | 'short' | 'long'
+        mode: 'focus', // 'focus' | 'short' | 'long'
         duration: 1500,
         isRunning: false,
         updatedAt: 0,
         targetEndTime: null as number | null,
     };
 
+    let widgetError = '';
+
     onMount(() => {
         if (!uid) return;
 
         let localInterval: any;
 
-        const unsub = onSnapshot(doc(db, "nowPlaying", uid), (snap) => {
-            if (snap.exists()) {
-                const data = snap.data().timer;
-                if (data) {
-                    // Initial sync
-                    if (data.isRunning && data.targetEndTime) {
-                        const now = Date.now();
-                        const remaining = Math.max(
-                            0,
-                            Math.ceil((data.targetEndTime - now) / 1000),
-                        );
-                        timerState = { ...data, timeLeft: remaining };
-                    } else {
-                        timerState = data;
+        const unsub = onSnapshot(
+            doc(db, 'nowPlaying', uid),
+            (snap) => {
+                widgetError = ''; // Clear error on success
+                if (snap.exists()) {
+                    const data = snap.data();
+                    if (data?.timer) {
+                        // Initial sync
+                        if (data.timer.isRunning && data.timer.targetEndTime) {
+                            const now = Date.now();
+                            const remaining = Math.max(
+                                0,
+                                Math.ceil((data.timer.targetEndTime - now) / 1000)
+                            );
+                            timerState = { ...data.timer, timeLeft: remaining };
+                        } else {
+                            timerState = data.timer;
+                        }
                     }
                 }
+            },
+            (error) => {
+                console.error('Timer sync error:', error);
+                widgetError = 'Conexión perdida';
+                timerState = {
+                    ...timerState,
+                    isRunning: false,
+                };
             }
-        });
+        );
 
         // Local Tick for smooth countdown
         localInterval = setInterval(() => {
             if (timerState.isRunning && timerState.targetEndTime) {
                 const now = Date.now();
-                const remaining = Math.max(
-                    0,
-                    Math.ceil((timerState.targetEndTime - now) / 1000),
-                );
+                const remaining = Math.max(0, Math.ceil((timerState.targetEndTime - now) / 1000));
                 timerState.timeLeft = remaining;
             }
         }, 1000); // 1s is sufficient for timer updates
@@ -61,11 +72,11 @@
 
     $: minutes = Math.floor(timerState.timeLeft / 60);
     $: seconds = timerState.timeLeft % 60;
-    $: formattedTime = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+    $: formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
 
-    $: isFocus = timerState.mode === "focus";
-    $: themeColor = isFocus ? "#ff7b3d" : "#22c55e"; // Orange vs Green
-    $: label = isFocus ? "FOCUS TIME" : "BREAK TIME";
+    $: isFocus = timerState.mode === 'focus';
+    $: themeColor = isFocus ? '#ff7b3d' : '#22c55e'; // Orange vs Green
+    $: label = isFocus ? 'FOCUS TIME' : 'BREAK TIME';
 </script>
 
 <svelte:head>
