@@ -617,17 +617,17 @@
         <div class="mt-12 flex flex-wrap justify-center items-center gap-6 text-sm text-slate-400">
             <div class="flex items-center gap-2">
                 <span class="text-[#9146FF] text-xl">▶</span>
-                <span>Twitch Safe</span>
+                <span>Twitch</span>
             </div>
             <div class="w-px h-4 bg-white/10"></div>
             <div class="flex items-center gap-2">
                 <span class="text-red-500 text-xl">▶</span>
-                <span>YouTube Safe</span>
+                <span>YouTube</span>
             </div>
             <div class="w-px h-4 bg-white/10"></div>
             <div class="flex items-center gap-2">
                 <span class="text-green-500 text-xl">▶</span>
-                <span>Kick Safe</span>
+                <span>Kick</span>
             </div>
         </div>
     </header>
