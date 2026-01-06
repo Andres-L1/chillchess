@@ -4,7 +4,8 @@
             "http://localhost:5173",
             "http://localhost:4173",
             "https://chillchess.app",
-            "https://www.chillchess.app"
+            "https://www.chillchess.app",
+            "https://chillchess.netlify.app"
         ],
         "AllowedMethods": [
             "GET",
@@ -14,10 +15,16 @@
             "DELETE"
         ],
         "AllowedHeaders": [
-            "*"
+            "*",
+            "Content-Type",
+            "Authorization",
+            "x-amz-date",
+            "x-amz-content-sha256",
+            "x-amz-user-agent"
         ],
         "ExposeHeaders": [
-            "ETag"
+            "ETag",
+            "Content-Length"
         ],
         "MaxAgeSeconds": 3000
     }
