@@ -211,8 +211,19 @@
             };
 
             const msg = errorMessages[error.code as 1 | 2 | 3 | 4] || 'Error desconocido';
-            console.error('🔴 Audio playback error:', msg, error);
-            toast.error(`⚠️ ${msg}. Saltando...`);
+            console.error('🔴 Audio playback error:', msg, error, {
+                trackUrl: resolvedStreamUrl,
+                trackTitle: currentTrack?.title,
+                errorCode: error.code,
+            });
+
+            // Only show toast for network errors (not format issues which might be ghost tracks)
+            if (error.code === 2) {
+                toast.error(`⚠️ ${msg}. Saltando...`);
+            } else {
+                // Silently skip broken/deleted tracks (format/decoding errors)
+                console.warn('Skipping broken track silently (likely deleted)');
+            }
 
             // Auto-skip to next track
             setTimeout(() => nextTrack(), 1500);

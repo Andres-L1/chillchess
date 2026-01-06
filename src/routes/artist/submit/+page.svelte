@@ -199,6 +199,20 @@
 
         const { uploadUrl, key } = await res.json();
 
+        // === DIAGNOSTIC LOGGING (Help identify upload failures) ===
+        console.group('📊 R2 Upload Diagnostics');
+        console.log('File Details:', {
+            name: file.name,
+            type: file.type,
+            size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+            folder,
+        });
+        console.log('Signed URL Domain:', new URL(uploadUrl).origin);
+        console.log('R2 Key:', key);
+        console.log('Browser:', navigator.userAgent);
+        console.log('Online Status:', navigator.onLine);
+        console.groupEnd();
+
         // CORS check: Verify the upload URL is accessible
         console.log('🌐 Verifying R2 CORS configuration...');
         try {
