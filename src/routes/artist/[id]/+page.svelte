@@ -61,11 +61,32 @@
                 if (!currentMap.has(a.id)) currentMap.set(a.id, a);
             });
 
-            artistAlbums = Array.from(currentMap.values()).sort((a, b) => {
-                const timeA = (a.createdAt as any)?.seconds || 0;
-                const timeB = (b.createdAt as any)?.seconds || 0;
-                return timeB - timeA;
-            });
+            artistAlbums = Array.from(currentMap.values())
+                .filter((album) => {
+                    // GHOST TRACK FILTER: Remove albums with NO valid tracks
+                    if (!album.tracks || album.tracks.length === 0) {
+                        console.warn(`Filtering out album "${album.title}" - no tracks defined`);
+                        return false;
+                    }
+
+                    // Check if at least ONE track has a valid audio source
+                    const hasValidTrack = album.tracks.some((track: any) => {
+                        return track.file || track.url || track.r2Key;
+                    });
+
+                    if (!hasValidTrack) {
+                        console.warn(
+                            `Filtering out album "${album.title}" - all tracks have broken sources`
+                        );
+                    }
+
+                    return hasValidTrack;
+                })
+                .sort((a, b) => {
+                    const timeA = (a.createdAt as any)?.seconds || 0;
+                    const timeB = (b.createdAt as any)?.seconds || 0;
+                    return timeB - timeA;
+                });
         };
 
         const unsubId = onSnapshot(qId, (snapshot) => {

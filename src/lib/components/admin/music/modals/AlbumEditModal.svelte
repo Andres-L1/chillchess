@@ -153,10 +153,26 @@
     }
 
     async function removeTrack(trackId: string) {
+        // GHOST TRACK PREVENTION: Don't allow removal of last track
+        if (editingAlbum.tracks.length <= 1) {
+            toast.error(
+                '⚠️ No puedes eliminar el último track. En su lugar, elimina el álbum completo desde la biblioteca.',
+                { duration: 5000 }
+            );
+            return;
+        }
+
         if (!confirm('¿Eliminar esta canción?')) return;
 
         try {
             const updatedTracks = editingAlbum.tracks.filter((t: any) => t.id !== trackId);
+
+            // Double-check we're not creating an empty album
+            if (updatedTracks.length === 0) {
+                toast.error('No puedes dejar un álbum sin canciones');
+                return;
+            }
+
             editingAlbum.tracks = updatedTracks;
 
             const albumRef = doc(db, 'albums', editingAlbum.id);

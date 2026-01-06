@@ -7,11 +7,12 @@
     // Sub-components
     import MusicLibrary from './music/MusicLibrary.svelte';
     import CreatorCatalog from './music/CreatorCatalog.svelte';
+    import GhostAlbumCleanup from './music/GhostAlbumCleanup.svelte';
     import AlbumCreateModal from './music/modals/AlbumCreateModal.svelte';
     import AlbumEditModal from './music/modals/AlbumEditModal.svelte';
 
     // --- STATE ---
-    let activeSection: 'library' | 'creators' = 'library';
+    let activeSection: 'library' | 'creators' | 'cleanup' = 'library';
     let showCreateAlbumForm = false;
     let editingAlbum: any = null;
     let verifiedArtists: any[] = [];
@@ -77,6 +78,15 @@
             >
                 Catálogo Streamers
             </button>
+            <button
+                class="px-4 py-2 rounded-lg text-sm font-bold transition-colors {activeSection ===
+                'cleanup'
+                    ? 'bg-red-500 text-white shadow-lg'
+                    : 'text-slate-400 hover:text-white'}"
+                on:click={() => (activeSection = 'cleanup')}
+            >
+                🧹 Limpieza
+            </button>
         </div>
     </div>
 
@@ -85,6 +95,8 @@
             on:create={() => (showCreateAlbumForm = true)}
             on:edit={(e) => (editingAlbum = e.detail)}
         />
+    {:else if activeSection === 'cleanup'}
+        <GhostAlbumCleanup />
     {:else}
         <CreatorCatalog />
     {/if}
