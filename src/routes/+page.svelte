@@ -549,7 +549,7 @@
     >
         <!-- Background Glow Effect -->
         <div
-            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-[120px] -z-10 pointer-events-none animate-pulse-slow"
+            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/20 md:bg-blue-600/20 bg-opacity-30 md:bg-opacity-100 rounded-full blur-[120px] -z-10 pointer-events-none animate-pulse-slow opacity-30 md:opacity-100"
         ></div>
 
         <div class="space-y-4 relative z-10">
@@ -585,12 +585,17 @@
         <!-- CTA Buttons -->
         <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8 relative z-10">
             {#if !$userStore.isLoggedIn}
-                <button
-                    on:click={openAuth}
-                    class="px-10 py-4 bg-white text-black font-bold text-lg rounded-full hover:scale-105 hover:shadow-[0_0_40px_-10px_rgba(255,255,255,0.5)] transition-all duration-300 w-full sm:w-auto"
-                >
-                    Empezar Gratis
-                </button>
+                <div class="flex flex-col items-center gap-2 w-full sm:w-auto">
+                    <button
+                        on:click={openAuth}
+                        class="px-10 py-4 bg-white text-black font-bold text-lg rounded-full hover:scale-105 hover:shadow-[0_0_40px_-10px_rgba(255,255,255,0.5)] transition-all duration-300 w-full sm:w-auto"
+                    >
+                        Empezar Gratis
+                    </button>
+                    <p class="text-xs text-slate-400">
+                        ✓ Sin tarjeta • Sin anuncios • Música ilimitada
+                    </p>
+                </div>
             {:else}
                 <a
                     href="/app"
@@ -606,6 +611,24 @@
             >
                 Explorar Música
             </a>
+        </div>
+
+        <!-- Platform Trust Badges -->
+        <div class="mt-12 flex flex-wrap justify-center items-center gap-6 text-sm text-slate-400">
+            <div class="flex items-center gap-2">
+                <span class="text-[#9146FF] text-xl">▶</span>
+                <span>Twitch Safe</span>
+            </div>
+            <div class="w-px h-4 bg-white/10"></div>
+            <div class="flex items-center gap-2">
+                <span class="text-red-500 text-xl">▶</span>
+                <span>YouTube Safe</span>
+            </div>
+            <div class="w-px h-4 bg-white/10"></div>
+            <div class="flex items-center gap-2">
+                <span class="text-green-500 text-xl">▶</span>
+                <span>Kick Safe</span>
+            </div>
         </div>
     </header>
 
