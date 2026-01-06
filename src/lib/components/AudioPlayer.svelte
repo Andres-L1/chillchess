@@ -213,7 +213,7 @@
             const msg = errorMessages[error.code as 1 | 2 | 3 | 4] || 'Error desconocido';
             console.error('🔴 Audio playback error:', msg, error, {
                 trackUrl: resolvedStreamUrl,
-                trackTitle: currentTrack?.title,
+                trackTitle: currentTrackEntry?.title,
                 errorCode: error.code,
             });
 
