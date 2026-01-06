@@ -162,13 +162,24 @@
     const PUBLIC_R2_DOMAIN = 'https://pub-e58e51867b4c44f58a32c407eb8cca7c.r2.dev';
 
     async function uploadToR2(file: File, folder: string) {
+        if (!$userStore.user) {
+            throw new Error('Usuario no autenticado');
+        }
+
         // Sanitize filename to prevent R2/URL issues and add timestamp for uniqueness/cache-busting
         const timestamp = Date.now();
         const safeName = `${timestamp}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
 
+        // Get Firebase auth token
+        const token = await $userStore.user.getIdToken();
+
         // 1. Get signed URL
         const res = await fetch('/api/r2/sign-url', {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
             body: JSON.stringify({
                 fileName: safeName,
                 fileType: file.type,
@@ -178,7 +189,7 @@
         });
 
         if (!res.ok) {
-            const err = await res.json();
+            const err = await res.json().catch(() => ({ error: 'Error del servidor' }));
             throw new Error(err.error || 'Error obteniendo URL de subida');
         }
 

@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import { onMount, onDestroy } from 'svelte';
     import { db } from '$lib/firebase';
-    import { collection, query, getDocs, orderBy } from 'firebase/firestore';
+    import { collection, query, onSnapshot, orderBy } from 'firebase/firestore';
     import { fade, fly } from 'svelte/transition';
     import { toast } from '$lib/stores/notificationStore';
 
@@ -10,6 +10,7 @@
     let searchTerm = '';
     let playingTrack: string | null = null;
     let audio: HTMLAudioElement | null = null;
+    let unsubscribe: (() => void) | null = null; // Declare unsubscribe variable
 
     $: filteredTracks = tracks.filter((track) => {
         const term = searchTerm.toLowerCase();
@@ -18,19 +19,37 @@
         );
     });
 
-    onMount(async () => {
-        await loadCatalog();
+    onMount(() => {
+        // Call loadCatalog directly, it will set up the listener
+        loadCatalog();
     });
 
-    async function loadCatalog() {
+    onDestroy(() => {
+        // Unsubscribe from the listener when the component is destroyed
+        if (unsubscribe) {
+            unsubscribe();
+        }
+    });
+
+    function loadCatalog() {
         try {
             const q = query(collection(db, 'creatorCatalog'), orderBy('createdAt', 'desc'));
-            const snap = await getDocs(q);
-            tracks = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+            // Set up real-time listener
+            unsubscribe = onSnapshot(
+                q,
+                (snap) => {
+                    tracks = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+                    loading = false; // Data loaded, set loading to false
+                },
+                (error) => {
+                    console.error('Error loading catalogue:', error);
+                    loading = false; // Error occurred, set loading to false
+                }
+            );
         } catch (e) {
-            console.error('Error loading catalogue:', e);
-        } finally {
-            loading = false;
+            console.error('Error setting up catalogue listener:', e);
+            loading = false; // Error occurred during setup, set loading to false
         }
     }
 
@@ -58,6 +77,7 @@
     }
 </script>
 
+```
 <svelte:head>
     <title>Creators Catalog | ChillChess</title>
 </svelte:head>
