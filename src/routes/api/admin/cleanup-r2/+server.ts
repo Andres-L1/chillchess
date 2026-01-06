@@ -1,15 +1,30 @@
 import { json } from '@sveltejs/kit';
+import type { RequestEvent } from '@sveltejs/kit';
 import { S3Client, ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3';
-// @ts-ignore
-import { R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME } from '$env/static/private';
-// @ts-ignore
-import { PUBLIC_R2_ACCOUNT_ID } from '$env/static/public';
+// @ts-ignore - SvelteKit dynamic env module
+import { env } from '$env/dynamic/private';
+// @ts-ignore - SvelteKit dynamic env module
+import { env as publicEnv } from '$env/dynamic/public';
+import { requireAdmin } from '$lib/server/auth';
+import { handleAPIError, logAudit } from '$lib/server/errors';
 
-export async function POST() {
+export async function POST({ locals }: RequestEvent) {
     try {
+        // SECURITY: Require admin authentication
+        const admin = await requireAdmin(locals);
+
+        const R2_ACCOUNT_ID = publicEnv.PUBLIC_R2_ACCOUNT_ID || env.PUBLIC_R2_ACCOUNT_ID;
+        const R2_ACCESS_KEY_ID = env.R2_ACCESS_KEY_ID;
+        const R2_SECRET_ACCESS_KEY = env.R2_SECRET_ACCESS_KEY;
+        const R2_BUCKET_NAME = env.R2_BUCKET_NAME || 'chillchess-music';
+
+        if (!R2_ACCOUNT_ID || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY) {
+            return json({ error: 'R2 configuration missing' }, { status: 500 });
+        }
+
         const R2 = new S3Client({
             region: 'auto',
-            endpoint: `https://${PUBLIC_R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+            endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
             credentials: {
                 accessKeyId: R2_ACCESS_KEY_ID,
                 secretAccessKey: R2_SECRET_ACCESS_KEY,
@@ -51,13 +66,23 @@ export async function POST() {
 
         await R2.send(deleteCommand);
 
+        // SECURITY: Log this admin action for audit
+        logAudit({
+            action: 'r2_cleanup',
+            userId: admin.uid,
+            details: {
+                deletedCount: toDelete.length,
+                bucket: R2_BUCKET_NAME,
+                prefix: 'submissions/temp/'
+            }
+        });
+
         return json({
             message: `Successfully cleaned ${toDelete.length} files older than 3 days.`,
             deletedCount: toDelete.length
         });
 
     } catch (e: any) {
-        console.error('R2 Cleanup Error:', e);
-        return json({ error: e.message }, { status: 500 });
+        return handleAPIError(e);
     }
 }

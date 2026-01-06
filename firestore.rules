@@ -25,7 +25,8 @@ service cloud.firestore {
     // Users Collection
     // ============================================
     match /users/{userId} {
-      allow read: if isSignedIn();
+      // SECURITY: Users can only read their own data
+      allow read: if isOwner(userId) || isAdmin();
       allow create: if isSignedIn() && request.auth.uid == userId;
       allow update: if isOwner(userId) || isAdmin();
       allow delete: if isAdmin();

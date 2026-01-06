@@ -1,23 +1,17 @@
 import { json } from '@sveltejs/kit';
+import type { RequestEvent } from '@sveltejs/kit';
 import { r2, R2_BUCKET } from '$lib/server/r2';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { requireAuth, canAccessR2Resource } from '$lib/server/auth';
+import { handleAPIError } from '$lib/server/errors';
+import { validateR2Key } from '$lib/server/validation';
+import { globalLimiter } from '$lib/server/rate-limit';
 
 // Shared logic for generating signed URL
 async function generateSignedUrl(key: string) {
-    if (!key || typeof key !== 'string') {
-        throw new Error('No key provided');
-    }
-
-    // Prevent directory traversal
-    if (key.includes('..')) {
-        throw new Error('Invalid key');
-    }
-
-    // Restrict access to known folders
-    if (!key.startsWith('submissions/') && !key.startsWith('music/')) {
-        throw new Error('Access denied');
-    }
+    // Validate key format and prevent path traversal
+    validateR2Key(key);
 
     const command = new GetObjectCommand({
         Bucket: R2_BUCKET,
@@ -28,31 +22,60 @@ async function generateSignedUrl(key: string) {
     return await getSignedUrl(r2, command, { expiresIn: 3600 });
 }
 
-export async function POST({ request }) {
+export async function POST({ request, locals }: RequestEvent) {
     try {
+        // SECURITY: Require authentication
+        const user = requireAuth(locals);
+
+        // SECURITY: Rate limiting (10 requests per minute per user)
+        globalLimiter.enforce(user.uid, 10, 60000);
+
         const { key } = await request.json();
+
+        if (!key || typeof key !== 'string') {
+            return json({ error: 'No key provided', code: 'MISSING_KEY' }, { status: 400 });
+        }
+
+        // SECURITY: Check if user has permission to access this resource
+        if (!canAccessR2Resource(user, key)) {
+            return json({
+                error: 'You do not have permission to access this resource',
+                code: 'FORBIDDEN'
+            }, { status: 403 });
+        }
+
         const url = await generateSignedUrl(key);
         return json({ url });
     } catch (err: any) {
-        if (err.message === 'Access denied') return json({ error: err.message }, { status: 403 });
-        if (err.message === 'Invalid key' || err.message === 'No key provided') return json({ error: err.message }, { status: 400 });
-
-        console.error('Error generating signed URL (POST):', err);
-        return json({ error: 'Failed to generate playback URL' }, { status: 500 });
+        return handleAPIError(err);
     }
 }
 
-export async function GET({ url }) {
+export async function GET({ url, locals }: RequestEvent) {
     try {
+        // SECURITY: Require authentication
+        const user = requireAuth(locals);
+
+        // SECURITY: Rate limiting (10 requests per minute per user)
+        globalLimiter.enforce(user.uid, 10, 60000);
+
         const key = url.searchParams.get('key');
-        // If key is null, generateSignedUrl will throw 'No key provided'
-        const signedUrl = await generateSignedUrl(key || '');
+
+        if (!key) {
+            return json({ error: 'No key provided', code: 'MISSING_KEY' }, { status: 400 });
+        }
+
+        // SECURITY: Check if user has permission to access this resource
+        if (!canAccessR2Resource(user, key)) {
+            return json({
+                error: 'You do not have permission to access this resource',
+                code: 'FORBIDDEN'
+            }, { status: 403 });
+        }
+
+        const signedUrl = await generateSignedUrl(key);
         return json({ url: signedUrl });
     } catch (err: any) {
-        if (err.message === 'Access denied') return json({ error: err.message }, { status: 403 });
-        if (err.message === 'Invalid key' || err.message === 'No key provided') return json({ error: err.message }, { status: 400 });
-
-        console.error('Error generating signed URL (GET):', err);
-        return json({ error: 'Failed to generate playback URL' }, { status: 500 });
+        return handleAPIError(err);
     }
 }

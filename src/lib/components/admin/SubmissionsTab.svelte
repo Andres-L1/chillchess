@@ -207,17 +207,10 @@
 
         try {
             const subRef = doc(db, 'musicSubmissions', submission.id);
-            await updateDoc(subRef, {
-                status: 'approved',
-                reviewedAt: Date.now(),
-            });
-
             const userRef = doc(db, 'users', submission.artistId);
-            const userSnap = await getDoc(userRef);
 
             // --- RESOLVE TRUE ARTIST PROFILE (Fix for Split Brain/Custom IDs) ---
-            // The submission has the UserID. We need to find the Public Profile ID.
-            let targetProfileId = submission.artistId; // Default fallback to UID
+            let targetProfileId = submission.artistId;
 
             try {
                 const artistsRef = collection(db, 'artists');
@@ -225,7 +218,6 @@
                 const snapshot = await getDocs(q);
 
                 if (!snapshot.empty) {
-                    // Prefer Verified profile or Custom ID profile
                     const profiles = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
                     const best =
                         profiles.find((p: any) => p.isVerified) ||
@@ -240,141 +232,139 @@
                 console.error('Error resolving profile:', err);
             }
 
-            if (userSnap.exists()) {
-                const userData = userSnap.data();
-                const currentApprovedCount = userData.approvedSubmissionsCount || 0;
-                const newApprovedCount = currentApprovedCount + 1;
+            const userSnap = await getDoc(userRef);
 
-                // Update approved count
-                await updateDoc(userRef, {
+            if (!userSnap.exists()) {
+                throw new Error('User not found');
+            }
+
+            const userData = userSnap.data();
+            const currentApprovedCount = userData.approvedSubmissionsCount || 0;
+            const newApprovedCount = currentApprovedCount + 1;
+            const shouldVerify = newApprovedCount >= 2 && !userData.isVerified;
+
+            // ✨ CREATE ALBUM IN COLLECTION (Auto-publish)
+            let tracksForAlbum = [];
+            let secureCoverKey = submission.r2CoverKey;
+
+            if (submission.submissionType === 'r2_direct') {
+                // 🚀 R2 Migration (Move files to permanent folder)
+                statusMessage = '⏳ Migrando archivos en Cloudflare R2...';
+
+                const filesToMigrate = [
+                    {
+                        key: submission.r2CoverKey,
+                        name: `cover_${Date.now()}.jpg`,
+                    },
+                    ...(submission.r2AudioKeys || []).map((f) => ({
+                        key: f.key,
+                        name: f.name,
+                    })),
+                ];
+
+                const moveRes = await fetch('/api/r2/approve', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        submissionId: submission.id,
+                        artistVerifiedName: submission.artistName,
+                        albumTitle: submission.releaseTitle,
+                        files: filesToMigrate,
+                    }),
+                });
+
+                if (!moveRes.ok) throw new Error('Error moviendo archivos en R2');
+
+                const { migratedFiles } = await moveRes.json();
+
+                const newCover =
+                    migratedFiles.find((f: any) => f.name.startsWith('cover_')) || migratedFiles[0];
+                secureCoverKey = newCover ? newCover.key : null;
+
+                const audioFiles = migratedFiles.filter((f: any) => f.key !== secureCoverKey);
+
+                tracksForAlbum = audioFiles.map((f: any, idx: number) => ({
+                    id: `track-${idx + 1}`,
+                    title: f.name.replace(/\.(mp3|wav|m4a)$/i, ''),
+                    r2Key: f.key,
+                    duration: 0,
+                }));
+            } else {
+                tracksForAlbum = submission.tracklist
+                    ? submission.tracklist
+                          .split('\n')
+                          .filter((t) => t.trim())
+                          .map((line, idx) => ({
+                              id: `track-${idx + 1}`,
+                              title: line.replace(/^\d+\.\s*/, '').trim(),
+                              url: submission.downloadLink,
+                          }))
+                    : [];
+            }
+
+            const albumData: any = {
+                title: submission.releaseTitle,
+                artist: submission.artistName,
+                artistId: targetProfileId,
+                cover:
+                    submission.coverUrl && submission.coverUrl.length < 5000
+                        ? submission.coverUrl
+                        : null,
+                r2CoverKey: secureCoverKey ?? null, // STRICTLY ensure null if undefined
+                category: submission.genre || 'Chill',
+                tracks: tracksForAlbum,
+                releaseDate: Date.now(),
+                createdAt: Date.now(),
+                submissionId: submission.id,
+                storageProvider:
+                    submission.submissionType === 'r2_direct' ? 'cloudflare_r2' : 'external_link',
+            };
+
+            delete albumData.audioFiles;
+
+            // PHASE 3: Use Firestore transaction for data consistency
+            const { runTransaction } = await import('firebase/firestore');
+
+            await runTransaction(db, async (transaction) => {
+                // Update submission status
+                transaction.update(subRef, {
+                    status: 'approved',
+                    reviewedAt: Date.now(),
+                });
+
+                // Update user approved count
+                transaction.update(userRef, {
                     approvedSubmissionsCount: newApprovedCount,
                     updatedAt: Date.now(),
                 });
 
-                // Auto-verify after 2nd approval
-                if (newApprovedCount >= 2 && !userData.isVerified) {
-                    await updateDoc(userRef, {
+                // Auto-verify if needed
+                if (shouldVerify) {
+                    transaction.update(userRef, {
                         isVerified: true,
                         verifiedAt: Date.now(),
                     });
 
-                    // Update the RESOLVED artist profile
                     const artistRef = doc(db, 'artists', targetProfileId);
-                    const artistSnap = await getDoc(artistRef);
-                    if (artistSnap.exists()) {
-                        await updateDoc(artistRef, {
-                            isVerified: true,
-                            verifiedAt: Date.now(),
-                        });
-                    } else if (targetProfileId !== submission.artistId) {
-                        // Fallback check if resolved profile didn't exist for some reason
-                        const uidRef = doc(db, 'artists', submission.artistId);
-                        const uidSnap = await getDoc(uidRef);
-                        if (uidSnap.exists()) {
-                            await updateDoc(uidRef, { isVerified: true, verifiedAt: Date.now() });
-                        }
-                    }
-
-                    statusMessage = `✅ Envío aprobado. ${submission.artistName} ahora es VERIFICADO ✓ (${newApprovedCount} aprobaciones)`;
-                } else if (newApprovedCount >= 2) {
-                    statusMessage = `✅ Envío aprobado (artista ya verificado, ${newApprovedCount} aprobaciones totales)`;
-                } else {
-                    statusMessage = `✅ Envío aprobado (${newApprovedCount}/2 para verificación automática)`;
-                }
-
-                // ✨ CREATE ALBUM IN COLLECTION (Auto-publish)
-                const { addDoc, collection } = await import('firebase/firestore');
-
-                let tracksForAlbum = [];
-                let secureCoverKey = submission.r2CoverKey;
-
-                if (submission.submissionType === 'r2_direct') {
-                    // 🚀 R2 Migration (Move files to permanent folder)
-                    statusMessage = '⏳ Migrando archivos en Cloudflare R2...';
-
-                    const filesToMigrate = [
-                        {
-                            key: submission.r2CoverKey,
-                            name: `cover_${Date.now()}.jpg`,
-                        },
-                        ...(submission.r2AudioKeys || []).map((f) => ({
-                            key: f.key,
-                            name: f.name,
-                        })),
-                    ];
-
-                    const moveRes = await fetch('/api/r2/approve', {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            submissionId: submission.id,
-                            artistVerifiedName: submission.artistName,
-                            albumTitle: submission.releaseTitle,
-                            files: filesToMigrate,
-                        }),
+                    transaction.update(artistRef, {
+                        isVerified: true,
+                        verifiedAt: Date.now(),
                     });
-
-                    if (!moveRes.ok) throw new Error('Error moviendo archivos en R2');
-
-                    const { migratedFiles } = await moveRes.json();
-
-                    // Map back to tracks
-                    // Robustly find cover (starts with cover_) or fallback to first file if logic differs,
-                    // but safer to find by name prefix as per backend logic
-                    const newCover =
-                        migratedFiles.find((f: any) => f.name.startsWith('cover_')) ||
-                        migratedFiles[0];
-                    secureCoverKey = newCover ? newCover.key : null;
-
-                    // Audio files are the rest
-                    const audioFiles = migratedFiles.filter((f: any) => f.key !== secureCoverKey);
-
-                    tracksForAlbum = audioFiles.map((f: any, idx: number) => ({
-                        id: `track-${idx + 1}`,
-                        title: f.name.replace(/\.(mp3|wav|m4a)$/i, ''),
-                        r2Key: f.key, // Store Private Key
-                        duration: 0,
-                    }));
-                } else {
-                    // Legacy (Link based)
-                    tracksForAlbum = submission.tracklist
-                        ? submission.tracklist
-                              .split('\n')
-                              .filter((t) => t.trim())
-                              .map((line, idx) => ({
-                                  id: `track-${idx + 1}`,
-                                  title: line.replace(/^\d+\.\s*/, '').trim(),
-                                  url: submission.downloadLink,
-                              }))
-                        : [];
                 }
 
-                const albumData: any = {
-                    title: submission.releaseTitle,
-                    artist: submission.artistName,
-                    artistId: targetProfileId, // Use the RESOLVED profile ID (e.g. 'julyactv-official')
-                    cover:
-                        submission.coverUrl && submission.coverUrl.length < 5000
-                            ? submission.coverUrl
-                            : null, // SANITIZE: Block base64
-                    r2CoverKey: secureCoverKey ?? null, // STRICTLY ensure null if undefined
-                    category: submission.genre || 'Chill',
-                    tracks: tracksForAlbum,
-                    releaseDate: Date.now(),
-                    createdAt: Date.now(),
-                    submissionId: submission.id,
-                    storageProvider:
-                        submission.submissionType === 'r2_direct'
-                            ? 'cloudflare_r2'
-                            : 'external_link',
-                };
+                // Create album
+                const albumRef = doc(collection(db, 'albums'));
+                transaction.set(albumRef, albumData);
+            });
 
-                // Double Safety: Remove 'audioFiles' or raw blobs if they crept in
-                delete albumData.audioFiles;
-
-                await addDoc(collection(db, 'albums'), albumData);
-
-                statusMessage = `✅ ¡Publicado! Archivos migrados y álbum creado.`;
+            if (shouldVerify) {
+                statusMessage = `✅ Envío aprobado. ${submission.artistName} ahora es VERIFICADO ✓ (${newApprovedCount} aprobaciones)`;
+            } else if (newApprovedCount >= 2) {
+                statusMessage = `✅ Envío aprobado (artista ya verificado, ${newApprovedCount} aprobaciones totales)`;
+            } else {
+                statusMessage = `✅ Envío aprobado (${newApprovedCount}/2 para verificación automática)`;
             }
+
+            statusMessage = `✅ ¡Publicado! Archivos migrados y álbum creado.`;
 
             submission.status = 'approved';
             submissions = submissions;
@@ -384,6 +374,7 @@
             setTimeout(() => (statusMessage = ''), 6000);
         } catch (e: any) {
             statusMessage = '❌ Error: ' + e.message;
+            console.error('Approval error:', e);
         }
     }
 
