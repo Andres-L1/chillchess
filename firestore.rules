@@ -129,9 +129,17 @@ service cloud.firestore {
     // ============================================
     match /system_logs/{logId} {
         allow read: if isAdmin();
-        // Writes usually happen via server SDK (bypassing rules), 
-        // but allowing admin write/delete is fine for maintenance.
-        allow write: if isAdmin();
+        allow create: if true; // Allow client-side error logging (maybe restrict to auth users later)
+        allow update, delete: if isAdmin();
+    }
+
+    // ============================================
+    // Audit Logs (Admin Actions)
+    // ============================================
+    match /audit_logs/{logId} {
+        allow read: if isAdmin();
+        allow create: if isAdmin(); // Only admins can create audit entries
+        allow update, delete: if false; // Audit logs are immutable
     }
     
     // ============================================

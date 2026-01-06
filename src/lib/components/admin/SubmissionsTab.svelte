@@ -16,6 +16,8 @@
         addDoc,
     } from 'firebase/firestore';
     import { toast } from '$lib/stores/notificationStore';
+    import { logger } from '$lib/utils/logger';
+    import { page } from '$app/stores';
 
     const dispatch = createEventDispatcher();
 
@@ -385,6 +387,21 @@
             }
 
             toast.success(`${submission.releaseTitle} aprobado correctamente`);
+
+            // Audit Log
+            const adminId = $page.data.user?.uid || 'unknown-admin';
+            logger.audit(
+                'submission_approved',
+                adminId,
+                {
+                    submissionId: submission.id,
+                    artist: submission.artistName,
+                    album: submission.releaseTitle,
+                    migrated: submission.submissionType === 'r2_direct',
+                },
+                submission.id
+            );
+
             dispatch('approved');
 
             setTimeout(() => (statusMessage = ''), 8000);
@@ -612,6 +629,20 @@
 
             statusMessage = `✅ Envío rechazado correctamente`;
             toast.success('Envío rechazado y archivos limpiados');
+
+            // Audit Log
+            const adminId = $page.data.user?.uid || 'unknown-admin';
+            logger.audit(
+                'submission_rejected',
+                adminId,
+                {
+                    submissionId: submission.id,
+                    artist: submission.artistName,
+                    reason: 'Manual rejection',
+                },
+                submission.id
+            );
+
             dispatch('approved');
 
             setTimeout(() => (statusMessage = ''), 4000);
