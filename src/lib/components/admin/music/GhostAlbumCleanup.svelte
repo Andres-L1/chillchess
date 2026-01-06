@@ -22,7 +22,7 @@
             scannedCount = snapshot.size;
 
             snapshot.docs.forEach((albumDoc) => {
-                const album = { id: albumDoc.id, ...albumDoc.data() };
+                const album: any = { id: albumDoc.id, ...albumDoc.data() };
 
                 // Check if album is ghost (no valid tracks)
                 const tracks = album.tracks || [];
