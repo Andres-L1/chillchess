@@ -9,6 +9,16 @@
 
     const patches: Patch[] = [
         {
+            version: 'v0.9.6',
+            date: '06 Ene 2026',
+            title: 'Web Maintenance Update',
+            type: 'minor',
+            changes: [
+                '🛠️ Mejoras de Estabilidad: Correcciones generales en la plataforma web para una experiencia más fluida.',
+                '🔧 Optimización de Sistema: Ajustes internos de mantenimiento y limpieza de datos.',
+            ],
+        },
+        {
             version: 'v0.9.5',
             date: '04 Ene 2026',
             title: 'The Productivity Update',
