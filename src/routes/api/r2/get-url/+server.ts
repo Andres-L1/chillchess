@@ -24,17 +24,24 @@ async function generateSignedUrl(key: string) {
 
 export async function POST({ request, locals }: RequestEvent) {
     try {
-        // SECURITY: Require authentication
-        const user = requireAuth(locals);
-
-        // SECURITY: Rate limiting (10 requests per minute per user)
-        globalLimiter.enforce(user.uid, 10, 60000);
-
         const { key } = await request.json();
 
         if (!key || typeof key !== 'string') {
             return json({ error: 'No key provided', code: 'MISSING_KEY' }, { status: 400 });
         }
+
+        // ✅ SMART SECURITY: Allow public access to music folder (published content)
+        // This allows users to play music without being logged in
+        if (key.startsWith('music/') || key.startsWith('catalog/')) {
+            const url = await generateSignedUrl(key);
+            return json({ url });
+        }
+
+        // For submissions and other private folders, require authentication
+        const user = requireAuth(locals);
+
+        // SECURITY: Rate limiting (10 requests per minute per user)
+        globalLimiter.enforce(user.uid, 10, 60000);
 
         // SECURITY: Check if user has permission to access this resource
         if (!canAccessR2Resource(user, key)) {
@@ -53,17 +60,23 @@ export async function POST({ request, locals }: RequestEvent) {
 
 export async function GET({ url, locals }: RequestEvent) {
     try {
-        // SECURITY: Require authentication
-        const user = requireAuth(locals);
-
-        // SECURITY: Rate limiting (10 requests per minute per user)
-        globalLimiter.enforce(user.uid, 10, 60000);
-
         const key = url.searchParams.get('key');
 
         if (!key) {
             return json({ error: 'No key provided', code: 'MISSING_KEY' }, { status: 400 });
         }
+
+        // ✅ SMART SECURITY: Allow public access to music folder (published content)
+        if (key.startsWith('music/') || key.startsWith('catalog/')) {
+            const signedUrl = await generateSignedUrl(key);
+            return json({ url: signedUrl });
+        }
+
+        // For submissions and other private folders, require authentication
+        const user = requireAuth(locals);
+
+        // SECURITY: Rate limiting (10 requests per minute per user)
+        globalLimiter.enforce(user.uid, 10, 60000);
 
         // SECURITY: Check if user has permission to access this resource
         if (!canAccessR2Resource(user, key)) {
