@@ -1,5 +1,6 @@
 <script lang="ts">
     import { audioStore, nextTrack, prevTrack, togglePlayback } from '$lib/audio/store';
+    import { toast } from '$lib/stores/notificationStore';
 
     // Ambience files (loops)
     const AMBIENCE_TRACKS = {
@@ -132,41 +133,90 @@
     }
 
     async function resolveAudioUrl(track: any) {
+        console.log('🎵 Resolving audio URL for track:', track.title || track.id);
+
         // 1. Static file (legacy)
         if (track.file) {
+            console.log('✅ Using static file path');
             resolvedStreamUrl = track.file;
             return;
         }
+
         // 2. Direct URL (legacy external)
         if (track.url) {
+            console.log('✅ Using direct URL');
             resolvedStreamUrl = track.url;
             return;
         }
+
         // 3. R2 Secure Key (New System)
         if (track.r2Key) {
-            try {
-                // Check cache or fetch new
-                const res = await fetch('/api/r2/get-url', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ key: track.r2Key }),
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    console.log('✅ Resolved R2 Audio:', data.url);
-                    resolvedStreamUrl = data.url;
-                } else {
-                    console.error('Failed to resolve R2 audio URL');
-                    resolvedStreamUrl = '';
+            console.log('📦 Fetching signed URL for R2 key:', track.r2Key);
+
+            // Retry logic for network errors
+            for (let attempt = 0; attempt < 3; attempt++) {
+                try {
+                    const res = await fetch('/api/r2/get-url', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ key: track.r2Key }),
+                    });
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        console.log('✅ R2 URL resolved successfully');
+                        resolvedStreamUrl = data.url;
+                        return;
+                    } else {
+                        const error = await res.json().catch(() => ({}));
+                        console.error(`❌ Failed to get R2 URL (${res.status}):`, error);
+
+                        if (attempt === 2) {
+                            toast.error(`No se pudo cargar: ${track.title || 'esta canción'}`);
+                            resolvedStreamUrl = '';
+                            // Auto-skip to next track
+                            setTimeout(() => nextTrack(), 1000);
+                        }
+                    }
+                } catch (err) {
+                    console.error(`❌ Network error (attempt ${attempt + 1}/3):`, err);
+
+                    if (attempt < 2) {
+                        // Wait before retry
+                        await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)));
+                    } else {
+                        toast.error('Error de red. Saltando a la siguiente canción...');
+                        resolvedStreamUrl = '';
+                        setTimeout(() => nextTrack(), 1000);
+                    }
                 }
-            } catch (err) {
-                console.error('Error resolving audio URL:', err);
-                resolvedStreamUrl = '';
             }
             return;
         }
 
+        console.warn('⚠️ No valid audio source found for track');
+        toast.warning('Esta canción no tiene fuente de audio');
         resolvedStreamUrl = '';
+        setTimeout(() => nextTrack(), 2000);
+    }
+
+    function handleAudioError(e: Event) {
+        const error = (e.target as HTMLAudioElement).error;
+        if (error) {
+            const errorMessages = {
+                1: 'Reproducción abortada',
+                2: 'Error de red al cargar audio',
+                3: 'Error de decodificación de audio',
+                4: 'Formato de audio no soportado',
+            };
+
+            const msg = errorMessages[error.code as 1 | 2 | 3 | 4] || 'Error desconocido';
+            console.error('🔴 Audio playback error:', msg, error);
+            toast.error(`⚠️ ${msg}. Saltando...`);
+
+            // Auto-skip to next track
+            setTimeout(() => nextTrack(), 1500);
+        }
     }
 
     // Reactive Updates: Volume & Playback State
@@ -406,9 +456,7 @@
     on:ended={handleTrackEnd}
     on:timeupdate={handleTimeUpdate}
     on:durationchange={handleDurationChange}
-    on:error={() => {
-        /* Audio file may not exist or failed to load */
-    }}
+    on:error={handleAudioError}
     preload="auto"
     crossorigin="anonymous"
 ></audio>

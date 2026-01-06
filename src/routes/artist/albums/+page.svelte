@@ -40,6 +40,8 @@
     let tracks: Array<{ title: string; url: string }> = [];
     let newTrackTitle = '';
     let newTrackUrl = '';
+    let newTrackFile: File | null = null;
+    let uploadingTrack = false;
     let saving = false;
 
     $: isVerified = $userSubscription.profile?.isVerified || false;
@@ -136,14 +138,62 @@
         }
     }
 
-    function addTrack() {
-        if (!newTrackTitle.trim() || !newTrackUrl.trim()) {
-            toast.warning('Completa título y URL del track');
+    function handleTrackFileSelect(e: Event) {
+        const input = e.target as HTMLInputElement;
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+
+            // Validate file type
+            if (!file.type.startsWith('audio/')) {
+                toast.error('❌ Solo se permiten archivos de audio');
+                return;
+            }
+
+            // Validate size (500MB max)
+            if (file.size > 500 * 1024 * 1024) {
+                toast.error('❌ El archivo no puede superar 500MB');
+                return;
+            }
+
+            newTrackFile = file;
+            // Clear URL if file is selected
+            newTrackUrl = '';
+        }
+    }
+
+    async function addTrack() {
+        if (!newTrackTitle.trim()) {
+            toast.warning('⚠️ El título es obligatorio');
             return;
         }
-        tracks = [...tracks, { title: newTrackTitle.trim(), url: newTrackUrl.trim() }];
+
+        let trackUrl = newTrackUrl.trim();
+
+        // Upload file if selected
+        if (newTrackFile) {
+            try {
+                uploadingTrack = true;
+                const folder = `albums/${$userStore.user?.uid}`;
+                trackUrl = await uploadToR2(newTrackFile, folder);
+                toast.success('✅ Audio subido correctamente');
+            } catch (error: any) {
+                toast.error('❌ Error subiendo audio: ' + error.message);
+                uploadingTrack = false;
+                return;
+            } finally {
+                uploadingTrack = false;
+            }
+        }
+
+        if (!trackUrl) {
+            toast.warning('⚠️ Proporciona una URL o sube un archivo de audio');
+            return;
+        }
+
+        tracks = [...tracks, { title: newTrackTitle.trim(), url: trackUrl }];
         newTrackTitle = '';
         newTrackUrl = '';
+        newTrackFile = null;
     }
 
     function removeTrack(index: number) {
@@ -631,26 +681,65 @@
                             </div>
                         {/each}
                     </div>
-                    <div class="flex flex-col sm:flex-row gap-2">
+                    <div class="space-y-2">
+                        <!-- Title Input -->
                         <input
                             type="text"
                             bind:value={newTrackTitle}
-                            placeholder="Título de la canción"
-                            class="flex-1 bg-[#0B1120] border border-white/10 rounded-lg px-3 py-2 text-sm"
+                            placeholder="Título de la canción *"
+                            class="w-full bg-[#0B1120] border border-white/10 rounded-lg px-3 py-2 text-sm"
                         />
-                        <input
-                            type="url"
-                            bind:value={newTrackUrl}
-                            placeholder="URL del audio"
-                            class="flex-1 bg-[#0B1120] border border-white/10 rounded-lg px-3 py-2 text-sm"
-                        />
-                        <button
-                            type="button"
-                            on:click={addTrack}
-                            class="px-4 py-2 bg-primary-600 hover:bg-primary-500 rounded-lg text-sm font-bold whitespace-nowrap active:scale-95 transition-transform"
-                        >
-                            + Añadir
-                        </button>
+
+                        <!-- File Upload or URL Input -->
+                        <div class="flex flex-col sm:flex-row gap-2 items-center">
+                            <!-- Option 1: Upload File -->
+                            <label class="flex-1 w-full cursor-pointer">
+                                <div
+                                    class="bg-[#0B1120] border-2 {newTrackFile
+                                        ? 'border-primary-500 bg-primary-500/10'
+                                        : 'border-dashed border-white/10'} rounded-lg px-3 py-2 text-sm h-full flex items-center justify-center hover:border-primary-500 transition-colors"
+                                >
+                                    {#if newTrackFile}
+                                        <span class="text-primary-400 font-medium truncate"
+                                            >📁 {newTrackFile.name}</span
+                                        >
+                                    {:else}
+                                        <span class="text-slate-400"
+                                            >📁 Subir archivo de audio...</span
+                                        >
+                                    {/if}
+                                </div>
+                                <input
+                                    type="file"
+                                    accept="audio/*"
+                                    class="hidden"
+                                    on:change={handleTrackFileSelect}
+                                    disabled={uploadingTrack}
+                                />
+                            </label>
+
+                            <!-- Divider -->
+                            <span class="text-slate-500 text-xs font-medium">o</span>
+
+                            <!-- Option 2: Manual URL -->
+                            <input
+                                type="url"
+                                bind:value={newTrackUrl}
+                                placeholder="URL del audio"
+                                disabled={!!newTrackFile || uploadingTrack}
+                                class="flex-1 w-full bg-[#0B1120] border border-white/10 rounded-lg px-3 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            />
+
+                            <!-- Add Button -->
+                            <button
+                                type="button"
+                                on:click={addTrack}
+                                disabled={uploadingTrack}
+                                class="px-4 py-2 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-sm font-bold whitespace-nowrap active:scale-95 transition-transform"
+                            >
+                                {uploadingTrack ? '⏳ Subiendo...' : '+ Añadir'}
+                            </button>
+                        </div>
                     </div>
                 </div>
 
