@@ -1,15 +1,29 @@
 <script lang="ts">
-    import { page } from "$app/stores";
-    import { goto } from "$app/navigation";
+    import { page } from '$app/stores';
+    import { goto } from '$app/navigation';
 
     export let status = 500;
     export let error: Error | null = null;
 
-    import SearchIcon from "$lib/components/icons/SearchIcon.svelte";
-    import PawnIcon from "$lib/components/icons/PawnIcon.svelte";
-    import AlertIcon from "$lib/components/icons/AlertIcon.svelte";
-    import HomeIcon from "$lib/components/icons/HomeIcon.svelte";
-    import CollectionIcon from "$lib/components/icons/CollectionIcon.svelte";
+    import { onMount } from 'svelte';
+    import { logger } from '$lib/utils/logger';
+
+    // Icons
+    import SearchIcon from '$lib/components/icons/SearchIcon.svelte';
+    import PawnIcon from '$lib/components/icons/PawnIcon.svelte';
+    import AlertIcon from '$lib/components/icons/AlertIcon.svelte';
+    import HomeIcon from '$lib/components/icons/HomeIcon.svelte';
+    import CollectionIcon from '$lib/components/icons/CollectionIcon.svelte';
+
+    onMount(() => {
+        if (status === 500 && error) {
+            logger.error('Global Error Boundary Caught Exception', {
+                message: error.message,
+                stack: error.stack,
+                url: $page.url.href,
+            });
+        }
+    });
 </script>
 
 <svelte:head>
@@ -52,8 +66,8 @@
             {#if status === 404}
                 La página que buscas no existe o ha sido movida.
             {:else if status === 500}
-                Hemos tenido un problema en el servidor. Nuestro equipo ha sido
-                notificado y estamos trabajando en solucionarlo.
+                Hemos tenido un problema en el servidor. Nuestro equipo ha sido notificado y estamos
+                trabajando en solucionarlo.
             {:else}
                 Ha ocurrido un error inesperado. Por favor, inténtalo de nuevo.
             {/if}
@@ -71,11 +85,9 @@
         {/if}
 
         <!-- Action Buttons -->
-        <div
-            class="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6"
-        >
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
             <button
-                on:click={() => goto("/")}
+                on:click={() => goto('/')}
                 class="px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 rounded-xl font-bold text-lg transition-all hover:scale-105 shadow-lg shadow-primary-900/30 flex items-center justify-center gap-3"
             >
                 <HomeIcon size="md" gradient={false} />
@@ -83,7 +95,7 @@
             </button>
 
             <button
-                on:click={() => goto("/coleccion")}
+                on:click={() => goto('/coleccion')}
                 class="px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-3"
             >
                 <CollectionIcon size="md" gradient={false} />
