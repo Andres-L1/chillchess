@@ -116,8 +116,9 @@
 
 <!-- Changed Background to Midnight Blue and allowed scrolling -->
 <div class="min-h-screen bg-[#0B1120] text-slate-200 font-poppins overflow-x-hidden">
-    <!-- Navbar Responsive -->
-    <nav class="relative flex justify-between items-center px-4 md:px-8 py-6 max-w-7xl mx-auto">
+    <!-- Navbar Responsive (Sticky & Glassmorphic) -->
+    <nav class="sticky top-0 z-50 w-full bg-[#0B1120]/80 backdrop-blur-xl border-b border-white/5 transition-all duration-300">
+        <div class="flex justify-between items-center px-4 md:px-8 py-4 max-w-7xl mx-auto">
         <!-- Logo -->
         <div class="flex items-center gap-3 z-20">
             <!-- Unified Logo for both Mobile and Desktop -->
@@ -541,6 +542,7 @@
         {/if}
 
         <!-- CTA Button (visible on all sizes) -->
+        </div>
     </nav>
 
     <!-- Hero Section -->
@@ -631,6 +633,49 @@
             </div>
         </div>
     </header>
+
+    <!-- How It Works Section (New) -->
+    <section class="max-w-7xl mx-auto px-4 md:px-8 py-16 relative z-10 border-b border-white/5 mb-20">
+        <div class="text-center mb-12">
+            <span class="text-xs font-bold uppercase tracking-widest text-[#9146FF] mb-2 block">Simple y Rápido</span>
+            <h2 class="text-2xl md:text-3xl font-bold text-white">Tu Espacio en 3 Pasos</h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+            <!-- Connector Line (Desktop) -->
+            <div class="hidden md:block absolute top-[2.5rem] left-[16%] right-[16%] h-px bg-gradient-to-r from-transparent via-white/10 to-transparent -z-10"></div>
+
+            <!-- Step 1 -->
+            <div class="flex flex-col items-center text-center group">
+                <div class="w-20 h-20 rounded-2xl bg-[#131b2e] border border-white/10 flex items-center justify-center text-white mb-6 shadow-lg shadow-blue-500/5 group-hover:scale-110 group-hover:border-blue-500/30 transition-all duration-300 relative z-10">
+                    <UserIcon size="lg" gradient={true} />
+                    <div class="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-blue-600 border-4 border-[#0B1120] flex items-center justify-center font-bold text-sm">1</div>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Crea tu Cuenta</h3>
+                <p class="text-sm text-slate-400 max-w-[250px]">Acceso instantáneo y gratuito. Sin tarjetas de crédito.</p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="flex flex-col items-center text-center group">
+                <div class="w-20 h-20 rounded-2xl bg-[#131b2e] border border-white/10 flex items-center justify-center text-white mb-6 shadow-lg shadow-purple-500/5 group-hover:scale-110 group-hover:border-purple-500/30 transition-all duration-300 relative z-10">
+                    <StarIcon size="lg" gradient={true} />
+                    <div class="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-purple-600 border-4 border-[#0B1120] flex items-center justify-center font-bold text-sm">2</div>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Elige tu Vibe</h3>
+                <p class="text-sm text-slate-400 max-w-[250px]">Lo-Fi, Jazz, Synthwave... Personaliza tu entorno sonoro.</p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="flex flex-col items-center text-center group">
+                <div class="w-20 h-20 rounded-2xl bg-[#131b2e] border border-white/10 flex items-center justify-center text-white mb-6 shadow-lg shadow-green-500/5 group-hover:scale-110 group-hover:border-green-500/30 transition-all duration-300 relative z-10">
+                    <BoltIcon size="lg" gradient={true} />
+                    <div class="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-green-600 border-4 border-[#0B1120] flex items-center justify-center font-bold text-sm">3</div>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Productividad Pura</h3>
+                <p class="text-sm text-slate-400 max-w-[250px]">Dale al play y olvídate. Sin interrupciones ni anuncios.</p>
+            </div>
+        </div>
+    </section>
 
     <!-- Features Section (Funciones) -->
     <section class="max-w-7xl mx-auto px-4 md:px-8 py-20 mb-20 relative z-10">
