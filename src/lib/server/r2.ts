@@ -26,7 +26,26 @@ export const r2 = new S3Client({
     forcePathStyle: true, // Crucial for Cloudflare R2 to avoid DNS/CORS issues with bucket subdomains
     requestChecksumCalculation: "WHEN_REQUIRED",
     responseChecksumValidation: "WHEN_REQUIRED",
+    // CRITICAL: Exclude host from signature to prevent R2 signing errors
+    // R2 changes the Host header which breaks AWS signature validation
+    signatureVersion: "v4",
 });
+
+// Configure additional middleware to exclude host from signing
+r2.middlewareStack.add(
+    (next) => async (args: any) => {
+        // Remove host from signable headers
+        if (args.request && args.request.headers) {
+            delete args.request.headers['host'];
+        }
+        return next(args);
+    },
+    {
+        step: 'build',
+        priority: 'high',
+        name: 'removeHostHeader'
+    }
+);
 
 // SECURITY: Make bucket name configurable via environment variable
 export const R2_BUCKET = env.R2_BUCKET_NAME || publicEnv.PUBLIC_R2_BUCKET_NAME || "chillchess-music";
