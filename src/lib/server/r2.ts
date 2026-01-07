@@ -26,9 +26,6 @@ export const r2 = new S3Client({
     forcePathStyle: true, // Crucial for Cloudflare R2 to avoid DNS/CORS issues with bucket subdomains
     requestChecksumCalculation: "WHEN_REQUIRED",
     responseChecksumValidation: "WHEN_REQUIRED",
-    // CRITICAL: Exclude host from signature to prevent R2 signing errors
-    // R2 changes the Host header which breaks AWS signature validation
-    signatureVersion: "v4",
 });
 
 // Configure additional middleware to exclude host from signing
