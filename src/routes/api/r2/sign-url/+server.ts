@@ -54,7 +54,12 @@ export async function POST({ request, locals }: RequestEvent) {
         });
 
         // Generate a signed URL valid for 15 minutes (enough for large audio files)
-        const signedUrl = await getSignedUrl(r2, command, { expiresIn: 900 });
+        // EXCLUDE 'host' from signed headers to prevent signature mismatch errors on R2
+        // R2 often has issues when the Host header changes between signing (server) and uploading (browser)
+        const signedUrl = await getSignedUrl(r2, command, {
+            expiresIn: 900,
+            signableHeaders: new Set(['content-type']) // Only sign Content-Type, ignore Host
+        });
 
         return json({
             uploadUrl: signedUrl,
