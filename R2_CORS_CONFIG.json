@@ -1,11 +1,7 @@
 [
     {
         "AllowedOrigins": [
-            "http://localhost:5173",
-            "http://localhost:4173",
-            "https://chillchess.app",
-            "https://www.chillchess.app",
-            "https://chillchess.netlify.app"
+            "*"
         ],
         "AllowedMethods": [
             "GET",
@@ -20,7 +16,10 @@
             "Authorization",
             "x-amz-date",
             "x-amz-content-sha256",
-            "x-amz-user-agent"
+            "x-amz-user-agent",
+            "x-amz-acl",
+            "x-amz-checksum-mode",
+            "x-amz-checksum-algorithm"
         ],
         "ExposeHeaders": [
             "ETag",
