@@ -2,7 +2,9 @@ import { json } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
 import { r2, R2_BUCKET } from '$lib/server/r2';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { S3RequestPresigner } from '@aws-sdk/s3-request-presigner';
+import { createRequest } from '@aws-sdk/util-create-request';
+import { formatUrl } from '@aws-sdk/util-format-url';
 import { requireAuth } from '$lib/server/auth';
 import { handleAPIError } from '$lib/server/errors';
 import { validateFileName, validateFileSize } from '$lib/server/validation';
@@ -56,10 +58,19 @@ export async function POST({ request, locals }: RequestEvent) {
         // Generate a signed URL valid for 15 minutes (enough for large audio files)
         // EXCLUDE 'host' from signed headers to prevent signature mismatch errors on R2
         // R2 often has issues when the Host header changes between signing (server) and uploading (browser)
-        const signedUrl = await getSignedUrl(r2, command, {
-            expiresIn: 900,
-            signableHeaders: new Set(['content-type']) // Only sign Content-Type, ignore Host
+
+        // Manual Presigning to strictly enforce exclusion of Host header
+        const signer = new S3RequestPresigner({
+            ...r2.config,
+            signableHeaders: new Set(['content-type']), // Strictly sign ONLY content-type
         });
+
+        const request = await createRequest(r2, command);
+        const signedUrlRequest = await signer.presign(request, {
+            expiresIn: 900
+        });
+
+        const signedUrl = formatUrl(signedUrlRequest);
 
         return json({
             uploadUrl: signedUrl,
