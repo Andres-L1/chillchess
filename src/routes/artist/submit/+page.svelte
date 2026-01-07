@@ -175,62 +175,16 @@
         const token = await user.getIdToken();
         console.log('✅ Token obtained successfully');
 
-        const res = await fetch('/api/r2/sign-url', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-                fileName: file.name,
-                fileType: file.type,
-                fileSize: file.size,
-                folder: folder,
-            }),
-        });
+        // Upload via server proxy to avoid CORS issues
+        console.log('📤 Uploading via server proxy:', file.name);
 
-        if (!res.ok) {
-            const err = await res
-                .json()
-                .catch(() => ({ error: `Error del servidor (${res.status})` }));
-            console.error('❌ Upload URL error:', res.status, err);
-            throw new Error(err.error || `Error del servidor: ${res.status}`);
-        }
-
-        const { uploadUrl, key } = await res.json();
-
-        // === DIAGNOSTIC LOGGING (Help identify upload failures) ===
-        console.group('📊 R2 Upload Diagnostics');
-        console.log('File Details:', {
-            name: file.name,
-            type: file.type,
-            size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
-            folder,
-        });
-        console.log('Signed URL Domain:', new URL(uploadUrl).origin);
-        console.log('R2 Key:', key);
-        console.log('Browser:', navigator.userAgent);
-        console.log('Online Status:', navigator.onLine);
-        console.groupEnd();
-
-        // CORS check: Verify the upload URL is accessible
-        console.log('🌐 Verifying R2 CORS configuration...');
-        try {
-            // Quick OPTIONS preflight to catch CORS issues early
-            await fetch(uploadUrl, { method: 'HEAD' });
-        } catch (corsError) {
-            console.warn(
-                '⚠️ CORS preflight check failed, but continuing (may be expected):',
-                corsError
-            );
-            // Don't block upload, just log
-        }
-
-        // 2. Upload to R2 with progress tracking
+        // Upload via proxy with progress tracking
         return new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('folder', folder);
 
-            // Add timeout (10 minutes for large audio files)
+            const xhr = new XMLHttpRequest();
             xhr.timeout = 600000; // 10 minutes
 
             xhr.upload.addEventListener('progress', (e) => {
@@ -242,46 +196,32 @@
 
             xhr.addEventListener('load', () => {
                 if (xhr.status === 200) {
-                    resolve({ key, name: file.name, size: file.size, type: file.type });
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        const key = response.key || response.url.split('.dev/')[1];
+                        resolve({ key, name: file.name, size: file.size, type: file.type });
+                    } catch (e) {
+                        reject(new Error('Error parsing upload response'));
+                    }
                 } else {
-                    console.error(
-                        `❌ R2 Upload failed with status ${xhr.status}`,
-                        xhr.responseText
-                    );
-                    reject(
-                        new Error(`Error subiendo archivo a R2 (${xhr.status}). Intenta de nuevo.`)
-                    );
+                    console.error(`❌ Upload failed with status ${xhr.status}`, xhr.responseText);
+                    reject(new Error(`Error subiendo archivo (${xhr.status}). Intenta de nuevo.`));
                 }
             });
 
-            xhr.addEventListener('error', (event) => {
-                console.error('❌ Network error during R2 upload:', {
-                    fileName: file.name,
-                    fileSize: file.size,
-                    readyState: xhr.readyState,
-                    status: xhr.status,
-                    uploadUrl: uploadUrl.substring(0, 50) + '...',
-                    event,
-                });
-                reject(
-                    new Error(
-                        'Error de red al subir archivo. Verifica tu conexión e intenta de nuevo.'
-                    )
-                );
+            xhr.addEventListener('error', () => {
+                console.error('❌ Network error during upload');
+                reject(new Error('Error de red al subir archivo. Verifica tu conexión.'));
             });
 
             xhr.addEventListener('timeout', () => {
                 console.error('❌ Upload timeout for file:', file.name);
-                reject(
-                    new Error(
-                        'El archivo tardó demasiado en subirse. Verifica tu conexión o intenta con un archivo más pequeño.'
-                    )
-                );
+                reject(new Error('El archivo tardó demasiado. Intenta con un archivo más pequeño.'));
             });
 
-            xhr.open('PUT', uploadUrl);
-            xhr.setRequestHeader('Content-Type', file.type);
-            xhr.send(file);
+            xhr.open('POST', '/api/r2/upload');
+            xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+            xhr.send(formData);
         });
     }
 
