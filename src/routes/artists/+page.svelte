@@ -12,6 +12,8 @@
 
     export let data: { verifiedArtists: ArtistProfile[] };
 
+    const GENRES = ['Lo-Fi', 'Jazz', 'Piano', 'Ambiente', 'Synthwave', 'Beats', 'Study'];
+
     // Use reactive variable for real-time updates
     let verifiedArtists = data.verifiedArtists || [];
     let albumsMap: Record<string, Album[]> = {}; // Map artistId -> Albums
@@ -266,6 +268,37 @@
                     </svg>
                 </div>
             </div>
+
+            <!-- Genre Pills -->
+            <div class="flex flex-wrap justify-center gap-2 mt-6">
+                {#each GENRES as genre}
+                    <button
+                        on:click={() => (searchQuery = genre)}
+                        class="px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-300 border
+                        {searchQuery.toLowerCase().includes(genre.toLowerCase())
+                            ? 'bg-primary-500 text-white border-primary-500 shadow-lg shadow-primary-500/25'
+                            : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:border-white/20 hover:text-white'}"
+                    >
+                        {genre}
+                    </button>
+                {/each}
+                {#if searchQuery}
+                    <button
+                        on:click={() => (searchQuery = '')}
+                        class="px-3 py-1.5 rounded-full text-xs font-medium text-slate-500 hover:text-white transition-colors flex items-center gap-1"
+                    >
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                            />
+                        </svg>
+                        Limpiar
+                    </button>
+                {/if}
+            </div>
         </header>
 
         <!-- Stats (Optional - only show if no search) -->
@@ -347,7 +380,7 @@
                                         />
                                     {:else}
                                         <div
-                                            class="w-full h-full rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center text-2xl font-bold text-slate-500"
+                                            class="w-full h-full rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center text-2xl font-bold text-slate-500 group-hover:text-white transition-colors"
                                         >
                                             {artist.artistName[0]}
                                         </div>
