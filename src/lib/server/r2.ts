@@ -45,4 +45,4 @@ r2.middlewareStack.add(
 );
 
 // SECURITY: Make bucket name configurable via environment variable
-export const R2_BUCKET = env.R2_BUCKET_NAME || publicEnv.PUBLIC_R2_BUCKET_NAME || "chillchess-music";
+export const R2_BUCKET = env.R2_BUCKET_NAME || publicEnv.PUBLIC_R2_BUCKET_NAME || "chillchess";
