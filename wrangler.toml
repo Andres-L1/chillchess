@@ -8,7 +8,7 @@ crons = ["0 * * * *"]  # Cada hora en punto (00:00, 01:00, 02:00, etc.)
 
 # Variables de entorno (configura en Cloudflare Dashboard)
 [vars]
-FIREBASE_PROJECT_ID = "chillchess-57365"
+FB_PROJECT_ID = "chillchess-57365"
 
 # Secrets (configúralos con: wrangler secret put FIREBASE_SERVICE_ACCOUNT)
-# FIREBASE_SERVICE_ACCOUNT = "..." (JSON del service account)
+# FB_SERVICE_ACCOUNT = "..." (JSON del service account)

@@ -6,8 +6,8 @@
 import * as jwt from '@tsndr/cloudflare-worker-jwt';
 
 interface Env {
-    FIREBASE_PROJECT_ID: string;
-    FIREBASE_SERVICE_ACCOUNT: string;
+    FB_PROJECT_ID: string;
+    FB_SERVICE_ACCOUNT: string;
 }
 
 interface Habit {
@@ -37,10 +37,10 @@ export default {
 
             console.log(`Current time (Madrid): ${currentTime}, Date: ${today}`);
 
-            const serviceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT);
+            const serviceAccount = JSON.parse(env.FB_SERVICE_ACCOUNT);
             const firebaseToken = await getFirebaseToken(serviceAccount);
 
-            const habitsUrl = `https://firestore.googleapis.com/v1/projects/${env.FIREBASE_PROJECT_ID}/databases/(default)/documents/habits`;
+            const habitsUrl = `https://firestore.googleapis.com/v1/projects/${env.FB_PROJECT_ID}/databases/(default)/documents/habits`;
             const habitsResponse = await fetch(habitsUrl, {
                 headers: { Authorization: `Bearer ${firebaseToken}` },
             });
@@ -71,7 +71,7 @@ export default {
                     continue;
                 }
 
-                const userUrl = `https://firestore.googleapis.com/v1/projects/${env.FIREBASE_PROJECT_ID}/databases/(default)/documents/users/${habit.userId}`;
+                const userUrl = `https://firestore.googleapis.com/v1/projects/${env.FB_PROJECT_ID}/databases/(default)/documents/users/${habit.userId}`;
                 const userResponse = await fetch(userUrl, {
                     headers: { Authorization: `Bearer ${firebaseToken}` },
                 });
