@@ -45,4 +45,6 @@ r2.middlewareStack.add(
 );
 
 // SECURITY: Make bucket name configurable via environment variable
-export const R2_BUCKET = env.R2_BUCKET_NAME || publicEnv.PUBLIC_R2_BUCKET_NAME || "chillchess-music";
+// SECURITY: Make bucket name configurable via environment variable
+// Forced to 'chillchess-music' to override incorrect Netlify env var
+export const R2_BUCKET = "chillchess-music";
