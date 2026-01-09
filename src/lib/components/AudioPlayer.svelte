@@ -120,6 +120,10 @@
     let resolvedStreamUrl = '';
     let lastResolvedTrackId = ''; // Prevent infinite loops
 
+    // Cache for signed URLs: ID -> { url: string, expires: number }
+    const urlCache = new Map<string, { url: string; expires: number }>();
+    const URL_TTL = 3600 * 1000; // 1 hour cache (R2 urls usually last longer, but keep it safe)
+
     // Watch for track changes and resolve URL asynchronously
     $: currentTrackEntry =
         $audioStore.playlist.length > 0
@@ -131,6 +135,48 @@
         lastResolvedTrackId = currentTrackEntry.id || '';
         retryCount = 0; // Reset retry count
         resolveAudioUrl(currentTrackEntry);
+    }
+
+    // Prefetch next track when current one is playing
+    $: if ($audioStore.isPlaying && currentTrackEntry) {
+        prefetchNextTrack();
+    }
+
+    async function prefetchNextTrack() {
+        if ($audioStore.playlist.length <= 1) return;
+
+        let nextIndex = $audioStore.currentTrackIndex + 1;
+        if (nextIndex >= $audioStore.playlist.length) {
+            // Loop back if repeat/shuffle?
+            // For now simple next
+            if ($audioStore.repeatMode === 'all') nextIndex = 0;
+            else return;
+        }
+
+        const nextTrack = $audioStore.playlist[nextIndex];
+        if (!nextTrack || !nextTrack.id) return;
+
+        // Check cache
+        if (urlCache.has(nextTrack.id)) return;
+
+        console.log('🔮 Prefetching next track:', nextTrack.title);
+        // We reuse the resolution logic but just store it
+        try {
+            if (nextTrack.r2Key) {
+                const res = await fetch('/api/r2/get-url', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key: nextTrack.r2Key }),
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    urlCache.set(nextTrack.id, { url: data.url, expires: Date.now() + URL_TTL });
+                    console.log('🔮 Prefetched:', nextTrack.title);
+                }
+            }
+        } catch (e) {
+            console.warn('Prefetch failed:', e);
+        }
     }
 
     async function resolveAudioUrl(track: any) {
@@ -152,6 +198,14 @@
 
         // 3. R2 Secure Key (New System)
         if (track.r2Key) {
+            // Check Cache first
+            const cached = urlCache.get(track.id);
+            if (cached && cached.expires > Date.now()) {
+                console.log('⚡ Using cached URL');
+                resolvedStreamUrl = cached.url;
+                return;
+            }
+
             console.log('📦 Fetching signed URL for R2 key:', track.r2Key);
 
             // Retry logic for network errors
@@ -166,6 +220,13 @@
                     if (res.ok) {
                         const data = await res.json();
                         console.log('✅ R2 URL resolved successfully');
+                        // Cache it
+                        if (track.id) {
+                            urlCache.set(track.id, {
+                                url: data.url,
+                                expires: Date.now() + URL_TTL,
+                            });
+                        }
                         resolvedStreamUrl = data.url;
                         return;
                     } else {
