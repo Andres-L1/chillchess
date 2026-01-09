@@ -2,9 +2,11 @@ export interface Track {
     id?: string; // Optional for now
     title: string;
     artist: string;
-    file: string;
+    file?: string; // Legacy static file
+    url?: string; // Legacy external URL
     cover?: string; // Optional per-track cover (for singles)
     duration?: number;
+    r2Key?: string; // New: R2 Secure Key
 }
 
 export type AlbumCategory = 'musica' | 'juegos' | 'ambiente';

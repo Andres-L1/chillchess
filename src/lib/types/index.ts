@@ -40,6 +40,7 @@ export interface Track {
     duration: number; // in seconds
     url: string;
     coverUrl: string;
+    r2Key?: string;
     genre: MusicGenre;
     createdAt: Date;
 }
