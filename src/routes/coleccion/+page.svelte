@@ -113,6 +113,10 @@
             alert(result.error);
         }
     }
+
+    function getTrackDownloadUrl(track: any): string | null {
+        return track.file || track.url || track.r2Key || null;
+    }
 </script>
 
 <svelte:head>
@@ -494,9 +498,19 @@
                                     {#if $userSubscription.tier === 'pro'}
                                         <button
                                             on:click|stopPropagation={() => {
+                                                // Get download URL with fallback priority
+                                                const downloadUrl = getTrackDownloadUrl(track);
+
+                                                if (!downloadUrl) {
+                                                    alert(
+                                                        'Esta canción no tiene URL de descarga disponible'
+                                                    );
+                                                    return;
+                                                }
+
                                                 // Simple download trigger
                                                 const link = document.createElement('a');
-                                                link.href = track.file;
+                                                link.href = downloadUrl;
                                                 link.download = `${track.artist} - ${track.title}.wav`;
                                                 link.click();
                                             }}

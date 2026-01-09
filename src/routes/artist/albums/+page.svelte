@@ -107,7 +107,12 @@
 
         albumCategory = (album as any).albumCategory || 'musica';
         coverPreview = album.cover || null;
-        tracks = album.tracks ? album.tracks.map((t) => ({ title: t.title, url: t.file })) : [];
+        tracks = album.tracks
+            ? album.tracks.map((t) => ({
+                  title: t.title,
+                  url: t.file || t.url || (t as any).r2Key || '',
+              }))
+            : [];
         showModal = true;
     }
 

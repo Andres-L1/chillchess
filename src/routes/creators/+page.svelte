@@ -62,7 +62,11 @@
         }
     }
 
-    function togglePlay(url: string) {
+    function togglePlay(url: string | undefined) {
+        if (!url) {
+            toast.error('Esta pista no tiene URL de audio');
+            return;
+        }
         if (playingTrack === url) {
             audio?.pause();
             playingTrack = null;
@@ -81,7 +85,11 @@
         toast.success('📋 Créditos copiados al portapapeles');
     }
 
-    function downloadTrack(url: string) {
+    function downloadTrack(url: string | undefined) {
+        if (!url) {
+            toast.error('Esta pista no tiene URL de descarga');
+            return;
+        }
         window.open(url, '_blank');
     }
 </script>
@@ -185,7 +193,7 @@
                                     on:click={() => togglePlay(track.url)}
                                     class="w-10 h-10 rounded-full bg-white/10 hover:bg-purple-500 text-white flex items-center justify-center transition-all hover:scale-110"
                                 >
-                                    {#if playingTrack === track.url}
+                                    {#if track.url && playingTrack === track.url}
                                         ⏸
                                     {:else}
                                         ▶

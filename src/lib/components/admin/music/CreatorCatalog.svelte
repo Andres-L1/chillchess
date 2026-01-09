@@ -251,10 +251,18 @@
                         class="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                         <a
-                            href={track.url}
+                            href={track.url || '#'}
                             target="_blank"
-                            class="p-2 bg-white/10 rounded-lg hover:bg-white/20 text-slate-300 hover:text-white"
+                            class="p-2 bg-white/10 rounded-lg hover:bg-white/20 text-slate-300 hover:text-white {!track.url
+                                ? 'opacity-50 cursor-not-allowed'
+                                : ''}"
                             download
+                            on:click={(e) => {
+                                if (!track.url) {
+                                    e.preventDefault();
+                                    alert('Esta pista no tiene URL');
+                                }
+                            }}
                         >
                             ⬇️
                         </a>
