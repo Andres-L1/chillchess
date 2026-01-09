@@ -1,6 +1,7 @@
 <script lang="ts">
     import { audioStore, nextTrack, prevTrack, togglePlayback } from '$lib/audio/store';
     import { toast } from '$lib/stores/notificationStore';
+    import { logError, logAudioError, logR2Error } from '$lib/logger';
 
     // Ambience files (loops)
     const AMBIENCE_TRACKS = {

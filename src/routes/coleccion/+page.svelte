@@ -21,9 +21,44 @@
 
     let selectedCategory: AlbumCategory | 'all' = 'all';
     let selectedAlbum: Album | null = null;
+    let resolvedCover: string = '/logo-mobile.png';
     let searchQuery = '';
     let debouncedSearchQuery = '';
     let searchTimeout: ReturnType<typeof setTimeout>;
+
+    // Resolve album cover when selectedAlbum changes
+    $: if (selectedAlbum) {
+        const r2Key =
+            (selectedAlbum as any).r2CoverKey ||
+            (selectedAlbum.cover?.startsWith('music/') ||
+            selectedAlbum.cover?.startsWith('catalog/')
+                ? selectedAlbum.cover
+                : null);
+
+        if (r2Key) {
+            fetch(`/api/r2/get-url?key=${encodeURIComponent(r2Key)}`)
+                .then((res) => {
+                    if (!res.ok) throw new Error('Fetch status ' + res.status);
+                    return res.json();
+                })
+                .then((data) => {
+                    if (data.url) resolvedCover = data.url;
+                })
+                .catch((err) => {
+                    console.warn('Failed to resolve R2 cover:', err);
+                    resolvedCover = '/logo-mobile.png';
+                });
+        } else if (
+            selectedAlbum.cover &&
+            !selectedAlbum.cover.startsWith('music/') &&
+            !selectedAlbum.cover.startsWith('catalog/')
+        ) {
+            // Direct URL (not an R2 key)
+            resolvedCover = selectedAlbum.cover;
+        } else {
+            resolvedCover = '/logo-mobile.png';
+        }
+    }
 
     // Debounce search to improve performance
     function handleSearchInput(e: Event) {
@@ -388,7 +423,7 @@
             <!-- Modal Cover Side -->
             <div class="w-full md:w-1/3 relative min-h-[200px] md:min-h-0">
                 <img
-                    src={selectedAlbum.cover}
+                    src={resolvedCover}
                     alt="Cover"
                     class="absolute inset-0 w-full h-full object-cover"
                 />
