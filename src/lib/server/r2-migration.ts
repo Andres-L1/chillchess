@@ -41,6 +41,7 @@ export async function migrateSubmissionFiles(
         }
 
         const newKey = `${finalPath}/${safeName}`;
+        const contentType = getMimeType(safeName);
 
         try {
             // 1. Copy Object
@@ -49,6 +50,8 @@ export async function migrateSubmissionFiles(
                     Bucket: R2_BUCKET,
                     CopySource: `${R2_BUCKET}/${file.key}`,
                     Key: newKey,
+                    MetadataDirective: 'REPLACE',
+                    ContentType: contentType,
                 })
             );
 
@@ -100,4 +103,22 @@ export async function migrateSubmissionFiles(
     }
 
     return { migratedFiles, errors };
+}
+
+function getMimeType(filename: string): string {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    const mimeTypes: Record<string, string> = {
+        'mp3': 'audio/mpeg',
+        'wav': 'audio/wav',
+        'm4a': 'audio/mp4',
+        'aac': 'audio/aac',
+        'flac': 'audio/flac',
+        'png': 'image/png',
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'webp': 'image/webp',
+        'gif': 'image/gif',
+        'svg': 'image/svg+xml'
+    };
+    return mimeTypes[ext || ''] || 'application/octet-stream';
 }
