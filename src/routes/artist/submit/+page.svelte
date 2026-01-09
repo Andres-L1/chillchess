@@ -243,8 +243,29 @@
                 );
             });
 
+            // FORCE Content-Type based on extension for iOS compatibility
+            const ext = file.name.split('.').pop()?.toLowerCase();
+            let contentType = file.type;
+
+            // Map common extensions to correct MIME types
+            const mimeMap: Record<string, string> = {
+                mp3: 'audio/mpeg',
+                wav: 'audio/wav',
+                m4a: 'audio/mp4',
+                aac: 'audio/aac',
+                jpg: 'image/jpeg',
+                jpeg: 'image/jpeg',
+                png: 'image/png',
+                webp: 'image/webp',
+            };
+
+            if (ext && mimeMap[ext]) {
+                contentType = mimeMap[ext];
+                console.log(`🔧 Forcing Content-Type for ${file.name}: ${contentType}`);
+            }
+
             xhr.open('PUT', uploadUrl);
-            xhr.setRequestHeader('Content-Type', file.type);
+            xhr.setRequestHeader('Content-Type', contentType);
             xhr.send(file);
         });
     }
