@@ -323,6 +323,12 @@
                     type: fileData.type,
                     title: audioFile.title,
                 });
+
+                // Add delay between uploads to avoid rate limiting
+                if (i < totalFiles - 1) {
+                    uploadStage = `Esperando... (${i + 1}/${totalFiles})`;
+                    await new Promise((resolve) => setTimeout(resolve, 800));
+                }
             }
 
             //  BIFURCATION: Verified vs Non-Verified Flow
