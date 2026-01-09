@@ -173,6 +173,13 @@
                         console.error(`❌ Failed to get R2 URL (${res.status}):`, error);
 
                         if (attempt === 2) {
+                            consecutiveFailures++;
+                            if (consecutiveFailures >= 3) {
+                                toast.error('⛔ Demasiados errores de red. Deteniendo.');
+                                audioStore.update((s) => ({ ...s, isPlaying: false }));
+                                return;
+                            }
+
                             toast.error(`No se pudo cargar: ${track.title || 'esta canción'}`);
                             resolvedStreamUrl = '';
                             // Auto-skip to next track
@@ -186,6 +193,13 @@
                         // Wait before retry
                         await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)));
                     } else {
+                        consecutiveFailures++;
+                        if (consecutiveFailures >= 3) {
+                            toast.error('⛔ Demasiados errores de red. Deteniendo.');
+                            audioStore.update((s) => ({ ...s, isPlaying: false }));
+                            return;
+                        }
+
                         toast.error('Error de red. Saltando a la siguiente canción...');
                         resolvedStreamUrl = '';
                         setTimeout(() => nextTrack(), 1000);
@@ -196,6 +210,14 @@
         }
 
         console.warn('⚠️ No valid audio source found for track');
+
+        consecutiveFailures++;
+        if (consecutiveFailures >= 3) {
+            toast.warning('Múltiples canciones sin audio. Deteniendo.');
+            audioStore.update((s) => ({ ...s, isPlaying: false }));
+            return;
+        }
+
         toast.warning('Esta canción no tiene fuente de audio');
         resolvedStreamUrl = '';
         setTimeout(() => nextTrack(), 2000);
@@ -203,6 +225,15 @@
 
     // Retry state
     let retryCount = 0;
+    let consecutiveFailures = 0; // Prevent infinite skip loops
+
+    function infoForTrack(track: any) {
+        if (!track) return 'Unknown';
+        // Try to get extension
+        const url = track.url || track.file || '';
+        const ext = url.split('.').pop()?.slice(0, 4) || '???';
+        return `[${ext}] ${track.title}`;
+    }
 
     function handleAudioError(e: Event) {
         const error = (e.target as HTMLAudioElement).error;
@@ -237,9 +268,25 @@
                 return; // Don't skip yet
             }
 
+            // CHECK INFINITE LOOP
+            consecutiveFailures++;
+            console.warn(`⚠️ Consecutive Failure #${consecutiveFailures}`);
+
+            if (consecutiveFailures >= 3) {
+                console.error('⛔ Too many consecutive errors. Stopping playback.');
+                toast.error(
+                    '⛔ Demasiados errores de reproducción. Se ha detenido el reproductor.'
+                );
+                audioStore.update((s) => ({ ...s, isPlaying: false }));
+                consecutiveFailures = 0; // Reset for manual restart
+                return;
+            }
+
             // Only show toast for network errors
             if (error.code === 2 || error.code === 4) {
-                toast.error(`⚠️ ${msg}. Saltando...`);
+                // Shorten toast to avoid spam
+                const trackInfo = currentTrackEntry ? infoForTrack(currentTrackEntry) : 'track';
+                toast.error(`⚠️ ${msg}. Saltando ${trackInfo}...`);
             } else {
                 console.warn('Skipping broken track silently');
             }
@@ -487,6 +534,11 @@
     on:timeupdate={handleTimeUpdate}
     on:durationchange={handleDurationChange}
     on:error={handleAudioError}
+    on:playing={() => {
+        // Reset check logic on successful playback start
+        consecutiveFailures = 0;
+        console.log('✅ Playback started successfully. Failure counter reset.');
+    }}
     preload="auto"
     crossorigin="anonymous"
 ></audio>
