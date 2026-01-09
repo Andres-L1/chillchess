@@ -30,29 +30,39 @@
         return () => observer.disconnect();
     });
 
-    // R2 Resolution Logic - Only fetch when visible
     let attemptedResolution = false;
 
-    // R2 Resolution Logic - Only fetch when visible and not tried yet
-    $: if (isVisible && !album.cover && (album as any).r2CoverKey && !attemptedResolution) {
-        attemptedResolution = true; // Block subsequent attempts immediately
-        const r2Key = (album as any).r2CoverKey;
+    // ✅ R2 Resolution Logic - Detect R2 keys in cover field too
+    $: if (isVisible && !attemptedResolution) {
+        const r2Key =
+            (album as any).r2CoverKey ||
+            (album.cover?.startsWith('music/') || album.cover?.startsWith('catalog/')
+                ? album.cover
+                : null);
 
-        // Resolve asynchronously
-        fetch(`/api/r2/get-url?key=${encodeURIComponent(r2Key)}`)
-            .then((res) => {
-                if (!res.ok) throw new Error('Fetch status ' + res.status);
-                return res.json();
-            })
-            .then((data) => {
-                if (data.url) resolvedCover = data.url;
-            })
-            .catch((err) => {
-                console.warn('Failed to resolve R2 cover:', err);
-                resolvedCover = '/logo-mobile.png';
-            });
-    } else if (album.cover) {
-        resolvedCover = album.cover;
+        if (r2Key) {
+            attemptedResolution = true;
+
+            fetch(`/api/r2/get-url?key=${encodeURIComponent(r2Key)}`)
+                .then((res) => {
+                    if (!res.ok) throw new Error('Fetch status ' + res.status);
+                    return res.json();
+                })
+                .then((data) => {
+                    if (data.url) resolvedCover = data.url;
+                })
+                .catch((err) => {
+                    console.warn('Failed to resolve R2 cover:', err);
+                    resolvedCover = '/logo-mobile.png';
+                });
+        } else if (
+            album.cover &&
+            !album.cover.startsWith('music/') &&
+            !album.cover.startsWith('catalog/')
+        ) {
+            // Direct URL (not an R2 key)
+            resolvedCover = album.cover;
+        }
     }
 
     function handleImageError(e: Event) {

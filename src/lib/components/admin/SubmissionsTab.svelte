@@ -213,28 +213,9 @@
             const subRef = doc(db, 'musicSubmissions', submission.id);
             const userRef = doc(db, 'users', submission.artistId);
 
-            // --- RESOLVE TRUE ARTIST PROFILE (Fix for Split Brain/Custom IDs) ---
-            let targetProfileId = submission.artistId;
-
-            try {
-                const artistsRef = collection(db, 'artists');
-                const q = query(artistsRef, where('userId', '==', submission.artistId));
-                const snapshot = await getDocs(q);
-
-                if (!snapshot.empty) {
-                    const profiles = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-                    const best =
-                        profiles.find((p: any) => p.isVerified) ||
-                        profiles.find((p) => p.id !== submission.artistId) ||
-                        profiles[0];
-                    targetProfileId = best.id;
-                    console.log(
-                        `✅ Resolved Public Profile ID: ${targetProfileId} (instead of UID ${submission.artistId})`
-                    );
-                }
-            } catch (err) {
-                console.error('Error resolving profile:', err);
-            }
+            // ✅ SIMPLIFIED OWNERSHIP: Always use UID for consistency
+            // This ensures albums appear in "Mis Álbumes" which filters by user.uid
+            const artistUserId = submission.artistId; // Always the Firebase UID
 
             const userSnap = await getDoc(userRef);
 
@@ -264,7 +245,7 @@
                         key: f.key,
                         name: f.name,
                     })),
-                ];
+                ].filter((f) => f.key); // Critical: Remove undefined keys to prevent API crash
 
                 const moveRes = await fetch('/api/r2/approve', {
                     method: 'POST',
@@ -289,7 +270,8 @@
                 const { migratedFiles } = await moveRes.json();
 
                 const newCover =
-                    migratedFiles.find((f: any) => f.name.startsWith('cover_')) || migratedFiles[0];
+                    migratedFiles.find((f: any) => f.name.startsWith('cover_')) ||
+                    migratedFiles.find((f: any) => f.name.match(/\.(jpg|jpeg|png|webp)$/i));
                 secureCoverKey = newCover ? newCover.key : null;
 
                 const audioFiles = migratedFiles.filter((f: any) => f.key !== secureCoverKey);
@@ -298,6 +280,7 @@
                     id: `track-${idx + 1}`,
                     title: f.name.replace(/\.(mp3|wav|m4a)$/i, ''),
                     r2Key: f.key,
+                    albumCover: secureCoverKey, // ✅ Add cover to each track
                     duration: 0,
                 }));
             } else {
@@ -316,7 +299,7 @@
             const albumData: any = {
                 title: submission.releaseTitle,
                 artist: submission.artistName,
-                artistId: targetProfileId,
+                artistId: artistUserId, // ✅ Use UID directly for ownership
                 cover:
                     submission.coverUrl && submission.coverUrl.length < 5000
                         ? submission.coverUrl
@@ -357,11 +340,19 @@
                         verifiedAt: Date.now(),
                     });
 
-                    const artistRef = doc(db, 'artists', targetProfileId);
-                    transaction.update(artistRef, {
-                        isVerified: true,
-                        verifiedAt: Date.now(),
-                    });
+                    // ✅ Update artist profile if it exists
+                    try {
+                        const artistRef = doc(db, 'artists', artistUserId);
+                        const artistSnap = await transaction.get(artistRef);
+                        if (artistSnap.exists()) {
+                            transaction.update(artistRef, {
+                                isVerified: true,
+                                verifiedAt: Date.now(),
+                            });
+                        }
+                    } catch (err) {
+                        console.warn('Artist profile not found, skipping verification update');
+                    }
                 }
 
                 // Create album
@@ -533,6 +524,7 @@
                     id: `track-${idx + 1}`,
                     title: f.name.replace(/\.(mp3|wav|m4a)$/i, ''),
                     r2Key: f.key,
+                    albumCover: secureCoverKey,
                     duration: 0,
                 }));
             } else {

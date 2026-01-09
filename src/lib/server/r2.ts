@@ -1,4 +1,6 @@
 import { S3Client } from "@aws-sdk/client-s3";
+// ⛔ PROTECTED FILE: DO NOT MODIFY WITHOUT EXPLICIT USER CONSENT.
+// Configuration is verified and working. Changes here will break production uploads.
 // @ts-ignore - SvelteKit dynamic env module
 import { env } from "$env/dynamic/private";
 // @ts-ignore - SvelteKit dynamic env module

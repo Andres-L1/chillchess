@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { db } from "$lib/firebase";
+    import { db } from '$lib/firebase';
     import {
         collection,
         query,
@@ -8,20 +8,20 @@
         doc,
         updateDoc,
         Timestamp,
-    } from "firebase/firestore";
-    import { onMount, onDestroy } from "svelte";
+    } from 'firebase/firestore';
+    import { onMount, onDestroy } from 'svelte';
 
     interface BugReport {
         id: string;
         title: string;
         description: string;
         steps: string;
-        severity: "low" | "medium" | "high" | "critical";
+        severity: 'low' | 'medium' | 'high' | 'critical';
         browser: string;
         os: string;
         author: string;
         authorUid: string | null;
-        status: "reported" | "reviewing" | "fixed" | "not-a-bug";
+        status: 'reported' | 'reviewing' | 'fixed' | 'not-a-bug';
         createdAt: Date;
         resolvedAt?: Date;
         adminNotes?: string;
@@ -29,30 +29,30 @@
 
     let bugs: BugReport[] = [];
     let unsubscribe: (() => void) | null = null;
-    let filterStatus: "all" | BugReport["status"] = "all";
-    let filterSeverity: "all" | BugReport["severity"] = "all";
+    let filterStatus: 'all' | BugReport['status'] = 'all';
+    let filterSeverity: 'all' | BugReport['severity'] = 'all';
     let expandedBug: string | null = null;
     let editingNotes: string | null = null;
-    let notesText = "";
+    let notesText = '';
 
     $: filteredBugs = bugs.filter((bug) => {
-        if (filterStatus !== "all" && bug.status !== filterStatus) return false;
-        if (filterSeverity !== "all" && bug.severity !== filterSeverity)
-            return false;
+        if (filterStatus !== 'all' && bug.status !== filterStatus) return false;
+        if (filterSeverity !== 'all' && bug.severity !== filterSeverity) return false;
         return true;
     });
 
     $: stats = {
         total: bugs.length,
-        reported: bugs.filter((b) => b.status === "reported").length,
-        reviewing: bugs.filter((b) => b.status === "reviewing").length,
-        fixed: bugs.filter((b) => b.status === "fixed").length,
-        critical: bugs.filter((b) => b.severity === "critical").length,
+        reported: bugs.filter((b) => b.status === 'reported').length,
+        reviewing: bugs.filter((b) => b.status === 'reviewing').length,
+        fixed: bugs.filter((b) => b.status === 'fixed').length,
+        critical: bugs.filter((b) => b.severity === 'critical').length,
     };
 
     onMount(() => {
-        const bugsRef = collection(db, "bug_reports");
-        const q = query(bugsRef, orderBy("createdAt", "desc"));
+        const bugsRef = collection(db, 'bug_reports');
+        // ✅ No orderBy to include all bugs
+        const q = query(bugsRef);
 
         unsubscribe = onSnapshot(q, (snapshot) => {
             bugs = snapshot.docs.map((docSnap) => {
@@ -73,6 +73,9 @@
                     adminNotes: data.adminNotes,
                 } as BugReport;
             });
+
+            // ✅ Sort client-side (newest first)
+            bugs.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
         });
     });
 
@@ -80,36 +83,33 @@
         if (unsubscribe) unsubscribe();
     });
 
-    async function updateBugStatus(
-        bugId: string,
-        newStatus: BugReport["status"],
-    ) {
+    async function updateBugStatus(bugId: string, newStatus: BugReport['status']) {
         try {
             const updates: any = {
                 status: newStatus,
             };
 
-            if (newStatus === "fixed" || newStatus === "not-a-bug") {
+            if (newStatus === 'fixed' || newStatus === 'not-a-bug') {
                 updates.resolvedAt = Timestamp.now();
             }
 
-            await updateDoc(doc(db, "bug_reports", bugId), updates);
+            await updateDoc(doc(db, 'bug_reports', bugId), updates);
         } catch (error) {
-            console.error("Error updating bug status:", error);
-            alert("Error al actualizar estado");
+            console.error('Error updating bug status:', error);
+            alert('Error al actualizar estado');
         }
     }
 
     async function saveAdminNotes(bugId: string) {
         try {
-            await updateDoc(doc(db, "bug_reports", bugId), {
+            await updateDoc(doc(db, 'bug_reports', bugId), {
                 adminNotes: notesText.trim(),
             });
             editingNotes = null;
-            notesText = "";
+            notesText = '';
         } catch (error) {
-            console.error("Error saving notes:", error);
-            alert("Error al guardar notas");
+            console.error('Error saving notes:', error);
+            alert('Error al guardar notas');
         }
     }
 
@@ -119,32 +119,32 @@
 
     function startEditNotes(bug: BugReport) {
         editingNotes = bug.id;
-        notesText = bug.adminNotes || "";
+        notesText = bug.adminNotes || '';
     }
 
-    function getSeverityColor(severity: BugReport["severity"]) {
+    function getSeverityColor(severity: BugReport['severity']) {
         switch (severity) {
-            case "critical":
-                return "bg-red-500";
-            case "high":
-                return "bg-orange-500";
-            case "medium":
-                return "bg-yellow-500";
-            case "low":
-                return "bg-blue-500";
+            case 'critical':
+                return 'bg-red-500';
+            case 'high':
+                return 'bg-orange-500';
+            case 'medium':
+                return 'bg-yellow-500';
+            case 'low':
+                return 'bg-blue-500';
         }
     }
 
-    function getStatusColor(status: BugReport["status"]) {
+    function getStatusColor(status: BugReport['status']) {
         switch (status) {
-            case "fixed":
-                return "bg-green-500 text-white";
-            case "reviewing":
-                return "bg-primary-500 text-white";
-            case "not-a-bug":
-                return "bg-slate-500 text-white";
+            case 'fixed':
+                return 'bg-green-500 text-white';
+            case 'reviewing':
+                return 'bg-primary-500 text-white';
+            case 'not-a-bug':
+                return 'bg-slate-500 text-white';
             default:
-                return "bg-amber-500 text-white";
+                return 'bg-amber-500 text-white';
         }
     }
 </script>
@@ -154,17 +154,13 @@
     <div class="flex items-center justify-between">
         <div>
             <h2 class="text-2xl font-bold text-white mb-1">Gestión de Bugs</h2>
-            <p class="text-slate-400">
-                Revisa y gestiona reportes de problemas
-            </p>
+            <p class="text-slate-400">Revisa y gestiona reportes de problemas</p>
         </div>
     </div>
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <div
-            class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4"
-        >
+        <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4">
             <div class="text-2xl font-bold text-white">{stats.total}</div>
             <div class="text-xs text-slate-400">Total</div>
         </div>
@@ -174,9 +170,7 @@
             </div>
             <div class="text-xs text-amber-400">Reportados</div>
         </div>
-        <div
-            class="bg-primary-500/10 border border-primary-500/30 rounded-2xl p-4"
-        >
+        <div class="bg-primary-500/10 border border-primary-500/30 rounded-2xl p-4">
             <div class="text-2xl font-bold text-primary-300">
                 {stats.reviewing}
             </div>
@@ -220,13 +214,11 @@
     <!-- Bug List -->
     <div class="space-y-3">
         {#if filteredBugs.length === 0}
-            <div
-                class="text-center py-12 bg-white/5 rounded-2xl border border-white/10"
-            >
+            <div class="text-center py-12 bg-white/5 rounded-2xl border border-white/10">
                 <p class="text-slate-400">
                     {bugs.length === 0
-                        ? "No hay bugs reportados"
-                        : "No hay bugs con los filtros seleccionados"}
+                        ? 'No hay bugs reportados'
+                        : 'No hay bugs con los filtros seleccionados'}
                 </p>
             </div>
         {/if}
@@ -243,7 +235,7 @@
                     <!-- Severity Indicator -->
                     <div
                         class="w-1.5 h-12 rounded-full {getSeverityColor(
-                            bug.severity,
+                            bug.severity
                         )} flex-shrink-0"
                     ></div>
 
@@ -255,30 +247,27 @@
                             <div class="flex gap-2 flex-shrink-0">
                                 <span
                                     class="px-2 py-1 rounded-lg text-xs font-bold {getSeverityColor(
-                                        bug.severity,
+                                        bug.severity
                                     )} text-white"
                                 >
                                     {bug.severity.toUpperCase()}
                                 </span>
                             </div>
                         </div>
-                        <div
-                            class="flex flex-wrap gap-3 text-xs text-slate-400"
-                        >
+                        <div class="flex flex-wrap gap-3 text-xs text-slate-400">
                             <span>{bug.author}</span>
                             <span>•</span>
                             <span>{bug.browser} / {bug.os}</span>
                             <span>•</span>
                             <span>
-                                {bug.createdAt.toLocaleDateString("es-ES")}
+                                {bug.createdAt.toLocaleDateString('es-ES')}
                             </span>
                         </div>
                     </div>
 
                     <!-- Expand Icon -->
                     <svg
-                        class="w-5 h-5 text-slate-400 transition-transform {expandedBug ===
-                        bug.id
+                        class="w-5 h-5 text-slate-400 transition-transform {expandedBug === bug.id
                             ? 'rotate-180'
                             : ''}"
                         fill="none"
@@ -296,14 +285,10 @@
 
                 <!-- Expanded Content -->
                 {#if expandedBug === bug.id}
-                    <div
-                        class="px-6 pb-6 space-y-4 border-t border-white/10 pt-4"
-                    >
+                    <div class="px-6 pb-6 space-y-4 border-t border-white/10 pt-4">
                         <!-- Description -->
                         <div>
-                            <p
-                                class="text-xs text-slate-500 uppercase font-bold mb-2"
-                            >
+                            <p class="text-xs text-slate-500 uppercase font-bold mb-2">
                                 Descripción:
                             </p>
                             <p class="text-slate-300 leading-relaxed">
@@ -314,9 +299,7 @@
                         <!-- Steps -->
                         {#if bug.steps}
                             <div>
-                                <p
-                                    class="text-xs text-slate-500 uppercase font-bold mb-2"
-                                >
+                                <p class="text-xs text-slate-500 uppercase font-bold mb-2">
                                     Pasos para Reproducir:
                                 </p>
                                 <pre
@@ -326,15 +309,10 @@
 
                         <!-- Status Management -->
                         <div>
-                            <p
-                                class="text-xs text-slate-500 uppercase font-bold mb-2"
-                            >
-                                Estado:
-                            </p>
+                            <p class="text-xs text-slate-500 uppercase font-bold mb-2">Estado:</p>
                             <div class="flex flex-wrap gap-2">
                                 <button
-                                    on:click={() =>
-                                        updateBugStatus(bug.id, "reported")}
+                                    on:click={() => updateBugStatus(bug.id, 'reported')}
                                     class="px-4 py-2 rounded-xl transition-all {bug.status ===
                                     'reported'
                                         ? getStatusColor('reported')
@@ -343,8 +321,7 @@
                                     📝 Reportado
                                 </button>
                                 <button
-                                    on:click={() =>
-                                        updateBugStatus(bug.id, "reviewing")}
+                                    on:click={() => updateBugStatus(bug.id, 'reviewing')}
                                     class="px-4 py-2 rounded-xl transition-all {bug.status ===
                                     'reviewing'
                                         ? getStatusColor('reviewing')
@@ -353,8 +330,7 @@
                                     🔍 En Revisión
                                 </button>
                                 <button
-                                    on:click={() =>
-                                        updateBugStatus(bug.id, "fixed")}
+                                    on:click={() => updateBugStatus(bug.id, 'fixed')}
                                     class="px-4 py-2 rounded-xl transition-all {bug.status ===
                                     'fixed'
                                         ? getStatusColor('fixed')
@@ -363,8 +339,7 @@
                                     ✅ Solucionado
                                 </button>
                                 <button
-                                    on:click={() =>
-                                        updateBugStatus(bug.id, "not-a-bug")}
+                                    on:click={() => updateBugStatus(bug.id, 'not-a-bug')}
                                     class="px-4 py-2 rounded-xl transition-all {bug.status ===
                                     'not-a-bug'
                                         ? getStatusColor('not-a-bug')
@@ -378,9 +353,7 @@
                         <!-- Admin Notes -->
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                <p
-                                    class="text-xs text-slate-500 uppercase font-bold"
-                                >
+                                <p class="text-xs text-slate-500 uppercase font-bold">
                                     Notas del Admin:
                                 </p>
                                 {#if editingNotes !== bug.id}
@@ -388,7 +361,7 @@
                                         on:click={() => startEditNotes(bug)}
                                         class="text-xs text-primary-400 hover:text-primary-300"
                                     >
-                                        {bug.adminNotes ? "Editar" : "Añadir"}
+                                        {bug.adminNotes ? 'Editar' : 'Añadir'}
                                     </button>
                                 {/if}
                             </div>
@@ -403,15 +376,13 @@
                                     ></textarea>
                                     <div class="flex gap-2">
                                         <button
-                                            on:click={() =>
-                                                saveAdminNotes(bug.id)}
+                                            on:click={() => saveAdminNotes(bug.id)}
                                             class="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-xl text-sm font-medium"
                                         >
                                             Guardar
                                         </button>
                                         <button
-                                            on:click={() =>
-                                                (editingNotes = null)}
+                                            on:click={() => (editingNotes = null)}
                                             class="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-sm"
                                         >
                                             Cancelar
@@ -427,9 +398,7 @@
                                     </p>
                                 </div>
                             {:else}
-                                <p class="text-sm text-slate-500 italic">
-                                    Sin notas
-                                </p>
+                                <p class="text-sm text-slate-500 italic">Sin notas</p>
                             {/if}
                         </div>
                     </div>

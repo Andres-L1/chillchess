@@ -39,6 +39,7 @@
     let remoteData: any = null;
     let widgetError = '';
     let resolvedCoverUrl = '';
+    let lastResolvedKey = ''; // Track last resolved key to prevent infinite loop
 
     onMount(() => {
         if (uid) {
@@ -71,10 +72,11 @@
               ? ($audioStore.currentTime / $audioStore.duration) * 100
               : 0;
 
-    // Resolve R2 cover URL if needed
-    $: if (activeTrack?.cover) {
+    // Resolve R2 cover URL if needed (with loop prevention)
+    $: if (activeTrack?.cover && activeTrack.cover !== lastResolvedKey) {
         if (activeTrack.cover.startsWith('music/') || activeTrack.cover.startsWith('catalog/')) {
             // This is an R2 key, needs resolution
+            lastResolvedKey = activeTrack.cover; // Mark as being resolved
             fetch('/api/r2/get-url', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -82,13 +84,18 @@
             })
                 .then((res) => (res.ok ? res.json() : Promise.reject()))
                 .then((data) => (resolvedCoverUrl = data.url))
-                .catch(() => (resolvedCoverUrl = '/logo-mobile-legacy.png'));
+                .catch(() => {
+                    resolvedCoverUrl = '/logo-mobile-legacy.png';
+                    lastResolvedKey = ''; // Reset on error to allow retry
+                });
         } else {
             // Direct URL
+            lastResolvedKey = activeTrack.cover;
             resolvedCoverUrl = activeTrack.cover;
         }
-    } else {
+    } else if (!activeTrack?.cover) {
         resolvedCoverUrl = '/logo-mobile-legacy.png';
+        lastResolvedKey = '';
     }
 
     function handleImageError(e: Event) {

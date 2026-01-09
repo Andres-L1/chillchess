@@ -3,7 +3,7 @@
     import { userStore } from '$lib/auth/userStore';
     import { goto } from '$app/navigation';
     import { db } from '$lib/firebase';
-    import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+    import { collection, addDoc, serverTimestamp, getDoc, doc } from 'firebase/firestore';
     import { userSubscription } from '$lib/subscription/userSubscription';
     import PaywallModal from '$lib/components/PaywallModal.svelte';
     import { toast } from '$lib/stores/notificationStore';
@@ -14,8 +14,9 @@
     let showPaywall = false;
     let currentStep = 1;
 
-    // Check PRO status
+    // Check PRO status and Verified status
     $: isPro = $userSubscription.tier === 'pro';
+    $: isVerified = $userSubscription.profile?.isVerified || false;
 
     // Form Data
     let releaseTitle = '';
@@ -105,8 +106,8 @@
 
         const files = Array.from(target.files);
         const validFiles = files.filter((file) => {
-            if (file.size > 500 * 1024 * 1024) {
-                toast.warning(`${file.name} es demasiado grande (Máx 500MB).`);
+            if (file.size > 1000 * 1024 * 1024) {
+                toast.warning(`${file.name} es demasiado grande (Máx 1GB).`);
                 return false;
             }
             if (!file.type.startsWith('audio/')) {
@@ -163,7 +164,6 @@
         folder: string,
         onProgress?: (percent: number) => void
     ) {
-        // 1. Get signed URL with authentication
         const user = $userStore.user;
         if (!user) {
             console.error('❌ No user found in userStore');
@@ -175,15 +175,32 @@
         const token = await user.getIdToken();
         console.log('✅ Token obtained successfully');
 
-        // Upload via server proxy to avoid CORS issues
-        console.log('📤 Uploading via server proxy:', file.name);
+        // Step 1: Get presigned URL from server
+        console.log('📝 Requesting presigned URL for:', file.name);
+        const presignRes = await fetch('/api/r2/sign-url', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                fileName: file.name,
+                fileType: file.type,
+                fileSize: file.size,
+                folder,
+            }),
+        });
 
-        // Upload via proxy with progress tracking
+        if (!presignRes.ok) {
+            const errData = await presignRes.json();
+            throw new Error(errData.error || `Failed to get upload URL (${presignRes.status})`);
+        }
+
+        const { uploadUrl, key } = await presignRes.json();
+        console.log('✅ Got presigned URL, uploading directly to R2...');
+
+        // Step 2: Upload directly to R2 using presigned URL
         return new Promise((resolve, reject) => {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('folder', folder);
-
             const xhr = new XMLHttpRequest();
             xhr.timeout = 600000; // 10 minutes
 
@@ -196,16 +213,21 @@
 
             xhr.addEventListener('load', () => {
                 if (xhr.status === 200) {
-                    try {
-                        const response = JSON.parse(xhr.responseText);
-                        const key = response.key || response.url.split('.dev/')[1];
-                        resolve({ key, name: file.name, size: file.size, type: file.type });
-                    } catch (e) {
-                        reject(new Error('Error parsing upload response'));
-                    }
+                    console.log('✅ Upload successful to R2');
+                    resolve({ key, name: file.name, size: file.size, type: file.type });
                 } else {
-                    console.error(`❌ Upload failed with status ${xhr.status}`, xhr.responseText);
-                    reject(new Error(`Error subiendo archivo (${xhr.status}). Intenta de nuevo.`));
+                    let errorMsg = `Upload failed (${xhr.status})`;
+                    try {
+                        const res = JSON.parse(xhr.responseText);
+                        if (res.error) {
+                            errorMsg = res.error;
+                            if (res.code) errorMsg += ` (${res.code})`;
+                        }
+                    } catch (e) {
+                        // ignore
+                    }
+                    console.error(`❌ Upload failed:`, errorMsg);
+                    reject(new Error(errorMsg));
                 }
             });
 
@@ -216,12 +238,14 @@
 
             xhr.addEventListener('timeout', () => {
                 console.error('❌ Upload timeout for file:', file.name);
-                reject(new Error('El archivo tardó demasiado. Intenta con un archivo más pequeño.'));
+                reject(
+                    new Error('El archivo tardó demasiado. Intenta con un archivo más pequeño.')
+                );
             });
 
-            xhr.open('POST', '/api/r2/upload');
-            xhr.setRequestHeader('Authorization', `Bearer ${token}`);
-            xhr.send(formData);
+            xhr.open('PUT', uploadUrl);
+            xhr.setRequestHeader('Content-Type', file.type);
+            xhr.send(file);
         });
     }
 
@@ -233,7 +257,10 @@
             return;
         }
 
-        if (!confirm('¿Estás seguro de enviar esta música para revisión?')) return;
+        const confirmMsg = isVerified
+            ? '¿Publicar este álbum? Se publicará inmediatamente.'
+            : '¿Enviar esta música para revisión?';
+        if (!confirm(confirmMsg)) return;
 
         uploading = true;
         uploadProgress = 0;
@@ -247,59 +274,96 @@
             const coverData: any = await uploadToR2WithProgress(
                 coverFile,
                 'submissions',
-                (percent) => {
-                    uploadProgress = Math.floor(percent * 0.2); // 0-20%
-                }
+                (p) => (uploadProgress = p * 0.3)
             );
 
             // Step 2: Upload Audio Files
             uploadStage = 'Subiendo archivos de audio...';
             const uploadedAudio = [];
-            for (let i = 0; i < audioFiles.length; i++) {
-                const audioFile = audioFiles[i];
-                uploadStage = `Subiendo ${audioFile.title} (${i + 1}/${audioFiles.length})...`;
+            const totalFiles = audioFiles.length;
 
-                const audioData: any = await uploadToR2WithProgress(
+            for (let i = 0; i < totalFiles; i++) {
+                const audioFile = audioFiles[i];
+                uploadStage = `Subiendo ${audioFile.title} (${i + 1}/${totalFiles})...`;
+
+                const fileData = (await uploadToR2WithProgress(
                     audioFile.file,
                     'submissions',
-                    (percent) => {
-                        const baseProgress = 20;
-                        const audioProgress = (percent / audioFiles.length) * 70;
-                        const fileOffset = (i / audioFiles.length) * 70;
-                        uploadProgress = Math.floor(baseProgress + fileOffset + audioProgress);
+                    (p) => {
+                        const base = 30 + (i / totalFiles) * 60;
+                        uploadProgress = base + (p / totalFiles) * 60;
                     }
-                );
+                )) as { key: string; name: string; size: number; type: string };
 
                 uploadedAudio.push({
-                    ...audioData,
+                    key: fileData.key,
+                    name: fileData.name,
+                    size: fileData.size,
+                    type: fileData.type,
                     title: audioFile.title,
-                    duration: audioFile.duration || 0,
                 });
             }
 
-            // Step 3: Save to Firestore
-            uploadStage = 'Guardando información...';
-            uploadProgress = 95;
+            //  BIFURCATION: Verified vs Non-Verified Flow
+            if (isVerified) {
+                // AUTO-PUBLISH for verified artists
+                uploadStage = '🚀 Publicando álbum...';
+                uploadProgress = 95;
 
-            await addDoc(collection(db, 'musicSubmissions'), {
-                userId, // Required by Firestore Rules
-                artistId: userId, // Required by Admin/App Logic
-                artistName: $userStore.user?.displayName || 'Unknown',
-                releaseTitle: releaseTitle.trim(),
-                genre: genre === 'Otra' ? customGenre.trim() : genre,
-                category,
-                r2CoverKey: coverData.key,
-                r2AudioKeys: uploadedAudio,
-                // Removed legacy null fields (coverUrl, audioFiles)
-                tracklist: audioFiles.map((f) => f.title).join('\n'),
-                submissionType: 'r2_direct',
-                status: 'pending',
-                submittedAt: serverTimestamp(),
-            });
+                const autoPublishRes = await fetch('/api/albums/auto-publish', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        albumData: {
+                            artistName: $userStore.user?.displayName || 'Unknown',
+                            albumTitle: releaseTitle.trim(),
+                            genre: genre === 'Otra' ? customGenre.trim() : genre,
+                            albumCategory: category, // Use existing category variable
+                            coverUrl: null,
+                            tracks: uploadedAudio.map((a, idx) => ({
+                                title: a.title,
+                                r2Key: a.key,
+                            })),
+                        },
+                        files: [coverData, ...uploadedAudio],
+                    }),
+                });
+
+                if (!autoPublishRes.ok) {
+                    const errData = await autoPublishRes.json();
+
+                    // FALLBACK: If auto-publish fails, create submission
+                    if (errData.requiresReview) {
+                        uploadStage = 'Guardando en revisión...';
+                        if (!userId) throw new Error('User ID not found');
+                        await createSubmission(userId, coverData, uploadedAudio);
+                        toast.warning('⚠️ Enviado para revisión manual.');
+                    } else {
+                        throw new Error(errData.error || 'Error al publicar');
+                    }
+                } else {
+                    const result = await autoPublishRes.json();
+                    uploadProgress = 100;
+                    uploadStage = '¡Publicado!';
+                    toast.success('🎉 ¡Álbum publicado exitosamente!');
+
+                    setTimeout(() => {
+                        goto(`/album/${result.albumId}`);
+                    }, 1500);
+                    return;
+                }
+            } else {
+                // STANDARD SUBMISSION for non-verified
+                uploadStage = 'Guardando información...';
+                uploadProgress = 95;
+
+                if (!userId) throw new Error('User ID not found');
+                await createSubmission(userId, coverData, uploadedAudio);
+                toast.success('✅ ¡Música enviada! La revisaremos pronto.');
+            }
 
             uploadProgress = 100;
             uploadStage = '¡Completado!';
-            toast.success('✅ ¡Música enviada con éxito! La revisaremos pronto.');
 
             setTimeout(() => {
                 goto('/artist');
@@ -310,6 +374,24 @@
         } finally {
             uploading = false;
         }
+    }
+
+    // Helper to create submission (shared for both fallback and non-verified)
+    async function createSubmission(userId: string, coverData: any, uploadedAudio: any[]) {
+        await addDoc(collection(db, 'musicSubmissions'), {
+            userId,
+            artistId: userId,
+            artistName: $userStore.user?.displayName || 'Unknown',
+            releaseTitle: releaseTitle.trim(),
+            genre: genre === 'Otra' ? customGenre.trim() : genre,
+            category,
+            r2CoverKey: coverData.key,
+            r2AudioKeys: uploadedAudio,
+            tracklist: audioFiles.map((f) => f.title).join('\n'),
+            submissionType: 'r2_direct',
+            status: 'pending',
+            submittedAt: serverTimestamp(),
+        });
     }
 </script>
 
@@ -366,14 +448,28 @@
                         Enviar Música
                     </h1>
                     <p class="text-slate-400 text-sm mt-1">
-                        Comparte tu arte con la comunidad ChillChess
+                        {#if isVerified}
+                            <span class="text-green-400 font-semibold">✓ Verificado</span> - Tu álbum
+                            se publicará inmediatamente
+                        {:else}
+                            Comparte tu arte con la comunidad ChillChess
+                        {/if}
                     </p>
                 </div>
-                <span
-                    class="hidden md:block bg-primary-500/10 text-primary-400 px-4 py-2 rounded-xl text-sm font-bold border border-primary-500/20"
-                >
-                    ✨ PRO ONLY
-                </span>
+                <div class="hidden md:flex flex-col items-end gap-2">
+                    <span
+                        class="bg-primary-500/10 text-primary-400 px-4 py-2 rounded-xl text-sm font-bold border border-primary-500/20"
+                    >
+                        ✨ PRO ONLY
+                    </span>
+                    {#if isVerified}
+                        <span
+                            class="bg-green-500/10 text-green-400 px-4 py-2 rounded-xl text-xs font-bold border border-green-500/20 animate-pulse"
+                        >
+                            🚀 PUBLICACIÓN INSTANTÁNEA
+                        </span>
+                    {/if}
+                </div>
             </div>
 
             <!-- Progress Steps -->
@@ -697,7 +793,7 @@
                                 </p>
                                 <p class="text-sm text-slate-400">o haz clic para seleccionar</p>
                                 <p class="text-xs text-slate-500">
-                                    MP3, WAV, M4A • Máx 500MB por archivo
+                                    MP3, WAV, M4A • Máx 1GB por archivo
                                 </p>
                             </div>
                         </div>
@@ -781,7 +877,13 @@
                             disabled={!canProceedFromStep3 || uploading}
                             class="flex-1 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg transition-all shadow-lg shadow-green-900/20"
                         >
-                            {uploading ? 'Subiendo...' : '🚀 Enviar para Revisión'}
+                            {#if uploading}
+                                Subiendo...
+                            {:else if isVerified}
+                                🚀 Publicar Álbum
+                            {:else}
+                                📤 Enviar para Revisión
+                            {/if}
                         </button>
                     </div>
                 </div>

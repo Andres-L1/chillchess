@@ -61,6 +61,7 @@ export async function POST({ request, locals }: RequestEvent) {
 export async function GET({ url, locals }: RequestEvent) {
     try {
         const key = url.searchParams.get('key');
+        console.log('[API] get-url requested for key:', key); // DEBUG
 
         if (!key) {
             return json({ error: 'No key provided', code: 'MISSING_KEY' }, { status: 400 });
@@ -68,6 +69,7 @@ export async function GET({ url, locals }: RequestEvent) {
 
         // ✅ SMART SECURITY: Allow public access to music folder (published content)
         if (key.startsWith('music/') || key.startsWith('catalog/')) {
+            console.log('[API] Public access granted for:', key); // DEBUG
             const signedUrl = await generateSignedUrl(key);
             return json({ url: signedUrl });
         }

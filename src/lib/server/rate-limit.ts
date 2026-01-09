@@ -83,6 +83,6 @@ export class RateLimiter {
 export const globalLimiter = new RateLimiter();
 
 // Clean up every hour
-if (typeof setInterval !== 'undefined') {
-    setInterval(() => globalLimiter.cleanup(), 60 * 60 * 1000);
-}
+// In serverless, we don't need a cleanup interval as the instance is ephemeral.
+// Also, keeping a timer open can cause the function to timeout waiting for the event loop to empty.
+// setInterval(() => globalLimiter.cleanup(), 60 * 60 * 1000);

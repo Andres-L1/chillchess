@@ -54,3 +54,6 @@ coverage/
 *.tmp
 *.temp
 .cache/
+
+# AI Agent Rules (Local Only)
+.agent/

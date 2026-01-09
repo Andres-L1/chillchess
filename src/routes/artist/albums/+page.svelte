@@ -297,9 +297,16 @@
                 tracks: tracks.map((t, idx) => ({
                     id: `track-${idx + 1}`,
                     title: t.title,
-                    url: t.url,
-                    file: t.url, // Alias for backward compatibility
+                    artist: $userStore.user?.displayName || 'Unknown Artist', // ✅
+                    url: t.url, // Legacy public URL
+                    file: t.url, // Backward compatibility
+                    // ✅ Extract R2 key from URL if it's R2 (with null check)
+                    r2Key:
+                        t.url && t.url.includes(PUBLIC_R2_DOMAIN)
+                            ? t.url.replace(`${PUBLIC_R2_DOMAIN}/`, '')
+                            : undefined,
                     duration: 0,
+                    albumCover: r2CoverKey || coverUrl || null, // ✅
                 })),
                 updatedAt: Date.now(),
             };

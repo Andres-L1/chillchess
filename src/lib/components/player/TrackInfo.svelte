@@ -11,11 +11,20 @@
     let resolvedCover = '/logo-mobile.png';
 
     $: if (currentAlbum) {
-        if (currentAlbum.cover) {
+        // Helper to detect if string is an R2 key
+        const isR2Key = (str: string) =>
+            str &&
+            (str.startsWith('music/') ||
+                str.startsWith('catalog/') ||
+                str.startsWith('submissions/') ||
+                !str.includes('/'));
+
+        if (currentAlbum.cover && !isR2Key(currentAlbum.cover)) {
             resolvedCover = currentAlbum.cover;
-        } else if (currentAlbum.r2CoverKey) {
+        } else if (currentAlbum.r2CoverKey || (currentAlbum.cover && isR2Key(currentAlbum.cover))) {
+            const keyToFetch = currentAlbum.r2CoverKey || currentAlbum.cover;
             // Resolve R2 URL asynchronously
-            fetch(`/api/r2/get-url?key=${encodeURIComponent(currentAlbum.r2CoverKey)}`)
+            fetch(`/api/r2/get-url?key=${encodeURIComponent(keyToFetch)}`)
                 .then((res) => res.json())
                 .then((data) => {
                     if (data.url) resolvedCover = data.url;
@@ -24,8 +33,20 @@
         } else {
             resolvedCover = '/logo-mobile.png';
         }
-    } else if (currentTrack?.cover) {
+    } else if (currentTrack?.cover && !currentTrack.cover.startsWith('music/')) {
         resolvedCover = currentTrack.cover;
+    } else if ((currentTrack as any)?.albumCover) {
+        const r2Key = (currentTrack as any).albumCover;
+        if (r2Key && (r2Key.startsWith('music/') || r2Key.startsWith('catalog/'))) {
+            fetch(`/api/r2/get-url?key=${encodeURIComponent(r2Key)}`)
+                .then((res) => res.json())
+                .then((data) => {
+                    if (data.url) resolvedCover = data.url;
+                })
+                .catch((err) => console.error('Error resolving albumCover in TrackInfo', err));
+        } else {
+            resolvedCover = r2Key;
+        }
     }
 </script>
 

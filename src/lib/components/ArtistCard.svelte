@@ -59,6 +59,11 @@
     $: themeColor = profile.themeColor || '#9333EA';
     $: accentColor = profile.accentColor || '#A855F7';
     $: cardLayout = profile.cardLayout || 'default';
+
+    // ✅ Helper to get track cover with fallbacks
+    function getTrackCover(track: any, album: Album): string {
+        return track.cover || track.albumCover || album.cover || '/images/default-album.png';
+    }
 </script>
 
 <div
@@ -189,7 +194,7 @@
         {#if !loadingAlbums && artistAlbums.length > 0}
             <!-- 1. All Tracks (Popular / Latest) -->
             {@const allTracks = artistAlbums.flatMap((a) =>
-                (a.tracks || []).map((t) => ({ ...t, cover: a.cover, albumTitle: a.title }))
+                (a.tracks || []).map((t) => ({ ...t, albumRef: a, albumTitle: a.title }))
             )}
 
             {#if allTracks.length > 0}
@@ -236,7 +241,7 @@
                                     class="w-8 h-8 rounded overflow-hidden bg-black/50 flex-shrink-0 relative group-hover:ring-1 group-hover:ring-primary-500"
                                 >
                                     <img
-                                        src={track.cover || '/images/default-album.png'}
+                                        src={getTrackCover(track, track.albumRef)}
                                         alt={track.title}
                                         class="w-full h-full object-cover"
                                     />

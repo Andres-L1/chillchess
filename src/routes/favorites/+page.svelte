@@ -14,8 +14,13 @@
     $: favoriteTracks = ALBUMS.flatMap((album) =>
         (album.tracks || []).map((track) => ({
             ...track,
-            cover: track.cover || album.cover,
-            albumCover: album.cover,
+            // ✅ Complete fallback chain
+            cover:
+                track.cover ||
+                (track as any).albumCover ||
+                album.cover ||
+                (album as any).r2CoverKey,
+            albumCover: album.cover || (album as any).r2CoverKey,
             albumTitle: album.title,
         }))
     ).filter((t) => $favoritesStore.includes(t.id || ''));

@@ -16,6 +16,13 @@
         Timestamp,
     } from 'firebase/firestore';
     import { onMount, onDestroy } from 'svelte';
+    import BulbIcon from '$lib/components/icons/BulbIcon.svelte';
+    import MusicIcon from '$lib/components/icons/MusicIcon.svelte';
+    import BoltIcon from '$lib/components/icons/BoltIcon.svelte';
+    import ToolsIcon from '$lib/components/icons/ToolsIcon.svelte';
+    import FireIcon from '$lib/components/icons/FireIcon.svelte';
+    import CelebrationIcon from '$lib/components/icons/CelebrationIcon.svelte';
+    import LockIcon from '$lib/components/icons/LockIcon.svelte';
 
     interface Proposal {
         id: string;
@@ -176,25 +183,18 @@
     function getStatusLabel(status: Proposal['status']) {
         switch (status) {
             case 'approved':
-                return '✓ Aprobada';
+                return 'Aprobada';
             case 'rejected':
-                return '✗ Rechazada';
+                return 'Rechazada';
             case 'implemented':
-                return '🎉 Implementada';
+                return 'Implementada';
             default:
-                return '⏳ Pendiente';
+                return 'Pendiente';
         }
     }
 
     function getCategoryIcon(category: Proposal['category']) {
-        switch (category) {
-            case 'album':
-                return '🎵';
-            case 'feature':
-                return '⚡';
-            case 'improvement':
-                return '🔧';
-        }
+        return category; // Return category name, icons handled in template
     }
 
     function getUserVoteState(proposal: Proposal): 'up' | 'down' | null {
@@ -232,9 +232,9 @@
         <div class="mb-12">
             <div class="flex items-center gap-4 mb-4">
                 <div
-                    class="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-primary-900/50"
+                    class="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-900/50"
                 >
-                    💡
+                    <BulbIcon size="xl" gradient={true} />
                 </div>
                 <div>
                     <h1
@@ -257,7 +257,10 @@
                 </div>
             {:else if !isPro}
                 <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-6 mt-8">
-                    <h3 class="font-bold text-amber-300 mb-2">🔒 Exclusivo Pro</h3>
+                    <h3 class="font-bold text-amber-300 mb-2 flex items-center gap-2">
+                        <LockIcon size="md" />
+                        Exclusivo Pro
+                    </h3>
                     <p class="text-amber-200/80 mb-4">
                         Necesitas una suscripción Pro para proponer y votar features.
                     </p>
@@ -283,7 +286,7 @@
                             ? 'bg-primary-500 text-white'
                             : 'bg-white/5 text-slate-400 hover:bg-white/10'}"
                     >
-                        🔥 Más Votadas
+                        <FireIcon size="sm" /> Más Votadas
                     </button>
                     <button
                         on:click={() => (sortBy = 'recent')}
@@ -319,7 +322,7 @@
                                         ? 'bg-primary-500 text-white'
                                         : 'bg-white/5 text-slate-400 hover:bg-white/10'}"
                                 >
-                                    🎵 Álbum
+                                    <MusicIcon size="sm" /> Álbum
                                 </button>
                                 <button
                                     on:click={() => (newCategory = 'feature')}
@@ -337,7 +340,7 @@
                                         ? 'bg-primary-500 text-white'
                                         : 'bg-white/5 text-slate-400 hover:bg-white/10'}"
                                 >
-                                    🔧 Mejora
+                                    <ToolsIcon size="sm" /> Mejora
                                 </button>
                             </div>
                         </div>

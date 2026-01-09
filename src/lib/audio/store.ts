@@ -76,7 +76,7 @@ export const audioStore = writable<AudioState>(initialState);
 // --- Initialization ---
 
 let isInitialized = false;
-const CACHE_VERSION = "v4_perf_emergency_fix"; // BUMPED TO INVALIDATE OLD LARGE CACHE
+const CACHE_VERSION = "v5_show_all_albums"; // ✅ Show albums without createdAt
 
 export async function initAudioLibrary() {
     if (isInitialized) return;
@@ -106,11 +106,10 @@ export async function initAudioLibrary() {
 
     // 2. BACKGROUND SYNC: Fetch from Firestore (Real-time)
     try {
-        // PERF: Limit to 100 most recent albums
+        // ✅ Load ALL albums (no orderBy to avoid excluding albums without createdAt)
         const q = query(
             collection(db, 'albums'),
-            orderBy('createdAt', 'desc'),
-            limit(100)
+            limit(200) // Increased limit
         );
 
         // Subscribe to real-time updates
@@ -139,6 +138,13 @@ export async function initAudioLibrary() {
                 } catch (err) {
                     console.error(`[QUARANTINE] Failed to parse album ${doc.id}`, err);
                 }
+            });
+
+            // ✅ Sort client-side (newest first, albums without createdAt go last)
+            safeAlbums.sort((a, b) => {
+                const aTime = (a as any).createdAt?.seconds || 0;
+                const bTime = (b as any).createdAt?.seconds || 0;
+                return bTime - aTime; // Descending (newest first)
             });
 
             console.log(`[AudioLibrary] Synced ${safeAlbums.length} albums from Firestore.`);
@@ -235,7 +241,7 @@ export function playAlbum(albumId: string) {
             playlist: (album.tracks || []).map((t) => ({
                 ...t,
                 artist: t.artist || album.artist, // Fallback to album artist
-                cover: t.cover || album.cover, // Fallback to album cover (if available)
+                cover: t.cover || (t as any).albumCover || album.cover, // ✅ Complete fallback
             })),
             currentTrackIndex: 0,
             currentAlbumId: albumId,

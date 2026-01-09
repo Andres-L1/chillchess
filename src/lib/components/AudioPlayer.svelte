@@ -129,6 +129,7 @@
     $: if (currentTrackEntry && (currentTrackEntry.id || '') !== lastResolvedTrackId) {
         // Only resolve if it's a DIFFERENT track
         lastResolvedTrackId = currentTrackEntry.id || '';
+        retryCount = 0; // Reset retry count
         resolveAudioUrl(currentTrackEntry);
     }
 
@@ -200,6 +201,9 @@
         setTimeout(() => nextTrack(), 2000);
     }
 
+    // Retry state
+    let retryCount = 0;
+
     function handleAudioError(e: Event) {
         const error = (e.target as HTMLAudioElement).error;
         if (error) {
@@ -207,7 +211,7 @@
                 1: 'Reproducción abortada',
                 2: 'Error de red al cargar audio',
                 3: 'Error de decodificación de audio',
-                4: 'Formato de audio no soportado',
+                4: 'Formato de audio no soportado (o archivo no encontrado)',
             };
 
             const msg = errorMessages[error.code as 1 | 2 | 3 | 4] || 'Error desconocido';
@@ -215,14 +219,29 @@
                 trackUrl: resolvedStreamUrl,
                 trackTitle: currentTrackEntry?.title,
                 errorCode: error.code,
+                retryCount,
             });
 
-            // Only show toast for network errors (not format issues which might be ghost tracks)
-            if (error.code === 2) {
+            // RETRY LOGIC for R2/Network issues
+            // Code 4 can happen if R2 returns 403/404 temporarily
+            // Code 2 is network error
+            if ((error.code === 2 || error.code === 4) && retryCount < 2) {
+                console.log(`🔄 Retrying playback (Attempt ${retryCount + 1}/2)...`);
+                retryCount++;
+                setTimeout(() => {
+                    if (musicEl) {
+                        musicEl.load();
+                        musicEl.play().catch((e) => console.error('Retry play failed:', e));
+                    }
+                }, 1000);
+                return; // Don't skip yet
+            }
+
+            // Only show toast for network errors
+            if (error.code === 2 || error.code === 4) {
                 toast.error(`⚠️ ${msg}. Saltando...`);
             } else {
-                // Silently skip broken/deleted tracks (format/decoding errors)
-                console.warn('Skipping broken track silently (likely deleted)');
+                console.warn('Skipping broken track silently');
             }
 
             // Auto-skip to next track

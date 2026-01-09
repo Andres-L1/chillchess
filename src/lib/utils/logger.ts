@@ -12,18 +12,15 @@ interface LogParams {
 
 class Logger {
     async log(params: LogParams) {
-        const collectionName = params.level === 'audit' ? 'audit_logs' : 'system_logs';
-
         try {
-            await addDoc(collection(db, collectionName), {
-                ...params,
-                timestamp: serverTimestamp(),
-                source: 'client',
-                userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'server',
-                url: typeof window !== 'undefined' ? window.location.href : 'server',
+            // Use server-side API for logging to avoid permission issues
+            await fetch('/api/log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(params)
             });
         } catch (e) {
-            console.error('Logger failed:', e);
+            console.error('Logger failed (API):', e);
         }
     }
 
@@ -42,16 +39,19 @@ class Logger {
     // Explicit audit action from client console/UI
     async audit(action: string, adminId: string, details: any, targetId?: string) {
         try {
-            await addDoc(collection(db, 'audit_logs'), {
-                action,
-                adminId,
-                details,
-                targetId,
-                timestamp: serverTimestamp(),
-                source: 'client_admin_panel'
+            await fetch('/api/log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    level: 'audit',
+                    action,
+                    adminId,
+                    details,
+                    targetId
+                })
             });
         } catch (e) {
-            console.error('Audit log failed:', e);
+            console.error('Audit log failed (API):', e);
         }
     }
 }

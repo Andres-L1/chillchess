@@ -4,6 +4,7 @@
     import { db } from '$lib/firebase';
     import { doc, onSnapshot } from 'firebase/firestore';
     import { fade } from 'svelte/transition';
+    import { audioStore } from '$lib/audio/store';
 
     // Parameters
     $: roomId = $page.url.searchParams.get('id');
@@ -16,8 +17,8 @@
         participants: Record<string, any>;
         currentTrack: {
             title: string;
-            artist?: string; // Sometimes tied to album
-            cover?: string; // Might need to resolve if not stored directly
+            artist?: string;
+            cover?: string;
             isPlaying: boolean;
             albumId: string;
             trackIndex: number;
@@ -28,18 +29,8 @@
     let loading = true;
     let error = '';
 
-    // We need to fetch album details if cover isn't in room data
-    // Usually room.currentTrack has limited info. We might need to listen to audioStore or fetch album.
-    // For simplicity/performance in a widget, we'll try to sync robustly.
-    // Actually, looking at `src/routes/rooms/[id]/+page.svelte`, the room doc stores:
-    // currentTrack: { albumId, trackIndex, title, isPlaying... }
-    // It DOES NOT store cover url or artist name usually. We need to fetch that or have a cache.
-    // To avoid complex Auth/Store logic in a lightweight widget, we might just rely on checking a minimal 'albums' collection or similar?
-    // OR just fetch the album doc if we have it?
-    // Wait, `audioStore` loads `availableAlbums` from `src/lib/data/albums.ts` (static) usually?
-    // Yes, for now albums are static in `src/lib/data/albums.ts`. We can import that!
-
-    import { ALBUMS as albums } from '$lib/data/albums';
+    // Import static albums as fallback
+    import { ALBUMS as staticAlbums } from '$lib/data/albums';
 
     let unsubscribe: (() => void) | null = null;
 
@@ -62,9 +53,15 @@
                 room = snap.data() as RoomData;
                 loading = false;
             },
-            (err) => {
-                console.error(err);
-                error = 'Error de conexión';
+            (err: any) => {
+                console.error('Room widget error:', err);
+                if (err.code === 'permission-denied') {
+                    error = 'Acceso denegado';
+                } else if (err.code === 'unavailable') {
+                    error = 'Servidor no disponible';
+                } else {
+                    error = 'Error de conexión';
+                }
             }
         );
     });
@@ -78,12 +75,26 @@
 
     $: currentTrackInfo = (() => {
         if (!room?.currentTrack) return null;
-        const album = albums.find((a) => a.id === room?.currentTrack?.albumId);
+
+        // Try dynamic albums from audioStore first, then static fallback
+        const album =
+            $audioStore.availableAlbums.find((a) => a.id === room?.currentTrack?.albumId) ||
+            staticAlbums.find((a) => a.id === room?.currentTrack?.albumId);
+
         const track = album?.tracks?.[room.currentTrack.trackIndex];
+
+        // Get cover with R2 key support (type assertion for optional props)
+        let cover =
+            (track as any)?.albumCover ||
+            (track as any)?.cover ||
+            (album as any)?.cover ||
+            (album as any)?.r2CoverKey ||
+            '/images/cover-placeholder.jpg';
+
         return {
             title: track?.title || room.currentTrack.title || 'Desconocido',
             artist: track?.artist || album?.artist || 'ChillChess',
-            cover: album?.cover || '/images/cover-placeholder.jpg',
+            cover,
             isPlaying: room.currentTrack.isPlaying,
         };
     })();

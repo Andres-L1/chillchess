@@ -23,9 +23,9 @@ export async function POST({ request, locals }: RequestEvent) {
             return json({ error: 'Missing file information', code: 'MISSING_FILE_INFO' }, { status: 400 });
         }
 
-        // SECURITY: Validate file size before signing (500MB limit for R2)
+        // SECURITY: Validate file size before signing (1GB limit for direct R2 uploads)
         if (fileSize) {
-            validateFileSize(fileSize, 500);
+            validateFileSize(fileSize, 1000);
         }
 
         // SECURITY: Validate and sanitize file name

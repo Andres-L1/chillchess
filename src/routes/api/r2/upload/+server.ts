@@ -37,8 +37,8 @@ export async function POST({ request, locals }: RequestEvent) {
             return json({ error: 'No file provided', code: 'NO_FILE' }, { status: 400 });
         }
 
-        // SECURITY: Validate file size (1GB limit for R2)
-        validateFileSize(file.size, 1000);
+        // SECURITY: Validate file size (300MB limit to prevent OOM)
+        validateFileSize(file.size, 300);
 
         // SECURITY: Validate and sanitize file name
         const sanitizedFileName = validateFileName(file.name);

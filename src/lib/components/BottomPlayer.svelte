@@ -102,10 +102,22 @@
     let resolvedCover = '/logo-mobile.png';
 
     $: if (currentAlbum) {
-        if (currentAlbum.cover) {
+        // Helper inline
+        const isR2Key = (str: string) =>
+            str &&
+            (str.startsWith('music/') ||
+                str.startsWith('catalog/') ||
+                str.startsWith('submissions/') ||
+                !str.includes('/'));
+
+        if (currentAlbum.cover && !isR2Key(currentAlbum.cover)) {
             resolvedCover = currentAlbum.cover;
-        } else if ((currentAlbum as any).r2CoverKey) {
-            fetch(`/api/r2/get-url?key=${encodeURIComponent((currentAlbum as any).r2CoverKey)}`)
+        } else if (
+            (currentAlbum as any).r2CoverKey ||
+            (currentAlbum.cover && isR2Key(currentAlbum.cover))
+        ) {
+            const keyToFetch = (currentAlbum as any).r2CoverKey || currentAlbum.cover;
+            fetch(`/api/r2/get-url?key=${encodeURIComponent(keyToFetch)}`)
                 .then((res) => res.json())
                 .then((data) => {
                     if (data.url) resolvedCover = data.url;
@@ -114,8 +126,21 @@
         } else {
             resolvedCover = '/logo-mobile.png';
         }
-    } else if (currentTrack?.cover) {
+    } else if (currentTrack?.cover && !currentTrack.cover.startsWith('music/')) {
         resolvedCover = currentTrack.cover;
+    } else if ((currentTrack as any)?.albumCover) {
+        // ✅ Fallback to albumCover field
+        const r2Key = (currentTrack as any).albumCover;
+        if (r2Key && (r2Key.startsWith('music/') || r2Key.startsWith('catalog/'))) {
+            fetch(`/api/r2/get-url?key=${encodeURIComponent(r2Key)}`)
+                .then((res) => res.json())
+                .then((data) => {
+                    if (data.url) resolvedCover = data.url;
+                })
+                .catch((err) => console.error('Error resolving albumCover', err));
+        } else {
+            resolvedCover = r2Key || '/logo-mobile.png'; // Direct URL or fallback
+        }
     }
 
     function handleImageError(e: Event) {

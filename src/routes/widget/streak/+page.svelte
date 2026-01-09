@@ -34,9 +34,17 @@
                 }
                 loading = false;
             },
-            (err) => {
+            (err: any) => {
                 console.error('Streak sync error:', err);
-                error = 'Error de conexión';
+                if (err.code === 'permission-denied') {
+                    error = 'Acceso denegado';
+                } else if (err.code === 'not-found') {
+                    error = 'Usuario no encontrado';
+                } else if (err.code === 'unavailable') {
+                    error = 'Servidor no disponible';
+                } else {
+                    error = 'Error de conexión';
+                }
                 loading = false;
             }
         );

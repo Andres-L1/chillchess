@@ -2,6 +2,7 @@
     import { onMount } from 'svelte';
     import { browser } from '$app/environment';
     import { userStore } from '$lib/auth/userStore';
+    import AlbumMigrationTool from './AlbumMigrationTool.svelte';
 
     // Esta tab es principalmente informativa y de monitoreo
     // La configuración real de backups se hace en Google Cloud Platform
@@ -344,5 +345,20 @@
                 </p>
             </div>
         </div>
+    </div>
+
+    <!-- Album Migration Tool -->
+    <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6">
+        <div class="flex items-start gap-4 mb-6">
+            <div class="text-3xl">🔧</div>
+            <div class="flex-1">
+                <h3 class="text-lg font-bold text-white mb-2">Migración de Álbumes</h3>
+                <p class="text-slate-400 text-sm">
+                    Herramienta para corregir problemas de ownership y portadas en álbumes
+                    existentes.
+                </p>
+            </div>
+        </div>
+        <AlbumMigrationTool />
     </div>
 </div>

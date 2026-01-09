@@ -15,6 +15,7 @@
     import { browser } from '$app/environment';
     import { scale, fade } from 'svelte/transition';
     import { clickOutside } from '$lib/actions/clickOutside';
+    import BugIcon from '$lib/components/icons/BugIcon.svelte';
 
     interface BugReport {
         id: string;
@@ -79,9 +80,9 @@
             detectUserAgent();
         }
 
-        // Subscribe to bug reports
+        // Subscribe to bug reports (no orderBy to include all bugs)
         const bugsRef = collection(db, 'bug_reports');
-        const q = query(bugsRef, orderBy('createdAt', 'desc'));
+        const q = query(bugsRef);
 
         unsubscribe = onSnapshot(q, (snapshot) => {
             bugs = snapshot.docs.map((docSnap) => {
@@ -102,6 +103,9 @@
                     adminNotes: data.adminNotes,
                 } as BugReport;
             });
+
+            // ✅ Sort client-side (newest first)
+            bugs.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
         });
     });
 
@@ -193,13 +197,13 @@
     function getSeverityLabel(severity: BugReport['severity']) {
         switch (severity) {
             case 'critical':
-                return '🔴 Crítico';
+                return 'Crítico';
             case 'high':
-                return '🟠 Alto';
+                return 'Alto';
             case 'medium':
-                return '🟡 Medio';
+                return 'Medio';
             case 'low':
-                return '🔵 Bajo';
+                return 'Bajo';
         }
     }
 
@@ -258,9 +262,9 @@
         <div class="mb-12">
             <div class="flex items-center gap-4 mb-4">
                 <div
-                    class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-red-900/50"
+                    class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg shadow-red-900/50"
                 >
-                    🐛
+                    <BugIcon size="xl" />
                 </div>
                 <div>
                     <h1
@@ -478,7 +482,7 @@
                                         ? 'bg-blue-500 text-white'
                                         : 'bg-white/5 text-slate-400 hover:bg-white/10'}"
                                 >
-                                    🔵 Bajo
+                                    Bajo
                                 </button>
                                 <button
                                     on:click={() => (newSeverity = 'medium')}
@@ -487,7 +491,7 @@
                                         ? 'bg-yellow-500 text-white'
                                         : 'bg-white/5 text-slate-400 hover:bg-white/10'}"
                                 >
-                                    🟡 Medio
+                                    Medio
                                 </button>
                                 <button
                                     on:click={() => (newSeverity = 'high')}
@@ -496,7 +500,7 @@
                                         ? 'bg-orange-500 text-white'
                                         : 'bg-white/5 text-slate-400 hover:bg-white/10'}"
                                 >
-                                    🟠 Alto
+                                    Alto
                                 </button>
                                 <button
                                     on:click={() => (newSeverity = 'critical')}
@@ -505,7 +509,7 @@
                                         ? 'bg-red-500 text-white'
                                         : 'bg-white/5 text-slate-400 hover:bg-white/10'}"
                                 >
-                                    🔴 Crítico
+                                    Crítico
                                 </button>
                             </div>
                         </div>

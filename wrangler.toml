@@ -1,3 +1,4 @@
+# ⛔ PROTECTED FILE: DO NOT MODIFY WITHOUT EXPLICIT USER CONSENT.
 name = "chillchess-habit-notifications"
 main = "workers/habitNotifications.ts"
 compatibility_date = "2024-01-01"

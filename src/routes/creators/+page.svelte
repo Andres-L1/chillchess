@@ -33,13 +33,22 @@
 
     function loadCatalog() {
         try {
-            const q = query(collection(db, 'creatorCatalog'), orderBy('createdAt', 'desc'));
+            // ✅ No orderBy to include all creators
+            const q = query(collection(db, 'creatorCatalog'));
 
             // Set up real-time listener
             unsubscribe = onSnapshot(
                 q,
                 (snap) => {
                     tracks = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+                    // ✅ Sort client-side (newest first)
+                    tracks.sort((a: any, b: any) => {
+                        const aTime = a.createdAt?.seconds || 0;
+                        const bTime = b.createdAt?.seconds || 0;
+                        return bTime - aTime;
+                    });
+
                     loading = false; // Data loaded, set loading to false
                 },
                 (error) => {

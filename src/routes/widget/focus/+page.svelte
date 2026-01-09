@@ -45,9 +45,17 @@
                     }
                 }
             },
-            (error) => {
+            (error: any) => {
                 console.error('Timer sync error:', error);
-                widgetError = 'Conexión perdida';
+                if (error.code === 'permission-denied') {
+                    widgetError = 'Widget no autorizado';
+                } else if (error.code === 'unavailable') {
+                    widgetError = 'Servidor no disponible';
+                } else if (error.code === 'not-found') {
+                    widgetError = 'Usuario no encontrado';
+                } else {
+                    widgetError = 'Conexión perdida';
+                }
                 timerState = {
                     ...timerState,
                     isRunning: false,

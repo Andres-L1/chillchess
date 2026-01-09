@@ -1,6 +1,7 @@
 /**
  * Cloudflare Worker para enviar notificaciones de hábitos
  * Se ejecuta cada hora usando Cron Triggers
+ * ⛔ PROTECTED FILE: DO NOT MODIFY WITHOUT EXPLICIT USER CONSENT.
  */
 
 import * as jwt from '@tsndr/cloudflare-worker-jwt';

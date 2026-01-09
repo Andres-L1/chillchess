@@ -222,7 +222,8 @@
     $: flatTracks = artistAlbums.flatMap((a) =>
         (a.tracks || []).map((t) => ({
             ...t,
-            cover: getCoverUrl({ ...a, cover: t.cover || a.cover } as any),
+            // ✅ Complete fallback chain
+            cover: t.cover || (t as any).albumCover || getCoverUrl(a),
             albumTitle: a.title,
             artist: a.artist,
         }))
