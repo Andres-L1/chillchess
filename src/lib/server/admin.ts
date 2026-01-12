@@ -1,7 +1,12 @@
-import admin from 'firebase-admin';
+// import admin from 'firebase-admin';
 // @ts-ignore: SvelteKit dynamic env module resolution
 import { env } from '$env/dynamic/private';
 
+// FIREBASE ADMIN IS NOT SUPPORTED ON CLOUDFLARE WORKERS
+// We have temporarily disabled it to allow the site to deploy.
+// TODO: Replace with REST API implementation for Edge.
+
+/*
 // Initialize Firebase Admin
 // Wrap in try-catch to avoid crashing if env vars are missing during build
 try {
@@ -26,6 +31,8 @@ try {
 } catch (err) {
     console.error('[Firebase Admin] Init failed:', err);
 }
+*/
 
-export const adminAuth = admin.apps.length ? admin.auth() : null;
-export const adminDB = admin.apps.length ? admin.firestore() : null;
+// Export null to prevent crashes, hooks.server.ts handles this gracefully
+export const adminAuth = null; // admin.apps.length ? admin.auth() : null;
+export const adminDB = null; // admin.apps.length ? admin.firestore() : null;
