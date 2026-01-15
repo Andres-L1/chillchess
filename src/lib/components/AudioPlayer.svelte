@@ -4,7 +4,8 @@
     import { logError, logAudioError, logR2Error } from '$lib/logger';
 
     // Ambience files (loops)
-    const AMBIENCE_TRACKS = {
+    // Ambience files (loops)
+    const AMBIENCE_TRACKS: Record<string, string> = {
         rain: '/assets/audio/ambience/rain.mp3',
         library: '/assets/audio/ambience/library.mp3',
         garden: '/assets/audio/ambience/garden.mp3',
@@ -12,7 +13,8 @@
     };
 
     // White Noise files (loops)
-    const WHITE_NOISE_TRACKS = {
+    // White Noise files (loops)
+    const WHITE_NOISE_TRACKS: Record<string, string> = {
         none: '',
         rain: '/whitenoise/rain.wav',
         fire: '/whitenoise/fire.mp3',
@@ -28,7 +30,7 @@
     // Handle Seek Request
     $: if (musicEl && $audioStore.seekRequest !== null) {
         musicEl.currentTime = $audioStore.seekRequest;
-        audioStore.update((s) => ({ ...s, seekRequest: null }));
+        audioStore.update((s: any) => ({ ...s, seekRequest: null }));
     }
 
     // --- MEDIA SESSION API INTEGRATION (Background Play & Metadata) ---
@@ -105,7 +107,7 @@
                 navigator.mediaSession.setActionHandler('seekto', (details) => {
                     // Support system scrubber
                     if (details.seekTime !== undefined && details.fastSeek === false) {
-                        audioStore.update((s) => ({
+                        audioStore.update((s: any) => ({
                             ...s,
                             seekRequest: details.seekTime ?? null,
                         }));
@@ -238,7 +240,7 @@
                             consecutiveFailures++;
                             if (consecutiveFailures >= 3) {
                                 toast.error('⛔ Demasiados errores de red. Deteniendo.');
-                                audioStore.update((s) => ({ ...s, isPlaying: false }));
+                                audioStore.update((s: any) => ({ ...s, isPlaying: false }));
                                 return;
                             }
 
@@ -258,7 +260,7 @@
                         consecutiveFailures++;
                         if (consecutiveFailures >= 3) {
                             toast.error('⛔ Demasiados errores de red. Deteniendo.');
-                            audioStore.update((s) => ({ ...s, isPlaying: false }));
+                            audioStore.update((s: any) => ({ ...s, isPlaying: false }));
                             return;
                         }
 
@@ -276,7 +278,7 @@
         consecutiveFailures++;
         if (consecutiveFailures >= 3) {
             toast.warning('Múltiples canciones sin audio. Deteniendo.');
-            audioStore.update((s) => ({ ...s, isPlaying: false }));
+            audioStore.update((s: any) => ({ ...s, isPlaying: false }));
             return;
         }
 
@@ -339,7 +341,7 @@
                 toast.error(
                     '⛔ Demasiados errores de reproducción. Se ha detenido el reproductor.'
                 );
-                audioStore.update((s) => ({ ...s, isPlaying: false }));
+                audioStore.update((s: any) => ({ ...s, isPlaying: false }));
                 consecutiveFailures = 0; // Reset for manual restart
                 return;
             }
@@ -471,14 +473,14 @@
                 nextTrack();
             } else {
                 // End of playlist
-                audioStore.update((s) => ({ ...s, isPlaying: false }));
+                audioStore.update((s: any) => ({ ...s, isPlaying: false }));
             }
         }
     }
 
     function handleTimeUpdate() {
         if (musicEl) {
-            audioStore.update((s) => ({
+            audioStore.update((s: any) => ({
                 ...s,
                 currentTime: musicEl.currentTime,
             }));
@@ -573,7 +575,7 @@
     } else if (browser) {
         cancelAnimationFrame(animationLoopId);
         // Reset analysis when stopped to avoid stuck visuals
-        analysisStore.update((s) => ({
+        analysisStore.update((s: any) => ({
             ...s,
             bass: 0,
             mid: 0,
@@ -584,7 +586,7 @@
 
     function handleDurationChange() {
         if (musicEl) {
-            audioStore.update((s) => ({ ...s, duration: musicEl.duration }));
+            audioStore.update((s: any) => ({ ...s, duration: musicEl.duration }));
         }
     }
 </script>
