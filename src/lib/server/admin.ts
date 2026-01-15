@@ -35,4 +35,5 @@ try {
 
 // Export null to prevent crashes, hooks.server.ts handles this gracefully
 export const adminAuth = null; // admin.apps.length ? admin.auth() : null;
-export const adminDB = null; // admin.apps.length ? admin.firestore() : null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const adminDB: any = null; // admin.apps.length ? admin.firestore() : null;
