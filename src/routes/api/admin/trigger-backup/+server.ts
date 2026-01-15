@@ -38,8 +38,10 @@ export const POST = async ({ locals }) => {
 
         // Get Access Token using the initialized Admin SDK credentials
         // Use imports dynamically to access the global admin app instance safely
-        const admin = (await import('firebase-admin')).default;
+        // const admin = (await import('firebase-admin')).default;
+        throw new Error("Backup feature disabled on Edge Runtime");
 
+        /*
         if (!admin.apps.length) {
             throw new Error("Firebase Admin app not initialized");
         }
@@ -51,6 +53,8 @@ export const POST = async ({ locals }) => {
 
         const tokenObj = await credential.getAccessToken();
         const accessToken = tokenObj.access_token;
+        */
+        const accessToken = ""; // Dummy for now
 
         const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default):exportDocuments`;
 
