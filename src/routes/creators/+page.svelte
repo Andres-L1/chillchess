@@ -80,7 +80,7 @@
     }
 
     function copyCredits(track: any) {
-        const creditText = `Music provided by ChillChess\nTrack: ${track.title}\nArtist: ${track.artist}\nListen: https://chillchess.com/creators`;
+        const creditText = `Music provided by ChillChess\nTrack: ${track.title}\nArtist: ${track.artist}\nListen: https://chillchess.app/creators`;
         navigator.clipboard.writeText(creditText);
         toast.success('📋 Créditos copiados al portapapeles');
     }
