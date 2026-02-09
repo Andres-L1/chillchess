@@ -175,6 +175,41 @@ service cloud.firestore {
     }
     
     // =================================================================
+    // BUG REPORTS COLLECTION - Public bug reporting
+    // =================================================================
+    match /bug_reports/{bugId} {
+      // Anyone can read bug reports (for patch notes/transparency)
+      allow read: if true;
+      
+      // Authenticated users can create bug reports
+      allow create: if isAuthenticated() && 
+                       hasRequiredFields(['title', 'description', 'status', 'createdAt']);
+      
+      // Only admins can update/delete bug reports
+      allow update, delete: if isAdmin();
+    }
+    
+    // =================================================================
+    // PROPOSALS COLLECTION - Feature requests and roadmap
+    // =================================================================
+    match /proposals/{proposalId} {
+      // Anyone can read proposals (public roadmap)
+      allow read: if true;
+      
+      // Authenticated users can create proposals
+      allow create: if isAuthenticated() && 
+                       hasRequiredFields(['title', 'description', 'category', 'status', 'createdAt']);
+      
+      // Users can update their own proposals
+      // Admins can update any proposal
+      allow update: if (isAuthenticated() && resource.data.userId == request.auth.uid) ||
+                       isAdmin();
+      
+      // Only admins can delete proposals
+      allow delete: if isAdmin();
+    }
+    
+    // =================================================================
     // ADMIN LOGS - System audit trail
     // =================================================================
     match /adminLogs/{logId} {
