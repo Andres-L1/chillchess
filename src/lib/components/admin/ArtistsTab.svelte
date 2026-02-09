@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { db } from "$lib/firebase";
+    import { onMount, onDestroy } from 'svelte';
+    import { db } from '$lib/firebase';
     import {
         collection,
         getDocs,
@@ -10,25 +10,27 @@
         setDoc,
         updateDoc,
         serverTimestamp,
-    } from "firebase/firestore";
-    import type { ArtistProfile } from "$lib/types/artist";
-    import VerifiedBadge from "$lib/components/VerifiedBadge.svelte";
-    import MusicIcon from "$lib/components/icons/MusicIcon.svelte";
-    import MicrophoneIcon from "$lib/components/icons/MicrophoneIcon.svelte";
-    import { ALBUMS } from "$lib/data/albums";
+        onSnapshot,
+    } from 'firebase/firestore';
+    import type { ArtistProfile } from '$lib/types/artist';
+    import VerifiedBadge from '$lib/components/VerifiedBadge.svelte';
+    import MusicIcon from '$lib/components/icons/MusicIcon.svelte';
+    import MicrophoneIcon from '$lib/components/icons/MicrophoneIcon.svelte';
+    import { ALBUMS } from '$lib/data/albums';
 
     let artists: ArtistProfile[] = [];
     let loading = true;
     let showCreateModal = false;
     let editingArtist: ArtistProfile | null = null;
+    let unsubscribe: (() => void) | null = null;
 
     // Form data
     let formData = {
-        userId: "",
-        artistName: "",
-        bio: "",
-        avatarUrl: "",
-        bannerUrl: "",
+        userId: '',
+        artistName: '',
+        bio: '',
+        avatarUrl: '',
+        bannerUrl: '',
         isVerified: true,
         socialLinks: [] as any[],
     };
@@ -37,34 +39,47 @@
         await loadArtists();
     });
 
+    onDestroy(() => {
+        if (unsubscribe) unsubscribe();
+    });
+
     async function loadArtists() {
         loading = true;
         try {
-            const artistsRef = collection(db, "artists");
+            const artistsRef = collection(db, 'artists');
             const q = query(artistsRef);
-            const snapshot = await getDocs(q);
 
-            artists = snapshot.docs.map(
-                (doc) =>
-                    ({
-                        ...doc.data(),
-                        userId: doc.id,
-                    }) as ArtistProfile,
+            // Use onSnapshot for real-time updates
+            unsubscribe = onSnapshot(
+                q,
+                (snapshot) => {
+                    artists = snapshot.docs.map(
+                        (doc) =>
+                            ({
+                                ...doc.data(),
+                                userId: doc.id,
+                            }) as ArtistProfile
+                    );
+                    loading = false;
+                },
+                (error) => {
+                    console.error('Error loading artists:', error);
+                    loading = false;
+                }
             );
         } catch (error) {
-            console.error("Error loading artists:", error);
-        } finally {
+            console.error('Error loading artists:', error);
             loading = false;
         }
     }
 
     function openCreateModal() {
         formData = {
-            userId: "",
-            artistName: "",
-            bio: "",
-            avatarUrl: "",
-            bannerUrl: "",
+            userId: '',
+            artistName: '',
+            bio: '',
+            avatarUrl: '',
+            bannerUrl: '',
             isVerified: true,
             socialLinks: [],
         };
@@ -76,9 +91,9 @@
         formData = {
             userId: artist.userId,
             artistName: artist.artistName,
-            bio: artist.bio || "",
-            avatarUrl: artist.avatarUrl || "",
-            bannerUrl: artist.bannerUrl || "",
+            bio: artist.bio || '',
+            avatarUrl: artist.avatarUrl || '',
+            bannerUrl: artist.bannerUrl || '',
             isVerified: artist.isVerified || false,
             socialLinks: artist.socialLinks || [],
         };
@@ -88,7 +103,7 @@
 
     async function saveArtist() {
         try {
-            const artistRef = doc(db, "artists", formData.userId);
+            const artistRef = doc(db, 'artists', formData.userId);
 
             const artistData: any = {
                 userId: formData.userId,
@@ -110,25 +125,25 @@
 
             await setDoc(artistRef, artistData, { merge: true });
 
-            alert(editingArtist ? "Artista actualizado" : "Artista creado");
+            alert(editingArtist ? 'Artista actualizado' : 'Artista creado');
             showCreateModal = false;
             await loadArtists();
         } catch (error) {
-            console.error("Error saving artist:", error);
-            alert("Error al guardar artista");
+            console.error('Error saving artist:', error);
+            alert('Error al guardar artista');
         }
     }
 
     async function toggleVerification(artist: ArtistProfile) {
         try {
-            const artistRef = doc(db, "artists", artist.userId);
+            const artistRef = doc(db, 'artists', artist.userId);
             await updateDoc(artistRef, {
                 isVerified: !artist.isVerified,
                 verifiedAt: !artist.isVerified ? Date.now() : null,
             });
             await loadArtists();
         } catch (error) {
-            console.error("Error toggling verification:", error);
+            console.error('Error toggling verification:', error);
         }
     }
 
@@ -142,9 +157,7 @@
     <div class="flex items-center justify-between">
         <div>
             <h2 class="text-2xl font-bold text-white">Gestión de Artistas</h2>
-            <p class="text-slate-400 text-sm mt-1">
-                Administra perfiles de artistas verificados
-            </p>
+            <p class="text-slate-400 text-sm mt-1">Administra perfiles de artistas verificados</p>
         </div>
         <button
             on:click={openCreateModal}
@@ -184,9 +197,7 @@
             ></div>
         </div>
     {:else if artists.length === 0}
-        <div
-            class="text-center py-12 bg-white/5 rounded-xl border border-white/10"
-        >
+        <div class="text-center py-12 bg-white/5 rounded-xl border border-white/10">
             <MicrophoneIcon size="xl" gradient={false} />
             <p class="text-slate-400">No hay artistas registrados</p>
         </div>
@@ -197,9 +208,7 @@
                 <div
                     class="bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-colors"
                 >
-                    <div
-                        class="flex flex-col sm:flex-row items-center sm:items-start gap-4"
-                    >
+                    <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4">
                         <!-- Avatar -->
                         <div
                             class="w-16 h-16 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-2xl shrink-0"
@@ -220,9 +229,7 @@
                             <div
                                 class="flex items-center justify-center sm:justify-start gap-2 mb-1"
                             >
-                                <h3
-                                    class="text-lg font-bold text-white truncate"
-                                >
+                                <h3 class="text-lg font-bold text-white truncate">
                                     {artist.artistName}
                                 </h3>
                                 {#if artist.isVerified}
@@ -230,22 +237,19 @@
                                 {/if}
                             </div>
                             <p class="text-sm text-slate-400 mb-2 line-clamp-2">
-                                {artist.bio || "Sin biografía"}
+                                {artist.bio || 'Sin biografía'}
                             </p>
                             <div
                                 class="flex flex-wrap justify-center sm:justify-start gap-x-4 gap-y-2 text-xs text-slate-500"
                             >
                                 <span>👤 {artist.userId.slice(0, 8)}...</span>
                                 <span
-                                    >📀 {artistAlbums.length} álbum{artistAlbums.length !==
-                                    1
-                                        ? "es"
-                                        : ""}</span
+                                    >📀 {artistAlbums.length} álbum{artistAlbums.length !== 1
+                                        ? 'es'
+                                        : ''}</span
                                 >
                                 {#if artist.followerCount}
-                                    <span
-                                        >👥 {artist.followerCount} seguidores</span
-                                    >
+                                    <span>👥 {artist.followerCount} seguidores</span>
                                 {/if}
                             </div>
                         </div>
@@ -260,9 +264,7 @@
                                     ? 'bg-green-500/20 text-green-300'
                                     : 'bg-slate-500/20 text-slate-300'} rounded-lg text-sm font-medium hover:opacity-80 transition-opacity whitespace-nowrap"
                             >
-                                {artist.isVerified
-                                    ? "✓ Verificado"
-                                    : "Verificar"}
+                                {artist.isVerified ? '✓ Verificado' : 'Verificar'}
                             </button>
                             <button
                                 on:click={() => openEditModal(artist)}
@@ -284,7 +286,7 @@
         type="button"
         class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 w-full h-full cursor-default border-none"
         on:click={() => (showCreateModal = false)}
-        on:keydown={(e) => e.key === "Escape" && (showCreateModal = false)}
+        on:keydown={(e) => e.key === 'Escape' && (showCreateModal = false)}
     >
         <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
         <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -296,16 +298,13 @@
             on:keydown|stopPropagation
         >
             <h3 class="text-2xl font-bold text-white mb-6">
-                {editingArtist ? "Editar" : "Crear"} Artista
+                {editingArtist ? 'Editar' : 'Crear'} Artista
             </h3>
 
             <div class="space-y-4">
                 <!-- User ID -->
                 <div>
-                    <label
-                        for="userId"
-                        class="block text-sm font-medium text-slate-300 mb-2"
-                    >
+                    <label for="userId" class="block text-sm font-medium text-slate-300 mb-2">
                         User ID (Firebase UID) *
                     </label>
                     <input
@@ -323,10 +322,7 @@
 
                 <!-- Artist Name -->
                 <div>
-                    <label
-                        for="artistName"
-                        class="block text-sm font-medium text-slate-300 mb-2"
-                    >
+                    <label for="artistName" class="block text-sm font-medium text-slate-300 mb-2">
                         Nombre del Artista *
                     </label>
                     <input
@@ -340,10 +336,7 @@
 
                 <!-- Bio -->
                 <div>
-                    <label
-                        for="bio"
-                        class="block text-sm font-medium text-slate-300 mb-2"
-                    >
+                    <label for="bio" class="block text-sm font-medium text-slate-300 mb-2">
                         Biografía
                     </label>
                     <textarea
@@ -357,10 +350,7 @@
 
                 <!-- Avatar URL -->
                 <div>
-                    <label
-                        for="avatarUrl"
-                        class="block text-sm font-medium text-slate-300 mb-2"
-                    >
+                    <label for="avatarUrl" class="block text-sm font-medium text-slate-300 mb-2">
                         Avatar URL
                     </label>
                     <input
@@ -374,10 +364,7 @@
 
                 <!-- Banner URL -->
                 <div>
-                    <label
-                        for="bannerUrl"
-                        class="block text-sm font-medium text-slate-300 mb-2"
-                    >
+                    <label for="bannerUrl" class="block text-sm font-medium text-slate-300 mb-2">
                         Banner URL
                     </label>
                     <input
@@ -397,9 +384,7 @@
                             bind:checked={formData.isVerified}
                             class="w-5 h-5 rounded border-white/20 bg-white/10"
                         />
-                        <span class="text-sm font-medium text-slate-300"
-                            >Artista Verificado</span
-                        >
+                        <span class="text-sm font-medium text-slate-300">Artista Verificado</span>
                     </label>
                 </div>
             </div>
@@ -411,7 +396,7 @@
                     disabled={!formData.userId || !formData.artistName}
                     class="flex-1 px-4 py-2 bg-primary-500 hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium transition-colors"
                 >
-                    {editingArtist ? "Actualizar" : "Crear"} Artista
+                    {editingArtist ? 'Actualizar' : 'Crear'} Artista
                 </button>
                 <button
                     on:click={() => (showCreateModal = false)}

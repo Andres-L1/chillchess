@@ -119,12 +119,12 @@
             </div>
             <div class="mt-3 flex flex-wrap gap-2 text-xs">
                 <div class="bg-white/5 rounded px-2 py-1">
-                    <span class="text-orange-400 font-bold">{stats.totalAlbums}</span>
-                    Releases
+                    <span class="text-green-400 font-bold">{stats.verifiedArtists}</span>
+                    Artistas Verificados
                 </div>
                 <div class="bg-white/5 rounded px-2 py-1">
-                    <span class="text-green-400 font-bold">{stats.verifiedArtists}</span>
-                    Artistas
+                    <span class="text-yellow-400 font-bold">{stats.pendingSubmissions}</span>
+                    Envíos Pendientes
                 </div>
             </div>
         </div>

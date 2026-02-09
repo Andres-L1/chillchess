@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { db } from "$lib/firebase";
+    import { onMount, onDestroy } from 'svelte';
+    import { db } from '$lib/firebase';
     import {
         collection,
         query,
@@ -10,7 +10,8 @@
         deleteDoc,
         orderBy,
         where,
-    } from "firebase/firestore";
+        onSnapshot,
+    } from 'firebase/firestore';
 
     interface Proposal {
         id: string;
@@ -19,45 +20,59 @@
         author: string;
         authorEmail: string;
         votes: number;
-        status: "pending" | "approved" | "rejected" | "implemented";
+        status: 'pending' | 'approved' | 'rejected' | 'implemented';
         createdAt: any;
-        category: "album" | "feature" | "improvement";
+        category: 'album' | 'feature' | 'improvement';
     }
 
     let proposals: Proposal[] = [];
     let filteredProposals: Proposal[] = [];
     let loading = true;
-    let filterStatus: "all" | "pending" | "approved" | "implemented" = "all";
-    let statusMessage = "";
+    let filterStatus: 'all' | 'pending' | 'approved' | 'implemented' = 'all';
+    let statusMessage = '';
+    let unsubscribe: (() => void) | null = null;
 
     onMount(async () => {
         await loadProposals();
     });
 
+    onDestroy(() => {
+        if (unsubscribe) unsubscribe();
+    });
+
     async function loadProposals() {
         loading = true;
         try {
-            const proposalsRef = collection(db, "proposals");
-            const q = query(proposalsRef, orderBy("createdAt", "desc"));
-            const snapshot = await getDocs(q);
+            const proposalsRef = collection(db, 'proposals');
+            const q = query(proposalsRef, orderBy('createdAt', 'desc'));
 
-            proposals = snapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            })) as Proposal[];
-
-            applyFilters();
+            // Use onSnapshot for real-time updates
+            unsubscribe = onSnapshot(
+                q,
+                (snapshot) => {
+                    proposals = snapshot.docs.map((doc) => ({
+                        id: doc.id,
+                        ...doc.data(),
+                    })) as Proposal[];
+                    applyFilters();
+                    loading = false;
+                },
+                (error) => {
+                    console.error(error);
+                    statusMessage = '❌ Error al cargar propuestas: ' + error.message;
+                    loading = false;
+                }
+            );
         } catch (e: any) {
             console.error(e);
-            statusMessage = "❌ Error al cargar propuestas: " + e.message;
-        } finally {
+            statusMessage = '❌ Error al cargar propuestas: ' + e.message;
             loading = false;
         }
     }
 
     function applyFilters() {
         filteredProposals = proposals.filter((proposal) => {
-            if (filterStatus === "all") return true;
+            if (filterStatus === 'all') return true;
             return proposal.status === filterStatus;
         });
     }
@@ -67,12 +82,9 @@
         applyFilters();
     }
 
-    async function updateStatus(
-        proposal: Proposal,
-        newStatus: Proposal["status"],
-    ) {
+    async function updateStatus(proposal: Proposal, newStatus: Proposal['status']) {
         try {
-            const proposalRef = doc(db, "proposals", proposal.id);
+            const proposalRef = doc(db, 'proposals', proposal.id);
             await updateDoc(proposalRef, {
                 status: newStatus,
                 updatedAt: Date.now(),
@@ -83,9 +95,9 @@
             applyFilters();
 
             statusMessage = `✅ Propuesta "${proposal.title}" marcada como ${newStatus}`;
-            setTimeout(() => (statusMessage = ""), 3000);
+            setTimeout(() => (statusMessage = ''), 3000);
         } catch (e: any) {
-            statusMessage = "❌ Error: " + e.message;
+            statusMessage = '❌ Error: ' + e.message;
         }
     }
 
@@ -93,36 +105,34 @@
         if (!confirm(`¿Eliminar propuesta "${proposal.title}"?`)) return;
 
         try {
-            await deleteDoc(doc(db, "proposals", proposal.id));
+            await deleteDoc(doc(db, 'proposals', proposal.id));
             proposals = proposals.filter((p) => p.id !== proposal.id);
             applyFilters();
 
             statusMessage = `✅ Propuesta eliminada`;
-            setTimeout(() => (statusMessage = ""), 3000);
+            setTimeout(() => (statusMessage = ''), 3000);
         } catch (e: any) {
-            statusMessage = "❌ Error: " + e.message;
+            statusMessage = '❌ Error: ' + e.message;
         }
     }
 
     function getCategoryIcon(category: string) {
-        if (category === "album") return "🎵";
-        if (category === "feature") return "⚡";
-        return "🔧";
+        if (category === 'album') return '🎵';
+        if (category === 'feature') return '⚡';
+        return '🔧';
     }
 
     function getStatusColor(status: string) {
-        if (status === "approved") return "text-green-400 bg-green-500/20";
-        if (status === "rejected") return "text-red-400 bg-red-500/20";
-        if (status === "implemented") return "text-blue-400 bg-blue-500/20";
-        return "text-yellow-400 bg-yellow-500/20";
+        if (status === 'approved') return 'text-green-400 bg-green-500/20';
+        if (status === 'rejected') return 'text-red-400 bg-red-500/20';
+        if (status === 'implemented') return 'text-blue-400 bg-blue-500/20';
+        return 'text-yellow-400 bg-yellow-500/20';
     }
 </script>
 
 <div class="animate-fade-in">
     <div class="mb-6">
-        <h2 class="text-2xl font-bold text-white mb-2">
-            Propuestas de Usuarios PRO
-        </h2>
+        <h2 class="text-2xl font-bold text-white mb-2">Propuestas de Usuarios PRO</h2>
         <p class="text-slate-400">Gestiona las propuestas de la comunidad</p>
     </div>
 
@@ -135,7 +145,7 @@
     <!-- Filters -->
     <div class="mb-6 flex gap-2 overflow-x-auto pb-2">
         <button
-            on:click={() => (filterStatus = "all")}
+            on:click={() => (filterStatus = 'all')}
             class="px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all {filterStatus ===
             'all'
                 ? 'bg-primary-500 text-white'
@@ -144,34 +154,31 @@
             Todas ({proposals.length})
         </button>
         <button
-            on:click={() => (filterStatus = "pending")}
+            on:click={() => (filterStatus = 'pending')}
             class="px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all {filterStatus ===
             'pending'
                 ? 'bg-yellow-500 text-white'
                 : 'bg-white/5 text-slate-400 hover:bg-white/10'}"
         >
-            Pendientes ({proposals.filter((p) => p.status === "pending")
-                .length})
+            Pendientes ({proposals.filter((p) => p.status === 'pending').length})
         </button>
         <button
-            on:click={() => (filterStatus = "approved")}
+            on:click={() => (filterStatus = 'approved')}
             class="px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all {filterStatus ===
             'approved'
                 ? 'bg-green-500 text-white'
                 : 'bg-white/5 text-slate-400 hover:bg-white/10'}"
         >
-            Aprobadas ({proposals.filter((p) => p.status === "approved")
-                .length})
+            Aprobadas ({proposals.filter((p) => p.status === 'approved').length})
         </button>
         <button
-            on:click={() => (filterStatus = "implemented")}
+            on:click={() => (filterStatus = 'implemented')}
             class="px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all {filterStatus ===
             'implemented'
                 ? 'bg-blue-500 text-white'
                 : 'bg-white/5 text-slate-400 hover:bg-white/10'}"
         >
-            Implementadas ({proposals.filter((p) => p.status === "implemented")
-                .length})
+            Implementadas ({proposals.filter((p) => p.status === 'implemented').length})
         </button>
     </div>
 
@@ -199,7 +206,7 @@
                 />
             </svg>
             <p>
-                No hay propuestas {filterStatus !== "all" ? filterStatus : ""}
+                No hay propuestas {filterStatus !== 'all' ? filterStatus : ''}
             </p>
         </div>
     {:else}
@@ -211,9 +218,7 @@
                     <div class="flex items-start justify-between mb-4">
                         <div class="flex-1">
                             <div class="flex items-center gap-3 mb-2">
-                                <span class="text-2xl"
-                                    >{getCategoryIcon(proposal.category)}</span
-                                >
+                                <span class="text-2xl">{getCategoryIcon(proposal.category)}</span>
                                 <h3 class="text-lg font-bold text-white">
                                     {proposal.title}
                                 </h3>
@@ -221,23 +226,21 @@
                             <p class="text-slate-300 mb-3">
                                 {proposal.description}
                             </p>
-                            <div
-                                class="flex items-center gap-4 text-sm text-slate-400"
-                            >
+                            <div class="flex items-center gap-4 text-sm text-slate-400">
                                 <span>Por: {proposal.author}</span>
                                 <span>•</span>
                                 <span>👍 {proposal.votes} votos</span>
                                 <span>•</span>
                                 <span
                                     >{new Date(
-                                        proposal.createdAt?.seconds * 1000,
+                                        proposal.createdAt?.seconds * 1000
                                     ).toLocaleDateString()}</span
                                 >
                             </div>
                         </div>
                         <span
                             class="px-3 py-1 rounded-lg text-xs font-bold {getStatusColor(
-                                proposal.status,
+                                proposal.status
                             )}"
                         >
                             {proposal.status.toUpperCase()}
@@ -246,26 +249,23 @@
 
                     <!-- Actions -->
                     <div class="flex gap-2 flex-wrap">
-                        {#if proposal.status === "pending"}
+                        {#if proposal.status === 'pending'}
                             <button
-                                on:click={() =>
-                                    updateStatus(proposal, "approved")}
+                                on:click={() => updateStatus(proposal, 'approved')}
                                 class="px-4 py-2 bg-green-500/20 text-green-300 hover:bg-green-500/30 rounded-lg font-medium text-sm transition-colors"
                             >
                                 ✓ Aprobar
                             </button>
                             <button
-                                on:click={() =>
-                                    updateStatus(proposal, "rejected")}
+                                on:click={() => updateStatus(proposal, 'rejected')}
                                 class="px-4 py-2 bg-red-500/20 text-red-300 hover:bg-red-500/30 rounded-lg font-medium text-sm transition-colors"
                             >
                                 ✗ Rechazar
                             </button>
                         {/if}
-                        {#if proposal.status === "approved"}
+                        {#if proposal.status === 'approved'}
                             <button
-                                on:click={() =>
-                                    updateStatus(proposal, "implemented")}
+                                on:click={() => updateStatus(proposal, 'implemented')}
                                 class="px-4 py-2 bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 rounded-lg font-medium text-sm transition-colors"
                             >
                                 🎉 Marcar como Implementada

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import { onMount, onDestroy } from 'svelte';
     import { db } from '$lib/firebase';
     import {
         collection,
@@ -10,6 +10,7 @@
         deleteDoc,
         orderBy,
         limit,
+        onSnapshot,
     } from 'firebase/firestore';
 
     interface User {
@@ -29,9 +30,14 @@
     let filterType: 'all' | 'verified' | 'unverified' | 'pro' | 'admin' = 'all';
     let statusMessage = '';
     let editingUser: User | null = null;
+    let unsubscribe: (() => void) | null = null;
 
     onMount(async () => {
         await loadUsers();
+    });
+
+    onDestroy(() => {
+        if (unsubscribe) unsubscribe();
     });
 
     async function loadUsers() {
@@ -39,18 +45,27 @@
         try {
             const usersRef = collection(db, 'users');
             const q = query(usersRef, orderBy('createdAt', 'desc'), limit(200));
-            const snapshot = await getDocs(q);
 
-            users = snapshot.docs.map((doc) => ({
-                uid: doc.id,
-                ...(doc.data() as any),
-            }));
-
-            applyFilters();
+            // Use onSnapshot for real-time updates
+            unsubscribe = onSnapshot(
+                q,
+                (snapshot) => {
+                    users = snapshot.docs.map((doc) => ({
+                        uid: doc.id,
+                        ...(doc.data() as any),
+                    }));
+                    applyFilters();
+                    loading = false;
+                },
+                (error) => {
+                    console.error(error);
+                    statusMessage = '❌ Error al cargar usuarios: ' + error.message;
+                    loading = false;
+                }
+            );
         } catch (e: any) {
             console.error(e);
             statusMessage = '❌ Error al cargar usuarios: ' + e.message;
-        } finally {
             loading = false;
         }
     }
