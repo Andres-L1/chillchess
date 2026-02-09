@@ -3,6 +3,7 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { type Auth, getAuth, setPersistence, browserLocalPersistence, GoogleAuthProvider } from "firebase/auth";
 import { type Firestore, getFirestore } from "firebase/firestore";
 import { getFunctions, connectFunctionsEmulator, type Functions } from "firebase/functions";
+import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDkAPVdrwASXA-O5ajBU7T14qbKSfef5EI",
@@ -26,14 +27,16 @@ let app: FirebaseApp | undefined;
 let auth: Auth;
 let db: Firestore;
 let functions: Functions;
+let storage: FirebaseStorage;
 
 try {
     app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-    // Initialize Auth, Firestore, and Functions
+    // Initialize Auth, Firestore, Functions, and Storage
     auth = getAuth(app);
     db = getFirestore(app);
     functions = getFunctions(app);
+    storage = getStorage(app);
 
     // Conectar emuladores si estamos en local
     if (typeof window !== 'undefined' && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
@@ -52,15 +55,5 @@ try {
     console.error("Error initializing Firebase (Check .env variables):", e);
 }
 
-// Initializing Storage explicitly
-import { getStorage, type FirebaseStorage } from "firebase/storage";
-let storage: FirebaseStorage;
-try {
-    if (app) {
-        storage = getStorage(app);
-    }
-} catch (e) {
-    console.warn("Storage init failed:", e);
-}
 
 export { app, auth, db, functions, storage };
