@@ -106,10 +106,18 @@
 
         const files = Array.from(target.files);
         const validFiles = files.filter((file) => {
-            if (file.size > 1000 * 1024 * 1024) {
-                toast.warning(`${file.name} es demasiado grande (Máx 1GB).`);
+            // Reject WAV files explicitly
+            if (file.name.toLowerCase().endsWith('.wav')) {
+                toast.error(`${file.name}: Formato WAV no soportado. Usa MP3, AAC, OGG o FLAC.`);
                 return false;
             }
+
+            // 20MB limit per file
+            if (file.size > 20 * 1024 * 1024) {
+                toast.warning(`${file.name} es demasiado grande (Máx 20MB).`);
+                return false;
+            }
+
             if (!file.type.startsWith('audio/')) {
                 toast.warning(`${file.name} no es un archivo de audio válido.`);
                 return false;
@@ -788,9 +796,55 @@
                         <h2 class="text-xl font-bold flex items-center gap-2">
                             <span class="text-2xl">🎵</span> Archivos de Audio
                         </h2>
-                        <p class="text-sm text-slate-400">
-                            Sube tus archivos de audio en formato MP3, WAV o M4A
-                        </p>
+
+                        <!-- File Format Guidelines -->
+                        <div
+                            class="bg-primary-500/10 border border-primary-500/20 rounded-xl p-4 space-y-3"
+                        >
+                            <div class="flex items-start gap-2">
+                                <span class="text-lg">📋</span>
+                                <div class="flex-1 space-y-2">
+                                    <p class="text-sm font-bold text-white">
+                                        Requisitos de Archivo
+                                    </p>
+                                    <div class="grid md:grid-cols-2 gap-3 text-xs">
+                                        <div class="space-y-1.5">
+                                            <p class="text-green-400 font-medium">
+                                                ✓ Formatos Aceptados:
+                                            </p>
+                                            <ul class="text-slate-300 space-y-1 ml-4">
+                                                <li>
+                                                    • <span class="text-green-400 font-bold"
+                                                        >MP3</span
+                                                    > (Recomendado 256kbps+)
+                                                </li>
+                                                <li>• AAC / M4A</li>
+                                                <li>• OGG Vorbis</li>
+                                                <li>• FLAC</li>
+                                            </ul>
+                                        </div>
+                                        <div class="space-y-1.5">
+                                            <p class="text-red-400 font-medium">✗ NO Soportado:</p>
+                                            <ul class="text-slate-400 space-y-1 ml-4">
+                                                <li>
+                                                    • <span class="text-red-400 font-bold">WAV</span
+                                                    > (causa errores de reproducción)
+                                                </li>
+                                            </ul>
+                                            <p class="text-primary-400 font-medium mt-3">
+                                                📦 Límites:
+                                            </p>
+                                            <ul class="text-slate-300 space-y-1 ml-4">
+                                                <li>
+                                                    • <span class="font-bold">20MB</span> por archivo
+                                                </li>
+                                                <li>• Sin límite de canciones</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Audio Upload Zone -->
@@ -809,7 +863,7 @@
                             <input
                                 type="file"
                                 multiple
-                                accept="audio/mpeg,audio/wav,audio/mp4,audio/x-m4a,.mp3,.wav,.m4a"
+                                accept="audio/mpeg,audio/aac,audio/ogg,audio/flac,audio/mp4,audio/x-m4a,.mp3,.aac,.ogg,.flac,.m4a"
                                 on:change={handleAudioSelect}
                                 class="absolute inset-0 opacity-0 cursor-pointer"
                             />
@@ -819,9 +873,10 @@
                                     Arrastra archivos de audio aquí
                                 </p>
                                 <p class="text-sm text-slate-400">o haz clic para seleccionar</p>
-                                <p class="text-xs text-slate-500">
-                                    MP3, WAV, M4A • Máx 1GB por archivo
+                                <p class="text-xs text-green-400 font-bold">
+                                    ✓ MP3 (Recomendado) • AAC • OGG • FLAC
                                 </p>
+                                <p class="text-xs text-red-400">✗ NO subas archivos WAV</p>
                             </div>
                         </div>
                     {:else}

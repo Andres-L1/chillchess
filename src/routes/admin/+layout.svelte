@@ -21,6 +21,7 @@
         { id: 'submissions', label: 'Envíos', icon: '🎵', href: '/admin/submissions' },
         { id: 'music', label: 'Música', icon: '🎼', href: '/admin/music' },
         { id: 'bugs', label: 'Bugs', icon: '🐛', href: '/admin/bugs' },
+        { id: 'cleanup', label: 'Limpieza', icon: '🧹', href: '/admin/cleanup' },
         { id: 'backups', label: 'Backups', icon: '💾', href: '/admin/backups' },
         { id: 'logs', label: 'Logs', icon: '📝', href: '/admin/logs' },
     ];
