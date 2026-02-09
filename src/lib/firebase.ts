@@ -5,7 +5,7 @@ import { type Firestore, getFirestore } from "firebase/firestore";
 import { getFunctions, connectFunctionsEmulator, type Functions } from "firebase/functions";
 
 const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIZaSyDkAPVdrwASXA-O5ajBU7I14qbKSfef5EI",
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDkAPVdrwASXA-O5ajBU7T14qbKSfef5EI",
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "chillchess-57365.firebaseapp.com",
     projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "chillchess-57365",
     storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "chillchess-57365.firebasestorage.app",

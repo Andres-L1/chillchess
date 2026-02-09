@@ -6,21 +6,29 @@ import { env } from '$env/dynamic/private';
 // Wrap in try-catch to avoid crashing if env vars are missing during build
 try {
     if (!admin.apps.length) {
-        const projectId = env.FB_PROJECT_ID;
-        const clientEmail = env.FB_CLIENT_EMAIL;
-        const privateKey = env.FB_PRIVATE_KEY?.replace(/\\n/g, '\n');
-
-        if (projectId && clientEmail && privateKey) {
+        // Try to use FIREBASE_SERVICE_ACCOUNT_KEY (JSON) first
+        if (env.FIREBASE_SERVICE_ACCOUNT_KEY && env.FIREBASE_PROJECT_ID) {
+            const serviceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT_KEY);
+            admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount),
+                projectId: env.FIREBASE_PROJECT_ID,
+            });
+            console.log('[Firebase Admin] Initialized with service account JSON');
+        }
+        // Fallback to individual env vars (for local development)
+        else if (env.FB_PROJECT_ID && env.FB_CLIENT_EMAIL && env.FB_PRIVATE_KEY) {
             admin.initializeApp({
                 credential: admin.credential.cert({
-                    projectId,
-                    clientEmail,
-                    privateKey,
+                    projectId: env.FB_PROJECT_ID,
+                    clientEmail: env.FB_CLIENT_EMAIL,
+                    privateKey: env.FB_PRIVATE_KEY.replace(/\\n/g, '\n'),
                 }),
             });
-            console.log('[Firebase Admin] Initialized successfully');
+            console.log('[Firebase Admin] Initialized with individual env vars');
         } else {
-            console.warn('[Firebase Admin] Skipping init: Missing env vars');
+            console.warn('[Firebase Admin] Skipping init: Missing required env vars');
+            console.warn('Expected: FIREBASE_SERVICE_ACCOUNT_KEY + FIREBASE_PROJECT_ID');
+            console.warn('Or: FB_PROJECT_ID + FB_CLIENT_EMAIL + FB_PRIVATE_KEY');
         }
     }
 } catch (err) {
