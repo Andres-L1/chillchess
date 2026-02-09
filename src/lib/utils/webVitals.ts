@@ -97,7 +97,7 @@ export function initWebVitals() {
     onFCP(reportWebVitals);
     onTTFB(reportWebVitals);
 
-    logger.debug('Web Vitals tracking initialized');
+    logger.info('Web Vitals tracking initialized');
 }
 
 /**
@@ -118,7 +118,7 @@ export function measurePerformance(name: string, startMark: string, endMark: str
             window.performance.measure(name, startMark, endMark);
             const measure = window.performance.getEntriesByName(name)[0];
 
-            logger.debug(`Performance: ${name}`, {
+            logger.info(`Performance: ${name}`, {
                 duration: Math.round(measure.duration),
             });
 

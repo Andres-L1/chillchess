@@ -5,7 +5,7 @@ import { migrateSubmissionFiles } from '$lib/server/r2-migration';
 import { validateArtistName, validateAlbumTitle } from '$lib/server/validation';
 import { requireAuth } from '$lib/server/auth';
 import { handleAPIError, logAudit } from '$lib/server/errors';
-// import admin from 'firebase-admin';
+import admin from 'firebase-admin';
 
 /**
  * Auto-publish endpoint for VERIFIED artists only

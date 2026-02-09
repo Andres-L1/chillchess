@@ -13,16 +13,16 @@
      * ```
      */
 
-    import { onMount, onDestroy } from "svelte";
-    import { logger } from "$lib/utils/logger";
+    import { onMount, onDestroy } from 'svelte';
+    import { logger } from '$lib/utils/logger';
 
-    export let fallbackMessage: string = "Ha ocurrido un error inesperado";
+    export let fallbackMessage: string = 'Ha ocurrido un error inesperado';
     export let showDetails: boolean = false;
     export let onError: ((error: Error) => void) | undefined = undefined;
 
     let hasError = false;
     let error: Error | null = null;
-    let errorInfo: string = "";
+    let errorInfo: string = '';
 
     // Error handler for window-level errors
     function handleError(event: ErrorEvent) {
@@ -30,7 +30,8 @@
         error = event.error;
         errorInfo = event.error?.stack || event.message;
 
-        logger.error("Error caught by boundary", event.error, {
+        logger.error('Error caught by boundary', {
+            error: event.error,
             message: event.message,
             filename: event.filename,
             lineno: event.lineno,
@@ -48,12 +49,11 @@
     // Handler for unhandled promise rejections
     function handleUnhandledRejection(event: PromiseRejectionEvent) {
         hasError = true;
-        error = new Error(
-            event.reason?.message || "Unhandled Promise Rejection",
-        );
+        error = new Error(event.reason?.message || 'Unhandled Promise Rejection');
         errorInfo = event.reason?.stack || String(event.reason);
 
-        logger.error("Unhandled promise rejection", event.reason, {
+        logger.error('Unhandled promise rejection', {
+            reason: event.reason,
             promise: event.promise,
         });
 
@@ -65,22 +65,19 @@
     }
 
     onMount(() => {
-        window.addEventListener("error", handleError);
-        window.addEventListener("unhandledrejection", handleUnhandledRejection);
+        window.addEventListener('error', handleError);
+        window.addEventListener('unhandledrejection', handleUnhandledRejection);
     });
 
     onDestroy(() => {
-        window.removeEventListener("error", handleError);
-        window.removeEventListener(
-            "unhandledrejection",
-            handleUnhandledRejection,
-        );
+        window.removeEventListener('error', handleError);
+        window.removeEventListener('unhandledrejection', handleUnhandledRejection);
     });
 
     function resetError() {
         hasError = false;
         error = null;
-        errorInfo = "";
+        errorInfo = '';
     }
 </script>
 
@@ -131,9 +128,7 @@
                         </div>
                         {#if errorInfo}
                             <div>
-                                <span class="text-slate-500 text-sm"
-                                    >Stack Trace:</span
-                                >
+                                <span class="text-slate-500 text-sm">Stack Trace:</span>
                                 <pre
                                     class="text-slate-300 font-mono text-xs mt-1 overflow-x-auto">{errorInfo}</pre>
                             </div>
@@ -160,9 +155,8 @@
 
             <!-- Support Link -->
             <p class="text-slate-500 text-sm mt-6">
-                Si el problema persiste, <a
-                    href="/bugs"
-                    class="text-primary-400 hover:underline">reporta el bug</a
+                Si el problema persiste, <a href="/bugs" class="text-primary-400 hover:underline"
+                    >reporta el bug</a
                 >
             </p>
         </div>
