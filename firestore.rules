@@ -210,6 +210,17 @@ service cloud.firestore {
     }
     
     // =================================================================
+    // NOW PLAYING COLLECTION - Real-time widget sync
+    // =================================================================
+    match /nowPlaying/{userId} {
+      // Anyone can read nowPlaying data (for public widgets)
+      allow read: if true;
+      
+      // Only the owner can write their nowPlaying status
+      allow write: if isOwner(userId);
+    }
+    
+    // =================================================================
     // ADMIN LOGS - System audit trail
     // =================================================================
     match /adminLogs/{logId} {
