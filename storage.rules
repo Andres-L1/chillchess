@@ -1,52 +1,128 @@
 rules_version = '2';
+
+// Firebase Storage Security Rules for ChillChess
+// Optimized for music streaming app with artist submissions
+
 service firebase.storage {
   match /b/{bucket}/o {
     
-    // ============================================
-    // DEFAULT DENY
-    // ============================================
-    match /{allPaths=**} {
-      allow read, write: if false;
-    }
-
-    // ============================================
-    // ALBUMS & TRACKS
-    // ============================================
-    match /albums/{artistId}/{allPaths=**} {
-      // Public read so everyone can listen/see covers
-      allow read: if true;
-      
-      // Write access:
-      // 1. Admins (custom claim or explicit list would be better, but we rely on Auth for now)
-      // 2. The artist themselves (must be authenticated and own the folder)
-      allow write: if request.auth != null 
-                   && (request.auth.uid == artistId || firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin == true);
-    }
-
-    // ============================================
-    // CREATOR CATALOG
-    // ============================================
-    // Used for streamer-safe music
-    match /catalog/{allPaths=**} {
-      allow read: if true; // Public for streamers
-      allow write: if request.auth != null 
-                   && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    // Helper function: Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
     }
     
-    // ============================================
-    // MUSIC SUBMISSIONS
-    // ============================================
-    // Path structure used in code: submissions/{userId}/{timestamp}/{filename}
+    // Helper function: Check if user is admin
+    function isAdmin() {
+      return isAuthenticated() && 
+             (request.auth.token.admin == true || 
+              request.auth.token.isAdmin == true);
+    }
+    
+    // Helper function: Check if user owns the resource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Helper function: Validate file size (max 50MB for audio, 5MB for images)
+    function isValidSize(maxSizeMB) {
+      return request.resource.size <= maxSizeMB * 1024 * 1024;
+    }
+    
+    // Helper function: Validate audio file types
+    function isAudioFile() {
+      return request.resource.contentType.matches('audio/mpeg') ||
+             request.resource.contentType.matches('audio/wav') ||
+             request.resource.contentType.matches('audio/mp4') ||
+             request.resource.contentType.matches('audio/x-m4a') ||
+             request.resource.contentType.matches('audio/.*');
+    }
+    
+    // Helper function: Validate image file types
+    function isImageFile() {
+      return request.resource.contentType.matches('image/jpeg') ||
+             request.resource.contentType.matches('image/jpg') ||
+             request.resource.contentType.matches('image/png') ||
+             request.resource.contentType.matches('image/webp');
+    }
+    
+    // =================================================================
+    // PUBLIC MUSIC CATALOG - Read-only for everyone
+    // =================================================================
+    match /music/{allPaths=**} {
+      // Anyone can read/download approved music
+      allow read: if true;
+      
+      // Only admins can write/delete
+      allow write, delete: if isAdmin();
+    }
+    
+    // =================================================================
+    // ALBUM COVERS - Read-only for everyone
+    // =================================================================
+    match /covers/{allPaths=**} {
+      // Anyone can view album covers
+      allow read: if true;
+      
+      // Only admins can upload/delete covers
+      allow write, delete: if isAdmin();
+    }
+    
+    // =================================================================
+    // ARTIST SUBMISSIONS - User-specific uploads
+    // =================================================================
     match /submissions/{userId}/{allPaths=**} {
-       // SECURITY: Only the uploader (owner) or admins can read submissions
-       allow read: if request.auth != null && 
-                      (request.auth.uid == userId || 
-                       firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin == true);
-       
-       // Only the owner can write, with size limit
-       allow write: if request.auth != null && 
-                       request.auth.uid == userId &&
-                       request.resource.size < 300 * 1024 * 1024; // 300MB limit
+      // Users can read their own submissions
+      // Admins can read all submissions
+      allow read: if isOwner(userId) || isAdmin();
+      
+      // Users can upload to their own folder
+      // Validate file type and size
+      allow create: if isOwner(userId) && 
+                       (
+                         (isAudioFile() && isValidSize(50)) ||
+                         (isImageFile() && isValidSize(5))
+                       );
+      
+      // Users can update/delete their own submissions
+      // Admins can update/delete any submission
+      allow update, delete: if isOwner(userId) || isAdmin();
+    }
+    
+    // =================================================================
+    // ARTIST BANNERS - Public read, restricted write
+    // =================================================================
+    match /banners/{allPaths=**} {
+      // Anyone can view banners
+      allow read: if true;
+      
+      // Only authenticated users can upload their own banner
+      // Admins can upload any banner
+      allow write: if (isAuthenticated() && isImageFile() && isValidSize(10)) || 
+                      isAdmin();
+      
+      allow delete: if isAdmin();
+    }
+    
+    // =================================================================
+    // ARTIST PROFILE PICTURES - Public read, restricted write
+    // =================================================================
+    match /profiles/{userId}/{fileName} {
+      // Anyone can view profile pictures
+      allow read: if true;
+      
+      // Users can upload/update their own profile picture
+      // Validate it's an image and under 2MB
+      allow write: if (isOwner(userId) && isImageFile() && isValidSize(2)) || 
+                      isAdmin();
+      
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+    
+    // =================================================================
+    // DEFAULT - Deny all other paths
+    // =================================================================
+    match /{allPaths=**} {
+      allow read, write: if false;
     }
   }
 }
