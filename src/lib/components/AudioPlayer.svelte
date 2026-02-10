@@ -2,6 +2,7 @@
     import { audioStore, nextTrack, prevTrack, togglePlayback } from '$lib/audio/store';
     import { toast } from '$lib/stores/notificationStore';
     import { logError, logAudioError, logR2Error } from '$lib/logger';
+    import { devLogger } from '$lib/utils/devLogger';
 
     // Ambience files (loops)
     // Ambience files (loops)
@@ -162,7 +163,7 @@
         // Check cache
         if (urlCache.has(nextTrack.id)) return;
 
-        console.log('🔮 Prefetching next track:', nextTrack.title);
+        devLogger.debug('Prefetching next track', { title: nextTrack.title });
         // We reuse the resolution logic but just store it
         try {
             if (nextTrack.r2Key) {
@@ -174,7 +175,7 @@
                 if (res.ok) {
                     const data = await res.json();
                     urlCache.set(nextTrack.id, { url: data.url, expires: Date.now() + URL_TTL });
-                    console.log('🔮 Prefetched:', nextTrack.title);
+                    devLogger.debug('Prefetched track', { title: nextTrack.title });
                 }
             }
         } catch (e) {
@@ -183,18 +184,18 @@
     }
 
     async function resolveAudioUrl(track: any) {
-        console.log('🎵 Resolving audio URL for track:', track.title || track.id);
+        devLogger.debug('Resolving audio URL for track', { title: track.title, id: track.id });
 
         // 1. Static file (legacy)
         if (track.file) {
-            console.log('✅ Using static file path');
+            devLogger.debug('Using static file path');
             resolvedStreamUrl = track.file;
             return;
         }
 
         // 2. Direct URL (legacy external)
         if (track.url) {
-            console.log('✅ Using direct URL');
+            devLogger.debug('Using direct URL');
             resolvedStreamUrl = track.url;
             return;
         }
@@ -204,12 +205,12 @@
             // Check Cache first
             const cached = urlCache.get(track.id);
             if (cached && cached.expires > Date.now()) {
-                console.log('⚡ Using cached URL');
+                devLogger.debug('Using cached URL');
                 resolvedStreamUrl = cached.url;
                 return;
             }
 
-            console.log('📦 Fetching signed URL for R2 key:', track.r2Key);
+            devLogger.debug('Fetching signed URL for R2 key', { r2Key: track.r2Key });
 
             // Retry logic for network errors
             for (let attempt = 0; attempt < 3; attempt++) {
@@ -222,7 +223,7 @@
 
                     if (res.ok) {
                         const data = await res.json();
-                        console.log('✅ R2 URL resolved successfully');
+                        devLogger.debug('R2 URL resolved successfully');
                         // Cache it
                         if (track.id) {
                             urlCache.set(track.id, {
@@ -321,7 +322,7 @@
             // Code 4 can happen if R2 returns 403/404 temporarily
             // Code 2 is network error
             if ((error.code === 2 || error.code === 4) && retryCount < 2) {
-                console.log(`🔄 Retrying playback (Attempt ${retryCount + 1}/2)...`);
+                devLogger.debug(`Retrying playback (Attempt ${retryCount + 1}/2)`);
                 retryCount++;
                 setTimeout(() => {
                     if (musicEl) {
@@ -371,13 +372,13 @@
             if (musicEl.getAttribute('src') !== resolvedStreamUrl) {
                 musicEl.src = resolvedStreamUrl;
                 if ($audioStore.isPlaying) {
-                    musicEl.play().catch((e) => console.log('Auto-play blocked:', e));
+                    musicEl.play().catch((e) => devLogger.debug('Auto-play blocked', { error: e }));
                 }
             }
 
             // Sync Play/Pause State
             if ($audioStore.isPlaying && musicEl.paused && musicEl.readyState >= 2) {
-                musicEl.play().catch((e) => console.log('Play error:', e));
+                musicEl.play().catch((e) => devLogger.debug('Play error', { error: e }));
             } else if (!$audioStore.isPlaying && !musicEl.paused) {
                 musicEl.pause();
             }
@@ -450,7 +451,7 @@
     }
 
     function handleTrackEnd() {
-        console.log('Track ended');
+        devLogger.debug('Track ended');
 
         // Handle repeat modes
         const { repeatMode, currentTrackIndex, playlist, shuffle } = $audioStore;
@@ -510,7 +511,7 @@
             sourceNode.connect(analyser);
             analyser.connect(audioContext.destination);
 
-            console.log('Audio Context Initialized for Visualization');
+            devLogger.debug('Audio Context Initialized for Visualization');
         } catch (e) {
             console.error('Audio Analysis Setup Failed:', e);
         }
@@ -601,7 +602,7 @@
     on:playing={() => {
         // Reset check logic on successful playback start
         consecutiveFailures = 0;
-        console.log('✅ Playback started successfully. Failure counter reset.');
+        devLogger.debug('Playback started successfully. Failure counter reset.');
     }}
     preload="auto"
     crossorigin="anonymous"

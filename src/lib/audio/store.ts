@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import type { Track, Album } from '$lib/data/albums';
+import type { Track, Album } from '$lib/types';
 import { ALBUMS } from '$lib/data/albums';
 import { db } from '$lib/firebase';
 import { collection, getDocs, query, limit, orderBy } from 'firebase/firestore';

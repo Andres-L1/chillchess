@@ -1,5 +1,5 @@
 <script lang="ts">
-    export let size = 'md';
+    export let size: 'sm' | 'md' | 'lg' | 'xl' = 'md';
     export let className = '';
 
     const sizes = {

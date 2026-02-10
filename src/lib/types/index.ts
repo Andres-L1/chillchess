@@ -31,30 +31,42 @@ export interface User {
 
 export type MusicGenre = 'classical' | 'jazz' | 'electronic' | 'ambient' | 'other';
 export type TrackStatus = 'pending' | 'approved' | 'rejected';
+export type AlbumCategory = 'musica' | 'juegos' | 'ambiente';
 
 export interface Track {
     id: string;
     title: string;
     artist: string;
-    album: string;
-    duration: number; // in seconds
-    url: string;
-    coverUrl: string;
+    album?: string;   // Optional for legacy static data
+    duration?: number;
+    url?: string;
+    file?: string;
+    cover?: string;
+    coverUrl?: string; // Firestore URL
     r2Key?: string;
-    genre: MusicGenre;
-    createdAt: Date;
+    albumCover?: string; // Album cover URL or R2 key
+    genre?: MusicGenre; // Optional for legacy
+    createdAt?: Date;
 }
 
 export interface Album {
     id: string;
     title: string;
     artist: string;
-    artistId: string;
+    artistId?: string;
     cover: string;
+    r2CoverKey?: string;
     tracks: Track[];
-    releaseDate: Date;
-    genre: MusicGenre;
+    genre?: MusicGenre; // Optional
+    releaseDate?: Date;
     description?: string;
+    createdAt?: Date;
+    tag?: string;
+    price?: string;
+    isPremium?: boolean;
+    vibeId?: string;
+    albumCategory?: string;
+    category?: string;
 }
 
 export interface Artist {

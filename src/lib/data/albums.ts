@@ -1,35 +1,9 @@
-export interface Track {
-    id?: string; // Optional for now
-    title: string;
-    artist: string;
-    file?: string; // Legacy static file
-    url?: string; // Legacy external URL
-    cover?: string; // Optional per-track cover (for singles)
-    duration?: number;
-    r2Key?: string; // New: R2 Secure Key
-}
+import type { Track, Album } from '$lib/types';
+// Removed local interface definitions
+// Local interfaces removed, using $lib/types
 
 export type AlbumCategory = 'musica' | 'juegos' | 'ambiente';
 
-export interface Album {
-    artistId?: string; // Optional: Link to artist profile
-    id: string;
-    title: string;
-    artist: string;
-    cover: string;
-    tracks?: Track[]; // Lista de canciones del álbum
-    isVerified?: boolean; // Si el artista del álbum está verificado
-    vibeId?: string;
-    price: string;
-    tag: string;
-    description: string;
-    isPremium?: boolean; // Requires Pro subscription
-    category: string; // GENRE: Lo-fi, Jazz Hop, etc.
-    albumCategory?: AlbumCategory; // TYPE: musica, juegos, ambiente
-    createdAt?: any; // Timestamp from Firestore
-    r2CoverKey?: string; // Optional for migrated albums
-    storageProvider?: 'cloudflare_r2' | 'external_link' | 'firebase'; // New field for R2 integration
-}
 
 export const ALBUMS: Album[] = [
     {

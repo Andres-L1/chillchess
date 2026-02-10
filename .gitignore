@@ -41,6 +41,8 @@ static/sounds/*.m4a
 INTERNAL_NOTES.md
 CREDENTIALS.md
 *.private.md
+SECURITY_IMPROVEMENTS.md
+SECURITY_DEPLOY.md
 
 # Firebase
 .firebase/

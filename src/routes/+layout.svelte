@@ -13,6 +13,7 @@
     import ToastContainer from '$lib/components/ToastContainer.svelte';
     import AudioSync from '$lib/components/AudioSync.svelte';
     import TimerSync from '$lib/components/TimerSync.svelte';
+    import KeyboardShortcuts from '$lib/components/KeyboardShortcuts.svelte';
 
     storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 
@@ -51,6 +52,14 @@
     // END AUTH WALL
 </script>
 
+<!-- Skip Navigation Links for Accessibility -->
+<a
+    href="#main-content"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-lg focus:shadow-lg"
+>
+    Saltar al contenido principal
+</a>
+
 <!-- App Shell -->
 <div class="min-h-screen w-full relative">
     <!-- Dynamic Background Layer -->
@@ -60,6 +69,7 @@
 
     <!-- Content -->
     <div
+        id="main-content"
         class="relative z-10 {$page.url.pathname !== '/' &&
         !$page.url.pathname.startsWith('/app') &&
         !$page.url.pathname.match(/^\/rooms\/[a-zA-Z0-9]+$/)
@@ -82,6 +92,7 @@
         <CookieConsent />
         <AudioSync />
         <TimerSync />
+        <KeyboardShortcuts />
     {/if}
 </div>
 
@@ -93,5 +104,17 @@
     :global(h1, h2, h3, h4, h5, h6) {
         font-family: 'Poppins', sans-serif;
         font-weight: 600;
+    }
+    /* Screen reader only class */
+    :global(.sr-only) {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
     }
 </style>

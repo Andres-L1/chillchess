@@ -1,132 +1,70 @@
 <script lang="ts">
-    import { audioStore } from '$lib/audio/store';
-    import { getAlbumById } from '$lib/data/albums';
+    import type { Track } from '$lib/types';
+    import { createEventDispatcher } from 'svelte';
 
-    export let currentTrack: any;
+    export let currentTrack: Track;
     export let isFavorite: boolean;
-    export let onFavoriteClick: () => void;
-    export let onShowTracks: () => void;
 
-    $: currentAlbum = $audioStore.currentAlbumId ? getAlbumById($audioStore.currentAlbumId) : null;
-    let resolvedCover = '/logo-mobile.png';
-
-    $: if (currentAlbum) {
-        // Helper to detect if string is an R2 key
-        const isR2Key = (str: string) =>
-            str &&
-            (str.startsWith('music/') ||
-                str.startsWith('catalog/') ||
-                str.startsWith('submissions/') ||
-                !str.includes('/'));
-
-        if (currentAlbum.cover && !isR2Key(currentAlbum.cover)) {
-            resolvedCover = currentAlbum.cover;
-        } else if (currentAlbum.r2CoverKey || (currentAlbum.cover && isR2Key(currentAlbum.cover))) {
-            const keyToFetch = currentAlbum.r2CoverKey || currentAlbum.cover;
-            // Resolve R2 URL asynchronously
-            fetch(`/api/r2/get-url?key=${encodeURIComponent(keyToFetch)}`)
-                .then((res) => res.json())
-                .then((data) => {
-                    if (data.url) resolvedCover = data.url;
-                })
-                .catch((err) => console.error('Error resolving cover in TrackInfo', err));
-        } else {
-            resolvedCover = '/logo-mobile.png';
-        }
-    } else if (currentTrack?.cover && !currentTrack.cover.startsWith('music/')) {
-        resolvedCover = currentTrack.cover;
-    } else if ((currentTrack as any)?.albumCover) {
-        const r2Key = (currentTrack as any).albumCover;
-        if (r2Key && (r2Key.startsWith('music/') || r2Key.startsWith('catalog/'))) {
-            fetch(`/api/r2/get-url?key=${encodeURIComponent(r2Key)}`)
-                .then((res) => res.json())
-                .then((data) => {
-                    if (data.url) resolvedCover = data.url;
-                })
-                .catch((err) => console.error('Error resolving albumCover in TrackInfo', err));
-        } else {
-            resolvedCover = r2Key;
-        }
-    }
+    const dispatch = createEventDispatcher();
 </script>
 
-<div class="flex items-center gap-4 w-1/3 min-w-0">
-    <!-- Album Cover & Expand Button -->
+<div class="flex items-center gap-3 group/info">
+    <!-- Album Art / Trigger -->
     <button
-        type="button"
-        on:click={onShowTracks}
-        class="hidden sm:relative sm:flex w-14 h-14 bg-white/5 rounded-lg items-center justify-center shrink-0 overflow-hidden cursor-pointer group shadow-lg shadow-black/40 border border-white/10"
-        title="Ver lista de canciones"
+        class="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 shadow-lg border border-white/10 group-hover/info:border-primary-500/50 transition-colors"
+        on:click={() => dispatch('showTracks')}
     >
-        {#if resolvedCover}
-            <img
-                src={resolvedCover}
-                alt={currentAlbum?.title || currentTrack.title}
-                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-            />
-            <!-- Overlay Icon on Hover -->
-            <div
-                class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-                <svg
-                    class="w-6 h-6 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    ><path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M4 6h16M4 12h16M4 18h16"
-                    ></path></svg
-                >
-            </div>
-        {:else}
-            <!-- Fallback if no album found -->
-            <div
-                class="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white/50"
-            >
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"
-                    ><path
-                        d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"
-                    /></svg
-                >
-            </div>
-        {/if}
+        <img
+            src={currentTrack.cover || currentTrack.albumCover || '/logo-mobile.png'}
+            class="w-full h-full object-cover"
+            alt={currentTrack.title}
+        />
+        <div
+            class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/info:opacity-100 transition-opacity"
+        >
+            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 6h16M4 12h16M4 18h16"
+                />
+            </svg>
+        </div>
     </button>
 
-    <div class="min-w-0 flex-1">
-        <div class="font-bold text-sm sm:text-base truncate text-white">
-            {currentTrack.title}
+    <div class="flex flex-col min-w-0">
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-bold text-white truncate max-w-[120px]"
+                >{currentTrack.title}</span
+            >
+            <button
+                on:click={() => dispatch('favorite')}
+                class="text-slate-400 hover:text-rose-500 transition-colors"
+            >
+                {#if isFavorite}
+                    <svg class="w-4 h-4 text-rose-500 fill-current" viewBox="0 0 24 24"
+                        ><path
+                            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                        /></svg
+                    >
+                {:else}
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        ><path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                        /></svg
+                    >
+                {/if}
+            </button>
         </div>
-        <div class="text-xs sm:text-sm text-slate-400 truncate">
+        <a
+            href="/artist"
+            class="text-xs text-slate-400 hover:text-white transition-colors truncate block"
+        >
             {currentTrack.artist}
-        </div>
+        </a>
     </div>
-
-    <button
-        on:click={onFavoriteClick}
-        class="text-white/50 hover:text-rose-400 transition-colors p-2 shrink-0"
-        title="Añadir a favoritos"
-        aria-label="Añadir a favoritos"
-    >
-        {#if isFavorite}
-            <svg class="w-5 h-5 text-rose-500 fill-current" viewBox="0 0 24 24"
-                ><path
-                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                /></svg
-            >
-        {:else}
-            <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                ><path
-                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                /></svg
-            >
-        {/if}
-    </button>
 </div>

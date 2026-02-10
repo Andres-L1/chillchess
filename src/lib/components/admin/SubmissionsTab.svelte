@@ -17,6 +17,7 @@
     } from 'firebase/firestore';
     import { toast } from '$lib/stores/notificationStore';
     import { logger } from '$lib/utils/logger';
+    import { devLogger } from '$lib/utils/devLogger';
     import { page } from '$app/stores';
 
     const dispatch = createEventDispatcher();
@@ -423,7 +424,7 @@
     async function reprocessSubmission(submission: Submission) {
         if (!confirm('¿Re-procesar este envío? Esto generará el álbum de nuevo.')) return;
 
-        console.log('🚀 Starting reprocess for submission:', submission);
+        devLogger.debug('Starting reprocess for submission', { submission });
 
         // DEFENSIVE CHECKS
         if (!db) {
@@ -460,7 +461,7 @@
                         profiles.find((p) => p.id !== submission.artistId) ||
                         profiles[0];
                     targetProfileId = best.id;
-                    console.log(`✅ Re-process: Resolved Profile ID: ${targetProfileId}`);
+                    devLogger.debug('Re-process: Resolved Profile ID', { targetProfileId });
                 }
             } catch (err) {
                 console.error('Error resolving profile:', err);
@@ -473,7 +474,7 @@
             let tracksForAlbum = [];
             let secureCoverKey = submission.r2CoverKey;
 
-            console.log('🔄 Logic: Processing tracks...');
+            devLogger.debug('Logic: Processing tracks...');
 
             if (submission.submissionType === 'r2_direct') {
                 // 🚀 R2 Migration (Move files to permanent folder)
@@ -560,10 +561,10 @@
                     submission.submissionType === 'r2_direct' ? 'cloudflare_r2' : 'external_link',
             };
 
-            console.log('💾 Saving album to Firestore:', albumData);
+            devLogger.debug('Saving album to Firestore', { albumData });
 
             await addDoc(collection(db, 'albums'), albumData);
-            console.log('✅ Album created in Firestore');
+            devLogger.debug('Album created in Firestore');
 
             statusMessage = `✅ ¡Re-procesado exitosamente! Álbum creado.`;
             dispatch('approved');
@@ -609,7 +610,7 @@
                             files: filesToCleanup,
                         }),
                     });
-                    console.log('✅ R2 files cleaned up for rejected submission');
+                    devLogger.debug('R2 files cleaned up for rejected submission');
                 } catch (cleanupErr) {
                     console.warn('⚠️ File cleanup failed (non-critical):', cleanupErr);
                     // Non-blocking - continue even if cleanup fails

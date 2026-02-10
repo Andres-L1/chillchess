@@ -1,5 +1,6 @@
 <script lang="ts">
-    import { ALBUMS, type Album, type AlbumCategory, CATEGORY_LABELS } from '$lib/data/albums';
+    import { ALBUMS, CATEGORY_LABELS } from '$lib/data/albums';
+    import type { Album, AlbumCategory } from '$lib/types/index';
     import { playAlbum, audioStore, nextTrack, prevTrack } from '$lib/audio/store';
     import { favoritesStore, toggleFavorite, isFavorite } from '$lib/data/favorites';
     import VerifiedBadge from '$lib/components/VerifiedBadge.svelte';
@@ -72,7 +73,8 @@
     }
 
     // Derived filtered albums (Deep Search)
-    $: sourceAlbums = $audioStore.availableAlbums.length > 0 ? $audioStore.availableAlbums : ALBUMS;
+    // FIX: Removed fallback to ALBUMS to ensure we only show real data
+    $: sourceAlbums = $audioStore.availableAlbums;
 
     $: filteredAlbums = sourceAlbums.filter((a) => {
         // Use albumCategory for filtering, fallback to 'musica' if not set
@@ -102,7 +104,7 @@
     $: filteredSingles = filteredAlbums.filter((a) => (a.tracks?.length || 0) <= 1);
 
     // Featured album (randomized or specific)
-    $: featuredAlbum = ALBUMS[0]; // For now, the first one
+    $: featuredAlbum = sourceAlbums.length > 0 ? sourceAlbums[0] : ALBUMS[0]; // Fallback to mock only for hero background if needed, but prefer real
 
     function togglePlayPause(albumId: string) {
         const isCurrentlyPlaying = $audioStore.currentAlbumId === albumId && $audioStore.isPlaying;
@@ -379,7 +381,15 @@
             </div>
         {/if}
 
-        {#if filteredAlbums.length === 0}
+        {#if $audioStore.isLoadingLibrary}
+            <div
+                class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 animate-pulse"
+            >
+                {#each Array(10) as _}
+                    <div class="bg-white/5 rounded-2xl aspect-square"></div>
+                {/each}
+            </div>
+        {:else if filteredAlbums.length === 0}
             <div
                 class="flex flex-col items-center justify-center py-20 text-center animate-fade-in"
             >

@@ -8,6 +8,8 @@
     import MusicIcon from '$lib/components/icons/MusicIcon.svelte';
     import AlertIcon from '$lib/components/icons/AlertIcon.svelte';
 
+    import LoadingSkeleton from '$lib/components/LoadingSkeleton.svelte';
+
     let stats = {
         totalUsers: 0,
         proUsers: 0,
@@ -77,100 +79,104 @@
 </script>
 
 <!-- Stats Grid - Pure Content -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" in:fade>
-    <!-- Users Stat -->
-    <div
-        class="bg-[#131b2e]/60 backdrop-blur-xl p-6 rounded-2xl border border-white/5 relative overflow-hidden group hover:border-blue-500/30 transition-colors"
-    >
+{#if loading}
+    <LoadingSkeleton />
+{:else}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" in:fade>
+        <!-- Users Stat -->
         <div
-            class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"
+            class="bg-[#131b2e]/60 backdrop-blur-xl p-6 rounded-2xl border border-white/5 relative overflow-hidden group hover:border-blue-500/30 transition-colors"
         >
-            <UsersIcon size="lg" />
-        </div>
-        <div class="relative z-10">
-            <h3 class="text-slate-400 text-sm font-medium">Usuarios Totales</h3>
-            <p class="text-3xl font-bold text-white mt-1">
-                {stats.totalUsers}
-            </p>
-            <div class="mt-2 text-xs flex items-center gap-2">
-                <span class="text-blue-400 bg-blue-400/10 px-1.5 py-0.5 rounded font-bold">
-                    {stats.proUsers} PRO
-                </span>
+            <div
+                class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"
+            >
+                <UsersIcon size="lg" />
             </div>
-        </div>
-    </div>
-
-    <!-- Music Stat -->
-    <div
-        class="bg-[#131b2e]/60 backdrop-blur-xl p-6 rounded-2xl border border-white/5 relative overflow-hidden group hover:border-orange-500/30 transition-colors"
-    >
-        <div
-            class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"
-        >
-            <MusicIcon size="lg" />
-        </div>
-        <div class="relative z-10">
-            <h3 class="text-slate-400 text-sm font-medium">Catálogo Musical</h3>
-            <div class="flex items-baseline gap-2 mt-1">
-                <p class="text-3xl font-bold text-white">
-                    {stats.totalAlbums}
+            <div class="relative z-10">
+                <h3 class="text-slate-400 text-sm font-medium">Usuarios Totales</h3>
+                <p class="text-3xl font-bold text-white mt-1">
+                    {stats.totalUsers}
                 </p>
-                <span class="text-xs text-slate-500">Total</span>
-            </div>
-            <div class="mt-3 flex flex-wrap gap-2 text-xs">
-                <div class="bg-white/5 rounded px-2 py-1">
-                    <span class="text-green-400 font-bold">{stats.verifiedArtists}</span>
-                    Artistas Verificados
-                </div>
-                <div class="bg-white/5 rounded px-2 py-1">
-                    <span class="text-yellow-400 font-bold">{stats.pendingSubmissions}</span>
-                    Envíos Pendientes
+                <div class="mt-2 text-xs flex items-center gap-2">
+                    <span class="text-blue-400 bg-blue-400/10 px-1.5 py-0.5 rounded font-bold">
+                        {stats.proUsers} PRO
+                    </span>
                 </div>
             </div>
         </div>
+
+        <!-- Music Stat -->
+        <div
+            class="bg-[#131b2e]/60 backdrop-blur-xl p-6 rounded-2xl border border-white/5 relative overflow-hidden group hover:border-orange-500/30 transition-colors"
+        >
+            <div
+                class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"
+            >
+                <MusicIcon size="lg" />
+            </div>
+            <div class="relative z-10">
+                <h3 class="text-slate-400 text-sm font-medium">Catálogo Musical</h3>
+                <div class="flex items-baseline gap-2 mt-1">
+                    <p class="text-3xl font-bold text-white">
+                        {stats.totalAlbums}
+                    </p>
+                    <span class="text-xs text-slate-500">Total</span>
+                </div>
+                <div class="mt-3 flex flex-wrap gap-2 text-xs">
+                    <div class="bg-white/5 rounded px-2 py-1">
+                        <span class="text-green-400 font-bold">{stats.verifiedArtists}</span>
+                        Artistas Verificados
+                    </div>
+                    <div class="bg-white/5 rounded px-2 py-1">
+                        <span class="text-yellow-400 font-bold">{stats.pendingSubmissions}</span>
+                        Envíos Pendientes
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Proposals Stat -->
+        <a
+            href="/admin/proposals"
+            class="bg-[#131b2e]/60 backdrop-blur-xl p-6 rounded-2xl border border-white/5 relative overflow-hidden group hover:border-purple-500/30 transition-colors cursor-pointer block"
+        >
+            <div
+                class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"
+            >
+                <BulbIcon size="lg" gradient={false} />
+            </div>
+            <div class="relative z-10">
+                <h3 class="text-slate-400 text-sm font-medium">Propuestas Pendientes</h3>
+                <p class="text-3xl font-bold text-white mt-1">
+                    {stats.pendingProposals}
+                </p>
+                {#if stats.pendingProposals > 0}
+                    <div class="mt-2 text-xs text-purple-400 font-bold">Requiere Revisión</div>
+                {/if}
+            </div>
+        </a>
+
+        <!-- Bugs Stat (New) -->
+        <a
+            href="/admin/bugs"
+            class="bg-[#131b2e]/60 backdrop-blur-xl p-6 rounded-2xl border border-white/5 relative overflow-hidden group hover:border-red-500/30 transition-colors cursor-pointer block"
+        >
+            <div
+                class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"
+            >
+                <AlertIcon size="lg" />
+            </div>
+            <div class="relative z-10">
+                <h3 class="text-slate-400 text-sm font-medium">Bugs Reportados</h3>
+                <p class="text-3xl font-bold text-white mt-1">
+                    {stats.pendingBugs}
+                </p>
+                {#if stats.pendingBugs > 0}
+                    <div class="mt-2 text-xs text-red-400 font-bold animate-pulse">
+                        Acción Requerida
+                    </div>
+                {/if}
+            </div>
+        </a>
     </div>
-
-    <!-- Proposals Stat -->
-    <a
-        href="/admin/proposals"
-        class="bg-[#131b2e]/60 backdrop-blur-xl p-6 rounded-2xl border border-white/5 relative overflow-hidden group hover:border-purple-500/30 transition-colors cursor-pointer block"
-    >
-        <div
-            class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"
-        >
-            <BulbIcon size="lg" gradient={false} />
-        </div>
-        <div class="relative z-10">
-            <h3 class="text-slate-400 text-sm font-medium">Propuestas Pendientes</h3>
-            <p class="text-3xl font-bold text-white mt-1">
-                {stats.pendingProposals}
-            </p>
-            {#if stats.pendingProposals > 0}
-                <div class="mt-2 text-xs text-purple-400 font-bold">Requiere Revisión</div>
-            {/if}
-        </div>
-    </a>
-
-    <!-- Bugs Stat (New) -->
-    <a
-        href="/admin/bugs"
-        class="bg-[#131b2e]/60 backdrop-blur-xl p-6 rounded-2xl border border-white/5 relative overflow-hidden group hover:border-red-500/30 transition-colors cursor-pointer block"
-    >
-        <div
-            class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"
-        >
-            <AlertIcon size="lg" />
-        </div>
-        <div class="relative z-10">
-            <h3 class="text-slate-400 text-sm font-medium">Bugs Reportados</h3>
-            <p class="text-3xl font-bold text-white mt-1">
-                {stats.pendingBugs}
-            </p>
-            {#if stats.pendingBugs > 0}
-                <div class="mt-2 text-xs text-red-400 font-bold animate-pulse">
-                    Acción Requerida
-                </div>
-            {/if}
-        </div>
-    </a>
-</div>
+{/if}
