@@ -1,121 +1,74 @@
 <script lang="ts">
     import { page } from '$app/stores';
     import { goto } from '$app/navigation';
+    import { AlertTriangle, Ghost, ServerCrash, Home } from 'lucide-svelte';
 
     export let status = 500;
     export let error: Error | null = null;
-
-    import { onMount } from 'svelte';
-    import { logger } from '$lib/utils/logger';
-
-    // Icons
-    import SearchIcon from '$lib/components/icons/SearchIcon.svelte';
-    import PawnIcon from '$lib/components/icons/PawnIcon.svelte';
-    import AlertIcon from '$lib/components/icons/AlertIcon.svelte';
-    import HomeIcon from '$lib/components/icons/HomeIcon.svelte';
-    import CollectionIcon from '$lib/components/icons/CollectionIcon.svelte';
-
-    onMount(() => {
-        if (status === 500 && error) {
-            logger.error('Global Error Boundary Caught Exception', {
-                message: error.message,
-                stack: error.stack,
-                url: $page.url.href,
-            });
-        }
-    });
 </script>
 
 <svelte:head>
-    <title>Error {status} | ChillChess</title>
+    <title>Error {status} | MultiTool</title>
 </svelte:head>
 
-<div
-    class="min-h-screen bg-midnight-900 text-white font-poppins flex items-center justify-center p-4"
->
-    <div class="max-w-2xl w-full text-center space-y-8">
-        <!-- Error Icon -->
+<div class="min-h-[100dvh] flex items-center justify-center p-4">
+    <div
+        class="max-w-2xl w-full text-center space-y-8 bg-white p-8 md:p-12 rounded-3xl shadow-sm border border-slate-200"
+    >
         <div class="flex justify-center mb-6">
             {#if status === 404}
-                <SearchIcon size="2xl" gradient={true} />
+                <Ghost class="w-24 h-24 text-brand-400 animate-bounce" />
             {:else if status === 500}
-                <PawnIcon size="2xl" gradient={true} />
+                <ServerCrash class="w-24 h-24 text-brand-400" />
             {:else}
-                <AlertIcon size="2xl" gradient={true} />
+                <AlertTriangle class="w-24 h-24 text-brand-400" />
             {/if}
         </div>
 
-        <!-- Error Title -->
         <div class="space-y-3">
-            <h1 class="text-6xl md:text-8xl font-bold text-primary-500">
+            <h1 class="text-6xl md:text-8xl font-black text-slate-800 tracking-tighter">
                 {status}
             </h1>
-            <h2 class="text-2xl md:text-3xl font-bold text-slate-100">
+            <h2 class="text-2xl md:text-3xl font-bold text-slate-600">
                 {#if status === 404}
                     Página No Encontrada
                 {:else if status === 500}
-                    Algo Ha Salido Mal
+                    Error del Servidor
                 {:else}
-                    Error
+                    Algo salió mal
                 {/if}
             </h2>
         </div>
 
-        <!-- Error Message -->
-        <p class="text-lg text-slate-400 max-w-md mx-auto">
+        <p class="text-lg text-slate-500 max-w-md mx-auto">
             {#if status === 404}
-                La página que buscas no existe o ha sido movida.
+                La herramienta que buscas no existe o ha sido movida.
             {:else if status === 500}
-                Hemos tenido un problema en el servidor. Nuestro equipo ha sido notificado y estamos
-                trabajando en solucionarlo.
+                Hemos tenido un problema interno en el servidor.
             {:else}
-                Ha ocurrido un error inesperado. Por favor, inténtalo de nuevo.
+                Ha ocurrido un error inesperado al cargar la aplicación.
             {/if}
         </p>
 
         {#if error?.message}
             <details
-                class="bg-white/5 p-4 rounded-xl text-left text-sm text-slate-500 max-w-md mx-auto cursor-pointer"
+                class="bg-slate-50 p-4 rounded-xl text-left text-sm text-slate-600 max-w-md mx-auto cursor-pointer border border-slate-200"
             >
-                <summary class="font-medium text-slate-300 cursor-pointer"
-                    >Detalles técnicos</summary
-                >
-                <pre class="mt-2 overflow-auto">{error.message}</pre>
+                <summary class="font-bold text-slate-700 cursor-pointer">Detalles técnicos</summary>
+                <div class="mt-2 overflow-auto text-xs bg-slate-800 text-slate-200 p-2 rounded">
+                    {error.message}
+                </div>
             </details>
         {/if}
 
-        <!-- Action Buttons -->
-        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
+        <div class="flex justify-center pt-6">
             <button
                 on:click={() => goto('/')}
-                class="px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 rounded-xl font-bold text-lg transition-all hover:scale-105 shadow-lg shadow-primary-900/30 flex items-center justify-center gap-3"
+                class="px-8 py-4 bg-brand-600 hover:bg-brand-700 active:scale-95 rounded-2xl font-bold text-white transition-all shadow-md shadow-brand-500/30 flex items-center justify-center gap-3"
             >
-                <HomeIcon size="md" gradient={false} />
+                <Home class="w-6 h-6" />
                 <span>Volver al Inicio</span>
             </button>
-
-            <button
-                on:click={() => goto('/coleccion')}
-                class="px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-3"
-            >
-                <CollectionIcon size="md" gradient={false} />
-                <span>Ir a la Colección</span>
-            </button>
-        </div>
-
-        <!-- Support Link -->
-        <div class="pt-6 border-t border-white/10">
-            <p class="text-sm text-slate-500">
-                ¿El problema persiste?
-                <a
-                    href="https://discord.gg/G7SrFtJHnr"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="text-primary-400 hover:text-primary-300 underline ml-1"
-                >
-                    Contáctanos en Discord
-                </a>
-            </p>
         </div>
     </div>
 </div>

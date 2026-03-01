@@ -11,7 +11,8 @@
  */
 
 // Logger
-export { logger, createContextLogger, LogLevel } from './logger';
+export { logger } from './logger';
+export type { LogLevel } from './logger';
 
 // Validators
 export {

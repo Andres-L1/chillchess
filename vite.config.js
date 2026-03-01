@@ -1,11 +1,11 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
-import { imagetools } from 'vite-imagetools';
+// import { imagetools } from 'vite-imagetools';
 
 export default defineConfig({
     plugins: [
         sveltekit(),
-        imagetools({
+        /*imagetools({
             defaultDirectives: (url) => {
                 // Auto-optimize images
                 return new URLSearchParams({
@@ -13,7 +13,7 @@ export default defineConfig({
                     quality: '80'
                 });
             }
-        })
+        })*/
     ],
     optimizeDeps: {
         exclude: ['cm-chessboard']
@@ -32,7 +32,7 @@ export default defineConfig({
         target: 'es2020',
         // Advanced chunking strategy
         rollupOptions: {
-            output: {
+            /*output: {
                 manualChunks: (id) => {
                     // Firebase chunks (aggressive splitting to reduce main bundle)
                     if (id.includes('firebase/auth')) return 'firebase-auth';
@@ -58,7 +58,7 @@ export default defineConfig({
                         return 'vendor';
                     }
                 }
-            }
+            }*/
         }
     }
 });

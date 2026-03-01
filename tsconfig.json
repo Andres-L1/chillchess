@@ -10,7 +10,10 @@
         "sourceMap": true,
         "strict": true,
         "moduleResolution": "bundler",
-        "module": "esnext"
+        "module": "esnext",
+        "types": [
+            "node"
+        ]
     },
     "include": [
         "src/**/*.d.ts",

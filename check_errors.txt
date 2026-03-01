@@ -1,0 +1,334 @@
+﻿
+> chillchess-v2@2.0.0 check
+> svelte-kit sync && svelte-check --tsconfig ./tsconfig.json
+
+
+====================================
+Loading svelte-check in workspace: c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess
+Getting Svelte diagnostics...
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\lib\utils\index.ts[39m:14:18
+[31mError[39m: Module '"./logger"' has no exported member 'createContextLogger'. 
+[36m// Logger
+export { logger, [35mcreateContextLogger[36m, LogLevel } from './logger';
+
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\lib\utils\index.ts[39m:14:39
+[31mError[39m: Re-exporting a type when 'verbatimModuleSyntax' is enabled requires using 'export type'. 
+[36m// Logger
+export { logger, createContextLogger, [35mLogLevel[36m } from './logger';
+
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\lib\validation\artist.ts[39m:1:19
+[31mError[39m: Cannot find module 'zod' or its corresponding type declarations. 
+[36mimport { z } from [35m'zod'[36m;
+import type { SocialLink } from '$lib/types/artist';
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\lib\validation\artist.ts[39m:56:38
+[31mError[39m: Parameter 'err' implicitly has an 'any' type. 
+[36m        const errors: Record<string, string> = {};
+        result.error.errors.forEach(([35merr[36m) => {
+            const path = err.path.join('.');
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\lib\validation\artist.ts[39m:71:38
+[31mError[39m: Parameter 'err' implicitly has an 'any' type. 
+[36m        const errors: Record<string, string> = {};
+        result.error.errors.forEach(([35merr[36m) => {
+            const path = err.path.join('.');
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\+error.svelte[39m:12:28
+[31mError[39m: Cannot find module '$lib/components/icons/SearchIcon.svelte' or its corresponding type declarations. (ts)
+[36m    // Icons
+    import SearchIcon from [35m'$lib/components/icons/SearchIcon.svelte'[36m;
+    import PawnIcon from '$lib/components/icons/PawnIcon.svelte';
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\+error.svelte[39m:13:26
+[31mError[39m: Cannot find module '$lib/components/icons/PawnIcon.svelte' or its corresponding type declarations. (ts)
+[36m    import SearchIcon from '$lib/components/icons/SearchIcon.svelte';
+    import PawnIcon from [35m'$lib/components/icons/PawnIcon.svelte'[36m;
+    import AlertIcon from '$lib/components/icons/AlertIcon.svelte';
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\+error.svelte[39m:14:27
+[31mError[39m: Cannot find module '$lib/components/icons/AlertIcon.svelte' or its corresponding type declarations. (ts)
+[36m    import PawnIcon from '$lib/components/icons/PawnIcon.svelte';
+    import AlertIcon from [35m'$lib/components/icons/AlertIcon.svelte'[36m;
+    import HomeIcon from '$lib/components/icons/HomeIcon.svelte';
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\+error.svelte[39m:15:26
+[31mError[39m: Cannot find module '$lib/components/icons/HomeIcon.svelte' or its corresponding type declarations. (ts)
+[36m    import AlertIcon from '$lib/components/icons/AlertIcon.svelte';
+    import HomeIcon from [35m'$lib/components/icons/HomeIcon.svelte'[36m;
+    import CollectionIcon from '$lib/components/icons/CollectionIcon.svelte';
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\+error.svelte[39m:16:32
+[31mError[39m: Cannot find module '$lib/components/icons/CollectionIcon.svelte' or its corresponding type declarations. (ts)
+[36m    import HomeIcon from '$lib/components/icons/HomeIcon.svelte';
+    import CollectionIcon from [35m'$lib/components/icons/CollectionIcon.svelte'[36m;
+
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\currency\+page.svelte[39m:108:17
+[33mWarn[39m: A11y: A form label must be associated with a control. (svelte)
+[36m            >
+                [35m<label class="block text-brand-100 text-xs font-bold uppercase tracking-wider mb-2"
+                    >Cantidad</label
+                >[36m
+                <div class="flex items-center">
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\currency\+page.svelte[39m:160:17
+[33mWarn[39m: A11y: A form label must be associated with a control. (svelte)
+[36m            <div>
+                [35m<label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3"
+                    >De (Moneda Origen)</label
+                >[36m
+                <div class="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\freelance\+page.svelte[39m:67:17
+[33mWarn[39m: A11y: A form label must be associated with a control. (svelte)
+[36m            <div>
+                [35m<label class="block text-xs font-bold text-slate-400 mb-1 flex justify-between">
+                    <span>Gastos Fijos Mensuales</span>
+                    <span class="text-slate-400 font-normal text-[10px]"
+                        >(Software, internet...)</span
+                    >
+                </label>[36m
+                <div class="relative">
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\freelance\+page.svelte[39m:88:17
+[33mWarn[39m: A11y: A form label must be associated with a control. (svelte)
+[36m            <div>
+                [35m<label class="block text-xs font-bold text-slate-400 mb-1 flex justify-between">
+                    <span>Beneficio Deseado Mensual</span>
+                    <span class="text-slate-400 font-normal text-[10px]">(Limpio para ti)</span>
+                </label>[36m
+                <div class="relative">
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\freelance\+page.svelte[39m:108:21
+[33mWarn[39m: A11y: A form label must be associated with a control. (svelte)
+[36m                <div>
+                    [35m<label class="block text-xs font-bold text-slate-400 mb-1"
+                        >Horas Facturables/Semana</label
+                    >[36m
+                    <div class="relative">
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\freelance\+page.svelte[39m:127:21
+[33mWarn[39m: A11y: A form label must be associated with a control. (svelte)
+[36m                <div>
+                    [35m<label class="block text-xs font-bold text-slate-400 mb-1"
+                        >Semanas Vacaciones/A├▒o</label
+                    >[36m
+                    <div class="relative">
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\password\+page.svelte[39m:161:17
+[33mWarn[39m: A11y: A form label must be associated with a control. (svelte)
+[36m            <div class="flex justify-between items-center mb-4">
+                [35m<label class="font-bold tracking-wide text-slate-700 text-sm"
+                    >Longitud de contrase├▒a</label
+                >[36m
+                <span
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\pomodoro\+page.svelte[39m:1:19
+[31mError[39m: Transform failed with 1 error:
+c:/Users/tomih/.gemini/antigravity/ChillChess/ChillChess/src/routes/pomodoro/+page.svelte:12:32: ERROR: Expected ";" but found "'longBreak'" (svelte(script))
+[36m<script lang="ts">[35m[36m
+    import { pageHeader } from '$lib/stores/ui';
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\pomodoro\+page.svelte[39m:12:33
+[31mError[39m: ',' expected. (ts)
+[36m
+    let mode: 'focus' | 'break' [35m'longBreak'[36m = 'focus';
+    let timeLeft = 25 * 60; // 25 minutes in seconds
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\pomodoro\+page.svelte[39m:12:33
+[31mError[39m: The left-hand side of an assignment expression must be a variable or a property access. (ts)
+[36m
+    let mode: 'focus' | 'break' [35m'longBreak'[36m = 'focus';
+    let timeLeft = 25 * 60; // 25 minutes in seconds
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\pomodoro\+page.svelte[39m:54:37
+[31mError[39m: Argument of type '"longBreak"' is not assignable to parameter of type '"focus" | "break"'. (ts)
+[36m                        if (completedPomodoros % 4 === 0) {
+                            setMode([35m'longBreak'[36m);
+                        } else {
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\pomodoro\+page.svelte[39m:117:37
+[31mError[39m: Argument of type '"longBreak"' is not assignable to parameter of type '"focus" | "break"'. (ts)
+[36m        <button
+            on:click={() => setMode([35m'longBreak'[36m)}
+            class="px-6 py-2 rounded-full text-sm font-bold transition-all {mode === 'longBreak'
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\pomodoro\+page.svelte[39m:118:77
+[31mError[39m: This comparison appears to be unintentional because the types '"focus" | "break"' and '"longBreak"' have no overlap. (ts)
+[36m            on:click={() => setMode('longBreak')}
+            class="px-6 py-2 rounded-full text-sm font-bold transition-all {[35mmode === 'longBreak'[36m
+                ? 'bg-blue-500 text-white shadow-md'
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\qr\+page.svelte[39m:102:25
+[33mWarn[39m: A11y: A form label must be associated with a control. (svelte)
+[36m                    <div>
+                        [35m<label class="block text-xs font-bold text-slate-400 uppercase mb-2"
+                            >Direcci├│n Web (URL)</label
+                        >[36m
+                        <input
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\qr\+page.svelte[39m:116:25
+[33mWarn[39m: A11y: A form label must be associated with a control. (svelte)
+[36m                    <div>
+                        [35m<label class="block text-xs font-bold text-slate-400 uppercase mb-2"
+                            >Texto Libre</label
+                        >[36m
+                        <textarea
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\qr\+page.svelte[39m:129:25
+[33mWarn[39m: A11y: A form label must be associated with a control. (svelte)
+[36m                    <div>
+                        [35m<label class="block text-xs font-bold text-slate-400 uppercase mb-2"
+                            >Nombre Red (SSID)</label
+                        >[36m
+                        <input
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\qr\+page.svelte[39m:140:25
+[33mWarn[39m: A11y: A form label must be associated with a control. (svelte)
+[36m                    <div>
+                        [35m<label class="block text-xs font-bold text-slate-400 uppercase mb-2"
+                            >Contrase├▒a</label
+                        >[36m
+                        <input
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\qr\+page.svelte[39m:3:24
+[31mError[39m: Could not find a declaration file for module 'qrcode'. 'c:/Users/tomih/.gemini/antigravity/ChillChess/ChillChess/node_modules/qrcode/lib/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/qrcode` if it exists or add a new declaration (.d.ts) file containing `declare module 'qrcode';` (ts)
+[36m    import { pageHeader } from '$lib/stores/ui';
+    import QRCode from [35m'qrcode'[36m;
+    import { Link, Type, Wifi, Download } from 'lucide-svelte';
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\qr\+page.svelte[39m:44:24
+[31mError[39m: Parameter 'url' implicitly has an 'any' type. (ts)
+[36m            })
+                .then(([35murl[36m) => (qrDataUrl = url))
+                .catch((err) => console.error(err));
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\qr\+page.svelte[39m:45:25
+[31mError[39m: Parameter 'err' implicitly has an 'any' type. (ts)
+[36m                .then((url) => (qrDataUrl = url))
+                .catch(([35merr[36m) => console.error(err));
+        } else {
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\tip\+page.svelte[39m:31:13
+[33mWarn[39m: A11y: A form label must be associated with a control. (svelte)
+[36m        <div>
+            [35m<label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"
+                >Total de la Cuenta</label
+            >[36m
+            <div class="relative">
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\tip\+page.svelte[39m:50:13
+[33mWarn[39m: A11y: A form label must be associated with a control. (svelte)
+[36m        <div>
+            [35m<label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3"
+                >Propina (%)</label
+            >[36m
+            <div class="grid grid-cols-4 gap-2 mb-4">
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\tip\+page.svelte[39m:85:13
+[33mWarn[39m: A11y: A form label must be associated with a control. (svelte)
+[36m        <div>
+            [35m<label
+                class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex justify-between"
+            >
+                <span>N├║mero de Personas</span>
+                <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold"
+                    >{numPeople}</span
+                >
+            </label>[36m
+            <div class="flex items-center gap-3">
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\vcard\+page.svelte[39m:153:21
+[33mWarn[39m: A11y: A form label must be associated with a control. (svelte)
+[36m                <div>
+                    [35m<label class="block text-xs font-bold text-slate-400 mb-1"
+                        >Nombre Completo</label
+                    >[36m
+                    <div class="relative">
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\vcard\+page.svelte[39m:169:21
+[33mWarn[39m: A11y: A form label must be associated with a control. (svelte)
+[36m                <div>
+                    [35m<label class="block text-xs font-bold text-slate-400 mb-1">Tel├®fono</label>[36m
+                    <div class="relative">
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\vcard\+page.svelte[39m:185:21
+[33mWarn[39m: A11y: A form label must be associated with a control. (svelte)
+[36m                <div>
+                    [35m<label class="block text-xs font-bold text-slate-400 mb-1">Empresa</label>[36m
+                    <div class="relative">
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\vcard\+page.svelte[39m:199:21
+[33mWarn[39m: A11y: A form label must be associated with a control. (svelte)
+[36m                <div>
+                    [35m<label class="block text-xs font-bold text-slate-400 mb-1">Cargo / Puesto</label
+                    >[36m
+                    <div class="relative">
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\vcard\+page.svelte[39m:215:17
+[33mWarn[39m: A11y: A form label must be associated with a control. (svelte)
+[36m            <div>
+                [35m<label class="block text-xs font-bold text-slate-400 mb-1">Correo Electr├│nico</label
+                >[36m
+                <div class="relative">
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\vcard\+page.svelte[39m:5:24
+[31mError[39m: Could not find a declaration file for module 'qrcode'. 'c:/Users/tomih/.gemini/antigravity/ChillChess/ChillChess/node_modules/qrcode/lib/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/qrcode` if it exists or add a new declaration (.d.ts) file containing `declare module 'qrcode';` (ts)
+[36m    import { onMount } from 'svelte';
+    import QRCode from [35m'qrcode'[36m;
+    import {
+[39m
+
+c:\Users\tomih\.gemini\antigravity\ChillChess\ChillChess\[32msrc\routes\vcard\+page.svelte[39m:92:18
+[31mError[39m: Parameter 'url' implicitly has an 'any' type. (ts)
+[36m            color: { dark: '#0f172a', light: '#ffffff' },
+        }).then(([35murl[36m) => (qrDataUrl = url));
+    }
+[39m
+
+====================================
+[31msvelte-check found 21 errors and 19 warnings in 10 files
+[39m

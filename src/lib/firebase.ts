@@ -4,9 +4,10 @@ import { type Auth, getAuth, setPersistence, browserLocalPersistence, GoogleAuth
 import { type Firestore, getFirestore } from "firebase/firestore";
 import { getFunctions, connectFunctionsEmulator, type Functions } from "firebase/functions";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
+import { devLogger } from '$lib/utils/devLogger';
 
 const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY_B64 ? atob(import.meta.env.VITE_FIREBASE_API_KEY_B64) : undefined,
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
     projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
     storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
@@ -21,7 +22,7 @@ if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
     console.error("Required variables: VITE_FIREBASE_API_KEY, VITE_FIREBASE_PROJECT_ID");
 }
 
-console.log("DEBUG: Firebase Config Loaded", {
+devLogger.debug("Firebase Config Loaded", {
     apiKeyPresent: !!firebaseConfig.apiKey,
     projectId: firebaseConfig.projectId
 });
