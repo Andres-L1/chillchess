@@ -4,15 +4,8 @@
 
 [context.production.environment]
   NODE_VERSION = "20"
-  VITE_FIREBASE_API_KEY = "AIzaSyDkAPVdrwASXA-O5ajBU7T14qbKSfef5EI"
-  VITE_FIREBASE_AUTH_DOMAIN = "chillchess-57365.firebaseapp.com"
-  VITE_FIREBASE_PROJECT_ID = "chillchess-57365"
-  VITE_FIREBASE_STORAGE_BUCKET = "chillchess-57365.firebasestorage.app"
-  VITE_FIREBASE_MESSAGING_SENDER_ID = "676151034372"
-  VITE_FIREBASE_APP_ID = "1:676151034372:web:4124fbdfd7fee5dfee2b51"
-  VITE_FIREBASE_VAPID_KEY = "BKw5D5y7z9y5z9y5z9y5z9y5z9y5z9y5z9y5z9y5"
-  # Whitelist Firebase API Key for secret scanner
-  SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "AIzaSyDkAPVdrwASXA-O5ajBU7T14qbKSfef5EI"
+  # VITE_FIREBASE_API_KEY and other Firebase variables should be configured via Netlify UI -> Site settings -> Environment variables.
+  # Do not hardcode secrets in this file.
   # R2 Configuration — set these in the Netlify UI under Site Settings > Environment Variables
   # PUBLIC_R2_ACCOUNT_ID = "your-account-id"
   # R2_ACCESS_KEY_ID = "your-access-key-id"
@@ -63,4 +56,6 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
     Cross-Origin-Opener-Policy = "same-origin-allow-popups"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.firebaseio.com https://*.firebaseapp.com https://*.google.com https://*.gstatic.com https://apis.google.com https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://*.firebasestorage.app https://*.googleusercontent.com; connect-src 'self' wss://*.firebaseio.com https://*.googleapis.com https://*.firebaseio.com https://*.stripe.com https://api.stripe.com; frame-src 'self' https://js.stripe.com https://*.firebaseapp.com;"
 

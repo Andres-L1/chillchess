@@ -1,5 +1,5 @@
 {
-  "name": "chillchess-v2",
+  "name": "multitool",
   "version": "2.0.0",
   "private": true,
   "type": "module",
@@ -18,10 +18,7 @@
     "prepare": "husky install || echo \"Husky not installed, skipping...\""
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260103.0",
-    "@fontsource/cinzel": "^5.0.0",
     "@fontsource/inter": "^5.0.0",
-    "@sveltejs/adapter-cloudflare": "^7.2.4",
     "@sveltejs/adapter-netlify": "^5.2.4",
     "@sveltejs/kit": "^2.0.0",
     "@sveltejs/vite-plugin-svelte": "^3.0.0",
@@ -43,19 +40,12 @@
     "typescript": "^5.3.3",
     "vite": "^5.0.10",
     "vite-imagetools": "^9.0.2",
-    "vitest": "^4.0.16",
-    "wrangler": "^4.54.0"
+    "vitest": "^4.0.16"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.964.0",
-    "@aws-sdk/s3-request-presigner": "^3.964.0",
-    "@aws-sdk/util-create-request": "^3.957.0",
-    "@aws-sdk/util-format-url": "^3.957.0",
     "@floating-ui/dom": "^1.7.4",
     "@fontsource/poppins": "^5.2.7",
     "@stripe/stripe-js": "^8.6.0",
-    "@tsndr/cloudflare-worker-jwt": "^3.2.1",
-    "dotenv": "^17.2.3",
     "firebase": "^10.7.1",
     "firebase-admin": "^12.0.0",
     "lucide-svelte": "^0.575.0",

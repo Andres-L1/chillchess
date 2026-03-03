@@ -28,27 +28,24 @@ function createAuthStore() {
     let unsubscribeDoc: () => void;
 
     if (typeof window !== 'undefined') {
-        console.log("Auth Store: Initializing...");
+        if (import.meta.env.DEV) console.log("Auth Store: Initializing...");
 
         // Separate function to handle firestore sync
         const syncUser = (firebaseUser: User) => {
             if (unsubscribeDoc) unsubscribeDoc();
-
-            const isAdmin = firebaseUser.email?.toLowerCase() === 'andreslgumuzio@gmail.com';
             const baseUserData: UserData = {
                 uid: firebaseUser.uid,
                 email: firebaseUser.email,
                 displayName: firebaseUser.displayName,
                 photoURL: firebaseUser.photoURL,
                 isPro: false,
-                isAdmin: isAdmin
+                isAdmin: false
             };
 
-            // For admin, we want to unlock the UI immediately
             update(state => ({
                 ...state,
                 user: baseUserData,
-                loading: !isAdmin,
+                loading: true,
                 error: null
             }));
 
@@ -56,22 +53,24 @@ function createAuthStore() {
             unsubscribeDoc = onSnapshot(userRef, (docSnap) => {
                 const data = docSnap.data();
                 const isPro = data?.isPro === true;
-                console.log("Auth Store: Firestore Sync (isPro:", isPro, ")");
+                const isAdmin = data?.isAdmin === true;
+
+                if (import.meta.env.DEV) console.log("Auth Store: Firestore Sync (isPro:", isPro, ", isAdmin:", isAdmin, ")");
 
                 update(state => ({
                     ...state,
-                    user: { ...baseUserData, isPro },
+                    user: { ...baseUserData, isPro, isAdmin },
                     loading: false
                 }));
             }, (error) => {
-                console.warn("Auth Store: Firestore restricted:", error.message);
+                if (import.meta.env.DEV) console.warn("Auth Store: Firestore restricted:", error.message);
                 update(state => ({ ...state, loading: false }));
             });
         };
 
         // 1. listener for state changes
         onAuthStateChanged(auth, (user) => {
-            console.log("Auth Store: onAuthStateChanged ->", user?.email || 'null');
+            if (import.meta.env.DEV) console.log("Auth Store: onAuthStateChanged ->", user?.email || 'null');
             if (user) {
                 syncUser(user);
             } else {
