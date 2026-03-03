@@ -9,9 +9,9 @@
 // APP METADATA
 // ============================================================================
 
-export const APP_NAME = 'ChillChess';
-export const APP_DESCRIPTION = 'Multi-Herramientas Web';
-export const APP_VERSION = '1.0.0';
+export const APP_NAME = 'MultiTool';
+export const APP_DESCRIPTION = 'Tu navaja suiza digital para freelancers';
+export const APP_VERSION = '3.5.0';
 export const APP_URL = 'https://chillchess.app';
 
 // ============================================================================
@@ -20,15 +20,19 @@ export const APP_URL = 'https://chillchess.app';
 
 export const ROUTES = {
     HOME: '/',
-    ARTISTS: '/artists',
-    COLLECTION: '/coleccion',
-    PROPOSALS: '/proposals',
-    BUGS: '/bugs',
+    LANDING: '/landing',
+    FREELANCE: '/freelance',
+    VCARD: '/vcard',
+    KANBAN: '/kanban',
+    POMODORO: '/pomodoro',
+    CURRENCY: '/currency',
+    TIP: '/tip',
+    PASSWORD: '/password',
+    QR: '/qr',
     ADMIN: '/admin',
     PROFILE: '/profile',
-    SETTINGS: '/settings',
-    PLAY: '/play',
-    TOURNAMENTS: '/tournaments',
+    PRICING: '/pricing',
+    COOKIES: '/cookies',
 } as const;
 
 // ============================================================================
@@ -37,9 +41,6 @@ export const ROUTES = {
 
 export const COLLECTIONS = {
     USERS: 'users',
-    BUG_REPORTS: 'bug_reports',
-    BACKUPS: 'backups',
-    NOTIFICATIONS: 'notifications',
 } as const;
 
 // ============================================================================
@@ -47,24 +48,10 @@ export const COLLECTIONS = {
 // ============================================================================
 
 export const STORAGE_KEYS = {
-    THEME: 'chillchess_theme',
-    MUSIC_VOLUME: 'chillchess_music_volume',
-    SFX_VOLUME: 'chillchess_sfx_volume',
-    LAST_ALBUM: 'chillchess_last_album',
-    PLAYER_STATE: 'chillchess_player_state',
-    USER_PREFERENCES: 'chillchess_user_preferences',
-} as const;
-
-// ============================================================================
-// AUDIO SETTINGS
-// ============================================================================
-
-export const AUDIO = {
-    DEFAULT_VOLUME: 0.5,
-    MIN_VOLUME: 0,
-    MAX_VOLUME: 1,
-    FADE_DURATION: 1000, // ms
-    CROSSFADE_DURATION: 2000, // ms
+    THEME: 'multitool_theme',
+    KANBAN_TASKS: 'multitool_kanban_tasks',
+    COOKIES_ACCEPTED: 'multitool_cookies_accepted',
+    COOKIES_DECLINED: 'multitool_cookies_declined',
 } as const;
 
 // ============================================================================
@@ -82,26 +69,11 @@ export const PAGINATION = {
 // ============================================================================
 
 export const LIMITS = {
-    // Proposals
-    PROPOSAL_TITLE_MAX: 100,
-    PROPOSAL_DESCRIPTION_MAX: 1000,
-
-    // Bug Reports
-    BUG_TITLE_MAX: 100,
-    BUG_DESCRIPTION_MAX: 500,
-    BUG_STEPS_MAX: 300,
-
-    // Music Submissions
-    SUBMISSION_TITLE_MAX: 100,
-    SUBMISSION_DESCRIPTION_MAX: 500,
-
     // User Profile
     DISPLAY_NAME_MAX: 50,
-    BIO_MAX: 500,
 
     // File Uploads
     MAX_IMAGE_SIZE: 5 * 1024 * 1024, // 5MB
-    MAX_AUDIO_SIZE: 20 * 1024 * 1024, // 20MB
 } as const;
 
 // ============================================================================
@@ -126,31 +98,6 @@ export const TIMINGS = {
     RESIZE_DEBOUNCE: 150,
     SCROLL_THROTTLE: 100,
     AUTO_SAVE: 2000,
-} as const;
-
-// ============================================================================
-// SUBSCRIPTION TIERS
-// ============================================================================
-
-export const SUBSCRIPTION_FEATURES = {
-    free: {
-        maxPlaylists: 3,
-        downloadQuality: 'standard',
-        adsEnabled: true,
-        offlineMode: false,
-    },
-    pro: {
-        maxPlaylists: 20,
-        downloadQuality: 'high',
-        adsEnabled: false,
-        offlineMode: true,
-    },
-    premium: {
-        maxPlaylists: -1, // unlimited
-        downloadQuality: 'lossless',
-        adsEnabled: false,
-        offlineMode: true,
-    },
 } as const;
 
 // ============================================================================
@@ -186,49 +133,7 @@ export const SUCCESS_MESSAGES = {
 export const PATTERNS = {
     EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     URL: /^https?:\/\//,
-    YOUTUBE_VIDEO: /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/,
     HEX_COLOR: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/,
-} as const;
-
-// ============================================================================
-// API ENDPOINTS
-// ============================================================================
-
-export const API_ENDPOINTS = {
-    ADMIN: {
-        TRIGGER_BACKUP: '/api/admin/trigger-backup',
-        CLEANUP_REJECTED: '/api/admin/cleanup-rejected',
-    },
-    AUTH: {
-        LOGIN: '/api/auth/login',
-        LOGOUT: '/api/auth/logout',
-        REGISTER: '/api/auth/register',
-    },
-} as const;
-
-// ============================================================================
-// CLOUDFLARE R2 CONFIG
-// ============================================================================
-
-export const R2_CONFIG = {
-    BUCKETS: {
-        MUSIC: 'chillchess-music',
-        COVERS: 'chillchess-covers',
-        AVATARS: 'chillchess-avatars',
-    },
-    MAX_RETENTION_DAYS: 30,
-} as const;
-
-// ============================================================================
-// FEATURE FLAGS
-// ============================================================================
-
-export const FEATURE_FLAGS = {
-    ENABLE_TOURNAMENTS: true,
-    ENABLE_SOCIAL_FEATURES: false,
-    ENABLE_ACHIEVEMENTS: false,
-    ENABLE_CHAT: false,
-    ENABLE_AI_ANALYSIS: false,
 } as const;
 
 // ============================================================================
@@ -236,10 +141,9 @@ export const FEATURE_FLAGS = {
 // ============================================================================
 
 export const THEME_COLORS = {
-    background: '#0B1120',
-    surface: '#131b2e',
-    primary: '#FF7B3D',
-    secondary: '#3B82F6',
+    background: '#0B0E14',
+    surface: '#0d1117',
+    primary: '#3B82F6',
     success: '#10B981',
     warning: '#F59E0B',
     error: '#EF4444',

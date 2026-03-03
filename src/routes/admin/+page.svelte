@@ -27,7 +27,7 @@
 </script>
 
 <svelte:head>
-    <title>Admin Dashboard | ChillChess</title>
+    <title>Admin Dashboard | MultiTool</title>
 </svelte:head>
 
 <div

@@ -97,7 +97,7 @@ sw.addEventListener('fetch', (event) => {
 /**
  * NOTIFICATION LOGIC (Migrated from static/service-worker.js)
  */
-const DB_NAME = 'chillchess-habits';
+const DB_NAME = 'multitool-habits';
 const STORE_NAME = 'scheduled-notifications';
 
 function openDB() {
