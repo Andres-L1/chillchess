@@ -14,7 +14,6 @@
         QrCode,
         Radio,
         Loader2,
-        Check,
     } from 'lucide-svelte';
 
     pageHeader.set({
@@ -72,12 +71,9 @@
                 qrDataUrl = await QRCode.toDataURL(generateVCFString(), {
                     width: 180,
                     margin: 2,
-                    color: {
-                        dark: '#0f172a',
-                        light: '#ffffff',
-                    },
+                    color: { dark: '#ffffff', light: '#0f172a' },
                 });
-            } catch (err) {
+            } catch {
                 addToast('Error al generar QR', 'error');
                 qrVisible = false;
             }
@@ -88,7 +84,7 @@
         QRCode.toDataURL(generateVCFString(), {
             width: 180,
             margin: 2,
-            color: { dark: '#0f172a', light: '#ffffff' },
+            color: { dark: '#ffffff', light: '#0f172a' },
         }).then((url: string) => (qrDataUrl = url));
     }
 
@@ -138,13 +134,19 @@
 
 <svelte:head>
     <title>Tarjeta de Contacto | MultiTool</title>
+    <meta
+        name="description"
+        content="Genera tarjetas de contacto digitales vCard, códigos QR y graba en NFC. Comparte tu información al instante."
+    />
 </svelte:head>
 
 <div class="flex flex-col lg:flex-row gap-8">
     <div class="flex-1 space-y-6">
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <div
+            class="bg-slate-800/50 backdrop-blur-sm p-5 rounded-2xl border border-slate-700/50 shadow-lg shadow-black/10 space-y-4"
+        >
             <h3
-                class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b pb-2"
+                class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4 border-b border-slate-700/50 pb-2"
             >
                 Datos Personales
             </h3>
@@ -155,14 +157,14 @@
                     >
                     <div class="relative">
                         <User
-                            class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
+                            class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"
                         />
                         <input
                             id="vcName"
                             type="text"
                             bind:value={vcName}
                             placeholder="Ej. Ana García"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            class="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all"
                         />
                     </div>
                 </div>
@@ -172,14 +174,14 @@
                     >
                     <div class="relative">
                         <Phone
-                            class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
+                            class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"
                         />
                         <input
                             id="vcPhone"
                             type="tel"
                             bind:value={vcPhone}
                             placeholder="+34 600 000 000"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            class="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all"
                         />
                     </div>
                 </div>
@@ -191,14 +193,14 @@
                     >
                     <div class="relative">
                         <Building2
-                            class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
+                            class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"
                         />
                         <input
                             id="vcCompany"
                             type="text"
                             bind:value={vcCompany}
                             placeholder="Ej. TechCorp"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            class="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all"
                         />
                     </div>
                 </div>
@@ -208,14 +210,14 @@
                     >
                     <div class="relative">
                         <Briefcase
-                            class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
+                            class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"
                         />
                         <input
                             id="vcTitle"
                             type="text"
                             bind:value={vcTitle}
                             placeholder="Ej. Desarrollador Web"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            class="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all"
                         />
                     </div>
                 </div>
@@ -225,13 +227,13 @@
                     >Correo Electrónico</label
                 >
                 <div class="relative">
-                    <Mail class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Mail class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                     <input
                         id="vcEmail"
                         type="email"
                         bind:value={vcEmail}
                         placeholder="ana@ejemplo.com"
-                        class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+                        class="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all"
                     />
                 </div>
             </div>
@@ -274,13 +276,13 @@
         <div class="grid grid-cols-2 gap-3">
             <button
                 on:click={downloadVCF}
-                class="bg-slate-800 hover:bg-slate-900 active:scale-95 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md flex flex-col items-center justify-center gap-1 text-xs"
+                class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md border border-slate-700/50 flex flex-col items-center justify-center gap-1 text-xs"
             >
                 <Download class="w-5 h-5 mb-1" /> Guardar .vcf
             </button>
             <button
                 on:click={toggleQR}
-                class="bg-brand-600 hover:bg-brand-700 active:scale-95 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md flex flex-col items-center justify-center gap-1 text-xs"
+                class="bg-brand-600 hover:bg-brand-500 active:scale-95 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md flex flex-col items-center justify-center gap-1 text-xs"
             >
                 <QrCode class="w-5 h-5 mb-1" />
                 {qrVisible ? 'Ocultar QR' : 'Mostrar QR'}
@@ -302,12 +304,12 @@
 
         {#if qrVisible && qrDataUrl}
             <div
-                class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center"
+                class="bg-slate-800/50 backdrop-blur-sm p-4 rounded-2xl border border-slate-700/50 shadow-lg shadow-black/10 flex flex-col items-center"
             >
                 <p class="text-xs font-bold text-slate-500 uppercase mb-3 text-center">
                     Escanea para guardar
                 </p>
-                <div class="bg-white p-2 rounded-xl flex justify-center">
+                <div class="rounded-xl overflow-hidden">
                     <img src={qrDataUrl} alt="QR Code" class="w-[180px] h-[180px]" />
                 </div>
             </div>

@@ -1,12 +1,16 @@
 // Stripe configuration
 import Stripe from 'stripe';
+// @ts-ignore
+import { env } from '$env/dynamic/private';
+// @ts-ignore
+import { env as publicEnv } from '$env/dynamic/public';
 
 // Lazy initialization - only create Stripe instance when needed
 let stripeInstance: Stripe | null = null;
 
 function getStripe(): Stripe {
     if (!stripeInstance) {
-        const apiKey = process.env.STRIPE_SECRET_KEY;
+        const apiKey = env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY;
         if (!apiKey) {
             throw new Error('STRIPE_SECRET_KEY is not configured');
         }
@@ -26,18 +30,18 @@ export const stripe = {
 
 // Price IDs from Stripe Dashboard
 export const STRIPE_PRICE_IDS = {
-    pro_monthly: process.env.PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID || '',
-    pro_yearly: process.env.PUBLIC_STRIPE_PRO_YEARLY_PRICE_ID || '',
+    pro_monthly: publicEnv.PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID || process.env.PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID || '',
+    pro_yearly: publicEnv.PUBLIC_STRIPE_PRO_YEARLY_PRICE_ID || process.env.PUBLIC_STRIPE_PRO_YEARLY_PRICE_ID || '',
 } as const;
 
 // Webhook secret for verifying Stripe events
-export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
+export const STRIPE_WEBHOOK_SECRET = env.STRIPE_WEBHOOK_SECRET || process.env.STRIPE_WEBHOOK_SECRET || '';
 
 // Helper to create checkout session
 export async function createCheckoutSession(params: {
     priceId: string;
     userId: string;
-    userEmail: string;
+    userEmail?: string;
     successUrl: string;
     cancelUrl: string;
 }) {
@@ -50,7 +54,7 @@ export async function createCheckoutSession(params: {
                 quantity: 1,
             },
         ],
-        customer_email: params.userEmail,
+        customer_email: params.userEmail ? params.userEmail : undefined,
         client_reference_id: params.userId,
         success_url: params.successUrl,
         cancel_url: params.cancelUrl,

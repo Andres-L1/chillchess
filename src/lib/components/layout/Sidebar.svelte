@@ -13,6 +13,7 @@
         Timer,
         DollarSign,
         Users,
+        LayoutList,
     } from 'lucide-svelte';
 
     let searchQuery = '';
@@ -22,6 +23,7 @@
     const tools = [
         { id: '/freelance', category: 'Negocios', name: 'Valor de mi Hora', icon: Briefcase },
         { id: '/vcard', category: 'Negocios', name: 'Tarjeta Contacto', icon: User },
+        { id: '/kanban', category: 'Productividad', name: 'Tablero Kanban', icon: LayoutList },
         { id: '/pomodoro', category: 'Productividad', name: 'Pomodoro', icon: Timer },
         { id: '/currency', category: 'Finanzas', name: 'Conversor Divisas', icon: DollarSign },
         { id: '/tip', category: 'Finanzas', name: 'Dividir Cuenta', icon: Users },
@@ -44,7 +46,7 @@
         if (window.innerWidth < 768) {
             mobileMenuOpen.set(false);
         }
-        searchQuery = ''; // Clear search on navigation
+        searchQuery = '';
     }
 </script>
 
@@ -56,7 +58,7 @@
 
 <!-- Overlay for mobile -->
 <div
-    class="fixed inset-0 bg-slate-900/50 z-40 md:hidden transition-opacity duration-300"
+    class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300"
     class:opacity-100={$mobileMenuOpen}
     class:opacity-0={!$mobileMenuOpen}
     class:pointer-events-none={!$mobileMenuOpen}
@@ -69,21 +71,21 @@
 
 <!-- Sidebar Navigation -->
 <nav
-    class="fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-2xl md:shadow-lg md:relative flex flex-col h-[100dvh] transition-transform duration-300 ease-in-out md:translate-x-0"
+    class="fixed inset-y-0 left-0 z-50 w-72 bg-[#0d1117] shadow-2xl md:shadow-lg md:relative flex flex-col h-[100dvh] transition-transform duration-300 ease-in-out md:translate-x-0 border-r border-slate-800/60"
     class:-translate-x-full={!$mobileMenuOpen}
     class:translate-x-0={$mobileMenuOpen}
 >
     <!-- Header del Menú -->
-    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+    <div class="p-5 border-b border-slate-800/60 flex items-center justify-between">
         <a href="/" class="flex items-center gap-3">
-            <div class="bg-brand-500 text-white p-2 rounded-lg shadow-sm">
+            <div class="bg-brand-500 text-white p-2 rounded-lg shadow-lg shadow-brand-500/20">
                 <Blocks size={24} />
             </div>
-            <h1 class="text-xl font-bold text-slate-800 tracking-tight">MultiTool</h1>
+            <h1 class="text-xl font-bold text-white tracking-tight">MultiTool</h1>
         </a>
         <button
             on:click={() => mobileMenuOpen.set(false)}
-            class="md:hidden p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
+            class="md:hidden p-2 text-slate-500 hover:text-slate-300 rounded-lg hover:bg-slate-800 transition-colors"
         >
             <X size={20} />
         </button>
@@ -93,18 +95,18 @@
     <div class="px-5 pt-4 pb-2">
         <div class="relative group">
             <Search
-                class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-brand-500 transition-colors"
+                class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-brand-400 transition-colors"
             />
             <input
                 type="text"
                 bind:value={searchQuery}
                 placeholder="Buscar herramienta..."
-                class="w-full bg-slate-100 border border-transparent rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all text-slate-700 placeholder:text-slate-400"
+                class="w-full bg-slate-800/80 border border-slate-700/50 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-slate-800 transition-all text-slate-300 placeholder:text-slate-500"
             />
             {#if searchQuery}
                 <button
                     on:click={() => (searchQuery = '')}
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
                 >
                     <XCircle class="w-4 h-4" />
                 </button>
@@ -115,29 +117,26 @@
     <!-- Lista de Herramientas -->
     <div class="px-3 pb-4 flex-1 overflow-y-auto">
         {#if filteredTools.length === 0}
-            <div class="flex flex-col items-center justify-center py-10 text-slate-400">
+            <div class="flex flex-col items-center justify-center py-10 text-slate-500">
                 <Search class="w-10 h-10 mb-3 opacity-50" />
                 <p class="text-sm font-medium">Sin resultados</p>
             </div>
         {:else}
             {#each groupedTools as group}
                 <div
-                    class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-5 mb-2 px-3 flex items-center gap-2"
+                    class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-5 mb-2 px-3 flex items-center gap-2"
                 >
                     <span>{group.category}</span>
-                    <div class="h-px bg-slate-100 flex-1"></div>
+                    <div class="h-px bg-slate-800 flex-1"></div>
                 </div>
                 {#each group.items as tool}
                     <a
                         href={tool.id}
                         on:click={handleNavigate}
-                        class="w-full flex items-center gap-3 p-3 rounded-xl text-sm font-semibold transition-all border-r-4 select-none"
-                        class:bg-brand-50={$page.url.pathname === tool.id}
-                        class:text-brand-700={$page.url.pathname === tool.id}
-                        class:border-brand-500={$page.url.pathname === tool.id}
-                        class:text-slate-600={$page.url.pathname !== tool.id}
-                        class:hover:bg-slate-50={$page.url.pathname !== tool.id}
-                        class:border-transparent={$page.url.pathname !== tool.id}
+                        class="w-full flex items-center gap-3 p-3 rounded-xl text-sm font-semibold transition-all border-r-4 select-none {$page
+                            .url.pathname === tool.id
+                            ? 'bg-brand-500/10 text-brand-400 border-brand-500'
+                            : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-300 border-transparent'}"
                     >
                         <svelte:component this={tool.icon} size={20} class="opacity-80" />
                         <span class="truncate">{tool.name}</span>
@@ -148,9 +147,9 @@
     </div>
 
     <!-- Footer del Menú -->
-    <div class="p-4 border-t border-slate-100 bg-slate-50/50">
-        <p class="text-[11px] font-medium text-slate-400 text-center uppercase tracking-widest">
-            Dashboard OS • v3.5
+    <div class="p-4 border-t border-slate-800/60 bg-slate-900/50">
+        <p class="text-[11px] font-medium text-slate-600 text-center uppercase tracking-widest">
+            MultiTool • v4.0
         </p>
     </div>
 </nav>

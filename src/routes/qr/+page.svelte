@@ -1,246 +1,244 @@
 <script lang="ts">
     import { pageHeader } from '$lib/stores/ui';
+    import { addToast } from '$lib/stores/toasts';
+    import { onMount } from 'svelte';
     import QRCode from 'qrcode';
-    import { Link, Type, Wifi, Download } from 'lucide-svelte';
+    import { QrCode, Link, Type, Wifi, Download, Palette } from 'lucide-svelte';
 
     pageHeader.set({
         title: 'Generador QR',
-        description: 'Crea códigos QR personalizados para URLs, WiFi, emails.',
+        description: 'Crea códigos QR para URLs, texto y credenciales WiFi.',
         category: 'Utilidades',
     });
 
-    let currentType: 'url' | 'text' | 'wifi' = 'url';
+    type QRMode = 'url' | 'text' | 'wifi';
 
-    let qrUrl = '';
-    let qrText = '';
-    let qrSsid = '';
-    let qrPass = '';
-
-    let colorDark = '#0f172a';
-    let colorLight = '#ffffff';
-
+    let mode: QRMode = 'url';
+    let urlInput = '';
+    let textInput = '';
+    let wifiSSID = '';
+    let wifiPassword = '';
+    let wifiEncryption: 'WPA' | 'WEP' | 'nopass' = 'WPA';
+    let fgColor = '#ffffff';
+    let bgColor = '#0f172a';
     let qrDataUrl = '';
 
-    $: {
-        let data = '';
-        if (currentType === 'url') {
-            data = qrUrl.trim();
-            if (data && !/^https?:\/\//i.test(data)) data = 'https://' + data;
-        } else if (currentType === 'text') {
-            data = qrText.trim();
-        } else if (currentType === 'wifi' && qrSsid.trim()) {
-            data = `WIFI:T:${qrPass.trim() ? 'WPA' : 'nopass'};S:${qrSsid.trim()};P:${qrPass.trim()};H:false;;`;
-        }
+    const modes = [
+        { id: 'url' as QRMode, label: 'URL', icon: Link },
+        { id: 'text' as QRMode, label: 'Texto', icon: Type },
+        { id: 'wifi' as QRMode, label: 'WiFi', icon: Wifi },
+    ];
 
-        if (data) {
-            QRCode.toDataURL(data, {
-                width: 256,
-                margin: 2,
-                color: {
-                    dark: colorDark,
-                    light: colorLight,
-                },
-            })
-                .then((url: string) => (qrDataUrl = url))
-                .catch((err: Error) => console.error(err));
-        } else {
-            qrDataUrl = '';
-        }
+    function getQRContent(): string {
+        if (mode === 'url') return urlInput || 'https://example.com';
+        if (mode === 'text') return textInput || 'Hello World';
+        return `WIFI:T:${wifiEncryption};S:${wifiSSID};P:${wifiPassword};;`;
+    }
+
+    $: qrContent = getQRContent();
+
+    $: if (qrContent) {
+        QRCode.toDataURL(qrContent, {
+            width: 256,
+            margin: 2,
+            color: { dark: fgColor, light: bgColor },
+        })
+            .then((url: string) => (qrDataUrl = url))
+            .catch(() => {});
     }
 
     function downloadQR() {
         if (!qrDataUrl) return;
         const link = document.createElement('a');
-        link.download = `Código_QR.png`;
         link.href = qrDataUrl;
+        link.download = 'qr-code.png';
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
+        addToast('QR descargado', 'success');
     }
 </script>
 
 <svelte:head>
     <title>Generador QR | MultiTool</title>
+    <meta
+        name="description"
+        content="Genera códigos QR personalizados para URLs, texto plano y credenciales WiFi. Descarga en PNG."
+    />
 </svelte:head>
 
-<div class="flex flex-col lg:flex-row gap-8">
-    <div class="flex-1 space-y-6">
+<div class="max-w-3xl mx-auto flex flex-col lg:flex-row gap-6">
+    <!-- Left: Config -->
+    <div class="flex-1 space-y-5">
+        <!-- Mode Switcher -->
         <div
-            class="bg-slate-50 p-1.5 rounded-xl border border-slate-200 flex flex-wrap md:flex-nowrap gap-1"
+            class="flex bg-slate-800/80 rounded-2xl p-1.5 border border-slate-700/50 shadow-lg shadow-black/10"
         >
-            <button
-                on:click={() => (currentType = 'url')}
-                class="flex-1 py-2 text-sm font-semibold rounded-lg flex items-center justify-center gap-1 transition-all
-                {currentType === 'url'
-                    ? 'bg-white shadow-sm text-brand-600 border border-slate-100'
-                    : 'text-slate-500 hover:text-slate-700'}"
-            >
-                <Link class="w-4 h-4" /> URL
-            </button>
-            <button
-                on:click={() => (currentType = 'text')}
-                class="flex-1 py-2 text-sm font-semibold rounded-lg flex items-center justify-center gap-1 transition-all
-                {currentType === 'text'
-                    ? 'bg-white shadow-sm text-brand-600 border border-slate-100'
-                    : 'text-slate-500 hover:text-slate-700'}"
-            >
-                <Type class="w-4 h-4" /> Texto
-            </button>
-            <button
-                on:click={() => (currentType = 'wifi')}
-                class="flex-1 py-2 text-sm font-semibold rounded-lg flex items-center justify-center gap-1 transition-all
-                {currentType === 'wifi'
-                    ? 'bg-white shadow-sm text-brand-600 border border-slate-100'
-                    : 'text-slate-500 hover:text-slate-700'}"
-            >
-                <Wifi class="w-4 h-4" /> WiFi
-            </button>
+            {#each modes as m}
+                <button
+                    on:click={() => (mode = m.id)}
+                    class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all"
+                    class:bg-slate-700={mode === m.id}
+                    class:text-white={mode === m.id}
+                    class:shadow-md={mode === m.id}
+                    class:text-slate-500={mode !== m.id}
+                    class:hover:text-slate-300={mode !== m.id}
+                >
+                    <svelte:component this={m.icon} class="w-4 h-4" />
+                    {m.label}
+                </button>
+            {/each}
         </div>
 
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm min-h-[200px]">
-            {#if currentType === 'url'}
-                <div class="space-y-4">
+        <!-- Input Fields -->
+        <div
+            class="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-5 border border-slate-700/50 shadow-lg shadow-black/10 space-y-4"
+        >
+            {#if mode === 'url'}
+                <div>
+                    <label
+                        for="qr-url"
+                        class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"
+                        >URL</label
+                    >
+                    <input
+                        id="qr-url"
+                        type="url"
+                        bind:value={urlInput}
+                        placeholder="https://tu-sitio.com"
+                        class="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all"
+                    />
+                </div>
+            {:else if mode === 'text'}
+                <div>
+                    <label
+                        for="qr-text"
+                        class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"
+                        >Texto</label
+                    >
+                    <textarea
+                        id="qr-text"
+                        bind:value={textInput}
+                        placeholder="Escribe tu texto aquí..."
+                        rows="4"
+                        class="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all resize-none"
+                    ></textarea>
+                </div>
+            {:else}
+                <div class="space-y-3">
                     <div>
                         <label
-                            for="qrUrl"
-                            class="block text-xs font-bold text-slate-400 uppercase mb-2"
-                            >Dirección Web (URL)</label
+                            for="wifi-ssid"
+                            class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"
+                            >Nombre de Red (SSID)</label
                         >
                         <input
-                            id="qrUrl"
-                            type="url"
-                            bind:value={qrUrl}
-                            placeholder="https://ejemplo.com"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500"
-                        />
-                    </div>
-                </div>
-            {:else if currentType === 'text'}
-                <div class="space-y-4">
-                    <div>
-                        <label
-                            for="qrText"
-                            class="block text-xs font-bold text-slate-400 uppercase mb-2"
-                            >Texto Libre</label
-                        >
-                        <textarea
-                            id="qrText"
-                            bind:value={qrText}
-                            placeholder="Mensaje..."
-                            class="w-full h-32 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
-                        ></textarea>
-                    </div>
-                </div>
-            {:else if currentType === 'wifi'}
-                <div class="space-y-4">
-                    <div>
-                        <label
-                            for="qrSsid"
-                            class="block text-xs font-bold text-slate-400 uppercase mb-2"
-                            >Nombre Red (SSID)</label
-                        >
-                        <input
-                            id="qrSsid"
+                            id="wifi-ssid"
                             type="text"
-                            bind:value={qrSsid}
-                            placeholder="Mi_Red"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3"
+                            bind:value={wifiSSID}
+                            placeholder="Mi WiFi"
+                            class="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all"
                         />
                     </div>
                     <div>
                         <label
-                            for="qrPass"
-                            class="block text-xs font-bold text-slate-400 uppercase mb-2"
+                            for="wifi-pass"
+                            class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"
                             >Contraseña</label
                         >
                         <input
-                            id="qrPass"
+                            id="wifi-pass"
                             type="text"
-                            bind:value={qrPass}
-                            placeholder="***"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3"
+                            bind:value={wifiPassword}
+                            placeholder="Contraseña WiFi"
+                            class="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all"
                         />
+                    </div>
+                    <div>
+                        <label
+                            for="wifi-enc"
+                            class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"
+                            >Encriptación</label
+                        >
+                        <select
+                            id="wifi-enc"
+                            bind:value={wifiEncryption}
+                            class="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all"
+                        >
+                            <option value="WPA">WPA/WPA2</option>
+                            <option value="WEP">WEP</option>
+                            <option value="nopass">Sin contraseña</option>
+                        </select>
                     </div>
                 </div>
             {/if}
         </div>
 
+        <!-- Color Config -->
         <div
-            class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-6"
+            class="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-5 border border-slate-700/50 shadow-lg shadow-black/10"
         >
-            <div class="flex items-center gap-3">
-                <div
-                    class="relative w-8 h-8 rounded-full shadow-sm border border-slate-200 overflow-hidden shrink-0"
-                >
-                    <label for="colorDark" class="sr-only">Color QR</label>
-                    <!-- Tailwind doesn't have default reset for color inputs easily cross-browser, handle via custom css classes or inline -->
-                    <input
-                        id="colorDark"
-                        type="color"
-                        bind:value={colorDark}
-                        class="absolute -top-2 -left-2 w-16 h-16 cursor-pointer opacity-0"
-                        style="opacity: 0;"
-                    />
-                    <div
-                        class="w-full h-full pointer-events-none"
-                        style="background-color: {colorDark}"
-                    ></div>
+            <h4
+                class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2"
+            >
+                <Palette class="w-3.5 h-3.5" /> Personalización
+            </h4>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="fg-color" class="block text-xs text-slate-500 mb-1">Color QR</label>
+                    <div class="flex items-center gap-2">
+                        <input
+                            id="fg-color"
+                            type="color"
+                            bind:value={fgColor}
+                            class="w-10 h-10 rounded-lg cursor-pointer border border-slate-700"
+                        />
+                        <span class="text-xs font-mono text-slate-400">{fgColor}</span>
+                    </div>
                 </div>
-                <span class="text-sm font-medium text-slate-600">Color QR</span>
-            </div>
-            <div class="flex items-center gap-3">
-                <div
-                    class="relative w-8 h-8 rounded-full shadow-sm border border-slate-200 overflow-hidden shrink-0"
-                >
-                    <label for="colorLight" class="sr-only">Fondo QR</label>
-                    <input
-                        id="colorLight"
-                        type="color"
-                        bind:value={colorLight}
-                        class="absolute -top-2 -left-2 w-16 h-16 cursor-pointer opacity-0"
-                        style="opacity: 0;"
-                    />
-                    <div
-                        class="w-full h-full pointer-events-none border border-slate-200"
-                        style="background-color: {colorLight}"
-                    ></div>
+                <div>
+                    <label for="bg-color" class="block text-xs text-slate-500 mb-1">Fondo</label>
+                    <div class="flex items-center gap-2">
+                        <input
+                            id="bg-color"
+                            type="color"
+                            bind:value={bgColor}
+                            class="w-10 h-10 rounded-lg cursor-pointer border border-slate-700"
+                        />
+                        <span class="text-xs font-mono text-slate-400">{bgColor}</span>
+                    </div>
                 </div>
-                <span class="text-sm font-medium text-slate-600">Fondo</span>
             </div>
         </div>
     </div>
 
-    <div class="lg:w-80 flex flex-col gap-4">
+    <!-- Right: Preview -->
+    <div class="lg:w-72 flex flex-col gap-4">
         <div
-            class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col items-center justify-center min-h-[320px] relative overflow-hidden"
+            class="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 shadow-lg shadow-black/10 flex flex-col items-center"
         >
-            <div
-                class="absolute -right-10 -top-10 w-40 h-40 bg-brand-100 rounded-full blur-3xl opacity-50 pointer-events-none"
-            ></div>
-
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">
+                Vista Previa
+            </p>
             {#if qrDataUrl}
-                <div
-                    class="bg-white p-2 rounded-xl shadow-md z-10 transition-transform hover:scale-105 duration-300"
-                >
-                    <img
-                        src={qrDataUrl}
-                        alt="QR Result"
-                        class="w-full h-auto max-w-[250px] rounded-lg block"
-                    />
+                <div class="rounded-xl overflow-hidden shadow-lg">
+                    <img src={qrDataUrl} alt="QR Code" class="w-[200px] h-[200px]" />
                 </div>
             {:else}
-                <p class="text-slate-400 text-sm text-center px-4 mt-4 z-10">
-                    Ingresa datos para generar
-                </p>
+                <div
+                    class="w-[200px] h-[200px] bg-slate-700/30 rounded-xl flex items-center justify-center"
+                >
+                    <QrCode class="w-16 h-16 text-slate-600" />
+                </div>
             {/if}
         </div>
 
-        <div class="flex gap-3">
-            <button
-                on:click={downloadQR}
-                disabled={!qrDataUrl}
-                class="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-                <Download class="w-5 h-5" /> Guardar Imagen
-            </button>
-        </div>
+        <button
+            on:click={downloadQR}
+            disabled={!qrDataUrl}
+            class="w-full bg-brand-600 hover:bg-brand-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-bold py-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-brand-500/20"
+        >
+            <Download class="w-5 h-5" /> Descargar PNG
+        </button>
     </div>
 </div>

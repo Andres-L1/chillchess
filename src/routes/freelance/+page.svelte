@@ -1,213 +1,258 @@
 <script lang="ts">
     import { pageHeader } from '$lib/stores/ui';
-    import { onMount } from 'svelte';
-    import { Receipt, PiggyBank, Clock, Palmtree, Save, ArrowRight } from 'lucide-svelte';
+    import { onMount, tick } from 'svelte';
+    import { Calculator, DollarSign, Clock, ArrowRight, Briefcase, BarChart3 } from 'lucide-svelte';
 
     pageHeader.set({
         title: 'Valor de mi Hora',
-        description: 'Calcula cuánto debes cobrar como Freelancer para ser rentable.',
+        description: 'Calcula automáticamente tu tarifa ideal como freelancer.',
         category: 'Negocios',
     });
 
-    let expenses = 300;
-    let profit = 1500;
-    let hours = 30;
-    let vacation = 4;
-    let projHours = 0;
+    // ------ Reactive state ------
+    let expenses = [
+        { label: 'Alquiler / Hipoteca', amount: 800 },
+        { label: 'Luz / Agua / Internet', amount: 150 },
+        { label: 'Comida', amount: 300 },
+        { label: 'Transporte', amount: 100 },
+        { label: 'Seguros', amount: 60 },
+        { label: 'Software & Herramientas', amount: 50 },
+    ];
 
-    let currentHourlyRate = 0;
-    let annualBillableHours = 0;
+    let profitMarginPercent = 25;
+    let hoursPerWeek = 30;
+    let vacationWeeks = 4;
 
-    $: {
-        const annualRevenueNeeded = (expenses + profit) * 12;
-        const weeksWorked = Math.max(1, 52 - vacation);
-        annualBillableHours = weeksWorked * hours;
-
-        if (annualBillableHours > 0) {
-            currentHourlyRate = annualRevenueNeeded / annualBillableHours;
-        } else {
-            currentHourlyRate = 0;
-        }
-    }
-
-    $: monthlyTotal = expenses + profit;
-    $: totalHoursMonthly = Math.round(annualBillableHours / 12);
-    $: projTotal = currentHourlyRate * projHours;
-
+    // Load saved values from localStorage
     onMount(() => {
-        const saved = localStorage.getItem('freelanceData_v1');
-        if (saved) {
-            const data = JSON.parse(saved);
-            expenses = parseFloat(data.expenses) || 300;
-            profit = parseFloat(data.profit) || 1500;
-            hours = parseFloat(data.hours) || 30;
-            vacation = parseFloat(data.vacation) || 4;
-        }
+        try {
+            const saved = localStorage.getItem('freelance_data');
+            if (saved) {
+                const data = JSON.parse(saved);
+                if (data.expenses) expenses = data.expenses;
+                if (data.profitMarginPercent) profitMarginPercent = data.profitMarginPercent;
+                if (data.hoursPerWeek) hoursPerWeek = data.hoursPerWeek;
+                if (data.vacationWeeks) vacationWeeks = data.vacationWeeks;
+            }
+        } catch {}
     });
 
-    function saveData() {
-        const data = { expenses, profit, hours, vacation };
-        localStorage.setItem('freelanceData_v1', JSON.stringify(data));
+    // Save to localStorage reactively
+    $: if (typeof window !== 'undefined') {
+        localStorage.setItem(
+            'freelance_data',
+            JSON.stringify({ expenses, profitMarginPercent, hoursPerWeek, vacationWeeks })
+        );
+    }
+
+    // -------- Derived calculations --------
+    $: totalMonthlyExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+    $: totalAnnualExpenses = totalMonthlyExpenses * 12;
+    $: annualBillableHours = hoursPerWeek * (52 - vacationWeeks);
+    $: annualTarget = totalAnnualExpenses * (1 + profitMarginPercent / 100);
+    $: hourlyRate = annualBillableHours > 0 ? annualTarget / annualBillableHours : 0;
+    $: dailyRate = hourlyRate * 8;
+    $: projectRate = hourlyRate * 40;
+
+    function addExpense() {
+        expenses = [...expenses, { label: '', amount: 0 }];
+    }
+    function removeExpense(index: number) {
+        expenses = expenses.filter((_, i) => i !== index);
     }
 </script>
 
 <svelte:head>
-    <title>Valor de mi Hora | MultiTool</title>
+    <title>Calculadora Freelance | MultiTool</title>
+    <meta
+        name="description"
+        content="Calcula tu tarifa por hora como freelancer basándote en tus gastos fijos, margen de beneficio e impuestos."
+    />
 </svelte:head>
 
 <div class="flex flex-col lg:flex-row gap-8">
+    <!-- Left Column: Inputs -->
     <div class="flex-1 space-y-6">
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-            <h3
-                class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b pb-2"
-            >
-                Tus Finanzas y Tiempo
-            </h3>
-            <div>
-                <label
-                    for="expenses"
-                    class="flex text-xs font-bold text-slate-400 mb-1 justify-between"
+        <!-- Monthly Expenses Card -->
+        <div
+            class="bg-slate-800/50 backdrop-blur-sm p-5 rounded-2xl border border-slate-700/50 shadow-lg shadow-black/10 space-y-4"
+        >
+            <div class="flex items-center justify-between mb-2">
+                <h3
+                    class="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2"
                 >
-                    <span>Gastos Fijos Mensuales</span>
-                    <span class="text-slate-400 font-normal text-[10px]"
-                        >(Software, internet...)</span
-                    >
-                </label>
-                <div class="relative">
-                    <Receipt
-                        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
-                    />
-                    <input
-                        id="expenses"
-                        type="number"
-                        bind:value={expenses}
-                        on:input={saveData}
-                        placeholder="500"
-                        min="0"
-                        class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand-500"
-                    />
-                </div>
-            </div>
-            <div>
-                <label
-                    for="profit"
-                    class="flex text-xs font-bold text-slate-400 mb-1 justify-between"
+                    <DollarSign class="w-4 h-4 text-brand-400" />
+                    Gastos Mensuales Fijos
+                </h3>
+                <button
+                    on:click={addExpense}
+                    class="text-xs font-bold text-brand-400 hover:text-brand-300 px-3 py-1 rounded-lg bg-brand-500/10 hover:bg-brand-500/20 transition-colors border border-brand-500/20"
                 >
-                    <span>Beneficio Deseado Mensual</span>
-                    <span class="text-slate-400 font-normal text-[10px]">(Limpio para ti)</span>
-                </label>
-                <div class="relative">
-                    <PiggyBank
-                        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
-                    />
-                    <input
-                        id="profit"
-                        type="number"
-                        bind:value={profit}
-                        on:input={saveData}
-                        placeholder="1500"
-                        min="0"
-                        class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand-500"
-                    />
-                </div>
+                    + Añadir
+                </button>
             </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label for="hours" class="block text-xs font-bold text-slate-400 mb-1"
-                        >Horas Facturables/Semana</label
-                    >
-                    <div class="relative">
-                        <Clock
-                            class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
-                        />
+
+            {#each expenses as expense, i}
+                <div class="flex items-center gap-3 group">
+                    <input
+                        type="text"
+                        bind:value={expense.label}
+                        placeholder="Concepto"
+                        class="flex-1 bg-slate-900/50 border border-slate-700/50 rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all"
+                    />
+                    <div class="relative w-28">
+                        <span
+                            class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-bold"
+                            >€</span
+                        >
                         <input
-                            id="hours"
                             type="number"
-                            bind:value={hours}
-                            on:input={saveData}
-                            placeholder="25"
-                            min="1"
-                            max="168"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand-500"
-                        />
-                    </div>
-                </div>
-                <div>
-                    <label for="vacation" class="block text-xs font-bold text-slate-400 mb-1"
-                        >Semanas Vacaciones/Año</label
-                    >
-                    <div class="relative">
-                        <Palmtree
-                            class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
-                        />
-                        <input
-                            id="vacation"
-                            type="number"
-                            bind:value={vacation}
-                            on:input={saveData}
-                            placeholder="4"
+                            bind:value={expense.amount}
                             min="0"
-                            max="52"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            class="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl pl-7 pr-3 py-2.5 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all"
                         />
                     </div>
+                    <button
+                        on:click={() => removeExpense(i)}
+                        class="text-slate-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all text-xs font-bold"
+                    >
+                        ✕
+                    </button>
                 </div>
+            {/each}
+
+            <div class="pt-3 border-t border-slate-700/50 flex justify-between items-center">
+                <span class="text-sm font-bold text-slate-400">Total Mensual</span>
+                <span class="text-xl font-black text-white font-mono"
+                    >{totalMonthlyExpenses.toFixed(0)}€</span
+                >
             </div>
         </div>
-        <p class="text-xs text-slate-400 flex items-center gap-1">
-            <Save class="w-3 h-3" /> Tus datos se guardan automáticamente.
-        </p>
+
+        <!-- Parameters Card -->
+        <div
+            class="bg-slate-800/50 backdrop-blur-sm p-5 rounded-2xl border border-slate-700/50 shadow-lg shadow-black/10 space-y-5"
+        >
+            <h3
+                class="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2"
+            >
+                <BarChart3 class="w-4 h-4 text-brand-400" />
+                Parámetros
+            </h3>
+
+            <div>
+                <label
+                    for="profit-margin"
+                    class="flex justify-between text-xs font-bold text-slate-400 mb-2"
+                >
+                    <span>Margen de beneficio</span>
+                    <span class="bg-slate-700/50 px-2 py-0.5 rounded font-bold text-brand-400"
+                        >{profitMarginPercent}%</span
+                    >
+                </label>
+                <input
+                    id="profit-margin"
+                    type="range"
+                    min="0"
+                    max="100"
+                    bind:value={profitMarginPercent}
+                    class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-brand-500"
+                />
+            </div>
+
+            <div>
+                <label
+                    for="hours-week"
+                    class="flex justify-between text-xs font-bold text-slate-400 mb-2"
+                >
+                    <span>Horas facturables / semana</span>
+                    <span class="bg-slate-700/50 px-2 py-0.5 rounded font-bold text-brand-400"
+                        >{hoursPerWeek}h</span
+                    >
+                </label>
+                <input
+                    id="hours-week"
+                    type="range"
+                    min="10"
+                    max="60"
+                    bind:value={hoursPerWeek}
+                    class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-brand-500"
+                />
+            </div>
+
+            <div>
+                <label
+                    for="vacation-weeks"
+                    class="flex justify-between text-xs font-bold text-slate-400 mb-2"
+                >
+                    <span>Semanas de vacaciones / año</span>
+                    <span class="bg-slate-700/50 px-2 py-0.5 rounded font-bold text-brand-400"
+                        >{vacationWeeks} sem</span
+                    >
+                </label>
+                <input
+                    id="vacation-weeks"
+                    type="range"
+                    min="0"
+                    max="12"
+                    bind:value={vacationWeeks}
+                    class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-brand-500"
+                />
+            </div>
+        </div>
     </div>
 
-    <div class="lg:w-[340px] flex flex-col gap-4">
+    <!-- Right Column: Results -->
+    <div class="lg:w-80 flex flex-col gap-6">
+        <!-- Main Rate Card -->
         <div
-            class="bg-gradient-to-br from-brand-600 to-brand-800 text-white p-6 rounded-2xl shadow-lg relative overflow-hidden"
+            class="relative w-full rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-brand-600 to-brand-800 text-white p-6 flex flex-col justify-between"
         >
             <div
                 class="absolute -right-10 -top-10 w-40 h-40 bg-white rounded-full blur-3xl opacity-10 pointer-events-none"
             ></div>
-            <p class="text-brand-100 text-sm font-medium mb-1">Para ser rentable, tu hora vale:</p>
-            <div class="flex items-end gap-1 mb-4">
-                <span class="text-5xl font-black font-mono tracking-tighter"
-                    >${currentHourlyRate.toFixed(2)}</span
-                >
+            <div class="relative z-10">
+                <p class="text-brand-200 text-sm font-medium mb-1 flex items-center gap-2">
+                    <Clock class="w-4 h-4" /> Tu Tarifa Ideal
+                </p>
+                <div class="text-5xl font-black font-mono tracking-tighter text-white tabular-nums">
+                    {hourlyRate.toFixed(2)}€
+                </div>
+                <p class="text-brand-300 text-sm font-medium mt-1">por hora</p>
             </div>
-            <div class="h-px bg-brand-500/50 w-full mb-4"></div>
-            <div class="flex justify-between items-end">
+            <div class="h-px bg-white/10 my-5"></div>
+            <div class="grid grid-cols-2 gap-4 relative z-10">
                 <div>
-                    <p class="text-brand-200 text-xs">Debes facturar al mes</p>
-                    <p class="text-xl font-bold font-mono">
-                        ${monthlyTotal.toLocaleString('en-US')}
-                    </p>
+                    <p class="text-brand-200/70 text-xs mb-1">Tarifa Diaria (8h)</p>
+                    <p class="text-xl font-bold font-mono">{dailyRate.toFixed(0)}€</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-brand-200 text-xs">Horas reales/mes</p>
-                    <p class="text-xl font-bold font-mono">{totalHoursMonthly}</p>
+                    <p class="text-brand-200/70 text-xs mb-1">Proyecto (40h)</p>
+                    <p class="text-xl font-bold font-mono">{projectRate.toFixed(0)}€</p>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm mt-2">
-            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3">
-                Cotizar Proyecto
-            </h3>
-            <div class="flex items-center gap-3">
-                <div class="flex-1 relative">
-                    <label for="projHours" class="sr-only">Horas estimadas del proyecto</label>
-                    <input
-                        id="projHours"
-                        type="number"
-                        bind:value={projHours}
-                        placeholder="Horas estimadas"
-                        class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
-                    />
-                </div>
-                <div class="w-8 flex justify-center text-slate-400"><ArrowRight /></div>
-                <div class="flex-1 bg-brand-50 rounded-lg border border-brand-100 p-2 text-center">
-                    <span class="text-lg font-bold text-brand-700 font-mono"
-                        >${projTotal.toFixed(2)}</span
-                    >
-                </div>
+        <!-- Annual Summary -->
+        <div
+            class="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-5 border border-slate-700/50 shadow-lg shadow-black/10 space-y-4"
+        >
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Resumen Anual</h4>
+            <div class="flex justify-between items-center py-2 border-b border-slate-700/30">
+                <span class="text-sm text-slate-400">Gastos Anuales</span>
+                <span class="text-sm font-bold text-white font-mono"
+                    >{totalAnnualExpenses.toLocaleString()}€</span
+                >
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-slate-700/30">
+                <span class="text-sm text-slate-400">Objetivo + Beneficio</span>
+                <span class="text-sm font-bold text-brand-400 font-mono"
+                    >{annualTarget.toLocaleString('es-ES', { maximumFractionDigits: 0 })}€</span
+                >
+            </div>
+            <div class="flex justify-between items-center py-2">
+                <span class="text-sm text-slate-400">Horas Facturables</span>
+                <span class="text-sm font-bold text-white font-mono">{annualBillableHours}h</span>
             </div>
         </div>
     </div>

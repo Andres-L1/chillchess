@@ -1,11 +1,11 @@
 {
-    "name": "ChillChess",
-    "short_name": "ChillChess",
-    "description": "Tu espacio premium de ajedrez, música Lo-Fi y enfoque.",
+    "name": "MultiTool",
+    "short_name": "MultiTool",
+    "description": "Tu navaja suiza digital para freelancers. Calculadora de tarifas, facturas, Pomodoro, Kanban, QR y más.",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#0B1120",
-    "theme_color": "#0B1120",
+    "background_color": "#0B0E14",
+    "theme_color": "#0B0E14",
     "orientation": "portrait",
     "icons": [
         {

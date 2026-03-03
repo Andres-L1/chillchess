@@ -25,81 +25,7 @@ export interface User {
     lastLogin?: Date;
 }
 
-// ============================================================================
-// MUSIC TYPES
-// ============================================================================
-
-export type MusicGenre = 'classical' | 'jazz' | 'electronic' | 'ambient' | 'other';
-export type TrackStatus = 'pending' | 'approved' | 'rejected';
-export type AlbumCategory = 'musica' | 'juegos' | 'ambiente';
-
-export interface Track {
-    id: string;
-    title: string;
-    artist: string;
-    album?: string;   // Optional for legacy static data
-    duration?: number;
-    url?: string;
-    file?: string;
-    cover?: string;
-    coverUrl?: string; // Firestore URL
-    r2Key?: string;
-    albumCover?: string; // Album cover URL or R2 key
-    genre?: MusicGenre; // Optional for legacy
-    createdAt?: Date;
-}
-
-export interface Album {
-    id: string;
-    title: string;
-    artist: string;
-    artistId?: string;
-    cover: string;
-    r2CoverKey?: string;
-    tracks: Track[];
-    genre?: MusicGenre; // Optional
-    releaseDate?: Date;
-    description?: string;
-    createdAt?: Date;
-    tag?: string;
-    price?: string;
-    isPremium?: boolean;
-    vibeId?: string;
-    albumCategory?: string;
-    category?: string;
-}
-
-export interface Artist {
-    id: string;
-    name: string;
-    bio?: string;
-    photoURL?: string;
-    isVerified: boolean;
-    genres: MusicGenre[];
-    albums: string[]; // album IDs
-    createdAt: Date;
-}
-
-// ============================================================================
-// MUSIC SUBMISSION TYPES
-// ============================================================================
-
-export interface MusicSubmission {
-    id: string;
-    title: string;
-    artist: string;
-    artistEmail: string;
-    trackUrl: string;
-    coverUrl?: string;
-    genre: MusicGenre;
-    description?: string;
-    status: TrackStatus;
-    submittedBy: string; // user UID
-    submittedAt: Date;
-    reviewedAt?: Date;
-    reviewedBy?: string; // admin UID
-    rejectionReason?: string;
-}
+// Removed old Music, Submissions, and Tournament Types
 
 // ============================================================================
 // PROPOSAL TYPES
@@ -145,30 +71,6 @@ export interface BugReport {
     createdAt: Date;
     resolvedAt?: Date;
     adminNotes?: string;
-}
-
-// Game Types removed (Chess logic deprecated)
-
-// ============================================================================
-// TOURNAMENT TYPES
-// ============================================================================
-
-export type TournamentStatus = 'upcoming' | 'active' | 'completed';
-export type TournamentFormat = 'single-elimination' | 'double-elimination' | 'round-robin';
-
-export interface Tournament {
-    id: string;
-    name: string;
-    description: string;
-    format: TournamentFormat;
-    status: TournamentStatus;
-    startDate: Date;
-    endDate?: Date;
-    participants: string[]; // user UIDs
-    maxParticipants: number;
-    prize?: string;
-    createdBy: string;
-    createdAt: Date;
 }
 
 // ============================================================================

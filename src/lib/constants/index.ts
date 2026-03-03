@@ -10,7 +10,7 @@
 // ============================================================================
 
 export const APP_NAME = 'ChillChess';
-export const APP_DESCRIPTION = 'Juega ajedrez con música relajante';
+export const APP_DESCRIPTION = 'Multi-Herramientas Web';
 export const APP_VERSION = '1.0.0';
 export const APP_URL = 'https://chillchess.app';
 
@@ -37,14 +37,7 @@ export const ROUTES = {
 
 export const COLLECTIONS = {
     USERS: 'users',
-    ARTISTS: 'artists',
-    ALBUMS: 'albums',
-    TRACKS: 'tracks',
-    PROPOSALS: 'proposals',
     BUG_REPORTS: 'bug_reports',
-    MUSIC_SUBMISSIONS: 'musicSubmissions',
-    TOURNAMENTS: 'tournaments',
-    GAMES: 'games',
     BACKUPS: 'backups',
     NOTIFICATIONS: 'notifications',
 } as const;
