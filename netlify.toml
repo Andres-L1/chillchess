@@ -14,6 +14,9 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  # Whitelist public Firebase API Key for secret scanner to prevent build false positives
+  SECRETS_SCAN_OMIT_KEYS = "VITE_FIREBASE_API_KEY"
+  SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "AIzaSyDkAPVdrwASXA-O5ajBU7T14qbKSfef5EI"
 
 # Aggressive caching for static assets
 [[headers]]
