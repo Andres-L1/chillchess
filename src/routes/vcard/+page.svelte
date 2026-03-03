@@ -240,9 +240,9 @@
         </div>
     </div>
 
-    <div class="lg:w-80 flex flex-col gap-6">
+    <div class="w-full lg:w-80 flex flex-col gap-6">
         <div
-            class="relative w-full aspect-[1.58/1] rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-slate-800 to-slate-900 text-white p-5 flex flex-col justify-between transition-all"
+            class="relative w-full aspect-[1.58/1] rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-slate-800 to-slate-900 text-white p-4 sm:p-5 flex flex-col justify-between transition-all"
         >
             <div
                 class="absolute -right-10 -top-10 w-40 h-40 bg-brand-500 rounded-full blur-3xl opacity-20 pointer-events-none"

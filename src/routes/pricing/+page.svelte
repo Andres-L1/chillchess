@@ -81,7 +81,7 @@
     </div>
 
     <div
-        class="w-full max-w-5xl mx-auto flex flex-col items-center z-10 relative mt-20 sm:mt-12 mb-12"
+        class="w-full max-w-5xl mx-auto flex flex-col items-center z-10 relative mt-24 sm:mt-20 md:mt-12 mb-12"
     >
         <!-- Header -->
         <div class="text-center mb-12 sm:mb-16 px-4">

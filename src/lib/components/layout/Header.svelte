@@ -126,7 +126,7 @@
 
             <div
                 transition:slide={{ duration: 200, axis: 'y' }}
-                class="absolute right-0 top-full mt-2 w-64 bg-slate-900 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-700/50 z-50 overflow-hidden transform origin-top-right"
+                class="absolute right-0 top-full mt-2 w-64 max-w-[calc(100vw-2rem)] bg-slate-900 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-700/50 z-50 overflow-hidden transform origin-top-right"
             >
                 <div class="px-5 py-4 border-b border-slate-800 bg-slate-800/30">
                     <p class="text-sm font-bold text-white truncate mb-1">

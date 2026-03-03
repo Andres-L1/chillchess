@@ -2,20 +2,63 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Estilos personalizados para el scroll y transiciones */
+/* ========================================
+   Global Touch & Responsive Utilities
+   ======================================== */
+
+/* Prevent double-tap zoom on interactive elements */
+button, a, input, select, textarea, [role="button"] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Minimum tap target for accessibility (44px) */
+@media (pointer: coarse) {
+    button, a, [role="button"] {
+        min-height: 44px;
+    }
+}
+
+/* Safe area padding for iOS notch devices */
+.safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ========================================
+   Scrollbar Styles
+   ======================================== */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
+/* Hide scrollbar on mobile for cleaner look but keep scrolling */
+@media (max-width: 767px) {
+    .hide-scrollbar-mobile::-webkit-scrollbar { display: none; }
+    .hide-scrollbar-mobile { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+/* ========================================
+   Toast Animations
+   ======================================== */
 .toast-enter { transform: translateY(100%); opacity: 0; }
 .toast-enter-active { transform: translateY(0); opacity: 1; transition: all 300ms ease-out; }
 .toast-exit { opacity: 0; transition: opacity 200ms ease-in; }
 
-/* Animación de pulso para NFC */
+/* ========================================
+   NFC Pulse Animation
+   ======================================== */
 @keyframes nfcPulse {
     0% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.4); }
     70% { box-shadow: 0 0 0 15px rgba(14, 165, 233, 0); }
     100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
 }
 .nfc-scanning { animation: nfcPulse 1.5s infinite; }
+
+/* ========================================
+   Responsive Table Wrapper
+   ======================================== */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}

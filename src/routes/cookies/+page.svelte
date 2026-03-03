@@ -101,9 +101,9 @@
 
             <h2>3. Tipos de cookies que usamos explícitamente</h2>
             <div
-                class="not-prose mt-6 bg-slate-800/50 rounded-2xl border border-slate-700/50 overflow-hidden"
+                class="not-prose mt-6 bg-slate-800/50 rounded-2xl border border-slate-700/50 overflow-hidden table-responsive"
             >
-                <table class="w-full text-left text-sm">
+                <table class="w-full text-left text-sm min-w-[480px]">
                     <thead
                         class="bg-slate-800/80 text-slate-300 font-semibold border-b border-slate-700/50"
                     >

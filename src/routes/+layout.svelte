@@ -57,7 +57,7 @@
         <div class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
             <Header />
 
-            <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 custom-scrollbar">
+            <main class="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 lg:p-8 custom-scrollbar">
                 <div class="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
                     <slot />
                 </div>

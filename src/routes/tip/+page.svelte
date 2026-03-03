@@ -134,7 +134,7 @@
     </div>
 
     <div
-        class="md:w-[300px] bg-slate-900 rounded-2xl p-6 text-white shadow-xl flex flex-col justify-between relative overflow-hidden border border-slate-700/50"
+        class="w-full md:w-72 lg:w-[300px] bg-slate-900 rounded-2xl p-5 sm:p-6 text-white shadow-xl flex flex-col justify-between relative overflow-hidden border border-slate-700/50"
     >
         <div
             class="absolute -right-20 -top-20 w-48 h-48 bg-brand-500 rounded-full blur-3xl opacity-20 pointer-events-none"

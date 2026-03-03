@@ -146,7 +146,7 @@
                     class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"
                     >De</label
                 >
-                <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
                     {#each POPULAR_CURRENCIES as cur}
                         <button
                             on:click={() => {
@@ -182,7 +182,7 @@
                 class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2"
                 >A</label
             >
-            <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">
+            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
                 {#each POPULAR_CURRENCIES as cur}
                     <button
                         on:click={() => (toCurrency = cur)}
@@ -218,7 +218,7 @@
                     {fromCurrency} =
                 </p>
                 <div
-                    class="text-4xl md:text-5xl font-black font-mono tracking-tighter tabular-nums"
+                    class="text-3xl sm:text-4xl md:text-5xl font-black font-mono tracking-tighter tabular-nums break-all"
                 >
                     {convertedAmount.toLocaleString('es-ES', {
                         minimumFractionDigits: 2,

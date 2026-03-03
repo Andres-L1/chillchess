@@ -31,7 +31,7 @@
 </svelte:head>
 
 <div
-    class="min-h-screen bg-slate-950 text-slate-200 selection:bg-brand-500/30 font-sans p-6 md:p-12"
+    class="min-h-screen bg-slate-950 text-slate-200 selection:bg-brand-500/30 font-sans p-4 sm:p-6 md:p-12"
 >
     <div class="max-w-6xl mx-auto">
         <!-- Header -->
@@ -61,7 +61,7 @@
         </header>
 
         <!-- Stats Grid -->
-        <div class="grid md:grid-cols-3 gap-6 mb-12">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-12">
             <div
                 class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col items-center text-center"
             >
@@ -111,7 +111,7 @@
                 ver una tabla detallada de cada usuario, cancelar suscripciones o enviar avisos
                 globales.
             </p>
-            <div class="flex justify-center gap-4">
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
                 <a
                     href="https://dashboard.stripe.com/"
                     target="_blank"

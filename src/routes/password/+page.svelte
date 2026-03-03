@@ -100,7 +100,7 @@
     >
         <div class="flex items-center gap-3">
             <div
-                class="flex-1 bg-slate-900/60 border border-slate-700/50 rounded-xl px-4 py-4 font-mono text-lg text-white overflow-x-auto whitespace-nowrap select-all"
+                class="flex-1 bg-slate-900/60 border border-slate-700/50 rounded-xl px-3 sm:px-4 py-3 sm:py-4 font-mono text-sm sm:text-lg text-white overflow-x-auto whitespace-nowrap select-all"
             >
                 {#if showPassword}
                     {password || 'Haz click en generar'}

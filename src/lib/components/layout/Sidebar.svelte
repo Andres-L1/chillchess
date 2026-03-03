@@ -147,7 +147,7 @@
     </div>
 
     <!-- Footer del Menú -->
-    <div class="p-4 border-t border-slate-800/60 bg-slate-900/50">
+    <div class="p-4 border-t border-slate-800/60 bg-slate-900/50 safe-bottom">
         <p class="text-[11px] font-medium text-slate-600 text-center uppercase tracking-widest">
             MultiTool • v4.0
         </p>
