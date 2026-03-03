@@ -5,7 +5,7 @@
 [context.production.environment]
   NODE_VERSION = "20"
   VITE_FIREBASE_API_KEY = "AIzaSyDkAPVdrwASXA-O5ajBU7T14qbKSfef5EI"
-  VITE_FIREBASE_AUTH_DOMAIN = "chillchess.app"
+  VITE_FIREBASE_AUTH_DOMAIN = "chillchess-57365.firebaseapp.com"
   VITE_FIREBASE_PROJECT_ID = "chillchess-57365"
   VITE_FIREBASE_STORAGE_BUCKET = "chillchess-57365.firebasestorage.app"
   VITE_FIREBASE_MESSAGING_SENDER_ID = "676151034372"
