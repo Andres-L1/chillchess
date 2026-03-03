@@ -51,7 +51,7 @@
     <slot />
     <Toast />
 {:else}
-    <div class="flex h-screen bg-[#0B0E14] overflow-hidden text-slate-200">
+    <div class="flex h-screen w-full bg-[#0B0E14] overflow-hidden text-slate-200">
         <Sidebar on:logout={handleLogout} />
 
         <div class="flex-1 flex flex-col min-w-0 overflow-hidden relative">

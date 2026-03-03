@@ -47,13 +47,12 @@
         { id: 'wifi' as QRMode, label: 'WiFi', icon: Wifi },
     ];
 
-    function getQRContent(): string {
-        if (mode === 'url') return urlInput || 'https://example.com';
-        if (mode === 'text') return textInput || 'Hello World';
-        return `WIFI:T:${wifiEncryption};S:${wifiSSID};P:${wifiPassword};;`;
-    }
-
-    $: qrContent = getQRContent();
+    $: qrContent =
+        mode === 'url'
+            ? urlInput || 'https://example.com'
+            : mode === 'text'
+              ? textInput || 'Hello World'
+              : `WIFI:T:${wifiEncryption};S:${wifiSSID};P:${wifiPassword};;`;
 
     // Regenerate QR when content, colors, or logo changes
     $: if (qrContent || fgColor || bgColor || logoDataUrl || logoSize) {
