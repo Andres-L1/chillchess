@@ -14,7 +14,7 @@
         Star,
     } from 'lucide-svelte';
     import { auth } from '$lib/firebase';
-    import { GoogleAuthProvider, signInWithRedirect } from 'firebase/auth';
+    import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
     import { mobileMenuOpen } from '$lib/stores/ui';
     import { authStore } from '$lib/stores/authStore';
     import { goto } from '$app/navigation';
@@ -39,12 +39,13 @@
         errorMessage = '';
         try {
             const provider = new GoogleAuthProvider();
-            // Using signInWithRedirect avoids the Cross-Origin-Opener-Policy (COOP)
-            // blocking issues that signInWithPopup causes in modern browsers.
-            await signInWithRedirect(auth, provider);
+            await signInWithPopup(auth, provider);
+            // onAuthStateChanged in authStore will handle the rest
         } catch (error: any) {
             console.error('Google Login error:', error);
-            errorMessage = 'Error al iniciar sesión con Google.';
+            if (error.code !== 'auth/popup-closed-by-user') {
+                errorMessage = 'Error al iniciar sesión con Google.';
+            }
             isAuthenticating = false;
         }
     }

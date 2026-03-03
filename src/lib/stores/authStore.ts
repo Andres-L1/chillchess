@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
 import { auth, db } from '$lib/firebase';
-import { onAuthStateChanged, getRedirectResult, type User } from 'firebase/auth';
+import { onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 
 export interface UserData {
@@ -79,16 +79,7 @@ function createAuthStore() {
             }
         });
 
-        // 2. handle redirect result
-        getRedirectResult(auth).then((result) => {
-            if (result) {
-                console.log("Auth Store: Redirect Result found for", result.user.email);
-                syncUser(result.user);
-            }
-        }).catch((error) => {
-            console.error("Auth Store: Redirect Result Error:", error);
-            update(state => ({ ...state, error: error.message, loading: false }));
-        });
+
     }
 
     return { subscribe };
