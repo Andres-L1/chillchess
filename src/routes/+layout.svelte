@@ -146,7 +146,7 @@
     <Toast />
 {:else if ['/', '/landing', '/pricing', '/cookies'].includes($page.url.pathname)}
     <div class="flex flex-col min-h-screen relative">
-        {#if globalSettings?.globalMessageActive && globalSettings?.globalMessageText}
+        {#if globalSettings?.globalMessageActive && globalSettings?.globalMessageText && $page.url.pathname !== '/landing'}
             <div
                 class="w-full bg-brand-500/20 border-b border-brand-500/30 px-4 py-2.5 flex items-center justify-center gap-2 text-center text-sm font-medium text-brand-100 backdrop-blur-md shadow-inner relative z-50"
             >
@@ -181,7 +181,7 @@
             <Sidebar />
 
             <div class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-                {#if globalSettings?.globalMessageActive && globalSettings?.globalMessageText}
+                {#if globalSettings?.globalMessageActive && globalSettings?.globalMessageText && $page.url.pathname !== '/landing'}
                     <div
                         class="w-full bg-brand-500/10 border-b border-white/5 px-4 py-2 flex items-center justify-center gap-2 text-center text-sm font-medium text-brand-200 backdrop-blur-lg shadow-inner z-40"
                     >
