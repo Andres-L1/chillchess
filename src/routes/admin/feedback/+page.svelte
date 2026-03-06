@@ -49,7 +49,14 @@
     let unsubscribe: () => void;
     let filterType: 'all' | 'unread' | 'bug' | 'suggestion' = 'unread';
 
-    onMount(() => {
+    let isDataSubscribed = false;
+
+    $: if (!$authStore.loading && $authStore.user?.isAdmin && !isDataSubscribed) {
+        startSubscription();
+    }
+
+    function startSubscription() {
+        isDataSubscribed = true;
         const q = query(collection(db, 'feedback'), orderBy('createdAt', 'desc'));
 
         unsubscribe = onSnapshot(
@@ -66,9 +73,10 @@
                 console.error('Error fetching feedback:', error);
                 addToast('No se pudo cargar el feedback.', 'error');
                 loading = false;
+                isDataSubscribed = false; // Permite reintentar si falla
             }
         );
-    });
+    }
 
     $: filteredFeedback = feedbackItems.filter((item) => {
         if (filterType === 'all') return true;
