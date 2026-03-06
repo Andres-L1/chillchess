@@ -96,9 +96,12 @@
                 <div class="group">
                     <label
                         for="currentAge"
-                        class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 group-focus-within:text-brand-400 transition-colors"
+                        class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1 group-focus-within:text-brand-400 transition-colors"
                         >Tu Edad Actual</label
                     >
+                    <p class="text-[11px] text-slate-500 mb-3 font-medium leading-tight">
+                        Desde cuándo comenzamos a calcular.
+                    </p>
                     <input
                         id="currentAge"
                         type="number"
@@ -112,9 +115,12 @@
                 <div class="group">
                     <label
                         for="currentSavings"
-                        class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2 group-focus-within:text-brand-400 transition-colors"
+                        class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1 group-focus-within:text-brand-400 transition-colors"
                         >Ahorro Inicial</label
                     >
+                    <p class="text-[11px] text-slate-500 mb-3 font-medium leading-tight">
+                        Capital o inversiones que ya tienes.
+                    </p>
                     <div class="relative">
                         <div
                             class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-black"
@@ -136,10 +142,13 @@
             <div class="group">
                 <label
                     for="monthlyContribution"
-                    class="flex text-xs font-black text-slate-400 uppercase tracking-widest mb-2 group-focus-within:text-brand-400 transition-colors items-center gap-2"
+                    class="flex text-xs font-black text-slate-400 uppercase tracking-widest mb-1 group-focus-within:text-brand-400 transition-colors items-center gap-2"
                 >
                     Aportación Mensual
                 </label>
+                <p class="text-[11px] text-slate-500 mb-3 font-medium leading-tight">
+                    Dinero nuevo que invertirás de forma periódica.
+                </p>
                 <div class="relative">
                     <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-black">
                         {$currencyStore}
@@ -166,9 +175,12 @@
                 <div class="group">
                     <label
                         for="targetMonthlyIncome"
-                        class="block text-xs font-black text-amber-400/80 uppercase tracking-widest mb-2 group-focus-within:text-amber-400 transition-colors"
+                        class="block text-xs font-black text-amber-400/80 uppercase tracking-widest mb-1 group-focus-within:text-amber-400 transition-colors"
                         >Ingreso Mensual Jubilación</label
                     >
+                    <p class="text-[11px] text-amber-500/50 mb-3 font-medium leading-tight">
+                        Dinero que necesitarás cada mes.
+                    </p>
                     <div class="relative">
                         <div
                             class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-black"
@@ -190,9 +202,12 @@
                 <div class="group">
                     <label
                         for="targetTotalCorpus"
-                        class="block text-xs font-black text-amber-400/80 uppercase tracking-widest mb-2 group-focus-within:text-amber-400 transition-colors"
+                        class="block text-xs font-black text-amber-400/80 uppercase tracking-widest mb-1 group-focus-within:text-amber-400 transition-colors"
                         >Objetivo Total (Regla 4%)</label
                     >
+                    <p class="text-[11px] text-amber-500/50 mb-3 font-medium leading-tight">
+                        Patrimonio que debes alcanzar.
+                    </p>
                     <div class="relative">
                         <div
                             class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-black"
