@@ -50,8 +50,8 @@
     let filterType: 'all' | 'unread' | 'bug' | 'suggestion' = 'unread';
 
     let isDataSubscribed = false;
-
     $: if (!$authStore.loading && $authStore.user?.isAdmin && !isDataSubscribed) {
+        console.log('Admin Feedback: Auth ready, starting subscription...');
         startSubscription();
     }
 
@@ -71,9 +71,13 @@
             },
             (error) => {
                 console.error('Error fetching feedback:', error);
-                addToast('No se pudo cargar el feedback.', 'error');
+                // No reseteamos isDataSubscribed aquí para evitar el bucle infinito
+                if (error.code === 'permission-denied') {
+                    addToast('Sin permisos para ver feedback.', 'error');
+                } else {
+                    addToast('No se pudo cargar el feedback.', 'error');
+                }
                 loading = false;
-                isDataSubscribed = false; // Permite reintentar si falla
             }
         );
     }
