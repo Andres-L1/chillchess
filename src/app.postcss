@@ -12,6 +12,34 @@ button, a, input, select, textarea, [role="button"] {
     -webkit-tap-highlight-color: transparent;
 }
 
+/* 
+ * iOS Native Feel Global Enhancements 
+ */
+body {
+    /* Prevent rubber-banding on the whole page, keep it for scrollable elements inside */
+    overscroll-behavior-y: none;
+    
+    /* Disable long-press context menus across the app UI by default */
+    -webkit-touch-callout: none;
+    
+    /* Disable default user text selection for UI elements to feel like a native app */
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Re-enable selection and callouts ONLY where appropriate (inputs, text blocks where we want them) */
+input, textarea, [contenteditable="true"] {
+    -webkit-user-select: auto;
+    user-select: auto;
+    -webkit-touch-callout: default;
+}
+
+/* Add select-text classes for things we explicitly want the user to be able to copy (e.g., invoices) */
+.selectable-text {
+    -webkit-user-select: auto;
+    user-select: auto;
+}
+
 /* Minimum tap target for accessibility (44px) */
 @media (pointer: coarse) {
     button, a, [role="button"] {

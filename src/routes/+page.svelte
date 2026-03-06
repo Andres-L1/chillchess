@@ -5,7 +5,7 @@
     // El root solo redirige según el estado de auth
     $: if (!$authStore.loading) {
         if ($authStore.user) {
-            goto('/freelance');
+            goto('/dashboard');
         } else {
             goto('/landing');
         }

@@ -46,6 +46,18 @@
         }
     }
 
+    function triggerHaptic() {
+        if (typeof navigator !== 'undefined' && navigator.vibrate) {
+            // Vibra ligeramente durante 50ms
+            navigator.vibrate(50);
+        }
+    }
+
+    function handleMenuClick() {
+        triggerHaptic();
+        mobileMenuOpen.set(true);
+    }
+
     $: initials = (() => {
         if (!$authStore.user) return 'U';
         if ($authStore.user.displayName) {
@@ -63,11 +75,11 @@
 >
     <div class="flex items-center gap-3 overflow-hidden">
         <button
-            on:click={() => mobileMenuOpen.set(true)}
-            class="md:hidden p-3 -ml-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors flex items-center justify-center min-w-[48px] min-h-[48px]"
+            on:click={handleMenuClick}
+            class="md:hidden p-4 -ml-4 text-slate-400 hover:text-white rounded-xl hover:bg-white/5 transition-colors flex items-center justify-center min-w-[56px] min-h-[56px] active:scale-95 touch-manipulation"
             aria-label="Abrir menú"
         >
-            <Menu class="w-6 h-6" />
+            <Menu class="w-7 h-7" />
         </button>
 
         <div class="flex-1 truncate">

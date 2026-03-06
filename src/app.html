@@ -9,6 +9,11 @@
 	<meta name="theme-color" content="#0B0E14" />
 	<link rel="manifest" href="%sveltekit.assets%/manifest.json" />
 
+	<!-- PWA iOS Native Behavior Attributes -->
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+	<meta name="apple-mobile-web-app-title" content="ChillChess" />
+
 	<!-- Performance: Preconnect to critical origins -->
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -32,6 +37,13 @@
 
 <body class="bg-[#0B0E14] text-slate-200 font-sans flex min-h-[100dvh] overflow-x-hidden w-full">
 	<div style="display: contents" class="h-full w-full">%sveltekit.body%</div>
+	<script>
+		if ('serviceWorker' in navigator) {
+			window.addEventListener('load', () => {
+				navigator.serviceWorker.register('/sw.js').catch(err => console.error('SW reg failed:', err));
+			});
+		}
+	</script>
 </body>
 
 </html>

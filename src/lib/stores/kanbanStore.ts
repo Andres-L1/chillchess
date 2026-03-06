@@ -1,6 +1,9 @@
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 import { browser } from '$app/environment';
 import type { KanbanTask } from '$lib/types/kanban';
+import { authStore } from '$lib/stores/authStore';
+import { db } from '$lib/firebase';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 
 const STORAGE_KEY = 'chillchess_kanban_tasks';
 
@@ -41,11 +44,55 @@ function createKanbanStore() {
 
     const { subscribe, set, update } = writable<KanbanTask[]>(initialTasks);
 
-    function save(tasks: KanbanTask[]) {
+    let currentUid: string | null = null;
+    let unsubscribeSnapshot: (() => void) | null = null;
+    let isRemoteUpdate = false;
+
+    if (browser) {
+        authStore.subscribe(state => {
+            const uid = state.user?.uid || null;
+            if (uid !== currentUid) {
+                currentUid = uid;
+                if (unsubscribeSnapshot) {
+                    unsubscribeSnapshot();
+                    unsubscribeSnapshot = null;
+                }
+
+                if (uid) {
+                    const kanbanRef = doc(db, 'users', uid, 'kanban', 'data');
+                    unsubscribeSnapshot = onSnapshot(kanbanRef, (snapshot) => {
+                        if (snapshot.exists()) {
+                            const data = snapshot.data();
+                            if (data && data.tasks) {
+                                isRemoteUpdate = true;
+                                set(data.tasks);
+                                localStorage.setItem(STORAGE_KEY, JSON.stringify(data.tasks));
+                                setTimeout(() => isRemoteUpdate = false, 0);
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    async function save(tasks: KanbanTask[]) {
+        if (isRemoteUpdate) return;
+
         if (browser) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
         }
         set(tasks);
+
+        const uid = currentUid || get(authStore).user?.uid;
+        if (uid) {
+            try {
+                const kanbanRef = doc(db, 'users', uid, 'kanban', 'data');
+                await setDoc(kanbanRef, { tasks }, { merge: true });
+            } catch (error) {
+                console.error('Error saving kanban to Firebase:', error);
+            }
+        }
     }
 
     return {

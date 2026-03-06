@@ -2,7 +2,7 @@
     "name": "ChillChess",
     "short_name": "ChillChess",
     "description": "Tu navaja suiza digital para freelancers. Calculadora de tarifas, facturas, Pomodoro, Kanban, QR y más.",
-    "start_url": "/",
+    "start_url": "/dashboard",
     "display": "standalone",
     "background_color": "#0B0E14",
     "theme_color": "#0B0E14",

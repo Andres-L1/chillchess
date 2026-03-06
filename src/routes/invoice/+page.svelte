@@ -469,7 +469,7 @@
 
             <!-- Table header (desktop) -->
             <div
-                class="hidden sm:grid grid-cols-[1fr_80px_100px_100px_40px] gap-3 text-xs font-black text-slate-500 uppercase tracking-widest mb-2 px-1 relative z-10"
+                class="hidden lg:grid grid-cols-[1fr_80px_100px_100px_40px] gap-3 text-xs font-black text-slate-500 uppercase tracking-widest mb-2 px-1 relative z-10"
             >
                 <span>Concepto</span>
                 <span class="text-center">Cant.</span>
@@ -481,39 +481,77 @@
             <div class="space-y-3 relative z-10">
                 {#each lines as line, i}
                     <div
-                        class="grid grid-cols-1 sm:grid-cols-[1fr_80px_100px_100px_40px] gap-3 items-center bg-black/20 p-3 sm:p-2 rounded-xl border border-white/5 group-hover:border-white/10 transition-colors"
+                        class="grid grid-cols-1 lg:grid-cols-[1fr_80px_100px_100px_40px] gap-4 lg:gap-3 items-center bg-black/20 p-4 lg:p-2 rounded-xl border border-white/5 group-hover:border-white/10 transition-colors"
                     >
-                        <input
-                            type="text"
-                            bind:value={line.concept}
-                            placeholder="Descripción del servicio"
-                            class="w-full bg-transparent border-none px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-0 transition-all"
-                        />
-                        <input
-                            type="number"
-                            bind:value={line.qty}
-                            min="1"
-                            class="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-all text-center"
-                        />
-                        <input
-                            type="number"
-                            bind:value={line.price}
-                            min="0"
-                            step="0.01"
-                            class="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-all text-right"
-                        />
-                        <div
-                            class="text-sm font-bold text-brand-300 text-right tabular-nums drop-shadow-[0_0_8px_rgba(14,165,233,0.3)]"
-                        >
-                            {fmt(subtotals[i] || 0)}
+                        <div class="space-y-1">
+                            <label
+                                for="concept-{i}"
+                                class="block lg:hidden text-[10px] font-bold text-slate-500 uppercase mb-1"
+                                >Concepto</label
+                            >
+                            <input
+                                id="concept-{i}"
+                                type="text"
+                                bind:value={line.concept}
+                                placeholder="Descripción del servicio"
+                                class="w-full bg-black/40 lg:bg-transparent border border-white/5 lg:border-none rounded-xl px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 lg:focus:ring-0 transition-all"
+                            />
                         </div>
-                        <button
-                            on:click={() => removeLine(i)}
-                            disabled={lines.length <= 1}
-                            class="p-2 text-slate-500 hover:text-red-400 disabled:opacity-30 transition-colors rounded-lg hover:bg-red-500/10 mx-auto"
+
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:contents gap-3">
+                            <div>
+                                <label
+                                    for="qty-{i}"
+                                    class="block lg:hidden text-[10px] font-bold text-slate-500 uppercase mb-1"
+                                    >Cant.</label
+                                >
+                                <input
+                                    id="qty-{i}"
+                                    type="number"
+                                    bind:value={line.qty}
+                                    min="1"
+                                    class="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-all text-center"
+                                />
+                            </div>
+                            <div>
+                                <label
+                                    for="price-{i}"
+                                    class="block lg:hidden text-[10px] font-bold text-slate-500 uppercase mb-1 text-right sm:text-left"
+                                    >Precio</label
+                                >
+                                <input
+                                    id="price-{i}"
+                                    type="number"
+                                    bind:value={line.price}
+                                    min="0"
+                                    step="0.01"
+                                    class="w-full bg-black/40 border border-white/5 shadow-inner rounded-xl px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-all text-right"
+                                />
+                            </div>
+                            <div class="flex flex-col justify-end lg:justify-center">
+                                <span
+                                    class="block lg:hidden text-[10px] font-bold text-slate-500 uppercase mb-1 text-right"
+                                    >Subtotal</span
+                                >
+                                <div
+                                    class="text-sm font-bold text-brand-300 text-right tabular-nums drop-shadow-[0_0_8px_rgba(14,165,233,0.3)]"
+                                >
+                                    {fmt(subtotals[i] || 0)}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div
+                            class="flex justify-end lg:justify-center border-t border-white/5 lg:border-none pt-2 lg:pt-0 mt-2 lg:mt-0"
                         >
-                            <Trash2 class="w-4 h-4" />
-                        </button>
+                            <button
+                                on:click={() => removeLine(i)}
+                                disabled={lines.length <= 1}
+                                class="p-2 text-slate-500 hover:text-red-400 disabled:opacity-30 transition-colors rounded-lg hover:bg-red-500/10"
+                            >
+                                <Trash2 class="w-4 h-4" />
+                            </button>
+                        </div>
                     </div>
                 {/each}
             </div>

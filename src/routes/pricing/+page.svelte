@@ -164,7 +164,7 @@
                             ✓ Eres Administrador. Ya tienes acceso total.
                         </div>
                         <button
-                            on:click={() => goto('/freelance')}
+                            on:click={() => goto('/dashboard')}
                             class="w-full bg-white hover:bg-slate-100 text-black font-medium py-4 px-6 rounded-xl transition-all mt-4 text-center block"
                         >
                             Ir a mis Herramientas
@@ -176,7 +176,7 @@
                             <Check class="w-5 h-5" /> Tu suscripción está activa.
                         </div>
                         <button
-                            on:click={() => goto('/freelance')}
+                            on:click={() => goto('/dashboard')}
                             class="w-full bg-white hover:bg-slate-100 text-black font-medium py-4 px-6 rounded-xl transition-all mt-4 text-center block"
                         >
                             Ir a mis Herramientas

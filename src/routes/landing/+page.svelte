@@ -27,7 +27,7 @@
 
     // Redirigir si ya está logueado
     $: if (!$authStore.loading && $authStore.user) {
-        goto('/freelance');
+        goto('/dashboard');
     }
 
     let isAuthenticating = false;

@@ -1191,6 +1191,13 @@
     <div
         class="flex flex-wrap items-center justify-center lg:justify-end gap-3 pt-4 border-t border-white/5"
     >
+        <a
+            href="/admin/feedback"
+            class="group flex items-center gap-2 bg-brand-500/10 hover:bg-brand-500/20 text-brand-400 hover:text-brand-300 px-5 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all border border-brand-500/20 shadow-inner"
+        >
+            <MessageSquare class="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
+            Ver Feedback
+        </a>
         <button
             on:click={exportUsersJSON}
             class="group flex items-center gap-2 bg-black/40 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white px-5 py-2.5 rounded-xl text-[11px] font-semibold uppercase tracking-wider transition-all active:scale-95"

@@ -1,6 +1,8 @@
 <script lang="ts">
     import '../app.postcss';
     import { page } from '$app/stores';
+    import { themeVariables } from '$lib/stores/themeStore';
+    import { mobileMenuOpen } from '$lib/stores/ui';
     import { goto } from '$app/navigation';
     import { authStore } from '$lib/stores/authStore';
     import { Loader2, ShieldAlert, Info } from 'lucide-svelte';
@@ -53,12 +55,54 @@
                 }
             } else {
                 if ($page.url.pathname === '/landing' || $page.url.pathname === '/') {
-                    goto('/freelance');
+                    goto('/dashboard');
                 }
             }
         }
     }
+
+    // Lógica global para "Deslizar para abrir" (Swipe to open) desde el borde izquierdo
+    let touchStartGlobalX = 0;
+    let touchStartGlobalY = 0;
+
+    function handleGlobalTouchStart(e: TouchEvent) {
+        // Solo iniciamos si el toque empieza en los primeros 30 píxeles de la izquierda
+        if (e.touches[0].clientX < 30) {
+            touchStartGlobalX = e.touches[0].clientX;
+            touchStartGlobalY = e.touches[0].clientY;
+        } else {
+            touchStartGlobalX = 0;
+            touchStartGlobalY = 0;
+        }
+    }
+
+    function handleGlobalTouchEnd(e: TouchEvent) {
+        if (!touchStartGlobalX || $mobileMenuOpen || window.innerWidth >= 768) return;
+
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+
+        const swipeDistanceX = touchEndX - touchStartGlobalX;
+        const swipeDistanceY = Math.abs(touchEndY - touchStartGlobalY);
+
+        // Si se desliza hacia la derecha más de 40px, y el movimiento es predominantemente horizontal
+        if (swipeDistanceX > 40 && swipeDistanceY < 50) {
+            if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+            mobileMenuOpen.set(true);
+        }
+
+        touchStartGlobalX = 0;
+        touchStartGlobalY = 0;
+    }
 </script>
+
+<svelte:head>
+    {@html '<sty' + 'le>:root {\n' + $themeVariables + '\n}</sty' + 'le>'}
+</svelte:head>
+
+<svelte:window on:touchstart={handleGlobalTouchStart} on:touchend={handleGlobalTouchEnd} />
 
 {#if $authStore.loading}
     <div class="h-screen w-full flex items-center justify-center bg-[#0B0E14]">

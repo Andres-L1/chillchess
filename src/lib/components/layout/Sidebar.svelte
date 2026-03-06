@@ -17,6 +17,9 @@
         Crown,
         FileText,
         Flame,
+        Landmark,
+        Palette,
+        MessageSquare,
     } from 'lucide-svelte';
     import { currencyStore, type CurrencyPrefix } from '$lib/stores/currencyStore';
     import { APP_VERSION } from '$lib/constants/version';
@@ -25,7 +28,14 @@
 
     let searchQuery = '';
 
-    const CATEGORY_ORDER = ['Negocios', 'Productividad', 'Finanzas', 'Seguridad', 'Utilidades'];
+    const CATEGORY_ORDER = [
+        'Negocios',
+        'Productividad',
+        'Finanzas',
+        'Seguridad',
+        'Utilidades',
+        'Comunidad',
+    ];
 
     const tools = [
         {
@@ -53,6 +63,7 @@
             pro: true,
         },
         { id: '/fire', category: 'Finanzas', name: 'Libertad Financiera', icon: Flame, pro: true },
+        { id: '/loan', category: 'Finanzas', name: 'Préstamos', icon: Landmark, pro: true },
         { id: '/tip', category: 'Finanzas', name: 'Dividir Cuenta', icon: Users, pro: true },
         {
             id: '/password',
@@ -62,6 +73,20 @@
             pro: true,
         },
         { id: '/qr', category: 'Utilidades', name: 'Generador QR', icon: QrCode, pro: true },
+        {
+            id: '/palette',
+            category: 'Utilidades',
+            name: 'Paletas de Color',
+            icon: Palette,
+            pro: true,
+        },
+        {
+            id: '/feedback',
+            category: 'Comunidad',
+            name: 'Sugerencias y Bugs',
+            icon: MessageSquare,
+            pro: true,
+        },
     ];
 
     $: filteredTools = tools.filter(
@@ -89,12 +114,19 @@
         touchStartX = e.touches[0].clientX;
     }
 
+    function triggerHaptic() {
+        if (typeof navigator !== 'undefined' && navigator.vibrate) {
+            navigator.vibrate(50);
+        }
+    }
+
     function handleTouchEnd(e: TouchEvent) {
         if (!$mobileMenuOpen) return;
         const touchEndX = e.changedTouches[0].clientX;
         const swipeDistance = touchStartX - touchEndX;
-        // If swiped left by more than 50px, close sidebar
-        if (swipeDistance > 50) {
+        // If swiped left by more than 40px, close sidebar
+        if (swipeDistance > 40) {
+            triggerHaptic();
             mobileMenuOpen.set(false);
         }
     }
