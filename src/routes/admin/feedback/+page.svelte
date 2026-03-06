@@ -50,9 +50,17 @@
     let filterType: 'all' | 'unread' | 'bug' | 'suggestion' = 'unread';
 
     let isDataSubscribed = false;
-    $: if (!$authStore.loading && $authStore.user?.isAdmin && !isDataSubscribed) {
-        console.log('Admin Feedback: Auth ready, starting subscription...');
-        startSubscription();
+    $: if (!$authStore.loading) {
+        console.log('Admin Feedback Debug:', {
+            storeIsAdmin: $authStore.user?.isAdmin,
+            email: $authStore.user?.email,
+            isDataSubscribed,
+        });
+
+        if ($authStore.user?.isAdmin && !isDataSubscribed) {
+            console.log('Admin Feedback: Auth ready, starting subscription...');
+            startSubscription();
+        }
     }
 
     function startSubscription() {
