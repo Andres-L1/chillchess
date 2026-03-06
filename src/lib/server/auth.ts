@@ -82,34 +82,3 @@ export async function requireAdmin(locals: App.Locals): Promise<AuthenticatedUse
     return { ...user, isAdmin: true };
 }
 
-/**
- * Check if a user has permission to access a specific R2 resource
- * 
- * @param user - Authenticated user
- * @param key - R2 object key
- * @returns true if user has access, false otherwise
- */
-export function canAccessR2Resource(user: AuthenticatedUser, key: string): boolean {
-    // Admins can access everything
-    if (user.isAdmin) {
-        return true;
-    }
-
-    // Users can access music folder (public content)
-    if (key.startsWith('music/')) {
-        return true;
-    }
-
-    // Users can only access their own submissions
-    if (key.startsWith('submissions/')) {
-        // Format is: submissions/{userId}/...
-        const parts = key.split('/');
-        if (parts.length >= 2 && parts[1] === user.uid) {
-            return true;
-        }
-        return false;
-    }
-
-    // Deny access to any other folders
-    return false;
-}

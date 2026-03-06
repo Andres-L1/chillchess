@@ -6,7 +6,7 @@
  * 
  * Example:
  * ```ts
- * import { logger, formatDate, validateBugTitle } from '$lib/utils';
+ * import { logger, formatDate } from '$lib/utils';
  * ```
  */
 
@@ -19,18 +19,8 @@ export {
     isEmpty,
     exceedsMaxLength,
     isValidEmail,
-    isValidUrl,
-    validateProposalTitle,
-    validateProposalDescription,
-    validateBugTitle,
-    validateBugDescription,
-    validateBugSeverity,
-    validateBugStatus,
     validateDisplayName,
     validateImageFile,
-    validateAudioFile,
-    sanitizeInput,
-    truncate,
 } from './validators';
 
 // Formatters

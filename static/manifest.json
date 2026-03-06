@@ -1,6 +1,6 @@
 {
-    "name": "MultiTool",
-    "short_name": "MultiTool",
+    "name": "ChillChess",
+    "short_name": "ChillChess",
     "description": "Tu navaja suiza digital para freelancers. Calculadora de tarifas, facturas, Pomodoro, Kanban, QR y más.",
     "start_url": "/",
     "display": "standalone",

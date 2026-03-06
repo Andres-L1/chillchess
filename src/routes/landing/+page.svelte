@@ -54,23 +54,23 @@
         {
             title: 'Calculadora Freelance',
             description:
-                'Calcula tu tarifa por hora exacta basada en tus gastos fijos, margen de beneficio deseado e impuestos locales.',
+                'Calcula el valor teórico de tu hora de trabajo aproximando gastos mensuales y margen deseado.',
             icon: Calculator,
             color: 'text-blue-400',
             bg: 'bg-blue-400/10 border-blue-400/20',
         },
         {
-            title: 'Generador de Facturas',
+            title: 'Gestor de Claves',
             description:
-                'Crea facturas profesionales en segundos lista para PDF. Gestiona retenciones, IVA y mantén un registro limpio.',
-            icon: Blocks,
+                'Genera contraseñas localmente en tu navegador. Las contraseñas generadas no se envían a nuestros servidores.',
+            icon: ShieldCheck,
             color: 'text-emerald-400',
             bg: 'bg-emerald-400/10 border-emerald-400/20',
         },
         {
             title: 'Pomodoro Timer',
             description:
-                'Maximiza tu concentración con nuestra técnica Pomodoro integrada. Ajusta los tiempos de trabajo y descanso cortos o largos.',
+                'Temporizador integrado con la técnica Pomodoro. Ajusta libremente los tiempos de trabajo y descanso.',
             icon: Timer,
             color: 'text-rose-400',
             bg: 'bg-rose-400/10 border-rose-400/20',
@@ -78,15 +78,15 @@
         {
             title: 'Tablero Kanban',
             description:
-                'Organiza tus proyectos visualmente. Arrastra y suelta tareas entre columnas: Pendiente, En progreso, Terminado.',
+                'Utilidad visual para la organización de tareas. Agrega, mueve y ordena tareas entre las columnas de tu tablero.',
             icon: LayoutList,
             color: 'text-amber-400',
             bg: 'bg-amber-400/10 border-amber-400/20',
         },
         {
-            title: 'VCard QR',
+            title: 'Generador QR',
             description:
-                'Genera tu tarjeta de contacto digital en un QR para compartir al instante con clientes potenciales.',
+                'Genera códigos QR personalizados desde texto o enlaces para poder compartirlos rápidamente.',
             icon: QrCode,
             color: 'text-purple-400',
             bg: 'bg-purple-400/10 border-purple-400/20',
@@ -95,29 +95,29 @@
 </script>
 
 <svelte:head>
-    <title>MultiTool | Tu Navaja Suiza Digital para Freelancers</title>
+    <title>ChillChess | Tu Navaja Suiza Digital Diaria</title>
     <meta
         name="description"
-        content="MultiTool reúne todas las herramientas que necesitas como freelancer: calculadora de tarifas, generador de facturas, Pomodoro, Kanban, QR y más."
+        content="ChillChess reúne todas las herramientas útiles que necesitas en tu día a día: Pomodoro, Kanban, VCard QR, Generador de Claves y más."
     />
 </svelte:head>
 
 <div
-    class="w-full min-h-[100dvh] bg-slate-950 flex flex-col relative overflow-x-hidden font-sans selection:bg-brand-500/30"
+    class="w-full min-h-[100dvh] bg-black text-slate-200 flex flex-col relative overflow-x-hidden font-sans selection:bg-white/20"
 >
-    <!-- Premium Background Effects -->
-    <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+    <!-- Liquid Glass Premium Effects -->
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden bg-black">
         <div
-            class="absolute top-0 -left-1/4 w-[150%] h-[500px] bg-gradient-to-b from-brand-900/40 via-brand-800/10 to-transparent blur-3xl opacity-60"
+            class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-800/20 via-black to-black"
         ></div>
         <div
-            class="absolute top-20 right-[5%] w-[400px] h-[400px] bg-indigo-600/20 rounded-full blur-[120px] mix-blend-screen animate-pulse-slow"
+            class="absolute top-[20%] left-[10%] w-[600px] h-[600px] bg-slate-800/20 rounded-full blur-[120px] mix-blend-screen opacity-50"
         ></div>
         <div
-            class="absolute bottom-20 left-[10%] w-[500px] h-[500px] bg-brand-500/15 rounded-full blur-[120px] mix-blend-screen"
+            class="absolute bottom-[20%] right-[10%] w-[500px] h-[500px] bg-white/5 rounded-full blur-[100px] mix-blend-screen opacity-50"
         ></div>
         <div
-            class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgwem0yMCAyMGMtMS4xIDAtMi0uOS0yLTJzLjktMiAyLTIgMiAuOSAyIDItLjkgMi0yIDJ6IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz48L3N2Zz4=')] opacity-50 mix-blend-overlay"
+            class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgwem0yMCAyMGMtMS4xIDAtMi0uOS0yLTJzLjktMiAyLTIgMiAuOSAyIDItLjkgMi0yIDJ6IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz48L3N2Zz4=')] opacity-[0.15] mix-blend-overlay"
         ></div>
     </div>
 
@@ -133,25 +133,26 @@
                 class="flex-1 w-full max-w-2xl lg:max-w-none flex flex-col items-center lg:items-start text-center lg:text-left"
             >
                 <div
-                    class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/80 border border-slate-800 backdrop-blur-md mb-8 shadow-xl"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8 shadow-sm"
                 >
-                    <Sparkles class="w-4 h-4 text-brand-400" />
+                    <Sparkles class="w-4 h-4 text-slate-300" />
                     <span class="text-sm font-medium text-slate-300"
-                        >La nueva generación de productividad</span
+                        >Colección de herramientas web</span
                     >
                 </div>
 
                 <h1
-                    class="text-5xl md:text-6xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400 tracking-tight leading-tight drop-shadow-sm mb-6"
+                    class="text-5xl md:text-6xl lg:text-7xl font-light text-white tracking-tight leading-tight drop-shadow-sm mb-6"
                 >
-                    Domina tu trabajo.<br class="hidden sm:block" /> Sin complicaciones.
+                    Utilidades para<br class="hidden sm:block" /> tu día a día.
                 </h1>
 
                 <p
-                    class="text-lg md:text-xl text-slate-400 font-medium max-w-xl leading-relaxed mb-10 mx-auto lg:mx-0"
+                    class="text-lg md:text-xl text-slate-400 font-light max-w-xl leading-relaxed mb-10 mx-auto lg:mx-0"
                 >
-                    MultiTool reúne todas las herramientas que necesitas como freelancer en un
-                    entorno <span class="text-brand-400">rápido, seguro y elegante</span>.
+                    ChillChess agrupa diferentes utilidades prácticas en un entorno <span
+                        class="text-white font-medium">limpio y sin distracciones</span
+                    >.
                 </p>
 
                 <div
@@ -159,9 +160,9 @@
                 >
                     <a
                         href="/pricing"
-                        class="px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full transition-all text-white font-bold flex items-center gap-2 backdrop-blur-md"
+                        class="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all text-white font-medium flex items-center gap-2 backdrop-blur-xl"
                     >
-                        <Star class="w-4 h-4 text-brand-400" />
+                        <Star class="w-4 h-4 text-slate-300" />
                         Ver Planes y Precios
                     </a>
                 </div>
@@ -170,27 +171,26 @@
             <!-- Right Side: Auth Card -->
             <div class="w-full max-w-md lg:w-[420px] xl:w-[460px] flex-shrink-0 relative group">
                 <div
-                    class="absolute -inset-1 bg-gradient-to-r from-brand-600 to-indigo-600 rounded-[2rem] blur-xl opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"
+                    class="absolute -inset-1 bg-white/5 rounded-[2rem] blur-2xl opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-500"
                 ></div>
 
                 <div
-                    class="relative bg-slate-900/90 backdrop-blur-xl rounded-[2rem] border border-slate-700/50 p-8 md:p-10 shadow-2xl flex flex-col items-center"
+                    class="relative bg-black/40 backdrop-blur-2xl rounded-[2rem] border border-white/10 p-8 md:p-10 shadow-2xl flex flex-col items-center"
                 >
                     <div
-                        class="flex items-center justify-center w-16 h-16 rounded-2xl bg-brand-500/20 border border-brand-500/30 mb-6"
+                        class="flex items-center justify-center w-16 h-16 rounded-2xl bg-white/5 border border-white/10 mb-6"
                     >
-                        <Blocks class="w-8 h-8 text-brand-400" />
+                        <Blocks class="w-8 h-8 text-white" />
                     </div>
 
-                    <h2 class="text-2xl font-bold text-white mb-2 text-center">Acceso Directo</h2>
-                    <p class="text-slate-400 text-sm text-center mb-10 max-w-xs">
-                        Organiza tu vida profesional en un solo click. No se requiere tarjeta de
-                        crédito para entrar.
+                    <h2 class="text-2xl font-medium text-white mb-2 text-center">Inicia Sesión</h2>
+                    <p class="text-slate-400 text-sm text-center mb-10 max-w-xs font-light">
+                        Accede al panel mediante tu cuenta de Google.
                     </p>
 
                     {#if errorMessage}
                         <div
-                            class="w-full bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-xl mb-6 text-center"
+                            class="w-full bg-red-950/50 border border-red-500/20 text-red-200 text-sm p-3 rounded-xl mb-6 text-center backdrop-blur-md"
                         >
                             {errorMessage}
                         </div>
@@ -199,11 +199,11 @@
                     <button
                         on:click={handleGoogleLogin}
                         disabled={isAuthenticating}
-                        class="w-full relative overflow-hidden bg-white hover:bg-slate-100 text-slate-950 rounded-xl py-4 flex items-center justify-center gap-3 font-bold transition-all disabled:opacity-70 focus:outline-none focus:ring-2 focus:ring-white/50 group/btn shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]"
+                        class="w-full relative overflow-hidden bg-white hover:bg-slate-100 text-black rounded-xl py-4 flex items-center justify-center gap-3 font-medium transition-all disabled:opacity-70 focus:outline-none focus:ring-2 focus:ring-white/20 group/btn"
                     >
                         {#if isAuthenticating}
                             <div
-                                class="w-5 h-5 border-2 border-slate-300 border-t-slate-950 rounded-full animate-spin"
+                                class="w-5 h-5 border-2 border-slate-300 border-t-black rounded-full animate-spin"
                             ></div>
                             <span class="relative z-10 text-lg">Conectando...</span>
                         {:else}
@@ -232,17 +232,11 @@
                         {/if}
                     </button>
 
-                    <p class="text-xs text-slate-500 mt-6 text-center leading-relaxed">
+                    <p class="text-xs text-slate-500 mt-6 text-center font-light leading-relaxed">
                         Al continuar, aceptas la <a
                             href="/cookies"
-                            class="text-brand-400 hover:text-brand-300 transition-colors"
+                            class="text-slate-300 hover:text-white transition-colors"
                             >Política de Cookies</a
-                        >
-                        y confirmas haber leído nuestros
-                        <a
-                            href="/pricing"
-                            class="text-brand-400 hover:text-brand-300 transition-colors"
-                            >Planes y Precios</a
                         >.
                     </p>
                 </div>
@@ -251,34 +245,37 @@
     </main>
 
     <!-- Detailed Tools Section -->
-    <section class="relative z-10 w-full py-24 bg-slate-900 border-y border-slate-800/60">
+    <section class="relative z-10 w-full py-24 border-t border-white/5">
         <div class="max-w-7xl mx-auto px-6 lg:px-12">
             <div class="text-center max-w-2xl mx-auto mb-16">
-                <h2 class="text-3xl md:text-4xl font-black text-white mb-4">
-                    Todo lo que necesitas, en una sola app
+                <h2 class="text-3xl md:text-4xl font-light text-white mb-4 tracking-tight">
+                    Utilidades desde el navegador
                 </h2>
-                <p class="text-slate-400">
-                    Descubre las herramientas diseñadas específicamente para agilizar el flujo de
-                    trabajo de freelances y creadores independientes.
+                <p class="text-slate-400 font-light">
+                    Explora las herramientas disponibles que pueden ayudarte en distintas tareas
+                    cotidianas.
                 </p>
             </div>
 
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {#each tools as tool}
                     <div
-                        class="bg-slate-950/50 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-slate-800/80 hover:border-slate-700 transition-all group"
+                        class="bg-white/5 backdrop-blur-xl rounded-[2rem] p-6 md:p-8 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all duration-300 group"
                     >
                         <div
-                            class="w-12 h-12 rounded-xl flex items-center justify-center mb-6 {tool.bg} border"
+                            class="w-12 h-12 rounded-2xl flex items-center justify-center mb-6 bg-white/5 border border-white/10 group-hover:bg-white/10 transition-colors"
                         >
-                            <svelte:component this={tool.icon} class="w-6 h-6 {tool.color}" />
+                            <svelte:component
+                                this={tool.icon}
+                                class="w-5 h-5 text-slate-300 group-hover:text-white transition-colors"
+                            />
                         </div>
                         <h3
-                            class="text-xl font-bold text-white mb-3 group-hover:text-brand-400 transition-colors"
+                            class="text-xl font-medium text-white mb-3 group-hover:text-white transition-colors tracking-tight"
                         >
                             {tool.title}
                         </h3>
-                        <p class="text-slate-400 text-sm leading-relaxed">
+                        <p class="text-slate-400 font-light text-sm leading-relaxed">
                             {tool.description}
                         </p>
                     </div>
@@ -288,9 +285,9 @@
     </section>
 
     <!-- Footer Simple -->
-    <footer class="relative z-10 w-full py-8 border-t border-slate-900 text-center">
-        <p class="text-slate-500 text-sm">
-            © {new Date().getFullYear()} MultiTool. Todos los derechos reservados.
+    <footer class="relative z-10 w-full py-8 border-t border-white/5 text-center">
+        <p class="text-slate-500 font-light text-sm">
+            © {new Date().getFullYear()} ChillChess. Todos los derechos reservados.
         </p>
     </footer>
 
@@ -301,20 +298,6 @@
 <style>
     :global(body) {
         overflow-x: hidden;
-        background-color: #020617; /* slate-950 */
-    }
-
-    .animate-pulse-slow {
-        animation: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-
-    @keyframes pulse {
-        0%,
-        100% {
-            opacity: 1;
-        }
-        50% {
-            opacity: 0.6;
-        }
+        background-color: #000;
     }
 </style>

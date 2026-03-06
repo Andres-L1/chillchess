@@ -24,6 +24,13 @@ button, a, input, select, textarea, [role="button"] {
     padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+/* Prevent iOS auto-zoom by ensuring minimum 16px font size on inputs */
+@media screen and (max-width: 767px) {
+    input, select, textarea {
+        font-size: 16px !important;
+    }
+}
+
 /* ========================================
    Scrollbar Styles
    ======================================== */

@@ -8,10 +8,10 @@
 </script>
 
 <svelte:head>
-    <title>Error {status} | MultiTool</title>
+    <title>Error {status} | ChillChess</title>
     <meta
         name="description"
-        content="Ha ocurrido un error. Vuelve al inicio para continuar usando MultiTool."
+        content="Ha ocurrido un error. Vuelve al inicio para continuar usando ChillChess."
     />
 </svelte:head>
 

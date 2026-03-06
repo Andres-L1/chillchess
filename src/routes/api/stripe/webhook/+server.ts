@@ -107,9 +107,8 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
     const priceId = subscription.items.data[0]?.price.id;
     let tier: 'free' | 'pro' = 'free';
 
-    // You'll need to map price IDs to tiers
-    // This is a simplified version - adjust based on your actual price IDs
-    if (priceId?.includes('pro') || priceId?.includes('premium')) {
+    // Map price IDs to tiers
+    if (priceId?.includes('pro') || priceId?.includes('premium') || priceId) {
         tier = 'pro';
     }
 
@@ -131,7 +130,17 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
         { merge: true }
     );
 
-    console.log(`Subscription updated for user ${userId}: ${tier} (${status})`);
+    // CRITICAL: Also sync isPro to the users collection (authStore reads from here)
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, {
+        isPro: isActive && tier === 'pro',
+        updatedAt: serverTimestamp(),
+    }).catch(() => {
+        // If user doc doesn't exist yet, create it with setDoc
+        return setDoc(userRef, { isPro: isActive && tier === 'pro', updatedAt: serverTimestamp() }, { merge: true });
+    });
+
+    console.log(`Subscription updated for user ${userId}: ${tier} (${status}), isPro: ${isActive && tier === 'pro'}`);
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
@@ -149,6 +158,13 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
         canceledAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
     });
+
+    // CRITICAL: Also remove isPro from users collection
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, {
+        isPro: false,
+        updatedAt: serverTimestamp(),
+    }).catch(() => { });
 
     console.log(`Subscription deleted for user ${userId}`);
 }

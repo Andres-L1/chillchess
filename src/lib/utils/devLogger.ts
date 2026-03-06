@@ -1,5 +1,5 @@
 /**
- * Development logger utility for MultiTool
+ * Development logger utility for ChillChess
  * Automatically filters debug logs in production
  */
 

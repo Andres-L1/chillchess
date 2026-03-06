@@ -8,7 +8,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         const body = await request.json();
         const { plan, interval, userId, userEmail } = body;
 
-        if (!userId || !userEmail) {
+        if (!userId) {
             return json({ error: 'User not authenticated' }, { status: 401 });
         }
 

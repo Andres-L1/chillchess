@@ -39,9 +39,16 @@ sw.addEventListener('activate', (event) => {
 sw.addEventListener('fetch', (event) => {
     // ignore POST requests etc
     if (event.request.method !== 'GET') return;
-    // ignore firebase requests
-    if (event.request.url.includes('firebase')) return;
-    if (event.request.url.includes('googleapis')) return;
+    // ignore external API requests (auth, payments, currency rates, etc.)
+    const url = event.request.url;
+    if (url.includes('firebase')) return;
+    if (url.includes('googleapis')) return;
+    if (url.includes('google.com')) return;
+    if (url.includes('gstatic.com')) return;
+    if (url.includes('stripe.com')) return;
+    if (url.includes('googleusercontent.com')) return;
+    if (url.includes('open.er-api.com')) return; // currency converter API
+
 
     async function respond() {
         const url = new URL(event.request.url);
@@ -94,111 +101,3 @@ sw.addEventListener('fetch', (event) => {
     event.respondWith(respond());
 });
 
-/**
- * NOTIFICATION LOGIC (Migrated from static/service-worker.js)
- */
-const DB_NAME = 'multitool-habits';
-const STORE_NAME = 'scheduled-notifications';
-
-function openDB() {
-    return new Promise<IDBDatabase>((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, 1);
-        request.onerror = () => reject(request.error);
-        request.onsuccess = () => resolve(request.result);
-        request.onupgradeneeded = (event) => {
-            // @ts-ignore
-            const db = event.target.result;
-            if (!db.objectStoreNames.contains(STORE_NAME)) {
-                db.createObjectStore(STORE_NAME, { keyPath: 'habitId' });
-            }
-        };
-    });
-}
-
-sw.addEventListener('message', async (event) => {
-    if (event.data?.type === 'SCHEDULE_NOTIFICATION') {
-        const { habitId, habitTitle, time } = event.data;
-        try {
-            const db = await openDB();
-            const tx = db.transaction(STORE_NAME, 'readwrite');
-            const store = tx.objectStore(STORE_NAME);
-
-            // @ts-ignore
-            await store.put({ habitId, habitTitle, time, lastNotified: null });
-            event.ports[0].postMessage({ success: true });
-        } catch (error: any) {
-            console.error('[SW] Schedule Error:', error);
-            event.ports[0].postMessage({ success: false, error: error.message });
-        }
-    }
-
-    if (event.data?.type === 'CANCEL_NOTIFICATION') {
-        // ... (similar logic as original)
-        const { habitId } = event.data;
-        try {
-            const db = await openDB();
-            const tx = db.transaction(STORE_NAME, 'readwrite');
-            const store = tx.objectStore(STORE_NAME);
-            // @ts-ignore
-            await store.delete(habitId);
-            event.ports[0].postMessage({ success: true });
-        } catch (e) {
-            console.error(e);
-        }
-    }
-});
-
-// Periodic Sync (or simple interval if browser allows in SW context - rare background)
-// Note: setInterval in SW is not reliable when browser kills worker.
-// The previous implementation used setInterval in SW which only works if SW is kept alive.
-// We'll keep it for now as a "best effort" when the app is open/backgrounded briefly.
-setInterval(async () => {
-    try {
-        const now = new Date();
-        const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-        const today = now.toISOString().split('T')[0];
-
-        const db = await openDB();
-
-        const allNotifications: any[] = await new Promise((resolve, reject) => {
-            const tx = db.transaction(STORE_NAME, 'readwrite');
-            const store = tx.objectStore(STORE_NAME);
-            // @ts-ignore
-            const request = store.getAll();
-            request.onsuccess = () => resolve(request.result || []);
-            request.onerror = () => reject(request.error);
-        });
-
-        if (Array.isArray(allNotifications)) {
-            for (const notif of allNotifications) {
-                if (notif.time === currentTime && notif.lastNotified !== today) {
-                    await sw.registration.showNotification('🔥 Recordatorio de hábito', {
-                        body: `No olvides: ${notif.habitTitle}`,
-                        icon: '/favicon.png',
-                        badge: '/favicon.png',
-                        tag: `habit-${notif.habitId}`,
-                        requireInteraction: true,
-                        data: { habitId: notif.habitId, url: '/app' }
-                    });
-
-                    // Update
-                    const updateDb = await openDB();
-                    const updateTx = updateDb.transaction(STORE_NAME, 'readwrite');
-                    const updateStore = updateTx.objectStore(STORE_NAME);
-                    notif.lastNotified = today;
-                    // @ts-ignore
-                    await updateStore.put(notif);
-                }
-            }
-        }
-    } catch (e) {
-        // silent fail
-    }
-}, 60000);
-
-sw.addEventListener('notificationclick', (event) => {
-    event.notification.close();
-    event.waitUntil(
-        sw.clients.openWindow(event.notification.data.url || '/app')
-    );
-});

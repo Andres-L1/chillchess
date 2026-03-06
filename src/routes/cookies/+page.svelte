@@ -4,10 +4,10 @@
 </script>
 
 <svelte:head>
-    <title>Política de Cookies | MultiTool</title>
+    <title>Política de Cookies | ChillChess</title>
     <meta
         name="description"
-        content="Política de Cookies de MultiTool. Conoce cómo utilizamos cookies y tecnologías similares para garantizar el correcto funcionamiento de la plataforma."
+        content="Política de Cookies de ChillChess. Conoce cómo utilizamos cookies y tecnologías similares para garantizar el correcto funcionamiento de la plataforma."
     />
 </svelte:head>
 
@@ -33,7 +33,7 @@
                     >
                         <CookieIcon class="w-5 h-5 text-white" />
                     </div>
-                    <span class="font-bold text-xl tracking-tight text-white">MultiTool</span>
+                    <span class="font-bold text-xl tracking-tight text-white">ChillChess</span>
                 </div>
             </div>
         </div>
@@ -53,7 +53,7 @@
                 Política de Cookies
             </h1>
             <p class="text-lg text-slate-400 leading-relaxed max-w-2xl mx-auto">
-                En MultiTool utilizamos cookies y tecnologías similares para garantizar el correcto
+                En ChillChess utilizamos cookies y tecnologías similares para garantizar el correcto
                 funcionamiento de la plataforma y mejorar continuamente tu experiencia de usuario.
             </p>
         </div>
@@ -75,7 +75,7 @@
 
             <h2>2. ¿Cómo utilizamos las cookies?</h2>
             <p>
-                Nuestra plataforma "MultiTool" se basa principalmente en la funcionalidad pura en tu
+                Nuestra plataforma "ChillChess" se basa principalmente en la funcionalidad pura en tu
                 lado local. Sin embargo, requerimos almacenamiento persistente para ciertas
                 características:
             </p>
@@ -121,7 +121,7 @@
                         </tr>
                         <tr>
                             <td class="p-4 font-medium text-slate-300"
-                                ><code class="text-brand-400">multitool_cookies_accepted</code></td
+                                ><code class="text-brand-400">chillchess_cookies_accepted</code></td
                             >
                             <td class="p-4">Recuerda si cerraste el banner de cookies.</td>
                             <td class="p-4">Persistente</td>

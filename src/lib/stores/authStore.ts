@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 import { auth, db } from '$lib/firebase';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 
 export interface UserData {
     uid: string;
@@ -50,6 +50,20 @@ function createAuthStore() {
             }));
 
             const userRef = doc(db, 'users', firebaseUser.uid);
+
+            // On first login only: write createdAt if not already set
+            getDoc(userRef).then((snap) => {
+                const existing = snap.data();
+                const updates: Record<string, unknown> = {
+                    email: firebaseUser.email,
+                    displayName: firebaseUser.displayName,
+                };
+                if (!existing?.createdAt) {
+                    updates.createdAt = serverTimestamp();
+                }
+                setDoc(userRef, updates, { merge: true }).catch(() => { });
+            }).catch(() => { });
+
             unsubscribeDoc = onSnapshot(userRef, (docSnap) => {
                 const data = docSnap.data();
                 const isPro = data?.isPro === true;

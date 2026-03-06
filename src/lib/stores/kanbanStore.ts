@@ -2,13 +2,13 @@ import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
 import type { KanbanTask } from '$lib/types/kanban';
 
-const STORAGE_KEY = 'multitool_kanban_tasks';
+const STORAGE_KEY = 'chillchess_kanban_tasks';
 
 const defaultTasks: KanbanTask[] = [
     {
         id: '1',
         title: 'Explorar Herramientas',
-        description: 'Prueba todas las funcionalidades de MultiTool como la Calculadora o este Tablero Kanban.',
+        description: 'Prueba todas las funcionalidades de ChillChess como la Calculadora o este Tablero Kanban.',
         status: 'todo',
         tags: [{ id: 't1', text: 'Onboarding', color: 'blue' }],
         createdAt: Date.now(),
@@ -50,10 +50,11 @@ function createKanbanStore() {
 
     return {
         subscribe,
-        addTask: (task: Omit<KanbanTask, 'id' | 'createdAt' | 'updatedAt'>) => update(tasks => {
+        // id is optional to support both new tasks and undo-restore
+        addTask: (task: { title: string; status: KanbanTask['status']; tags: KanbanTask['tags']; id?: string; description?: string }) => update(tasks => {
             const newTask: KanbanTask = {
                 ...task,
-                id: crypto.randomUUID(),
+                id: task.id ?? crypto.randomUUID(),
                 createdAt: Date.now(),
                 updatedAt: Date.now()
             };

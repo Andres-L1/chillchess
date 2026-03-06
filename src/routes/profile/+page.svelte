@@ -17,7 +17,7 @@
     import { auth } from '$lib/firebase';
     import { signOut, updateProfile } from 'firebase/auth';
     import { goto } from '$app/navigation';
-    import toast from 'svelte-french-toast';
+    import { addToast } from '$lib/stores/toasts';
 
     onMount(() => {
         pageHeader.set({
@@ -42,7 +42,7 @@
             goto('/landing');
         } catch (e) {
             console.error('Logout error:', e);
-            toast.error('Error al cerrar sesión');
+            addToast('Error al cerrar sesión', 'error');
         }
     }
 
@@ -56,12 +56,36 @@
             if ($authStore.user) {
                 $authStore.user.displayName = newDisplayName;
             }
-            toast.success('Nombre actualizado correctamente');
+            addToast('Nombre actualizado correctamente', 'success');
         } catch (error) {
             console.error('Update name error:', error);
-            toast.error('Error al actualizar el nombre');
+            addToast('Error al actualizar el nombre', 'error');
         } finally {
             isUpdatingName = false;
+        }
+    }
+
+    async function handleManagePayments() {
+        if (!$authStore.user) return;
+        try {
+            // First, we need the Stripe customer ID from Firestore
+            // For now, redirect to pricing if no subscription info available
+            addToast('Redirigiendo al portal de pagos...', 'info');
+            // Try to open portal session via API
+            const res = await fetch('/api/stripe/create-portal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ customerId: $authStore.user.uid }),
+            });
+            const data = await res.json();
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                // Fallback to pricing page
+                goto('/pricing');
+            }
+        } catch {
+            addToast('No se pudo abrir el portal de pagos. Contacta al soporte.', 'error');
         }
     }
 
@@ -75,10 +99,10 @@
 </script>
 
 <svelte:head>
-    <title>Mi Perfil | MultiTool</title>
+    <title>Mi Perfil | ChillChess</title>
     <meta
         name="description"
-        content="Gestiona tu cuenta, nombres, facturación y preferencias en MultiTool."
+        content="Gestiona tu cuenta, nombres, facturación y preferencias en ChillChess."
     />
 </svelte:head>
 
@@ -108,7 +132,7 @@
 
         <div class="flex-1 text-center md:text-left">
             <h2 class="text-2xl font-black text-white mb-1">
-                {$authStore.user?.displayName || 'Usuario de MultiTool'}
+                {$authStore.user?.displayName || 'Usuario de ChillChess'}
             </h2>
             <div
                 class="flex items-center justify-center md:justify-start gap-2 text-slate-400 text-sm mb-4"
@@ -265,16 +289,14 @@
                             Mejorar Plan a PRO
                         </button>
                     {/if}
-                    <a
-                        href="https://billing.stripe.com/p/login/test_123"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    <button
+                        on:click={handleManagePayments}
                         class="flex-1 bg-slate-700/50 hover:bg-slate-700 border border-slate-600/50 text-slate-300 font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2"
                         title="Ir al portal del cliente en Stripe"
                     >
                         Gestionar Pagos
                         <ExternalLink class="w-4 h-4 text-slate-500" />
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>

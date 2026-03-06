@@ -6,15 +6,34 @@
     import { signOut } from 'firebase/auth';
     import { goto } from '$app/navigation';
     import { fade, slide } from 'svelte/transition';
+    import { currencyStore, type CurrencyPrefix } from '$lib/stores/currencyStore';
+
+    const currencies: CurrencyPrefix[] = ['€', '$', '£'];
 
     let isDropdownOpen = false;
+    let isCurrencyDropdownOpen = false;
 
     function toggleDropdown() {
         isDropdownOpen = !isDropdownOpen;
+        if (isDropdownOpen) isCurrencyDropdownOpen = false;
     }
 
     function closeDropdown() {
         isDropdownOpen = false;
+    }
+
+    function toggleCurrencyDropdown() {
+        isCurrencyDropdownOpen = !isCurrencyDropdownOpen;
+        if (isCurrencyDropdownOpen) isDropdownOpen = false;
+    }
+
+    function closeCurrencyDropdown() {
+        isCurrencyDropdownOpen = false;
+    }
+
+    function setCurrency(c: CurrencyPrefix) {
+        currencyStore.set(c);
+        closeCurrencyDropdown();
     }
 
     async function handleLogout() {
@@ -40,12 +59,13 @@
 </script>
 
 <header
-    class="bg-[#0d1117]/80 backdrop-blur-md border-b border-slate-800/60 z-10 flex-shrink-0 flex items-center justify-between px-4 md:px-8 py-4 h-16 md:h-auto relative"
+    class="bg-black/40 backdrop-blur-2xl border-b border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)] z-50 flex-shrink-0 flex items-center justify-between px-4 md:px-8 py-4 h-16 md:h-auto relative"
 >
     <div class="flex items-center gap-3 overflow-hidden">
         <button
             on:click={() => mobileMenuOpen.set(true)}
-            class="md:hidden p-2 -ml-2 text-slate-400 hover:text-brand-400 rounded-lg hover:bg-slate-800 transition-colors"
+            class="md:hidden p-3 -ml-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors flex items-center justify-center min-w-[48px] min-h-[48px]"
+            aria-label="Abrir menú"
         >
             <Menu class="w-6 h-6" />
         </button>
@@ -71,15 +91,57 @@
         </div>
     </div>
 
+    <!-- Currency Selector -->
+    <div class="relative ml-auto shrink-0 hidden sm:block">
+        <button
+            on:click|stopPropagation={toggleCurrencyDropdown}
+            class="flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium transition-colors border border-white/10 ring-1 ring-inset ring-transparent active:scale-95"
+            title="Cambiar Moneda Global"
+        >
+            {$currencyStore}
+        </button>
+
+        {#if isCurrencyDropdownOpen}
+            <div
+                class="fixed inset-0 z-40"
+                on:click={closeCurrencyDropdown}
+                on:keydown={(e) => e.key === 'Escape' && closeCurrencyDropdown()}
+                role="button"
+                tabindex="0"
+                aria-label="Cerrar selector de moneda"
+            ></div>
+            <div
+                transition:slide={{ duration: 150, axis: 'y' }}
+                class="absolute right-0 top-full mt-2 w-16 bg-black/60 backdrop-blur-2xl rounded-xl shadow-2xl border border-white/10 z-50 overflow-hidden transform origin-top-right"
+            >
+                <div class="flex flex-col p-1 gap-1">
+                    {#each currencies as c}
+                        <button
+                            on:click={() => setCurrency(c)}
+                            class="w-full py-2 font-medium text-center rounded-lg transition-colors {$currencyStore ===
+                            c
+                                ? 'text-white bg-white/10 border border-white/5'
+                                : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+                        >
+                            {c}
+                        </button>
+                    {/each}
+                </div>
+            </div>
+        {/if}
+    </div>
+
     <!-- User Profile Dropdown -->
     <div class="relative ml-4 shrink-0">
         <button
             on:click|stopPropagation={toggleDropdown}
-            class="flex items-center gap-2 md:gap-3 p-1.5 md:p-2 rounded-xl hover:bg-slate-800/50 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+            class="flex items-center gap-2 md:gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors focus:outline-none focus:ring-1 focus:ring-white/20 min-h-[48px]"
+            aria-expanded={isDropdownOpen}
+            aria-label="Opciones de usuario"
         >
             <div class="relative">
                 <div
-                    class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 text-white flex items-center justify-center font-bold text-sm md:text-base shadow-lg shadow-brand-500/20 ring-2 ring-slate-800"
+                    class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 text-white border border-white/20 flex items-center justify-center font-bold text-sm md:text-base shadow-sm"
                 >
                     {initials}
                 </div>
@@ -126,14 +188,14 @@
 
             <div
                 transition:slide={{ duration: 200, axis: 'y' }}
-                class="absolute right-0 top-full mt-2 w-64 max-w-[calc(100vw-2rem)] bg-slate-900 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-700/50 z-50 overflow-hidden transform origin-top-right"
+                class="absolute right-0 top-full mt-2 w-64 max-w-[calc(100vw-2rem)] bg-black/60 backdrop-blur-2xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-white/10 z-50 overflow-hidden transform origin-top-right"
             >
-                <div class="px-5 py-4 border-b border-slate-800 bg-slate-800/30">
-                    <p class="text-sm font-bold text-white truncate mb-1">
+                <div class="px-5 py-4 border-b border-white/10 bg-white/5">
+                    <p class="text-sm font-medium text-white truncate mb-1">
                         {$authStore.user?.displayName || 'Usuario'}
                     </p>
                     <p
-                        class="text-xs text-slate-400 truncate cursor-copy hover:text-brand-400 transition-colors"
+                        class="text-xs text-slate-400 truncate cursor-copy hover:text-white transition-colors"
                         title="Tu correo"
                     >
                         {$authStore.user?.email}
@@ -146,7 +208,7 @@
                             closeDropdown();
                             goto('/profile');
                         }}
-                        class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-brand-400 font-medium text-sm flex items-center gap-3 transition-colors"
+                        class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white font-medium text-sm flex items-center gap-3 transition-colors"
                     >
                         <User class="w-4 h-4" />
                         Mi Perfil
@@ -158,15 +220,15 @@
                                 closeDropdown();
                                 goto('/admin');
                             }}
-                            class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-amber-400 font-medium text-sm flex items-center gap-3 transition-colors"
+                            class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-white/5 text-slate-300 hover:text-amber-300 font-medium text-sm flex items-center gap-3 transition-colors"
                         >
-                            <Crown class="w-4 h-4 text-amber-500" />
+                            <Crown class="w-4 h-4 text-amber-400" />
                             Panel Admin
                         </button>
                     {/if}
                 </div>
 
-                <div class="p-2 border-t border-slate-800 bg-slate-800/20">
+                <div class="p-2 border-t border-white/10 bg-transparent">
                     <button
                         on:click={handleLogout}
                         class="w-full text-left px-3 py-2 rounded-xl text-red-400 hover:bg-red-500/10 hover:text-red-300 font-medium text-sm flex items-center gap-3 transition-colors"

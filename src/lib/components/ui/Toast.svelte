@@ -5,7 +5,7 @@
 </script>
 
 <div
-    class="fixed top-4 md:top-auto md:bottom-4 right-4 md:left-auto left-4 z-[60] flex flex-col gap-2 pointer-events-none"
+    class="fixed top-4 md:top-auto md:bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-4 z-[60] flex flex-col gap-2 pointer-events-none w-[90vw] md:w-auto safe-top"
 >
     {#each $toasts as toast (toast.id)}
         <div

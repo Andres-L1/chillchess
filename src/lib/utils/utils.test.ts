@@ -13,7 +13,6 @@ import {
     slugify,
 } from '$lib/utils/formatters';
 import {
-    validateBugTitle,
     isValidEmail,
     isEmpty,
 } from '$lib/utils/validators';
@@ -83,26 +82,6 @@ describe('Validators', () => {
         });
     });
 
-    describe('validateBugTitle', () => {
-        it('validates bug titles', () => {
-            const valid = validateBugTitle('Valid bug title');
-            expect(valid.valid).toBe(true);
-            expect(valid.error).toBeUndefined();
-        });
-
-        it('rejects empty titles', () => {
-            const invalid = validateBugTitle('');
-            expect(invalid.valid).toBe(false);
-            expect(invalid.error).toBeDefined();
-        });
-
-        it('rejects titles that are too long', () => {
-            const longTitle = 'a'.repeat(101);
-            const invalid = validateBugTitle(longTitle);
-            expect(invalid.valid).toBe(false);
-            expect(invalid.error).toContain('exceder');
-        });
-    });
 });
 
 describe('Utilities', () => {

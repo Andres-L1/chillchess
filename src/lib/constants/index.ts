@@ -9,7 +9,7 @@
 // APP METADATA
 // ============================================================================
 
-export const APP_NAME = 'MultiTool';
+export const APP_NAME = 'ChillChess';
 export const APP_DESCRIPTION = 'Tu navaja suiza digital para freelancers';
 export const APP_VERSION = '4.0.0';
 export const APP_URL = 'https://chillchess.app';
@@ -48,10 +48,10 @@ export const COLLECTIONS = {
 // ============================================================================
 
 export const STORAGE_KEYS = {
-    THEME: 'multitool_theme',
-    KANBAN_TASKS: 'multitool_kanban_tasks',
-    COOKIES_ACCEPTED: 'multitool_cookies_accepted',
-    COOKIES_DECLINED: 'multitool_cookies_declined',
+    THEME: 'chillchess_theme',
+    KANBAN_TASKS: 'chillchess_kanban_tasks',
+    COOKIES_ACCEPTED: 'chillchess_cookies_accepted',
+    COOKIES_DECLINED: 'chillchess_cookies_declined',
 } as const;
 
 // ============================================================================

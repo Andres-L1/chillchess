@@ -8,7 +8,7 @@
 
     // Simulate checking simple localstorage
     onMount(() => {
-        const hasAccepted = localStorage.getItem('multitool_cookies_accepted');
+        const hasAccepted = localStorage.getItem('chillchess_cookies_accepted');
         if (!hasAccepted) {
             // Little delay to let the page load before the banner pops up
             setTimeout(() => {
@@ -18,14 +18,14 @@
     });
 
     function acceptCookies() {
-        localStorage.setItem('multitool_cookies_accepted', 'true');
+        localStorage.setItem('chillchess_cookies_accepted', 'true');
         showBanner = false;
         dispatch('accept');
     }
 
     function declineCookies() {
         // Here you might record the decline, but we just hide the banner for now.
-        sessionStorage.setItem('multitool_cookies_declined', 'true');
+        sessionStorage.setItem('chillchess_cookies_declined', 'true');
         showBanner = false;
         dispatch('decline');
     }

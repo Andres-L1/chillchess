@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 
 export const pageHeader = writable({
-    title: 'MultiTool',
+    title: 'ChillChess',
     description: 'Selecciona una herramienta',
     category: 'Dashboard',
 });
