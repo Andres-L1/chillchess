@@ -65,7 +65,7 @@
 
     function startSubscription() {
         isDataSubscribed = true;
-        const q = query(collection(db, 'feedback'), orderBy('createdAt', 'desc'));
+        const q = query(collection(db, 'feedback')); // Removiendo orderBy temporalmente para descartar temas de índices
 
         unsubscribe = onSnapshot(
             q,
