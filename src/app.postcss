@@ -3,6 +3,50 @@
 @tailwind utilities;
 
 /* ========================================
+   NeatPass Inspired Design System
+   ======================================== */
+
+:root {
+    --neat-bg: #0B0E14;
+    --neat-card-bg: rgba(255, 255, 255, 0.05);
+    --neat-card-border: rgba(255, 255, 255, 0.1);
+    --neat-accent: #00E5FF; /* Vibrant Cyan from NeatPass */
+    --neat-text-primary: #FFFFFF;
+    --neat-text-secondary: #94A3B8;
+}
+
+/* ========================================
+   Typography
+   ======================================== */
+@layer base {
+    h1, h2, h3, h4, h5, h6 {
+        @apply tracking-tight font-bold;
+    }
+}
+
+/* ========================================
+   Utility Classes
+   ======================================== */
+@layer components {
+    .glass-card {
+        @apply bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2rem] shadow-2xl;
+    }
+
+    .hero-text-gradient {
+        @apply bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-neat-accent;
+        background-size: 200% auto;
+    }
+
+    .neat-button-primary {
+        @apply bg-white hover:bg-slate-100 text-black rounded-xl px-6 py-4 font-bold transition-all active:scale-95 flex items-center justify-center gap-2;
+    }
+
+    .neat-button-secondary {
+        @apply bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl px-6 py-4 font-bold transition-all active:scale-95 flex items-center justify-center gap-2 backdrop-blur-xl;
+    }
+}
+
+/* ========================================
    Global Touch & Responsive Utilities
    ======================================== */
 
@@ -12,32 +56,19 @@ button, a, input, select, textarea, [role="button"] {
     -webkit-tap-highlight-color: transparent;
 }
 
-/* 
- * iOS Native Feel Global Enhancements 
- */
 body {
-    /* Prevent rubber-banding on the whole page, keep it for scrollable elements inside */
+    background-color: var(--neat-bg);
+    color: var(--neat-text-secondary);
     overscroll-behavior-y: none;
-    
-    /* Disable long-press context menus across the app UI by default */
     -webkit-touch-callout: none;
-    
-    /* Disable default user text selection for UI elements to feel like a native app */
     -webkit-user-select: none;
     user-select: none;
 }
 
-/* Re-enable selection and callouts ONLY where appropriate (inputs, text blocks where we want them) */
-input, textarea, [contenteditable="true"] {
+input, textarea, [contenteditable="true"], .selectable-text {
     -webkit-user-select: auto;
     user-select: auto;
     -webkit-touch-callout: default;
-}
-
-/* Add select-text classes for things we explicitly want the user to be able to copy (e.g., invoices) */
-.selectable-text {
-    -webkit-user-select: auto;
-    user-select: auto;
 }
 
 /* Minimum tap target for accessibility (44px) */
@@ -47,12 +78,10 @@ input, textarea, [contenteditable="true"] {
     }
 }
 
-/* Safe area padding for iOS notch devices */
 .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* Prevent iOS auto-zoom by ensuring minimum 16px font size on inputs */
 @media screen and (max-width: 767px) {
     input, select, textarea {
         font-size: 16px !important;
@@ -64,36 +93,23 @@ input, textarea, [contenteditable="true"] {
    ======================================== */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
 
-/* Hide scrollbar on mobile for cleaner look but keep scrolling */
 @media (max-width: 767px) {
     .hide-scrollbar-mobile::-webkit-scrollbar { display: none; }
     .hide-scrollbar-mobile { -ms-overflow-style: none; scrollbar-width: none; }
 }
 
 /* ========================================
-   Toast Animations
+   Animations
    ======================================== */
-.toast-enter { transform: translateY(100%); opacity: 0; }
-.toast-enter-active { transform: translateY(0); opacity: 1; transition: all 300ms ease-out; }
-.toast-exit { opacity: 0; transition: opacity 200ms ease-in; }
-
-/* ========================================
-   NFC Pulse Animation
-   ======================================== */
-@keyframes nfcPulse {
-    0% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.4); }
-    70% { box-shadow: 0 0 0 15px rgba(14, 165, 233, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
 }
-.nfc-scanning { animation: nfcPulse 1.5s infinite; }
 
-/* ========================================
-   Responsive Table Wrapper
-   ======================================== */
-.table-responsive {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+.animate-float {
+    animation: float 6s ease-in-out infinite;
 }

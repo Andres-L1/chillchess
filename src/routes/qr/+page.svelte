@@ -191,46 +191,41 @@
 </svelte:head>
 
 <ProGate>
-    <div class="relative max-w-4xl mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8">
+    <div class="relative max-w-5xl mx-auto flex flex-col lg:flex-row gap-8">
         <!-- Ambient Background Glows -->
         <div
-            class="absolute top-0 left-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-[120px] -z-10 mix-blend-screen pointer-events-none"
+            class="absolute top-0 left-0 w-[500px] h-[500px] bg-neat-accent/5 rounded-full blur-[120px] -z-10 mix-blend-screen pointer-events-none"
         ></div>
         <div
-            class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-slate-500/5 rounded-full blur-[120px] -z-10 mix-blend-screen pointer-events-none"
+            class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-[120px] -z-10 mix-blend-screen pointer-events-none"
         ></div>
 
         <!-- Left: Config -->
-        <div class="flex-1 space-y-6">
+        <div class="flex-1 space-y-8">
             <!-- Mode Switcher -->
-            <div
-                class="bg-black/40 backdrop-blur-2xl border border-white/10 shadow-sm rounded-2xl p-2 relative overflow-hidden"
-            >
-                <div
-                    class="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent pointer-events-none"
-                ></div>
-                <div class="flex relative z-10 gap-1 sm:gap-2">
+            <div class="glass-card p-2">
+                <div class="flex gap-1.5">
                     {#each modes as m}
                         <button
                             on:click={() => (mode = m.id)}
-                            class="flex-1 flex items-center justify-center gap-2 py-3.5 sm:py-4 rounded-xl text-sm font-bold transition-all duration-300 relative overflow-hidden group {mode ===
+                            class="flex-1 flex items-center justify-center gap-2 py-4 rounded-xl text-sm font-black transition-all duration-300 relative group {mode ===
                             m.id
-                                ? 'text-white shadow-sm'
+                                ? 'text-white'
                                 : 'text-slate-400 hover:text-white hover:bg-white/5'}"
                         >
                             {#if mode === m.id}
                                 <div
-                                    class="absolute inset-0 bg-white/10 border border-white/20 rounded-xl"
+                                    class="absolute inset-0 bg-neat-accent/10 border border-neat-accent/20 rounded-xl"
                                 ></div>
                             {/if}
                             <div class="relative z-10 flex items-center gap-2">
                                 <svelte:component
                                     this={m.icon}
                                     class="w-4 h-4 {mode === m.id
-                                        ? 'animate-pulse'
+                                        ? 'text-neat-accent'
                                         : 'group-hover:scale-110 transition-transform'}"
                                 />
-                                <span>{m.label}</span>
+                                <span class="uppercase tracking-tighter">{m.label}</span>
                             </div>
                         </button>
                     {/each}
@@ -238,66 +233,50 @@
             </div>
 
             <!-- Input Fields -->
-            <div
-                class="bg-black/40 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 border border-white/10 shadow-sm relative overflow-hidden group/panel"
-            >
-                <div
-                    class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                ></div>
-
-                <div class="space-y-5 relative z-10">
+            <div class="glass-card p-8">
+                <div class="space-y-6">
                     {#if mode === 'url'}
-                        <div class="space-y-2">
+                        <div class="space-y-3">
                             <label
                                 for="qr-url"
-                                class="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1"
+                                class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1"
                             >
-                                <Link class="w-3.5 h-3.5 text-white" />
+                                <Link class="w-3.5 h-3.5 text-neat-accent" />
                                 Dirección URL
                             </label>
-                            <div class="relative group">
-                                <div
-                                    class="absolute -inset-0.5 bg-white/5 rounded-xl blur opacity-20 group-focus-within:opacity-50 transition duration-500 pointer-events-none"
-                                ></div>
-                                <input
-                                    id="qr-url"
-                                    type="url"
-                                    bind:value={urlInput}
-                                    placeholder="https://tu-sitio.com"
-                                    class="relative w-full bg-black/40 backdrop-blur-sm border border-white/10 rounded-xl px-4 py-3.5 text-sm sm:text-base text-white placeholder:text-slate-500 focus:outline-none focus:border-white/30 shadow-inner transition-all"
-                                />
-                            </div>
+                            <input
+                                id="qr-url"
+                                type="url"
+                                bind:value={urlInput}
+                                placeholder="https://tu-sitio.com"
+                                class="w-full bg-black/20 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-neat-accent/30 transition-all font-medium"
+                            />
                         </div>
                     {:else if mode === 'text'}
-                        <div class="space-y-2">
+                        <div class="space-y-3">
                             <label
                                 for="qr-text"
-                                class="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1"
+                                class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1"
                             >
-                                <Type class="w-3.5 h-3.5 text-white" />
+                                <Type class="w-3.5 h-3.5 text-neat-accent" />
                                 Mensaje de Texto
                             </label>
-                            <div class="relative group">
-                                <div
-                                    class="absolute -inset-0.5 bg-white/5 rounded-xl blur opacity-20 group-focus-within:opacity-50 transition duration-500 pointer-events-none"
-                                ></div>
-                                <textarea
-                                    id="qr-text"
-                                    bind:value={textInput}
-                                    placeholder="Escribe tu texto aquí..."
-                                    rows="4"
-                                    class="relative w-full bg-black/40 backdrop-blur-sm border border-white/10 rounded-xl px-4 py-3.5 text-sm sm:text-base text-white placeholder:text-slate-500 focus:outline-none focus:border-white/30 shadow-inner transition-all resize-none"
-                                ></textarea>
-                            </div>
+                            <textarea
+                                id="qr-text"
+                                bind:value={textInput}
+                                placeholder="Escribe tu texto aquí..."
+                                rows="4"
+                                class="w-full bg-black/20 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-neat-accent/30 transition-all font-medium resize-none"
+                            ></textarea>
                         </div>
                     {:else}
-                        <div class="space-y-5">
-                            <div class="space-y-2">
+                        <div class="space-y-6">
+                            <div class="space-y-3">
                                 <label
                                     for="wifi-ssid"
-                                    class="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider ml-1"
+                                    class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1"
                                 >
-                                    <Wifi class="w-3.5 h-3.5 text-white" />
+                                    <Wifi class="w-3.5 h-3.5 text-neat-accent" />
                                     Nombre de Red (SSID)
                                 </label>
                                 <input
@@ -305,14 +284,14 @@
                                     type="text"
                                     bind:value={wifiSSID}
                                     placeholder="Mi WiFi"
-                                    class="w-full bg-black/40 backdrop-blur-sm border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-white/30 shadow-inner transition-all"
+                                    class="w-full bg-black/20 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-neat-accent/30 transition-all font-medium"
                                 />
                             </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                <div class="space-y-2">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div class="space-y-3">
                                     <label
                                         for="wifi-pass"
-                                        class="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1"
+                                        class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1"
                                         >Contraseña</label
                                     >
                                     <input
@@ -320,28 +299,26 @@
                                         type="text"
                                         bind:value={wifiPassword}
                                         placeholder="Contraseña WiFi"
-                                        class="w-full bg-black/40 backdrop-blur-sm border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-white/30 shadow-inner transition-all"
+                                        class="w-full bg-black/20 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-neat-accent/30 transition-all font-medium"
                                     />
                                 </div>
-                                <div class="space-y-2">
+                                <div class="space-y-3">
                                     <label
                                         for="wifi-enc"
-                                        class="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1"
+                                        class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1"
                                         >Encriptación</label
                                     >
-                                    <div class="relative">
-                                        <select
-                                            id="wifi-enc"
-                                            bind:value={wifiEncryption}
-                                            class="w-full bg-black/40 backdrop-blur-sm border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-white/30 shadow-inner appearance-none transition-all cursor-pointer"
+                                    <select
+                                        id="wifi-enc"
+                                        bind:value={wifiEncryption}
+                                        class="w-full bg-black/20 border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-neat-accent/30 transition-all font-medium cursor-pointer appearance-none"
+                                    >
+                                        <option value="WPA" class="bg-slate-900">WPA/WPA2</option>
+                                        <option value="WEP" class="bg-slate-900">WEP</option>
+                                        <option value="nopass" class="bg-slate-900"
+                                            >Sin contraseña</option
                                         >
-                                            <option value="WPA" class="bg-black">WPA/WPA2</option>
-                                            <option value="WEP" class="bg-black">WEP</option>
-                                            <option value="nopass" class="bg-black"
-                                                >Sin contraseña</option
-                                            >
-                                        </select>
-                                    </div>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -349,72 +326,49 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Color Config -->
-                <div
-                    class="bg-black/40 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 border border-white/10 shadow-sm relative overflow-hidden flex flex-col h-full"
-                >
-                    <div
-                        class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"
-                    ></div>
-
+                <div class="glass-card p-8 flex flex-col">
                     <h4
-                        class="text-sm font-bold text-white tracking-wide mb-6 flex items-center gap-3 relative z-10"
+                        class="text-xs font-black text-white uppercase tracking-[0.2em] mb-8 flex items-center gap-3"
                     >
-                        <div
-                            class="p-2 bg-white/10 text-white rounded-lg shadow-inner border border-white/20"
-                        >
-                            <Palette class="w-4 h-4" />
-                        </div>
+                        <Palette class="w-4 h-4 text-neat-accent" />
                         Personalizar Colores
                     </h4>
 
-                    <div class="grid grid-cols-2 gap-4 flex-1 relative z-10">
-                        <div class="space-y-2">
+                    <div class="grid grid-cols-2 gap-6 flex-1">
+                        <div class="space-y-3">
                             <label
                                 for="fg-color"
-                                class="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1"
+                                class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1"
                                 >Color QR</label
                             >
-                            <div
-                                class="bg-black/40 p-2 rounded-2xl border border-white/10 flex items-center gap-3 shadow-inner group"
-                            >
-                                <div
-                                    class="relative w-10 h-10 rounded-xl overflow-hidden border border-white/20 shadow-sm transition-colors"
-                                >
-                                    <input
-                                        id="fg-color"
-                                        type="color"
-                                        bind:value={fgColor}
-                                        class="absolute inset-[-10px] w-20 h-20 cursor-pointer pointer-events-auto"
-                                    />
-                                </div>
-                                <span class="text-xs font-mono text-slate-300 uppercase"
-                                    >{fgColor}</span
+                            <div class="flex items-center gap-3">
+                                <input
+                                    id="fg-color"
+                                    type="color"
+                                    bind:value={fgColor}
+                                    class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 cursor-pointer overflow-hidden [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:border-none"
+                                />
+                                <span class="font-mono text-xs text-white uppercase">{fgColor}</span
                                 >
                             </div>
                         </div>
-                        <div class="space-y-2">
+
+                        <div class="space-y-3">
                             <label
                                 for="bg-color"
-                                class="block text-xs font-bold text-slate-400 uppercase tracking-wider ml-1"
+                                class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1"
                                 >Fondo</label
                             >
-                            <div
-                                class="bg-black/40 p-2 rounded-2xl border border-white/10 flex items-center gap-3 shadow-inner group"
-                            >
-                                <div
-                                    class="relative w-10 h-10 rounded-xl overflow-hidden border border-white/20 shadow-sm transition-colors"
-                                >
-                                    <input
-                                        id="bg-color"
-                                        type="color"
-                                        bind:value={bgColor}
-                                        class="absolute inset-[-10px] w-20 h-20 cursor-pointer pointer-events-auto"
-                                    />
-                                </div>
-                                <span class="text-xs font-mono text-slate-300 uppercase"
-                                    >{bgColor}</span
+                            <div class="flex items-center gap-3">
+                                <input
+                                    id="bg-color"
+                                    type="color"
+                                    bind:value={bgColor}
+                                    class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 cursor-pointer overflow-hidden [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:border-none"
+                                />
+                                <span class="font-mono text-xs text-white uppercase">{bgColor}</span
                                 >
                             </div>
                         </div>
@@ -422,34 +376,23 @@
                 </div>
 
                 <!-- Logo / Custom Image -->
-                <div
-                    class="bg-black/40 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 border border-white/10 shadow-sm relative overflow-hidden flex flex-col h-full"
-                >
-                    <div
-                        class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"
-                    ></div>
-
+                <div class="glass-card p-8 flex flex-col">
                     <h4
-                        class="text-sm font-bold text-white tracking-wide mb-6 flex items-center gap-3 relative z-10"
+                        class="text-xs font-black text-white uppercase tracking-[0.2em] mb-8 flex items-center gap-3"
                     >
-                        <div
-                            class="p-2 bg-white/10 text-white rounded-lg shadow-inner border border-white/20"
-                        >
-                            <Image class="w-4 h-4" />
-                        </div>
+                        <Image class="w-4 h-4 text-neat-accent" />
                         Logo Central
                     </h4>
 
-                    <div class="flex-1 relative z-10 flex flex-col justify-center">
+                    <div class="flex-1 flex flex-col justify-center">
                         {#if logoDataUrl}
-                            <div class="space-y-5">
-                                <!-- Logo preview -->
+                            <div class="space-y-6">
                                 <div
-                                    class="flex items-center gap-4 bg-black/40 p-3 rounded-2xl border border-white/10 shadow-inner"
+                                    class="flex items-center gap-5 bg-black/20 p-4 rounded-2xl border border-white/5"
                                 >
                                     <div class="relative group">
                                         <div
-                                            class="w-14 h-14 bg-white/5 backdrop-blur-md rounded-xl p-1.5 border border-white/10 shadow-sm flex items-center justify-center"
+                                            class="w-16 h-16 bg-white/5 rounded-xl p-2 border border-white/10 flex items-center justify-center"
                                         >
                                             <img
                                                 src={logoDataUrl}
@@ -459,20 +402,20 @@
                                         </div>
                                         <button
                                             on:click={removeLogo}
-                                            class="absolute -top-2 -right-2 w-6 h-6 bg-red-500/80 hover:bg-red-500 rounded-full flex items-center justify-center text-white backdrop-blur-sm transition-all active:scale-90 border border-white/20"
-                                            title="Eliminar logo"
+                                            class="absolute -top-2 -right-2 w-7 h-7 bg-red-500 rounded-full flex items-center justify-center text-white transition-all active:scale-90 border-2 border-slate-900"
                                         >
-                                            <X class="w-3.5 h-3.5" />
+                                            <X class="w-4 h-4" />
                                         </button>
                                     </div>
-                                    <div class="flex-1 overflow-hidden">
+                                    <div class="flex-1 min-w-0">
                                         <p
-                                            class="text-sm text-slate-200 font-medium truncate"
-                                            title={logoFile?.name}
+                                            class="text-sm text-white font-black truncate tracking-tighter"
                                         >
                                             {logoFile?.name}
                                         </p>
-                                        <p class="text-xs font-mono text-slate-500 mt-0.5">
+                                        <p
+                                            class="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1"
+                                        >
                                             {logoFile
                                                 ? (logoFile.size / 1024).toFixed(1) + ' KB'
                                                 : ''}
@@ -480,70 +423,56 @@
                                     </div>
                                 </div>
 
-                                <!-- Logo size slider -->
-                                <div class="space-y-3">
+                                <div class="space-y-4">
                                     <div class="flex items-center justify-between">
                                         <label
-                                            for="logo-size"
-                                            class="text-xs font-bold text-slate-400 uppercase tracking-wider"
-                                            >Tamaño Logo</label
+                                            for="logo-scale"
+                                            class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]"
+                                            >Escala del Logo</label
                                         >
-                                        <span
-                                            class="text-xs font-mono text-white bg-white/10 px-2 py-0.5 rounded-md border border-white/20"
+                                        <span class="text-xs font-black text-neat-accent"
                                             >{logoSize}%</span
                                         >
                                     </div>
                                     <input
-                                        id="logo-size"
+                                        id="logo-scale"
                                         type="range"
                                         min="10"
                                         max="35"
                                         step="1"
                                         bind:value={logoSize}
-                                        class="w-full h-2 bg-black/40 rounded-lg appearance-none cursor-pointer accent-white border border-white/10 shadow-inner"
+                                        class="w-full h-1.5 bg-black/40 rounded-full appearance-none cursor-pointer accent-neat-accent"
                                     />
-                                    <div
-                                        class="flex justify-between text-[10px] uppercase font-bold text-slate-600"
-                                    >
-                                        <span>Pequeño</span>
-                                        <span>Grande</span>
-                                    </div>
                                 </div>
                             </div>
                         {:else}
-                            <!-- Upload area -->
                             <label
                                 for="logo-upload"
-                                class="flex flex-col items-center justify-center gap-3 py-6 border border-dashed border-white/20 rounded-2xl cursor-pointer hover:border-white/40 hover:bg-white/5 transition-all group bg-black/20 backdrop-blur-sm h-full max-h-[160px]"
+                                class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-white/10 rounded-3xl cursor-pointer hover:border-neat-accent/30 hover:bg-neat-accent/5 transition-all group bg-black/10"
                             >
-                                <div
-                                    class="w-12 h-12 rounded-xl bg-black/40 group-hover:bg-white/10 flex items-center justify-center transition-colors shadow-inner border border-white/10"
-                                >
-                                    <Upload
-                                        class="w-5 h-5 text-slate-400 group-hover:text-white transition-colors group-hover:-translate-y-0.5 duration-300"
-                                    />
-                                </div>
-                                <div class="text-center">
-                                    <p
-                                        class="text-sm font-bold text-slate-300 group-hover:text-white transition-colors"
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <div
+                                        class="p-4 bg-neat-accent/10 rounded-2xl mb-4 group-hover:scale-110 transition-transform"
                                     >
-                                        Seleccionar Logo
-                                    </p>
-                                    <p
-                                        class="text-[11px] text-slate-500 mt-1 uppercase tracking-wider font-semibold"
+                                        <Upload class="w-6 h-6 text-neat-accent" />
+                                    </div>
+                                    <span
+                                        class="text-xs font-black text-white uppercase tracking-widest"
+                                        >Elegir Logo</span
                                     >
-                                        PNG, JPG, SVG • Máx 2MB
-                                    </p>
+                                    <span class="text-[10px] text-slate-500 mt-2"
+                                        >PNG o SVG (Max 1MB)</span
+                                    >
                                 </div>
+                                <input
+                                    id="logo-upload"
+                                    type="file"
+                                    class="hidden"
+                                    accept="image/*"
+                                    on:change={handleLogoUpload}
+                                    bind:this={fileInput}
+                                />
                             </label>
-                            <input
-                                id="logo-upload"
-                                bind:this={fileInput}
-                                type="file"
-                                accept="image/png,image/jpeg,image/svg+xml,image/webp"
-                                on:change={handleLogoUpload}
-                                class="hidden"
-                            />
                         {/if}
                     </div>
                 </div>
@@ -551,83 +480,79 @@
         </div>
 
         <!-- Right: Preview -->
-        <div class="w-full lg:w-80 flex flex-col gap-6 lg:shrink-0 sticky top-24 pt-1 lg:pt-0">
-            <div
-                class="bg-black/40 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 border border-white/10 shadow-sm relative overflow-hidden flex flex-col items-center"
-            >
-                <div
-                    class="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white/5 to-transparent pointer-events-none"
-                ></div>
-                <div
-                    class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                ></div>
-
+        <div class="w-full lg:w-96 flex flex-col gap-8 lg:shrink-0">
+            <div class="glass-card p-8 flex flex-col items-center sticky top-24">
                 <p
-                    class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 relative z-10 flex items-center gap-2"
+                    class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-10 flex items-center gap-2"
                 >
-                    <QrCode class="w-4 h-4 text-white" /> Vista Previa
+                    <QrCode class="w-4 h-4 text-neat-accent" /> Vista Previa
                 </p>
 
-                <div class="relative z-10 flex flex-col items-center w-full">
+                <div class="relative flex flex-col items-center w-full">
                     {#if qrDataUrl}
                         <div class="relative group">
+                            <!-- Glow effect -->
                             <div
-                                class="absolute -inset-4 bg-gradient-to-br from-white/10 to-transparent rounded-3xl blur-xl opacity-50 group-hover:opacity-80 transition duration-500 pointer-events-none"
+                                class="absolute -inset-8 bg-neat-accent/20 rounded-[3rem] blur-3xl opacity-0 group-hover:opacity-100 transition duration-700 pointer-events-none"
                             ></div>
+
                             <div
-                                class="relative bg-white p-3 sm:p-4 rounded-2xl shadow-lg border border-white/20 overflow-hidden group-hover:scale-[1.02] transition-transform duration-300"
+                                class="relative bg-white p-6 rounded-[2.5rem] shadow-2xl overflow-hidden group-hover:scale-[1.05] transition-transform duration-500"
                             >
                                 <img
                                     src={qrDataUrl}
                                     alt="QR Code"
-                                    class="w-48 h-48 sm:w-56 sm:h-56 object-contain render-pixelated"
-                                    style="image-rendering: pixelated;"
+                                    class="w-56 h-56 sm:w-64 sm:h-64 object-contain"
+                                    style="image-rendering: auto;"
                                 />
                             </div>
                         </div>
 
                         {#if logoDataUrl}
                             <div
-                                class="flex items-center gap-2 mt-6 bg-white/10 border border-white/20 px-3 py-1.5 rounded-lg backdrop-blur-sm shadow-sm"
+                                class="flex items-center gap-3 mt-10 bg-neat-accent/10 border border-neat-accent/20 px-4 py-2 rounded-2xl"
                             >
-                                <div class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div>
+                                <div
+                                    class="w-2 h-2 rounded-full bg-neat-accent animate-pulse"
+                                ></div>
                                 <span
-                                    class="text-[11px] font-bold text-slate-300 uppercase tracking-wider"
-                                    >Corrección H (Alta)</span
+                                    class="text-[10px] font-black text-neat-accent uppercase tracking-widest"
+                                    >Corrección Alta</span
                                 >
                             </div>
                         {/if}
                     {:else}
                         <div
-                            class="w-48 h-48 sm:w-56 sm:h-56 bg-black/40 rounded-2xl flex flex-col items-center justify-center border border-dashed border-white/10 shadow-inner group/empty transition-colors hover:border-white/30"
+                            class="w-56 h-56 sm:w-64 sm:h-64 bg-black/20 rounded-[2.5rem] flex flex-col items-center justify-center border-2 border-dashed border-white/5 animate-pulse"
                         >
-                            <RotateCcw
-                                class="w-12 h-12 text-slate-600 group-hover/empty:text-white/50 transition-colors group-hover/empty:animate-spin-slow mb-3"
-                            />
+                            <RotateCcw class="w-10 h-10 text-slate-700 mb-4" />
                             <span
-                                class="text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                class="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]"
                                 >Generando...</span
                             >
                         </div>
                     {/if}
                 </div>
-            </div>
 
-            <button
-                on:click={downloadQR}
-                disabled={!qrDataUrl}
-                class="w-full relative overflow-hidden group bg-white/10 hover:bg-white/20 disabled:bg-black/40 disabled:text-slate-500 text-white font-medium py-4 rounded-2xl transition-all shadow-sm active:scale-[0.98] border border-white/20 disabled:border-white/5 backdrop-blur-md"
-            >
-                {#if qrDataUrl}
-                    <div
-                        class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"
-                    ></div>
-                {/if}
-                <div class="relative z-10 flex items-center justify-center gap-3 tracking-wide">
-                    <Download class="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" />
-                    <span>Descargar Imagen QR</span>
+                <div class="w-full mt-12 space-y-4">
+                    <button
+                        on:click={downloadQR}
+                        disabled={!qrDataUrl}
+                        class="w-full relative overflow-hidden group neat-button-primary py-5 rounded-2xl flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <Download class="w-5 h-5 group-hover:-translate-y-1 transition-transform" />
+                        <span class="text-sm font-black uppercase tracking-tighter"
+                            >Descargar QR</span
+                        >
+                    </button>
+
+                    <p
+                        class="text-[9px] text-center text-slate-500 font-black uppercase tracking-[0.2em]"
+                    >
+                        Format: PNG • High Resolution
+                    </p>
                 </div>
-            </button>
+            </div>
         </div>
     </div>
 </ProGate>

@@ -71,32 +71,32 @@
 </script>
 
 <header
-    class="bg-black/40 backdrop-blur-2xl border-b border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)] z-50 flex-shrink-0 flex items-center justify-between px-4 md:px-8 py-4 h-16 md:h-auto relative"
+    class="bg-black/20 backdrop-blur-3xl border-b border-white/5 z-50 flex-shrink-0 flex items-center justify-between px-6 md:px-10 py-5 h-20 relative"
 >
-    <div class="flex items-center gap-3 overflow-hidden">
+    <div class="flex items-center gap-4 overflow-hidden">
         <button
             on:click={handleMenuClick}
-            class="md:hidden p-4 -ml-4 text-slate-400 hover:text-white rounded-xl hover:bg-white/5 transition-colors flex items-center justify-center min-w-[56px] min-h-[56px] active:scale-95 touch-manipulation"
+            class="md:hidden p-3 -ml-2 text-slate-400 hover:text-white rounded-2xl hover:bg-white/5 flex items-center justify-center min-w-[48px] min-h-[48px] active:scale-95 transition-all"
             aria-label="Abrir menú"
         >
-            <Menu class="w-7 h-7" />
+            <Menu class="w-6 h-6" />
         </button>
 
         <div class="flex-1 truncate">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-3">
                 {#if $pageHeader.category}
                     <span
-                        class="hidden md:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-brand-500/10 text-brand-400 shrink-0"
+                        class="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-white/5 text-slate-400 border border-white/10 shrink-0"
                     >
                         {$pageHeader.category}
                     </span>
                 {/if}
-                <h2 class="text-xl md:text-2xl font-bold text-white truncate">
+                <h2 class="text-xl md:text-2xl font-bold text-white truncate tracking-tight">
                     {$pageHeader.title}
                 </h2>
             </div>
             {#if $pageHeader.description}
-                <p class="text-slate-500 text-xs md:text-sm mt-0.5 truncate hidden md:block">
+                <p class="text-slate-500 text-xs mt-1 truncate hidden md:block font-medium">
                     {$pageHeader.description}
                 </p>
             {/if}
@@ -107,7 +107,7 @@
     <div class="relative ml-auto shrink-0 hidden sm:block">
         <button
             on:click|stopPropagation={toggleCurrencyDropdown}
-            class="flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium transition-colors border border-white/10 ring-1 ring-inset ring-transparent active:scale-95"
+            class="flex items-center justify-center w-11 h-11 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-bold transition-all border border-white/10 active:scale-95"
             title="Cambiar Moneda Global"
         >
             {$currencyStore}

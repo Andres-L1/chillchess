@@ -109,17 +109,20 @@
 <div class="space-y-8">
     <!-- User summary top card -->
     <div
-        class="bg-slate-800/50 backdrop-blur-sm rounded-3xl p-6 md:p-8 shadow-lg shadow-black/10 border border-slate-700/50 flex flex-col md:flex-row items-center md:items-start gap-6 relative overflow-hidden"
+        class="glass-card p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6 relative overflow-hidden group"
     >
         <div
-            class="absolute top-0 right-0 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl opacity-50 -z-10 translate-x-1/2 -translate-y-1/2"
+            class="absolute top-0 right-0 w-64 h-64 bg-neat-accent/10 rounded-full blur-3xl opacity-0 group-hover:opacity-50 -z-10 translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000"
         ></div>
 
         <div class="relative shrink-0">
             <div
-                class="w-24 h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 text-white flex items-center justify-center font-bold text-3xl md:text-4xl shadow-xl ring-4 ring-slate-800"
+                class="w-24 h-24 md:w-28 md:h-28 rounded-full bg-slate-900 border border-white/10 text-white flex items-center justify-center font-black text-3xl md:text-5xl shadow-2xl relative overflow-hidden"
             >
-                {initials}
+                <div
+                    class="absolute inset-0 bg-gradient-to-br from-neat-accent/20 to-transparent opacity-50"
+                ></div>
+                <span class="relative z-10">{initials}</span>
             </div>
             {#if $authStore.user?.isAdmin || $authStore.user?.isPro}
                 <div
@@ -151,7 +154,7 @@
                     </div>
                 {:else if $authStore.user?.isPro}
                     <div
-                        class="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-500/10 text-brand-400 rounded-lg text-xs font-bold border border-brand-500/20"
+                        class="inline-flex items-center gap-1.5 px-3 py-1 bg-neat-accent/10 text-neat-accent rounded-lg text-[10px] font-black uppercase tracking-wider border border-neat-accent/20"
                     >
                         <Crown class="w-3.5 h-3.5" />
                         Suscripción Pro Activa
@@ -180,12 +183,12 @@
 
     <div class="grid lg:grid-cols-2 gap-8">
         <!-- Account Settings Form -->
-        <div
-            class="bg-slate-800/50 backdrop-blur-sm rounded-3xl p-6 md:p-8 shadow-lg shadow-black/10 border border-slate-700/50"
-        >
-            <div class="flex items-center justify-between mb-8">
-                <h3 class="text-xl font-bold text-white flex items-center gap-2">
-                    <Settings class="w-5 h-5 text-brand-400" />
+        <div class="glass-card p-6 md:p-8">
+            <div class="flex items-center justify-between mb-10">
+                <h3
+                    class="text-xl font-black text-white flex items-center gap-3 uppercase tracking-tighter"
+                >
+                    <Settings class="w-6 h-6 text-neat-accent" />
                     Datos Personales
                 </h3>
             </div>
@@ -201,13 +204,13 @@
                             type="text"
                             bind:value={newDisplayName}
                             placeholder="Ej. Juan Pérez"
-                            class="flex-1 bg-slate-900/50 border border-slate-700/50 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all font-medium text-white placeholder:text-slate-600"
+                            class="flex-1 bg-black/40 border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-neat-accent/50 transition-all font-black text-white placeholder:text-slate-700 tracking-tight"
                         />
                         <button
                             on:click={handleSaveName}
                             disabled={isUpdatingName ||
                                 newDisplayName === $authStore.user?.displayName}
-                            class="px-6 py-3 bg-brand-600 hover:bg-brand-500 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all h-[50px] whitespace-nowrap"
+                            class="px-8 py-4 bg-neat-accent hover:bg-white text-black disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed font-black rounded-2xl transition-all h-[58px] whitespace-nowrap uppercase text-sm tracking-widest"
                         >
                             {#if isUpdatingName}
                                 <RefreshCw class="w-5 h-5 animate-spin mx-auto" />
@@ -238,12 +241,12 @@
 
         <!-- Plan and Security -->
         <div class="space-y-8">
-            <div
-                class="bg-slate-800/50 backdrop-blur-sm rounded-3xl p-6 md:p-8 shadow-lg shadow-black/10 border border-slate-700/50"
-            >
-                <h3 class="text-xl font-bold text-white flex items-center gap-2 mb-6">
-                    <CreditCard class="w-5 h-5 text-emerald-400" />
-                    Facturación y Suscripción
+            <div class="glass-card p-6 md:p-8">
+                <h3
+                    class="text-xl font-black text-white flex items-center gap-3 mb-10 uppercase tracking-tighter"
+                >
+                    <CreditCard class="w-6 h-6 text-emerald-400" />
+                    Facturación
                 </h3>
 
                 {#if $authStore.user?.isAdmin}
@@ -259,12 +262,14 @@
                     </div>
                 {:else if $authStore.user?.isPro}
                     <div
-                        class="p-4 bg-brand-500/10 rounded-xl border border-brand-500/20 text-brand-300 mb-6"
+                        class="p-5 bg-neat-accent/5 rounded-2xl border border-neat-accent/10 text-neat-accent mb-8"
                     >
-                        <h4 class="font-bold mb-1 flex items-center gap-2">
-                            <Crown class="w-4 h-4" /> Plan Pro Activo
+                        <h4
+                            class="font-black mb-1 flex items-center gap-2 uppercase text-xs tracking-wider"
+                        >
+                            <Crown class="w-4 h-4 text-neat-accent" /> Plan Pro Activo
                         </h4>
-                        <p class="text-sm opacity-90">
+                        <p class="text-[11px] font-bold opacity-70 tracking-tight">
                             Cuentas con acceso ilimitado a todas las herramientas de la suite.
                         </p>
                     </div>
@@ -283,7 +288,7 @@
                     {#if !$authStore.user?.isPro && !$authStore.user?.isAdmin}
                         <button
                             on:click={() => goto('/pricing')}
-                            class="flex-1 bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md shadow-brand-500/20 flex items-center justify-center gap-2"
+                            class="flex-1 bg-neat-accent hover:bg-white text-black font-black py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-3 uppercase text-xs tracking-widest"
                         >
                             <Crown class="w-4 h-4" />
                             Mejorar Plan a PRO

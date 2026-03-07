@@ -6,14 +6,16 @@ import { getFunctions, connectFunctionsEmulator, type Functions } from "firebase
 import { getStorage, type FirebaseStorage } from "firebase/storage";
 import { devLogger } from '$lib/utils/devLogger';
 
+import { env } from '$env/dynamic/public';
+
 const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || (import.meta.env.VITE_FIREBASE_API_KEY_B64 ? atob(import.meta.env.VITE_FIREBASE_API_KEY_B64) : undefined),
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID,
-    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+    apiKey: env.VITE_FIREBASE_API_KEY || (env.VITE_FIREBASE_API_KEY_B64 ? atob(env.VITE_FIREBASE_API_KEY_B64) : undefined),
+    authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: env.VITE_FIREBASE_APP_ID,
+    measurementId: env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Validate required Firebase configuration

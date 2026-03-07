@@ -1,7 +1,17 @@
 <script lang="ts">
     import { pageHeader } from '$lib/stores/ui';
     import { onMount } from 'svelte';
-    import { Calculator, DollarSign, Clock, ArrowRight, Briefcase, BarChart3 } from 'lucide-svelte';
+    import {
+        Calculator,
+        DollarSign,
+        Clock,
+        ArrowRight,
+        Briefcase,
+        BarChart3,
+        Plus,
+        X,
+    } from 'lucide-svelte';
+    import { fade } from 'svelte/transition';
     import ProGate from '$lib/components/ui/ProGate.svelte';
     import { currencyStore } from '$lib/stores/currencyStore';
     import { browser } from '$app/environment';
@@ -72,31 +82,25 @@
 </svelte:head>
 
 <ProGate>
-    <div class="relative max-w-5xl mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8">
+    <div class="relative max-w-6xl mx-auto flex flex-col lg:flex-row gap-8 lg:gap-12">
         <!-- Ambient Background Glows -->
         <div
-            class="absolute top-0 right-0 w-[600px] h-[600px] bg-brand-500/10 rounded-full blur-[120px] -z-10 mix-blend-screen pointer-events-none"
+            class="absolute top-0 right-0 w-[600px] h-[600px] bg-neat-accent/10 rounded-full blur-[120px] -z-10 mix-blend-screen pointer-events-none"
         ></div>
         <div
-            class="absolute bottom-[-200px] left-0 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] -z-10 mix-blend-screen pointer-events-none"
+            class="absolute bottom-[-200px] left-0 w-[500px] h-[500px] bg-slate-500/10 rounded-full blur-[120px] -z-10 mix-blend-screen pointer-events-none"
         ></div>
 
         <!-- Left Column: Inputs -->
-        <div class="flex-1 space-y-6">
+        <div class="flex-1 space-y-8">
             <!-- Monthly Expenses Card -->
-            <div
-                class="bg-black/40 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 border border-white/10 shadow-sm relative overflow-hidden group/panel"
-            >
-                <div
-                    class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                ></div>
-
-                <div class="flex items-center justify-between mb-6 relative z-10">
+            <div class="glass-card p-8 sm:p-10 space-y-8">
+                <div class="flex items-center justify-between">
                     <h3
-                        class="text-sm font-bold text-white tracking-wide flex items-center gap-3 relative z-10"
+                        class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-3"
                     >
                         <div
-                            class="p-2 bg-white/5 text-slate-300 rounded-lg shadow-sm border border-white/10"
+                            class="p-2.5 bg-neat-accent/10 text-neat-accent rounded-xl border border-neat-accent/20"
                         >
                             <DollarSign class="w-4 h-4" />
                         </div>
@@ -104,184 +108,148 @@
                     </h3>
                     <button
                         on:click={addExpense}
-                        class="text-xs font-medium text-white px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all border border-white/10 shadow-sm active:scale-95 flex items-center gap-1"
+                        class="text-[10px] font-black text-white px-5 py-3 rounded-2xl bg-white/5 hover:bg-white/10 transition-all border border-white/5 active:scale-95 flex items-center gap-2 uppercase tracking-widest"
                     >
-                        <span>+</span> Añadir
+                        <Plus class="w-4 h-4" /> Añadir Gasto
                     </button>
                 </div>
 
-                <div class="relative z-10 space-y-4">
+                <div class="space-y-4">
                     {#each expenses as expense, i}
-                        <div class="flex items-center gap-2 sm:gap-3 group/row">
-                            <div class="flex-1 relative group">
-                                <div
-                                    class="absolute -inset-0.5 bg-white rounded-xl blur opacity-0 group-focus-within:opacity-10 transition duration-500 pointer-events-none"
-                                ></div>
+                        <div class="flex items-center gap-3 group/row" transition:fade>
+                            <div class="flex-1 relative">
                                 <input
                                     type="text"
                                     bind:value={expense.label}
-                                    placeholder="Concepto"
-                                    class="relative w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl px-4 py-3.5 text-sm sm:text-base text-white placeholder:text-slate-500 focus:outline-none focus:border-white/30 focus:bg-white/10 shadow-sm transition-all"
+                                    placeholder="Concepto (ej. Alquiler)"
+                                    class="w-full bg-black/20 border border-white/5 rounded-2xl px-5 py-4 text-sm font-bold text-white placeholder:text-slate-700 focus:outline-none focus:border-neat-accent/30 transition-all"
                                 />
                             </div>
-                            <div class="relative w-28 sm:w-36 group">
+                            <div class="relative w-32 sm:w-40">
                                 <span
-                                    class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold z-10"
+                                    class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-black uppercase"
                                     >{$currencyStore}</span
                                 >
-                                <div
-                                    class="absolute -inset-0.5 bg-white rounded-xl blur opacity-0 group-focus-within:opacity-10 transition duration-500 pointer-events-none"
-                                ></div>
                                 <input
                                     type="number"
                                     bind:value={expense.amount}
                                     min="0"
-                                    class="relative w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl flex items-center pl-8 sm:pl-10 pr-4 py-3.5 text-sm sm:text-base font-bold text-white focus:outline-none focus:border-white/30 focus:bg-white/10 shadow-sm transition-all"
+                                    class="w-full bg-black/20 border border-white/5 rounded-2xl pl-10 pr-5 py-4 text-sm font-black text-white focus:outline-none focus:border-neat-accent/30 transition-all tabular-nums"
                                 />
                             </div>
                             <button
                                 on:click={() => removeExpense(i)}
-                                class="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-red-400 bg-white/5 hover:bg-red-500/20 rounded-xl border border-white/10 hover:border-red-500/30 transition-all active:scale-90 shadow-sm group/btn"
-                                title="Eliminar gasto"
+                                class="w-12 h-12 flex items-center justify-center text-slate-500 hover:text-white bg-white/5 hover:bg-red-500/20 rounded-2xl border border-white/5 hover:border-red-500/30 transition-all active:scale-90 shadow-sm"
                             >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="16"
-                                    height="16"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2.5"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    class="group-hover/btn:scale-110 transition-transform"
-                                    ><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg
-                                >
+                                <X class="w-5 h-5" />
                             </button>
                         </div>
                     {/each}
                 </div>
 
-                <div
-                    class="pt-6 mt-6 border-t border-white/10 flex justify-between items-center relative z-10"
-                >
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest"
-                        >Total Mensual</span
+                <div class="pt-8 border-t border-white/5 flex justify-between items-center">
+                    <span class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]"
+                        >Total Gastos</span
                     >
-                    <span class="text-2xl sm:text-3xl font-black text-white drop-shadow-md"
-                        >{totalMonthlyExpenses.toFixed(0)}<span
-                            class="text-slate-400 font-medium ml-1">{$currencyStore}</span
-                        ></span
+                    <div
+                        class="text-3xl font-black text-white tracking-tighter tabular-nums drop-shadow-xl"
                     >
+                        {totalMonthlyExpenses.toLocaleString('es-ES')}
+                        <span class="text-neat-accent text-lg ml-1 uppercase">{$currencyStore}</span
+                        >
+                    </div>
                 </div>
             </div>
 
             <!-- Parameters Card -->
-            <div
-                class="bg-black/40 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 border border-white/10 shadow-sm relative overflow-hidden group/panel"
-            >
-                <div
-                    class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                ></div>
-
+            <div class="glass-card p-8 sm:p-10 space-y-10">
                 <h3
-                    class="text-sm font-bold text-white tracking-wide mb-6 flex items-center gap-3 relative z-10"
+                    class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-3"
                 >
                     <div
-                        class="p-2 bg-white/5 text-slate-300 rounded-lg shadow-sm border border-white/10"
+                        class="p-2.5 bg-neat-accent/10 text-neat-accent rounded-xl border border-neat-accent/20"
                     >
                         <BarChart3 class="w-4 h-4" />
                     </div>
                     Configuración de Parámetros
                 </h3>
 
-                <div class="space-y-6 relative z-10">
-                    <div
-                        class="bg-black/20 p-4 sm:p-5 rounded-2xl border border-white/10 shadow-sm"
-                    >
-                        <label
-                            for="profit-margin"
-                            class="flex justify-between text-xs font-bold text-slate-300 mb-4 uppercase tracking-wider"
-                        >
-                            <span class="flex items-center gap-2"
-                                ><Briefcase class="w-3.5 h-3.5 text-emerald-400" /> Margen de beneficio</span
-                            >
-                            <span
-                                class="bg-white/10 px-2 py-0.5 rounded-md font-mono text-emerald-400 border border-white/10"
+                <div class="space-y-12">
+                    <!-- Profit Margin -->
+                    <div class="space-y-6">
+                        <div class="flex justify-between items-end">
+                            <label for="profit-margin" class="space-y-1">
+                                <span
+                                    class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]"
+                                    >Margen de beneficio</span
+                                >
+                                <span class="block text-xs text-slate-400 font-medium"
+                                    >Porcentaje extra para ahorros e inversión</span
+                                >
+                            </label>
+                            <span class="text-2xl font-black text-neat-accent tabular-nums"
                                 >{profitMarginPercent}%</span
                             >
-                        </label>
+                        </div>
                         <input
                             id="profit-margin"
                             type="range"
                             min="0"
                             max="100"
                             bind:value={profitMarginPercent}
-                            class="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-emerald-500 hover:accent-emerald-400 transition-colors shadow-inner"
+                            class="w-full h-1.5 bg-black/40 rounded-full appearance-none cursor-pointer accent-neat-accent"
                         />
                     </div>
 
-                    <div
-                        class="bg-black/20 p-4 sm:p-5 rounded-2xl border border-white/10 shadow-sm"
-                    >
-                        <label
-                            for="hours-week"
-                            class="flex justify-between text-xs font-bold text-slate-300 mb-4 uppercase tracking-wider"
-                        >
-                            <span class="flex items-center gap-2"
-                                ><Clock class="w-3.5 h-3.5 text-brand-400" /> Horas facturables / semana</span
-                            >
-                            <span
-                                class="bg-white/10 px-2 py-0.5 rounded-md font-mono text-brand-400 border border-white/10"
+                    <!-- Hours per Week -->
+                    <div class="space-y-6">
+                        <div class="flex justify-between items-end">
+                            <label for="hours-week" class="space-y-1">
+                                <span
+                                    class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]"
+                                    >Horas Facturables</span
+                                >
+                                <span class="block text-xs text-slate-400 font-medium"
+                                    >Horas reales que puedes cobrar por semana</span
+                                >
+                            </label>
+                            <span class="text-2xl font-black text-neat-accent tabular-nums"
                                 >{hoursPerWeek}h</span
                             >
-                        </label>
+                        </div>
                         <input
                             id="hours-week"
                             type="range"
                             min="0"
                             max="60"
                             bind:value={hoursPerWeek}
-                            class="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-brand-500 hover:accent-brand-400 transition-colors shadow-inner"
+                            class="w-full h-1.5 bg-black/40 rounded-full appearance-none cursor-pointer accent-neat-accent"
                         />
                     </div>
 
-                    <div
-                        class="bg-black/20 p-4 sm:p-5 rounded-2xl border border-white/10 shadow-sm"
-                    >
-                        <label
-                            for="vacation-weeks"
-                            class="flex justify-between text-xs font-bold text-slate-300 mb-4 uppercase tracking-wider"
-                        >
-                            <span class="flex items-center gap-2"
-                                ><svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="14"
-                                    height="14"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    class="text-orange-400"
-                                    ><path
-                                        d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
-                                    /></svg
-                                > Semanas de vacaciones / año</span
+                    <!-- Vacation Weeks -->
+                    <div class="space-y-6">
+                        <div class="flex justify-between items-end">
+                            <label for="vacation-weeks" class="space-y-1">
+                                <span
+                                    class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]"
+                                    >Vacaciones</span
+                                >
+                                <span class="block text-xs text-slate-400 font-medium"
+                                    >Semanas de descanso al año (no cobradas)</span
+                                >
+                            </label>
+                            <span class="text-2xl font-black text-neat-accent tabular-nums"
+                                >{vacationWeeks} sem</span
                             >
-                            <span
-                                class="bg-white/10 px-2 py-0.5 rounded-md font-mono text-orange-400 border border-white/10"
-                                >{vacationWeeks}</span
-                            >
-                        </label>
+                        </div>
                         <input
                             id="vacation-weeks"
                             type="range"
                             min="0"
                             max="12"
                             bind:value={vacationWeeks}
-                            class="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-orange-500 hover:accent-orange-400 transition-colors shadow-inner"
+                            class="w-full h-1.5 bg-black/40 rounded-full appearance-none cursor-pointer accent-neat-accent"
                         />
                     </div>
                 </div>
@@ -289,129 +257,118 @@
         </div>
 
         <!-- Right Column: Results -->
-        <div class="w-full lg:w-96 flex flex-col gap-6 lg:shrink-0 lg:sticky lg:top-24 h-max">
+        <div class="w-full lg:w-[400px] flex flex-col gap-8 lg:shrink-0">
             <!-- Main Rate Card -->
             <div
-                class="relative w-full rounded-3xl overflow-hidden shadow-2xl bg-white/5 backdrop-blur-3xl border border-white/20 text-white p-8 sm:p-10 flex flex-col group transition-all duration-500 hover:scale-[1.01]"
+                class="glass-card !bg-neat-accent p-10 flex flex-col items-center text-center text-black overflow-hidden relative group"
             >
-                <!-- Background animations -->
+                <!-- Decorative Circle -->
                 <div
-                    class="absolute -right-20 -top-20 w-80 h-80 bg-white rounded-full blur-[80px] opacity-10 pointer-events-none group-hover:opacity-20 transition-opacity duration-700"
-                ></div>
-                <div
-                    class="absolute -left-20 -bottom-20 w-60 h-60 bg-white rounded-full blur-[60px] opacity-5 pointer-events-none group-hover:opacity-15 transition-opacity duration-700"
-                ></div>
-                <div
-                    class="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay pointer-events-none"
+                    class="absolute -top-20 -right-20 w-64 h-64 bg-white/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"
                 ></div>
 
-                <div class="relative z-10 flex-1 flex flex-col items-center text-center">
-                    <div
-                        class="inline-flex items-center justify-center p-3 bg-white/10 backdrop-blur-md rounded-2xl mb-6 shadow-inner border border-white/20"
-                    >
-                        <Calculator class="w-6 h-6 text-slate-200" />
-                    </div>
-
-                    <p
-                        class="text-slate-300 text-xs sm:text-sm font-bold mb-3 uppercase tracking-widest drop-shadow-sm"
-                    >
-                        Tu Tarifa Ideal
-                    </p>
-
-                    <div
-                        class="flex items-start justify-center text-6xl sm:text-7xl font-light tracking-tighter text-white drop-shadow-sm mb-1"
-                    >
-                        <span class="text-3xl mt-2 mr-1 opacity-60">{$currencyStore}</span>
-                        <span>{hourlyRate.toFixed(2)}</span>
-                    </div>
-
-                    <p class="text-slate-400 text-sm font-medium mt-1 mb-8">por hora</p>
+                <div class="p-4 bg-black/10 rounded-[2rem] mb-8 relative z-10">
+                    <Calculator class="w-8 h-8" />
                 </div>
 
-                <div
-                    class="relative z-10 bg-black/20 backdrop-blur-md rounded-2xl p-5 border border-white/10 shadow-sm w-full"
+                <p
+                    class="text-[10px] font-black uppercase tracking-[0.4em] mb-4 relative z-10 opacity-70"
                 >
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="text-center sm:text-left">
-                            <p
-                                class="text-slate-400 text-[10px] sm:text-xs font-bold mb-1.5 uppercase tracking-widest flex items-center justify-center sm:justify-start gap-1"
-                            >
-                                Tarifa Diaria <span class="opacity-70">(8h)</span>
-                            </p>
-                            <p class="text-xl sm:text-2xl font-light text-white drop-shadow-sm">
-                                {dailyRate.toFixed(0)}<span class="text-slate-400 text-lg ml-0.5"
-                                    >{$currencyStore}</span
-                                >
-                            </p>
-                        </div>
-                        <div
-                            class="h-10 w-px bg-white/10 absolute left-1/2 top-1/2 -translate-y-1/2 hidden sm:block"
-                        ></div>
-                        <div class="text-center sm:text-right">
-                            <p
-                                class="text-slate-400 text-[10px] sm:text-xs font-bold mb-1.5 uppercase tracking-widest flex items-center justify-center sm:justify-end gap-1"
-                            >
-                                Proyecto <span class="opacity-70">(40h)</span>
-                            </p>
-                            <p class="text-xl sm:text-2xl font-light text-white drop-shadow-sm">
-                                {projectRate.toFixed(0)}<span class="text-slate-400 text-lg ml-0.5"
-                                    >{$currencyStore}</span
-                                >
-                            </p>
-                        </div>
+                    Tu Tarifa Ideal
+                </p>
+
+                <div class="flex items-start justify-center relative z-10 mb-2">
+                    <span class="text-2xl font-black mt-2 mr-2">{$currencyStore}</span>
+                    <span class="text-8xl font-black tracking-tighter leading-none">
+                        {hourlyRate.toFixed(0)}
+                    </span>
+                    <span class="text-2xl font-black mt-2 ml-1"
+                        >.{hourlyRate.toFixed(2).split('.')[1]}</span
+                    >
+                </div>
+                <p class="text-sm font-black uppercase tracking-widest opacity-60 relative z-10">
+                    Por Hora
+                </p>
+
+                <div
+                    class="w-full grid grid-cols-2 gap-4 mt-12 pt-10 border-t border-black/10 relative z-10"
+                >
+                    <div class="space-y-1">
+                        <p
+                            class="text-[10px] font-black uppercase tracking-widest opacity-60 text-black/60"
+                        >
+                            Día (8h)
+                        </p>
+                        <p class="text-2xl font-black tabular-nums">
+                            {$currencyStore}{dailyRate.toFixed(0)}
+                        </p>
+                    </div>
+                    <div class="space-y-1">
+                        <p
+                            class="text-[10px] font-black uppercase tracking-widest opacity-60 text-black/60"
+                        >
+                            Semana
+                        </p>
+                        <p class="text-2xl font-black tabular-nums">
+                            {$currencyStore}{projectRate.toFixed(0)}
+                        </p>
                     </div>
                 </div>
             </div>
 
             <!-- Annual Summary -->
-            <div
-                class="bg-black/40 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl border border-white/10 shadow-sm relative overflow-hidden"
-            >
+            <div class="glass-card p-8 sm:p-10 space-y-8 relative overflow-hidden">
                 <div
-                    class="absolute inset-x-0 top-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                    class="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none"
                 ></div>
 
                 <h4
-                    class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2 relative z-10"
+                    class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-3 relative z-10"
                 >
                     Resumen Anual
                 </h4>
 
-                <div class="space-y-4 relative z-10">
-                    <div class="flex justify-between items-center py-2">
-                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2"
-                            ><DollarSign class="w-4 h-4 text-slate-400" /> Gastos Anuales</span
-                        >
-                        <span class="text-sm font-bold text-white font-mono"
-                            >{totalAnnualExpenses.toLocaleString()}
-                            <span class="text-slate-400">{$currencyStore}</span></span
-                        >
+                <div class="space-y-6 relative z-10">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-3 text-slate-300">
+                            <div class="w-1.5 h-1.5 rounded-full bg-slate-500"></div>
+                            <span class="text-xs font-bold uppercase tracking-widest">Gastos</span>
+                        </div>
+                        <span class="text-sm font-black text-white tabular-nums">
+                            {totalAnnualExpenses.toLocaleString('es-ES')}
+                            {$currencyStore}
+                        </span>
                     </div>
 
-                    <div class="h-px w-full bg-white/10"></div>
-
-                    <div class="flex justify-between items-center py-2">
-                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2"
-                            ><ArrowRight class="w-4 h-4 text-white" /> Objetivo + Beneficio</span
-                        >
-                        <span class="text-base font-bold text-white font-mono"
-                            >{annualTarget.toLocaleString('es-ES', {
-                                maximumFractionDigits: 0,
-                            })}
-                            <span class="opacity-70 text-slate-400">{$currencyStore}</span></span
-                        >
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-3 text-slate-300">
+                            <div class="w-1.5 h-1.5 rounded-full bg-neat-accent"></div>
+                            <span class="text-xs font-bold uppercase tracking-widest">Objetivo</span
+                            >
+                        </div>
+                        <span class="text-sm font-black text-neat-accent tabular-nums">
+                            {annualTarget.toLocaleString('es-ES')}
+                            {$currencyStore}
+                        </span>
                     </div>
 
-                    <div class="h-px w-full bg-white/10"></div>
-
-                    <div class="flex justify-between items-center py-2">
-                        <span class="text-sm font-medium text-slate-300 flex items-center gap-2"
-                            ><Clock class="w-4 h-4 text-slate-400" /> Horas Facturables</span
-                        >
-                        <span class="text-sm font-bold text-white font-mono"
-                            >{annualBillableHours}<span class="text-slate-400 ml-0.5">h</span></span
-                        >
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-3 text-slate-300">
+                            <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
+                            <span class="text-xs font-bold uppercase tracking-widest">Horas</span>
+                        </div>
+                        <span class="text-sm font-black text-indigo-400 tabular-nums">
+                            {annualBillableHours}h
+                            <span class="text-[10px] text-slate-600 ml-1">COBRABLES</span>
+                        </span>
                     </div>
+                </div>
+
+                <div class="p-5 bg-white/5 rounded-2xl border border-white/5 relative z-10 mt-4">
+                    <p class="text-[10px] text-slate-500 font-medium leading-relaxed">
+                        Tarifa calculada para cubrir tus gastos fijos anuales ajustados con un
+                        margen de beneficio del {profitMarginPercent}%.
+                    </p>
                 </div>
             </div>
         </div>

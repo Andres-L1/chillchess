@@ -51,21 +51,14 @@
 
     let isDataSubscribed = false;
     $: if (!$authStore.loading) {
-        console.log('Admin Feedback Debug:', {
-            storeIsAdmin: $authStore.user?.isAdmin,
-            email: $authStore.user?.email,
-            isDataSubscribed,
-        });
-
         if ($authStore.user?.isAdmin && !isDataSubscribed) {
-            console.log('Admin Feedback: Auth ready, starting subscription...');
             startSubscription();
         }
     }
 
     function startSubscription() {
         isDataSubscribed = true;
-        const q = query(collection(db, 'feedback')); // Removiendo orderBy temporalmente para descartar temas de índices
+        const q = query(collection(db, 'feedback'), orderBy('createdAt', 'desc'));
 
         unsubscribe = onSnapshot(
             q,

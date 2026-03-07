@@ -59,3 +59,13 @@ coverage/
 
 # AI Agent Rules (Local Only)
 .agent/
+
+# Scripts with secrets
+*.ps1
+*.sh
+set-firebase-key.ps1
+
+# Service Account keys
+*-adminsdk-*.json
+service-account*.json
+serviceAccount*.json

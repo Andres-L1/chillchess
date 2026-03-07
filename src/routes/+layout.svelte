@@ -107,7 +107,7 @@
 {#if $authStore.loading}
     <div class="h-screen w-full flex items-center justify-center bg-[#0B0E14]">
         <div class="flex flex-col items-center gap-4">
-            <Loader2 class="w-10 h-10 text-brand-500 animate-spin" />
+            <Loader2 class="w-10 h-10 text-neat-accent animate-spin" />
             <p class="text-slate-400 font-medium animate-pulse">Cargando aplicación...</p>
         </div>
     </div>
@@ -148,7 +148,7 @@
     <div class="flex flex-col min-h-screen relative">
         {#if globalSettings?.globalMessageActive && globalSettings?.globalMessageText && $page.url.pathname !== '/landing'}
             <div
-                class="w-full bg-brand-500/20 border-b border-brand-500/30 px-4 py-2.5 flex items-center justify-center gap-2 text-center text-sm font-medium text-brand-100 backdrop-blur-md shadow-inner relative z-50"
+                class="w-full bg-neat-accent/10 border-b border-white/5 px-4 py-2.5 flex items-center justify-center gap-3 text-center text-xs font-black uppercase tracking-widest text-neat-accent backdrop-blur-md relative z-50"
             >
                 <Info class="w-4 h-4 flex-shrink-0" />
                 <span>{globalSettings.globalMessageText}</span>
@@ -161,18 +161,16 @@
     <Toast />
 {:else}
     <div
-        class="flex h-screen w-full bg-slate-950 overflow-hidden text-slate-200 relative selection:bg-brand-500/30"
+        class="flex h-screen w-full bg-[#03060B] overflow-hidden text-slate-200 relative selection:bg-neat-accent/20"
     >
-        <!-- Ambient Background Glow -->
+        <!-- Ambient Background Glow (NeatPass Style) -->
         <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden">
             <div
-                class="absolute top-0 -left-1/4 w-[150%] h-[500px] bg-gradient-to-b from-brand-900/10 via-brand-800/5 to-transparent blur-3xl opacity-50"
+                class="absolute -top-[20%] -right-[10%] w-[70vw] h-[70vw] bg-neat-accent/5 rounded-full blur-[150px] mix-blend-screen animate-pulse"
+                style="animation-duration: 10s"
             ></div>
             <div
-                class="absolute top-1/4 right-[5%] w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-[120px] mix-blend-screen animate-[pulse_8s_ease-in-out_infinite]"
-            ></div>
-            <div
-                class="absolute bottom-1/4 left-[10%] w-[500px] h-[500px] bg-brand-500/10 rounded-full blur-[120px] mix-blend-screen"
+                class="absolute -bottom-[10%] -left-[10%] w-[50vw] h-[50vw] bg-indigo-500/5 rounded-full blur-[120px] mix-blend-screen"
             ></div>
         </div>
 
@@ -183,17 +181,17 @@
             <div class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
                 {#if globalSettings?.globalMessageActive && globalSettings?.globalMessageText && $page.url.pathname !== '/landing'}
                     <div
-                        class="w-full bg-brand-500/10 border-b border-white/5 px-4 py-2 flex items-center justify-center gap-2 text-center text-sm font-medium text-brand-200 backdrop-blur-lg shadow-inner z-40"
+                        class="w-full bg-neat-accent/5 border-b border-white/5 px-6 py-2.5 flex items-center justify-center gap-3 text-center text-xs font-black uppercase tracking-widest text-neat-accent backdrop-blur-3xl z-40"
                     >
-                        <Info class="w-4 h-4 flex-shrink-0 text-brand-400" />
+                        <Info class="w-4 h-4 flex-shrink-0" />
                         <span>{globalSettings.globalMessageText}</span>
                     </div>
                 {/if}
                 <Header />
 
-                <main class="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 lg:p-8 custom-scrollbar">
+                <main class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-10 lg:p-12 custom-scrollbar">
                     <div
-                        class="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out fill-mode-both"
+                        class="max-w-7xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] fill-mode-both"
                     >
                         <slot />
                     </div>

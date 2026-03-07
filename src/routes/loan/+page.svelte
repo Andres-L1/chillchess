@@ -49,47 +49,44 @@
     <!-- Background glows -->
     <div class="absolute inset-0 z-[-1] overflow-hidden pointer-events-none">
         <div
-            class="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-sky-500/10 rounded-full blur-[100px] mix-blend-screen"
+            class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-neat-accent/10 rounded-full blur-[120px] mix-blend-screen"
         ></div>
         <div
-            class="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-emerald-500/10 rounded-full blur-[100px] mix-blend-screen"
+            class="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] mix-blend-screen"
         ></div>
     </div>
 
-    <div class="max-w-4xl mx-auto space-y-6">
+    <div class="max-w-4xl mx-auto flex flex-col gap-8">
         <!-- Main Calculator Card -->
-        <div
-            class="bg-black/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl"
-        >
-            <!-- Subtle Highlight -->
-            <div
-                class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"
-            ></div>
-
-            <div class="flex items-center gap-3 mb-8">
-                <div class="p-3 bg-white/5 rounded-2xl border border-white/10 shadow-inner">
-                    <Calculator class="w-6 h-6 text-sky-400" />
+        <div class="glass-card p-8 sm:p-10 space-y-10 relative overflow-hidden">
+            <div class="flex items-center gap-4 mb-2">
+                <div
+                    class="p-3 bg-neat-accent/10 text-neat-accent rounded-2xl border border-neat-accent/20"
+                >
+                    <Calculator class="w-6 h-6" />
                 </div>
                 <div>
-                    <h2 class="text-xl font-light text-white tracking-wide">Datos del Préstamo</h2>
-                    <p class="text-sm text-slate-400">
-                        Introduce los detalles para calcular tu cuota mensual y el total a pagar.
+                    <h2 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">
+                        Configuración del Préstamo
+                    </h2>
+                    <p class="text-xs text-slate-400 font-medium">
+                        Ajusta los parámetros para ver el impacto en tus cuotas
                     </p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Loan Amount Input -->
-                <div class="space-y-2">
+                <div class="space-y-4">
                     <label
                         for="loanAmount"
-                        class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1"
+                        class="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1"
                     >
-                        Capital del Préstamo
+                        Monto del Crédito
                     </label>
                     <div class="relative group">
                         <div
-                            class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-sky-400 transition-colors"
+                            class="absolute inset-y-0 left-5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-neat-accent transition-colors"
                         >
                             <Landmark class="w-5 h-5" />
                         </div>
@@ -98,30 +95,27 @@
                             type="number"
                             min="0"
                             bind:value={loanAmount}
-                            class="w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl pl-12 pr-12 py-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/50 transition-all font-medium text-lg shadow-inner"
+                            class="w-full bg-black/40 border border-white/10 rounded-3xl pl-14 pr-14 py-5 text-white focus:outline-none focus:border-neat-accent focus:ring-1 focus:ring-neat-accent/50 transition-all font-black text-xl shadow-inner tabular-nums"
                         />
                         <div
-                            class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400 font-medium"
+                            class="absolute inset-y-0 right-6 flex items-center pointer-events-none text-neat-accent font-black text-sm"
                         >
                             {$currencyStore}
                         </div>
                     </div>
-                    <p class="text-[11px] text-slate-500 ml-1">
-                        El monto total que solicitas prestado.
-                    </p>
                 </div>
 
                 <!-- Interest Rate Input -->
-                <div class="space-y-2">
+                <div class="space-y-4">
                     <label
                         for="annualInterestRate"
-                        class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1"
+                        class="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1"
                     >
-                        Tasa de Interés Anual
+                        Interés Anual (%)
                     </label>
                     <div class="relative group">
                         <div
-                            class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-sky-400 transition-colors"
+                            class="absolute inset-y-0 left-5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-neat-accent transition-colors"
                         >
                             <Percent class="w-5 h-5" />
                         </div>
@@ -131,28 +125,27 @@
                             min="0"
                             step="0.01"
                             bind:value={annualInterestRate}
-                            class="w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl pl-12 pr-12 py-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/50 transition-all font-medium text-lg shadow-inner"
+                            class="w-full bg-black/40 border border-white/10 rounded-3xl pl-14 pr-14 py-5 text-white focus:outline-none focus:border-neat-accent focus:ring-1 focus:ring-neat-accent/50 transition-all font-black text-xl shadow-inner tabular-nums"
                         />
                         <div
-                            class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400 font-medium"
+                            class="absolute inset-y-0 right-6 flex items-center pointer-events-none text-neat-accent font-black text-sm"
                         >
                             %
                         </div>
                     </div>
-                    <p class="text-[11px] text-slate-500 ml-1">T.A.E. o Tipo de Interés Nominal.</p>
                 </div>
 
                 <!-- Loan Term Input -->
-                <div class="space-y-2">
+                <div class="space-y-4">
                     <label
                         for="loanTermYears"
-                        class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1"
+                        class="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1"
                     >
-                        Plazo del Préstamo
+                        Plazo (Años)
                     </label>
                     <div class="relative group">
                         <div
-                            class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-sky-400 transition-colors"
+                            class="absolute inset-y-0 left-5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-neat-accent transition-colors"
                         >
                             <Calendar class="w-5 h-5" />
                         </div>
@@ -161,98 +154,105 @@
                             type="number"
                             min="1"
                             bind:value={loanTermYears}
-                            class="w-full bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl pl-12 pr-12 py-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-sky-400/50 focus:ring-1 focus:ring-sky-400/50 transition-all font-medium text-lg shadow-inner"
+                            class="w-full bg-black/40 border border-white/10 rounded-3xl pl-14 pr-14 py-5 text-white focus:outline-none focus:border-neat-accent focus:ring-1 focus:ring-neat-accent/50 transition-all font-black text-xl shadow-inner tabular-nums"
                         />
                         <div
-                            class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400 font-medium"
+                            class="absolute inset-y-0 right-6 flex items-center pointer-events-none text-neat-accent font-black text-xs uppercase tracking-tighter"
                         >
                             Años
                         </div>
                     </div>
-                    <p class="text-[11px] text-slate-500 ml-1">
-                        Duración total del préstamo en años.
-                    </p>
                 </div>
             </div>
         </div>
 
         <!-- Results Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <!-- Monthly Payment -->
             <div
-                class="md:col-span-1 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl flex flex-col justify-center"
+                class="md:col-span-1 glass-card p-10 flex flex-col justify-center relative group overflow-hidden border-neat-accent/30 bg-neat-accent/5"
             >
                 <div
-                    class="absolute top-0 right-0 w-32 h-32 bg-sky-400/20 blur-[50px] rounded-full mix-blend-screen pointer-events-none"
+                    class="absolute -top-12 -right-12 w-48 h-48 bg-neat-accent/10 blur-[60px] rounded-full pointer-events-none"
                 ></div>
 
                 <h3
-                    class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-2"
+                    class="text-[10px] font-black text-neat-accent uppercase tracking-[0.3em] mb-4 flex items-center gap-2"
                 >
-                    <span
-                        class="w-2 h-2 rounded-full bg-sky-400 shadow-[0_0_10px_rgba(56,189,248,0.5)]"
-                    ></span>
-                    Cuota Mensual
+                    <div
+                        class="w-1.5 h-1.5 rounded-full bg-neat-accent shadow-[0_0_10px_#00E5FF]"
+                    ></div>
+                    CUOTA MENSUAL
                 </h3>
-                <div
-                    class="text-4xl sm:text-5xl font-light text-white tracking-tight break-words mb-2"
-                >
+
+                <div class="text-6xl font-black text-white tracking-tighter tabular-nums mb-4">
                     {formatCurrency(monthlyPayment)}
                 </div>
-                <p class="text-sm text-slate-400">
-                    Total a pagar cada mes durante {totalPayments} meses.
+
+                <p class="text-[11px] text-slate-400 font-medium leading-relaxed">
+                    Estimación de pago mensual fijo por un total de <span class="text-white"
+                        >{totalPayments} cuotas</span
+                    >.
                 </p>
             </div>
 
             <!-- Breakdown -->
-            <div
-                class="md:col-span-2 bg-black/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl"
-            >
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="p-2.5 bg-white/5 rounded-xl border border-white/10 shadow-inner">
-                        <PieChart class="w-5 h-5 text-emerald-400" />
+            <div class="md:col-span-2 glass-card p-10 space-y-8">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="p-2.5 bg-white/5 rounded-xl border border-white/10">
+                            <PieChart class="w-5 h-5 text-neat-accent" />
+                        </div>
+                        <h3 class="text-[10px] font-black text-white uppercase tracking-[0.3em]">
+                            Análisis del Crédito
+                        </h3>
                     </div>
-                    <h3 class="text-lg font-light text-white tracking-wide">Desglose Total</h3>
+                    <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                        Total a devolver: {formatCurrency(totalAmountPaid)}
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10">
-                    <div class="bg-black/30 rounded-2xl p-5 border border-white/5 shadow-inner">
-                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                            Total Intereses (+{((totalInterestPaid / loanAmount) * 100).toFixed(
-                                1
-                            )}%)
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div class="bg-black/40 rounded-3xl p-6 border border-white/5 space-y-1">
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                            Suma de Intereses
                         </p>
-                        <p class="text-2xl font-light text-red-400/90">
+                        <p class="text-3xl font-black text-red-500/90 tabular-nums">
                             {formatCurrency(totalInterestPaid)}
                         </p>
+                        <p class="text-[10px] text-red-500/50 font-black">
+                            +{((totalInterestPaid / loanAmount) * 100).toFixed(1)}% sobre el capital
+                        </p>
                     </div>
-                    <div class="bg-black/30 rounded-2xl p-5 border border-white/5 shadow-inner">
-                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                            Pago Total
+
+                    <div class="bg-black/40 rounded-3xl p-6 border border-white/5 space-y-1">
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                            Capital Solicitado
                         </p>
-                        <p class="text-2xl font-light text-emerald-400/90">
-                            {formatCurrency(totalAmountPaid)}
+                        <p class="text-3xl font-black text-neat-accent tabular-nums">
+                            {formatCurrency(loanAmount)}
                         </p>
+                        <p class="text-[10px] text-neat-accent/50 font-black">100% Importe Base</p>
                     </div>
                 </div>
 
-                <!-- Simple Visual Bar -->
-                <div class="mt-8 flex flex-col gap-2">
+                <!-- Visual Bar -->
+                <div class="space-y-4 pt-2">
                     <div
-                        class="flex justify-between text-xs font-bold text-slate-400 uppercase tracking-wider mb-1"
+                        class="flex justify-between text-[10px] font-black text-slate-500 uppercase tracking-widest"
                     >
-                        <span>Capital</span>
-                        <span>Intereses</span>
+                        <span>Capital Reembolsado</span>
+                        <span>Costo de Intereses</span>
                     </div>
                     <div
-                        class="relative w-full h-3 bg-black/50 rounded-full overflow-hidden flex border border-white/10"
+                        class="h-3 bg-black/60 rounded-full overflow-hidden flex border border-white/5 shadow-inner"
                     >
                         <div
-                            class="h-full bg-brand-500 shadow-[0_0_10px_var(--tw-colors-brand-500)]"
+                            class="h-full bg-neat-accent shadow-[0_0_20px_rgba(0,229,255,0.3)] transition-all duration-1000"
                             style="width: {(loanAmount / totalAmountPaid) * 100 || 0}%"
                         ></div>
                         <div
-                            class="h-full bg-red-500/80 shadow-[0_0_10px_rgba(239,68,68,0.5)]"
+                            class="h-full bg-red-500/60 transition-all duration-1000"
                             style="width: {(totalInterestPaid / totalAmountPaid) * 100 || 0}%"
                         ></div>
                     </div>

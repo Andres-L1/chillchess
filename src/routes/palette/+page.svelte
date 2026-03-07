@@ -232,110 +232,126 @@
     <!-- Background glows -->
     <div class="absolute inset-0 z-[-1] overflow-hidden pointer-events-none">
         <div
-            class="absolute top-1/4 left-1/4 w-[300px] h-[300px] bg-indigo-500/10 rounded-full blur-[100px] mix-blend-screen"
+            class="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-neat-accent/10 rounded-full blur-[120px] mix-blend-screen"
         ></div>
         <div
-            class="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-rose-500/10 rounded-full blur-[100px] mix-blend-screen"
+            class="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[120px] mix-blend-screen"
         ></div>
     </div>
 
-    <div class="max-w-4xl mx-auto space-y-8">
-        <!-- Tab 1: Base Color Generator -->
-        <div
-            class="bg-black/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl"
-        >
-            <div
-                class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"
-            ></div>
-
-            <div class="flex items-center gap-3 mb-6">
-                <div class="p-3 bg-white/5 rounded-2xl border border-white/10 shadow-inner">
-                    <Palette class="w-6 h-6 text-indigo-400" />
+    <div class="max-w-4xl mx-auto flex flex-col gap-10">
+        <!-- Section 1: Base Color Generator -->
+        <div class="glass-card p-10 space-y-10 relative overflow-hidden">
+            <div class="flex items-center gap-4">
+                <div
+                    class="p-3 bg-neat-accent/10 text-neat-accent rounded-2xl border border-neat-accent/20"
+                >
+                    <Palette class="w-6 h-6" />
                 </div>
                 <div>
-                    <h2 class="text-xl font-light text-white tracking-wide">Generador Armónico</h2>
-                    <p class="text-sm text-slate-400">
-                        Introduce un color Hex y obtén variaciones.
+                    <h2 class="text-[10px] font-black text-white uppercase tracking-[0.3em]">
+                        Generador Armónico
+                    </h2>
+                    <p class="text-xs text-slate-400 font-medium tracking-tight">
+                        Crea variaciones perfectas a partir de un color base
                     </p>
                 </div>
             </div>
 
-            <div class="flex flex-col sm:flex-row gap-6 items-center">
-                <div
-                    class="flex items-center gap-4 bg-black/40 border border-white/10 rounded-2xl p-2 w-full sm:w-auto shadow-inner"
-                >
-                    <input
-                        type="color"
-                        bind:value={baseColor}
-                        class="w-12 h-12 rounded-xl cursor-pointer bg-transparent border-none p-0"
-                    />
-                    <input
-                        type="text"
-                        bind:value={baseColor}
-                        class="bg-transparent border-none text-white font-mono text-lg focus:outline-none focus:ring-0 w-28 uppercase"
-                        maxlength="7"
-                    />
+            <div class="flex flex-col lg:flex-row gap-10 items-stretch">
+                <!-- Color Input Box -->
+                <div class="lg:w-1/3 flex flex-col gap-4">
+                    <label
+                        for="base-color-text"
+                        class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1"
+                        >Color de Origen</label
+                    >
+                    <div
+                        class="flex items-center gap-4 bg-black/40 border border-white/10 rounded-[2rem] p-3 shadow-inner group focus-within:border-neat-accent transition-colors"
+                    >
+                        <div
+                            class="relative w-16 h-16 rounded-2xl overflow-hidden border border-white/10 shrink-0"
+                        >
+                            <label for="base-color-picker" class="sr-only"
+                                >Seleccionar color base</label
+                            >
+                            <input
+                                id="base-color-picker"
+                                type="color"
+                                bind:value={baseColor}
+                                class="absolute inset-[-10px] w-[calc(100%+20px)] h-[calc(100%+20px)] cursor-pointer bg-transparent border-none p-0"
+                            />
+                        </div>
+                        <div class="flex-1 px-2">
+                            <label for="base-color-text" class="sr-only">Color Hexadecimal</label>
+                            <input
+                                id="base-color-text"
+                                type="text"
+                                bind:value={baseColor}
+                                class="w-full bg-transparent border-none text-white font-black text-2xl focus:outline-none focus:ring-0 uppercase tracking-tighter tabular-nums"
+                                maxlength="7"
+                            />
+                        </div>
+                    </div>
                 </div>
 
-                <div class="flex-1 w-full grid grid-cols-5 gap-2 h-24">
-                    {#each generatedPalette as color, i}
-                        <div
-                            class="relative rounded-xl overflow-hidden group cursor-pointer border border-white/10 shadow-lg transition-transform hover:-translate-y-1 active:scale-95 flex flex-col items-center justify-center"
-                            style="background-color: {color}"
-                            on:click={() => copyToClipboard(color)}
-                            role="button"
-                            tabindex="0"
-                            on:keydown={(e) => e.key === 'Enter' && copyToClipboard(color)}
-                        >
-                            {#if copiedColor === color}
+                <!-- Generated Palette Row -->
+                <div class="flex-1 flex flex-col gap-4">
+                    <h3
+                        class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1"
+                    >
+                        Paleta Generada
+                    </h3>
+                    <div class="grid grid-cols-5 gap-3 h-24">
+                        {#each generatedPalette as color}
+                            <button
+                                class="relative rounded-[1.5rem] overflow-hidden group border border-white/5 shadow-lg transition-all hover:scale-105 active:scale-95 flex items-center justify-center"
+                                style="background-color: {color}"
+                                on:click={() => copyToClipboard(color)}
+                            >
                                 <div
-                                    class="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center text-white"
+                                    class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center text-white backdrop-blur-[2px]"
                                 >
-                                    <Check class="w-6 h-6" />
-                                </div>
-                            {:else}
-                                <div
-                                    class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white backdrop-blur-sm"
-                                >
-                                    <Copy class="w-5 h-5" />
+                                    {#if copiedColor === color}
+                                        <Check class="w-6 h-6 scale-110" />
+                                    {:else}
+                                        <Copy
+                                            class="w-5 h-5 group-hover:scale-110 transition-transform"
+                                        />
+                                    {/if}
                                 </div>
                                 <span
-                                    class="absolute bottom-2 text-[10px] font-mono font-bold uppercase tracking-wider text-white mix-blend-difference drop-shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
-                                    >{color}</span
+                                    class="absolute bottom-2 text-[9px] font-black uppercase tracking-tighter text-white mix-blend-difference drop-shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
-                            {/if}
-                        </div>
-                    {/each}
+                                    {color}
+                                </span>
+                            </button>
+                        {/each}
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Tab 2: Image Color Extractor -->
-        <div
-            class="bg-black/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl"
-        >
-            <div
-                class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"
-            ></div>
-
-            <div class="flex items-center gap-3 mb-6">
-                <div class="p-3 bg-white/5 rounded-2xl border border-white/10 shadow-inner">
-                    <ImageIcon class="w-6 h-6 text-rose-400" />
+        <!-- Section 2: Image Color Extractor -->
+        <div class="glass-card p-10 space-y-10 relative overflow-hidden">
+            <div class="flex items-center gap-4">
+                <div class="p-3 bg-white/5 rounded-2xl border border-white/10">
+                    <ImageIcon class="w-6 h-6 text-white" />
                 </div>
                 <div>
-                    <h2 class="text-xl font-light text-white tracking-wide">
-                        Extractor de Imágenes
+                    <h2 class="text-[10px] font-black text-white uppercase tracking-[0.3em]">
+                        Extractor por IA
                     </h2>
-                    <p class="text-sm text-slate-400">
-                        Sube una foto y obtén su paleta predominante.
+                    <p class="text-xs text-slate-400 font-medium tracking-tight">
+                        Sube una imagen para analizar su ADN visual
                     </p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                <!-- Dropzone -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-stretch">
+                <!-- Dropzone High Premium -->
                 <div
-                    class="border-2 border-dashed border-white/10 hover:border-white/30 rounded-3xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-colors bg-white/5 hover:bg-white/10 h-64 relative group overflow-hidden"
+                    class="border-2 border-dashed border-white/10 hover:border-neat-accent/50 rounded-[2.5rem] p-10 flex flex-col items-center justify-center text-center cursor-pointer transition-all bg-black/20 hover:bg-neat-accent/5 min-h-[300px] relative group overflow-hidden"
                     on:click={() => fileInput.click()}
                     role="button"
                     tabindex="0"
@@ -353,82 +369,118 @@
                         <img
                             src={imageSrc}
                             alt="Preview"
-                            class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity"
+                            class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-700"
                         />
                         <div
-                            class="relative z-10 flex flex-col items-center bg-black/60 backdrop-blur-md p-4 rounded-2xl border border-white/10"
+                            class="relative z-10 flex flex-col items-center bg-black/40 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-2xl scale-90 group-hover:scale-100 transition-transform"
                         >
-                            <Upload class="w-8 h-8 text-white mb-2" />
-                            <span class="text-sm font-medium text-white">Cambiar imagen</span>
+                            <Upload class="w-8 h-8 text-neat-accent mb-3" />
+                            <span class="text-xs font-black text-white uppercase tracking-widest"
+                                >Cambiar Imagen</span
+                            >
                         </div>
                     {:else}
-                        <Upload
-                            class="w-10 h-10 text-slate-400 group-hover:text-white transition-colors mb-4 group-hover:-translate-y-1 duration-300"
-                        />
-                        <span class="text-sm font-medium text-slate-300">Sube una imagen</span>
-                        <span class="text-xs text-slate-500 mt-1">JPG, PNG, GIF (Max 5MB)</span>
+                        <div
+                            class="p-6 bg-white/5 rounded-3xl mb-6 group-hover:scale-110 transition-transform border border-white/5"
+                        >
+                            <Upload
+                                class="w-10 h-10 text-slate-400 group-hover:text-neat-accent transition-colors"
+                            />
+                        </div>
+                        <span class="text-sm font-black text-white uppercase tracking-[0.2em] mb-2"
+                            >Sube tu imagen</span
+                        >
+                        <span
+                            class="text-[10px] text-slate-500 font-medium uppercase tracking-widest"
+                            >Max file size 5MB • PNG / JPG</span
+                        >
                     {/if}
                 </div>
 
-                <!-- Extracted Palette -->
-                <div class="flex flex-col gap-4">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">
-                        Colores Extraídos
-                    </h3>
+                <!-- Extracted Palette Vertical list -->
+                <div class="flex flex-col gap-6">
+                    <div class="flex justify-between items-center px-2">
+                        <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                            Espectro Detectado
+                        </h3>
+                        {#if extractedColors.length > 0}
+                            <button
+                                on:click={() => {}}
+                                class="text-[10px] font-black text-neat-accent uppercase tracking-widest hover:underline"
+                            >
+                                Descargar .ASE
+                            </button>
+                        {/if}
+                    </div>
+
                     {#if isExtracting}
                         <div
-                            class="h-40 flex flex-col items-center justify-center text-slate-400 bg-black/20 rounded-2xl border border-white/5"
+                            class="flex-1 flex flex-col items-center justify-center gap-4 bg-black/20 rounded-[2rem] border border-white/5 min-h-[200px]"
                         >
-                            <RefreshCw class="w-6 h-6 animate-spin mb-3 text-rose-400" />
-                            <span class="text-sm font-medium">Analizando píxeles...</span>
+                            <div class="relative w-12 h-12">
+                                <div
+                                    class="absolute inset-0 border-4 border-neat-accent/20 rounded-full"
+                                ></div>
+                                <div
+                                    class="absolute inset-0 border-4 border-t-neat-accent rounded-full animate-spin"
+                                ></div>
+                            </div>
+                            <span
+                                class="text-[10px] font-black text-neat-accent uppercase tracking-widest animate-pulse"
+                                >Analizando Espectro...</span
+                            >
                         </div>
                     {:else if extractedColors.length > 0}
-                        <div class="flex flex-col gap-2">
+                        <div class="space-y-3">
                             {#each extractedColors as color}
-                                <div
-                                    class="h-12 rounded-xl flex items-center justify-between px-4 group cursor-pointer border border-white/10 hover:border-white/30 transition-all overflow-hidden relative shadow-sm"
+                                <button
+                                    class="w-full h-16 rounded-2xl flex items-center justify-between px-6 group border border-white/5 bg-black/20 hover:bg-white/5 hover:border-white/20 transition-all overflow-hidden relative shadow-sm"
                                     on:click={() => copyToClipboard(color)}
-                                    role="button"
-                                    tabindex="0"
-                                    on:keydown={(e) => e.key === 'Enter' && copyToClipboard(color)}
                                 >
-                                    <div
-                                        class="absolute inset-0 right-1/2"
-                                        style="background-color: {color}"
-                                    ></div>
-                                    <div
-                                        class="absolute inset-0 left-1/2 bg-black/40 backdrop-blur-xl"
-                                    ></div>
-
-                                    <div
-                                        class="relative z-10 flex w-full justify-between items-center mix-blend-difference text-white"
-                                    >
+                                    <div class="flex items-center gap-5 relative z-10 w-full">
                                         <div
-                                            class="w-8 h-8 rounded-lg shadow-sm border border-white/20"
+                                            class="w-10 h-10 rounded-xl shadow-lg border border-white/20 shrink-0 group-hover:scale-110 transition-transform"
                                             style="background-color: {color}"
                                         ></div>
-                                        <div class="flex items-center gap-3">
+                                        <div class="flex justify-between items-center flex-1">
                                             <span
-                                                class="font-mono text-sm tracking-wider uppercase font-bold"
+                                                class="font-black text-lg text-white tracking-tighter tabular-nums uppercase"
                                                 >{color}</span
                                             >
-                                            {#if copiedColor === color}
-                                                <Check class="w-4 h-4 text-emerald-400" />
-                                            {:else}
-                                                <Copy
-                                                    class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                />
-                                            {/if}
+
+                                            <div class="flex items-center gap-3">
+                                                {#if copiedColor === color}
+                                                    <span
+                                                        class="text-[10px] font-black text-neat-accent uppercase tracking-widest"
+                                                        >Copiado!</span
+                                                    >
+                                                    <Check class="w-4 h-4 text-neat-accent" />
+                                                {:else}
+                                                    <Copy
+                                                        class="w-4 h-4 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    />
+                                                {/if}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+
+                                    <!-- Subtle background hit -->
+                                    <div
+                                        class="absolute inset-0 bg-gradient-to-r from-transparent via-white/0 to-white/[0.02] translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500"
+                                    ></div>
+                                </button>
                             {/each}
                         </div>
                     {:else}
                         <div
-                            class="h-40 flex items-center justify-center text-slate-500 bg-black/20 rounded-2xl border border-white/5 text-sm italic"
+                            class="flex-1 flex flex-col items-center justify-center gap-4 bg-black/20 rounded-[2rem] border border-white/5 border-dashed min-h-[200px]"
                         >
-                            Aún no se ha subido imagen
+                            <Palette class="w-8 h-8 text-slate-800" />
+                            <p
+                                class="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] text-center max-w-[200px]"
+                            >
+                                Los colores aparecerán aquí tras subir una imagen
+                            </p>
                         </div>
                     {/if}
                 </div>

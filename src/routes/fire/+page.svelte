@@ -78,12 +78,12 @@
 
 <ProGate>
     <div
-        class="max-w-4xl mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8 border border-white/5 bg-black/40 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-2xl relative overflow-hidden"
+        class="max-w-4xl mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8 glass-card p-6 lg:p-8 relative overflow-hidden group"
     >
         <!-- Glassmorphism ambient glow -->
         <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden rounded-3xl">
             <div
-                class="absolute -top-32 -right-32 w-[500px] h-[500px] bg-brand-500/10 rounded-full blur-[100px] mix-blend-screen"
+                class="absolute -top-32 -right-32 w-[500px] h-[500px] bg-neat-accent/10 rounded-full blur-[100px] mix-blend-screen opacity-0 group-hover:opacity-100 transition-opacity duration-1000"
             ></div>
             <div
                 class="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[100px] mix-blend-screen"
@@ -96,7 +96,7 @@
                 <div class="group">
                     <label
                         for="currentAge"
-                        class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1 group-focus-within:text-brand-400 transition-colors"
+                        class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1 group-focus-within:text-neat-accent transition-colors"
                         >Tu Edad Actual</label
                     >
                     <p class="text-[11px] text-slate-500 mb-3 font-medium leading-tight">
@@ -107,7 +107,7 @@
                         type="number"
                         bind:value={currentAge}
                         min="0"
-                        class="w-full bg-black/20 border border-white/5 rounded-2xl px-4 py-3 text-lg font-black text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/50 focus:bg-white/5 transition-all shadow-inner"
+                        class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-xl font-black text-white focus:outline-none focus:border-neat-accent/50 transition-all shadow-inner tracking-tight"
                     />
                 </div>
 
@@ -115,7 +115,7 @@
                 <div class="group">
                     <label
                         for="currentSavings"
-                        class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1 group-focus-within:text-brand-400 transition-colors"
+                        class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1 group-focus-within:text-neat-accent transition-colors"
                         >Ahorro Inicial</label
                     >
                     <p class="text-[11px] text-slate-500 mb-3 font-medium leading-tight">
@@ -132,7 +132,7 @@
                             type="number"
                             bind:value={currentSavings}
                             min="0"
-                            class="w-full bg-black/20 border border-white/5 rounded-2xl pl-9 pr-4 py-3 text-lg font-black text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/50 focus:bg-white/5 transition-all shadow-inner"
+                            class="w-full bg-black/40 border border-white/10 rounded-2xl pl-10 pr-4 py-4 text-xl font-black text-white focus:outline-none focus:border-neat-accent/50 transition-all shadow-inner tracking-tight"
                         />
                     </div>
                 </div>
@@ -142,7 +142,7 @@
             <div class="group">
                 <label
                     for="monthlyContribution"
-                    class="flex text-xs font-black text-slate-400 uppercase tracking-widest mb-1 group-focus-within:text-brand-400 transition-colors items-center gap-2"
+                    class="flex text-xs font-black text-slate-400 uppercase tracking-widest mb-1 group-focus-within:text-neat-accent transition-colors items-center gap-2"
                 >
                     Aportación Mensual
                 </label>
@@ -158,10 +158,10 @@
                         type="number"
                         bind:value={monthlyContribution}
                         min="0"
-                        class="w-full bg-black/20 border border-white/5 rounded-2xl pl-9 pr-14 py-4 text-2xl font-black text-white focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/50 focus:bg-white/5 transition-all shadow-inner"
+                        class="w-full bg-black/40 border border-white/10 rounded-2xl pl-10 pr-16 py-5 text-3xl font-black text-white focus:outline-none focus:border-neat-accent/50 transition-all shadow-inner tracking-tighter"
                     />
                     <div
-                        class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-bold uppercase"
+                        class="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-black uppercase tracking-widest"
                     >
                         /mes
                     </div>
@@ -230,11 +230,11 @@
             <div class="group">
                 <label
                     for="annualReturn"
-                    class="flex text-xs font-black text-slate-400 uppercase tracking-widest mb-3 justify-between group-focus-within:text-brand-400 transition-colors"
+                    class="flex text-xs font-black text-slate-400 uppercase tracking-widest mb-3 justify-between group-focus-within:text-neat-accent transition-colors"
                 >
                     <span>Rentabilidad Anual Esperada</span>
                     <span
-                        class="text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded border border-brand-500/20"
+                        class="text-neat-accent bg-neat-accent/10 px-3 py-1 rounded-lg border border-neat-accent/20 font-black text-[10px] uppercase tracking-widest"
                         >{annualReturn}%</span
                     >
                 </label>
@@ -246,7 +246,7 @@
                         max="15"
                         step="0.1"
                         bind:value={annualReturn}
-                        class="flex-1 h-2 bg-black/40 border border-white/5 rounded-lg appearance-none cursor-pointer accent-brand-500"
+                        class="flex-1 h-1.5 bg-black/60 border border-white/5 rounded-full appearance-none cursor-pointer accent-neat-accent"
                     />
                 </div>
                 <p class="text-xs text-slate-500 mt-2">
@@ -260,7 +260,7 @@
             class="w-full lg:w-[380px] bg-black/40 border border-white/10 backdrop-blur-md rounded-2xl p-6 sm:p-8 text-white shadow-2xl flex flex-col relative overflow-hidden z-10"
         >
             <div
-                class="absolute -right-20 -top-20 w-48 h-48 bg-brand-500 rounded-full blur-[60px] opacity-20 pointer-events-none"
+                class="absolute -right-20 -top-20 w-48 h-48 bg-neat-accent rounded-full blur-[60px] opacity-20 pointer-events-none"
             ></div>
             <div
                 class="absolute -left-20 -bottom-20 w-48 h-48 bg-emerald-500 rounded-full blur-[60px] opacity-20 pointer-events-none"
@@ -299,7 +299,7 @@
                         <p
                             class="text-slate-400 text-xs font-black tracking-widest uppercase mb-2 flex items-center gap-2"
                         >
-                            <Calendar class="w-4 h-4" /> Tiempo Requerido
+                            <Calendar class="w-4 h-4 text-neat-accent" /> Tiempo Requerido
                         </p>
                         <div
                             class="text-5xl md:text-6xl font-black font-mono tracking-tighter text-white tabular-nums flex items-baseline drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]"
@@ -307,7 +307,9 @@
                             {yearsToRetire}<span class="text-2xl text-slate-500 ml-1">años</span>
                         </div>
                         {#if extraMonths > 0}
-                            <div class="text-brand-400 font-bold text-sm mt-1">
+                            <div
+                                class="text-neat-accent font-black text-xs uppercase tracking-widest mt-2 px-1"
+                            >
                                 y {extraMonths} meses
                             </div>
                         {/if}
@@ -323,7 +325,7 @@
                                 Edad Retiro
                             </p>
                             <div
-                                class="text-2xl font-black font-mono text-brand-400 drop-shadow-[0_0_10px_rgba(14,165,233,0.3)] tabular-nums"
+                                class="text-3xl font-black font-mono text-neat-accent drop-shadow-[0_0_15px_rgba(0,229,255,0.3)] tabular-nums tracking-tighter"
                             >
                                 {retirementAge}
                             </div>

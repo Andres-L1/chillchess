@@ -153,25 +153,25 @@
 
 <!-- Sidebar Navigation -->
 <nav
-    class="fixed inset-y-0 left-0 z-50 w-72 bg-black/40 backdrop-blur-2xl shadow-2xl md:shadow-[4px_0_24px_rgba(0,0,0,0.3)] md:relative flex flex-col h-[100dvh] transition-transform duration-300 ease-in-out md:translate-x-0 border-r border-white/10"
+    class="fixed inset-y-0 left-0 z-50 w-80 bg-black/10 backdrop-blur-3xl shadow-2xl md:relative flex flex-col h-[100dvh] transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] md:translate-x-0 border-r border-white/5"
     class:-translate-x-full={!$mobileMenuOpen}
     class:translate-x-0={$mobileMenuOpen}
     on:touchstart={handleTouchStart}
     on:touchend={handleTouchEnd}
 >
     <!-- Header del Menú -->
-    <div class="p-5 border-b border-white/10 flex items-center justify-between">
+    <div class="p-6 border-b border-white/5 flex items-center justify-between">
         <a href="/" class="flex items-center gap-3 group">
             <div
-                class="bg-white/5 border border-white/10 text-white p-2 rounded-lg shadow-sm group-hover:bg-white/10 transition-colors"
+                class="bg-white/5 border border-white/10 text-white p-2.5 rounded-2xl shadow-sm group-hover:bg-white/10 transition-all active:scale-95"
             >
-                <Blocks size={24} class="opacity-80" />
+                <Blocks size={22} class="text-white" />
             </div>
-            <h1 class="text-xl font-medium text-white tracking-tight">ChillChess</h1>
+            <h1 class="text-xl font-bold text-white tracking-tighter">CHILLCHESS</h1>
         </a>
         <button
             on:click={() => mobileMenuOpen.set(false)}
-            class="md:hidden p-3 text-slate-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors flex items-center justify-center min-w-[48px] min-h-[48px]"
+            class="md:hidden p-2 text-slate-400 hover:text-white rounded-2xl hover:bg-white/5 transition-all flex items-center justify-center min-w-[44px] min-h-[44px]"
             aria-label="Cerrar menú"
         >
             <X size={20} />
@@ -179,16 +179,16 @@
     </div>
 
     <!-- Buscador -->
-    <div class="px-5 pt-4 pb-2">
+    <div class="px-6 pt-6 pb-2">
         <div class="relative group">
             <Search
-                class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-white transition-colors"
+                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-white transition-colors"
             />
             <input
                 type="text"
                 bind:value={searchQuery}
-                placeholder="Buscar herramienta..."
-                class="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-white/20 focus:bg-white/10 transition-all text-slate-200 placeholder:text-slate-500"
+                placeholder="Buscar..."
+                class="w-full bg-white/5 border border-white/5 rounded-2xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-white/20 focus:bg-white/10 transition-all text-slate-200 placeholder:text-slate-500 font-medium"
             />
             {#if searchQuery}
                 <button
@@ -203,69 +203,76 @@
     </div>
 
     <!-- Lista de Herramientas -->
-    <div class="px-3 pb-4 flex-1 overflow-y-auto">
+    <div class="px-4 pb-6 flex-1 overflow-y-auto custom-scrollbar">
         {#if filteredTools.length === 0}
-            <div class="flex flex-col items-center justify-center py-10 text-slate-500">
-                <Search class="w-10 h-10 mb-3 opacity-50" />
-                <p class="text-sm font-medium">Sin resultados</p>
+            <div class="flex flex-col items-center justify-center py-10 text-slate-600">
+                <Search class="w-10 h-10 mb-3 opacity-30" />
+                <p class="text-sm font-bold tracking-tight">Sin resultados</p>
             </div>
         {:else}
             {#each groupedTools as group}
                 <div
-                    class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-5 mb-2 px-3 flex items-center gap-2"
+                    class="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] mt-8 mb-3 px-4 flex items-center gap-3"
                 >
                     <span>{group.category}</span>
-                    <div class="h-px bg-white/10 flex-1"></div>
+                    <div class="h-px bg-white/5 flex-1"></div>
                 </div>
-                {#each group.items as tool}
-                    <a
-                        href={tool.id}
-                        on:click={handleNavigate}
-                        class="w-full flex items-center justify-between p-3 min-h-[48px] rounded-xl text-sm font-medium transition-all select-none group {$page
-                            .url.pathname === tool.id
-                            ? 'bg-white/10 border border-white/10 text-white shadow-sm'
-                            : 'text-slate-400 hover:bg-white/5 hover:text-slate-200 border border-transparent'}"
-                    >
-                        <div class="flex items-center gap-3 truncate">
-                            <svelte:component
-                                this={tool.icon}
-                                size={20}
-                                class="opacity-80 shrink-0"
-                            />
-                            <span class="truncate">{tool.name}</span>
-                        </div>
-                        {#if tool.pro}
-                            <Crown size={14} class="text-amber-400 shrink-0" />
-                        {/if}
-                    </a>
-                {/each}
+                <div class="space-y-1">
+                    {#each group.items as tool}
+                        <a
+                            href={tool.id}
+                            on:click={handleNavigate}
+                            class="w-full flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-bold transition-all select-none group {$page
+                                .url.pathname === tool.id
+                                ? 'bg-white/10 text-white border border-white/10 shadow-lg'
+                                : 'text-slate-400 hover:bg-white/5 hover:text-slate-200 border border-transparent'}"
+                        >
+                            <div class="flex items-center gap-4 truncate">
+                                <svelte:component
+                                    this={tool.icon}
+                                    size={18}
+                                    class="shrink-0 transition-colors group-hover:text-white"
+                                />
+                                <span class="truncate">{tool.name}</span>
+                            </div>
+                            {#if tool.pro}
+                                <Crown size={12} class="text-neat-accent shrink-0 opacity-80" />
+                            {/if}
+                        </a>
+                    {/each}
+                </div>
             {/each}
         {/if}
     </div>
 
     <!-- Footer del Menú -->
-    <div class="p-4 border-t border-white/10 bg-transparent safe-bottom space-y-3">
+    <div class="p-6 border-t border-white/5 bg-transparent safe-bottom space-y-5">
         <!-- Currency selector (visible on mobile where header selector is hidden) -->
-        <div class="flex items-center justify-center gap-1 sm:hidden">
-            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mr-1"
+        <div class="flex items-center justify-between sm:hidden px-2">
+            <span class="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]"
                 >Moneda</span
             >
-            {#each currencies as c}
-                <button
-                    on:click={() => currencyStore.set(c)}
-                    class="w-9 h-9 rounded-lg font-medium text-sm transition-colors {$currencyStore ===
-                    c
-                        ? 'bg-white/10 text-white border border-white/20'
-                        : 'text-slate-400 hover:text-white hover:bg-white/5'}"
-                >
-                    {c}
-                </button>
-            {/each}
+            <div class="flex gap-1">
+                {#each currencies as c}
+                    <button
+                        on:click={() => currencyStore.set(c)}
+                        class="w-10 h-10 rounded-xl font-bold text-sm transition-all active:scale-90 {$currencyStore ===
+                        c
+                            ? 'bg-white text-black shadow-lg'
+                            : 'text-slate-500 hover:text-white hover:bg-white/5 border border-transparent'}"
+                    >
+                        {c}
+                    </button>
+                {/each}
+            </div>
         </div>
-        <p
-            class="text-[10px] font-medium text-slate-600 text-center uppercase tracking-widest pt-2"
-        >
-            ChillChess • v{APP_VERSION}
-        </p>
+        <div class="flex items-center justify-center flex-col gap-1">
+            <p class="text-[10px] font-black text-slate-700 uppercase tracking-[0.3em]">
+                CHILLCHESS PLATFORM
+            </p>
+            <p class="text-[9px] font-bold text-slate-800 uppercase tracking-widest">
+                VERSION {APP_VERSION}
+            </p>
+        </div>
     </div>
 </nav>
