@@ -62,10 +62,10 @@
                 } else {
                     // Default settings if none exist
                     qrSettings = {
-                        targetUrl: 'https://chillchess.pages.dev',
+                        targetUrl: 'https://chillchess.app',
                         fgColor: '#000000',
                         bgColor: '#ffffff',
-                        title: 'CHILL CHESS',
+                        title: '¡Escanea para entrar!',
                     };
                 }
                 loading = false;

@@ -58,7 +58,8 @@
     $: {
         if (!$authStore.loading) {
             const publicRoutes = ['/', '/landing', '/pricing', '/cookies'];
-            const isPublicRoute = publicRoutes.includes($page.url.pathname);
+            const isWidgetRoute = $page.url.pathname.startsWith('/widgets');
+            const isPublicRoute = publicRoutes.includes($page.url.pathname) || isWidgetRoute;
 
             if (!$authStore.user) {
                 if (!isPublicRoute) {

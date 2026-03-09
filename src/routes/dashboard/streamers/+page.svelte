@@ -36,10 +36,10 @@
     let lastSaved = Date.now();
     let copied = false;
 
-    $: widgetUrl =
-        typeof window !== 'undefined'
-            ? `${window.location.origin}/widgets/qr/${$authStore.user?.uid}`
-            : '';
+    $: ready = $authStore.user?.uid ? true : false;
+    $: widgetUrl = ready
+        ? `${window.location.origin}/widgets/qr/${$authStore.user?.uid}`
+        : 'Cargando URL...';
 
     onMount(() => {
         if (!$authStore.user?.uid) return;
@@ -266,8 +266,9 @@
                                 />
                                 <button
                                     on:click={copyToClipboard}
-                                    class="p-2 bg-black text-white hover:bg-slate-800 transition-colors"
-                                    title="Copiar URL"
+                                    disabled={!ready}
+                                    class="p-2 bg-black text-white hover:bg-slate-800 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors"
+                                    title={ready ? 'Copiar URL' : 'Cargando...'}
                                 >
                                     {#if copied}
                                         <Check class="w-4 h-4 text-primary" />
