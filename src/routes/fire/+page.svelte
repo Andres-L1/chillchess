@@ -77,53 +77,48 @@
 </svelte:head>
 
 <ProGate>
-    <div
-        class="max-w-4xl mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8 glass-card p-6 lg:p-8 relative overflow-hidden group"
-    >
-        <!-- Glassmorphism ambient glow -->
-        <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden rounded-3xl">
-            <div
-                class="absolute -top-32 -right-32 w-[500px] h-[500px] bg-neat-accent/10 rounded-full blur-[100px] mix-blend-screen opacity-0 group-hover:opacity-100 transition-opacity duration-1000"
-            ></div>
-            <div
-                class="absolute -bottom-32 -left-32 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[100px] mix-blend-screen"
-            ></div>
-        </div>
+    <div class="max-w-5xl mx-auto grid lg:grid-cols-[1fr_400px] gap-8 py-8 px-4">
+        <!-- Input Section -->
+        <div class="neo-card p-8 md:p-10 space-y-10 bg-white dark:bg-slate-900 transition-colors">
+            <div class="flex items-center gap-4">
+                <div class="w-2 h-10 bg-primary border-2 border-black"></div>
+                <h2 class="text-xl font-black uppercase tracking-tighter theme-text">
+                    CONFIGURACIÓN FIRE
+                </h2>
+            </div>
 
-        <div class="flex-1 space-y-8 relative z-10 w-full max-w-lg lg:max-w-none mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Current Age -->
-                <div class="group">
+                <div class="space-y-3">
                     <label
                         for="currentAge"
-                        class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1 group-focus-within:text-neat-accent transition-colors"
+                        class="block text-sm font-black uppercase tracking-widest theme-text opacity-60"
                         >Tu Edad Actual</label
                     >
-                    <p class="text-[11px] text-slate-500 mb-3 font-medium leading-tight">
-                        Desde cuándo comenzamos a calcular.
-                    </p>
                     <input
                         id="currentAge"
                         type="number"
                         bind:value={currentAge}
                         min="0"
-                        class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-xl font-black text-white focus:outline-none focus:border-neat-accent/50 transition-all shadow-inner tracking-tight"
+                        class="w-full bg-slate-50 dark:bg-slate-800 border-4 border-black px-6 py-4 text-xl font-black theme-text focus:outline-none focus:bg-white dark:focus:bg-slate-700 transition-all shadow-neo-sm"
                     />
+                    <p
+                        class="text-[10px] theme-text opacity-40 font-bold uppercase tracking-wider leading-tight"
+                    >
+                        Desde cuándo comenzamos a calcular.
+                    </p>
                 </div>
 
                 <!-- Initial Savings -->
-                <div class="group">
+                <div class="space-y-3">
                     <label
                         for="currentSavings"
-                        class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1 group-focus-within:text-neat-accent transition-colors"
+                        class="block text-sm font-black uppercase tracking-widest theme-text opacity-60"
                         >Ahorro Inicial</label
                     >
-                    <p class="text-[11px] text-slate-500 mb-3 font-medium leading-tight">
-                        Capital o inversiones que ya tienes.
-                    </p>
                     <div class="relative">
                         <div
-                            class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-black"
+                            class="absolute left-5 top-1/2 -translate-y-1/2 theme-text font-black text-xl"
                         >
                             {$currencyStore}
                         </div>
@@ -132,25 +127,28 @@
                             type="number"
                             bind:value={currentSavings}
                             min="0"
-                            class="w-full bg-black/40 border border-white/10 rounded-2xl pl-10 pr-4 py-4 text-xl font-black text-white focus:outline-none focus:border-neat-accent/50 transition-all shadow-inner tracking-tight"
+                            class="w-full bg-slate-50 dark:bg-slate-800 border-4 border-black pl-12 pr-6 py-4 text-xl font-black theme-text focus:outline-none focus:bg-white dark:focus:bg-slate-700 transition-all shadow-neo-sm tabular-nums"
                         />
                     </div>
+                    <p
+                        class="text-[10px] theme-text opacity-40 font-bold uppercase tracking-wider leading-tight"
+                    >
+                        Capital o inversiones que ya tienes.
+                    </p>
                 </div>
             </div>
 
             <!-- Monthly Contribution -->
-            <div class="group">
+            <div class="space-y-4">
                 <label
                     for="monthlyContribution"
-                    class="flex text-xs font-black text-slate-400 uppercase tracking-widest mb-1 group-focus-within:text-neat-accent transition-colors items-center gap-2"
+                    class="flex items-center gap-2 text-sm font-black uppercase tracking-widest theme-text opacity-60"
+                    >Aportación Mensual</label
                 >
-                    Aportación Mensual
-                </label>
-                <p class="text-[11px] text-slate-500 mb-3 font-medium leading-tight">
-                    Dinero nuevo que invertirás de forma periódica.
-                </p>
                 <div class="relative">
-                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-black">
+                    <div
+                        class="absolute left-6 top-1/2 -translate-y-1/2 theme-text font-black text-2xl"
+                    >
                         {$currencyStore}
                     </div>
                     <input
@@ -158,33 +156,33 @@
                         type="number"
                         bind:value={monthlyContribution}
                         min="0"
-                        class="w-full bg-black/40 border border-white/10 rounded-2xl pl-10 pr-16 py-5 text-3xl font-black text-white focus:outline-none focus:border-neat-accent/50 transition-all shadow-inner tracking-tighter"
+                        class="w-full bg-slate-50 dark:bg-slate-800 border-4 border-black pl-14 pr-20 py-6 text-4xl font-black theme-text focus:outline-none focus:bg-white dark:focus:bg-slate-700 transition-all shadow-neo tabular-nums"
                     />
                     <div
-                        class="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-black uppercase tracking-widest"
+                        class="absolute right-6 top-1/2 -translate-y-1/2 font-black text-sm uppercase tracking-widest opacity-40"
                     >
                         /mes
                     </div>
                 </div>
+                <p
+                    class="text-[10px] theme-text opacity-40 font-bold uppercase tracking-wider leading-tight"
+                >
+                    Dinero nuevo que invertirás de forma periódica.
+                </p>
             </div>
 
-            <div class="h-px bg-white/10 w-full my-6"></div>
+            <div class="h-1 bg-black/10 dark:bg-white/10 w-full rounded-full"></div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Target Monthly Income -->
-                <div class="group">
+                <div class="space-y-3">
                     <label
                         for="targetMonthlyIncome"
-                        class="block text-xs font-black text-amber-400/80 uppercase tracking-widest mb-1 group-focus-within:text-amber-400 transition-colors"
-                        >Ingreso Mensual Jubilación</label
+                        class="block text-sm font-black uppercase tracking-widest text-primary"
+                        >Ingreso Retiro</label
                     >
-                    <p class="text-[11px] text-amber-500/50 mb-3 font-medium leading-tight">
-                        Dinero que necesitarás cada mes.
-                    </p>
                     <div class="relative">
-                        <div
-                            class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-black"
-                        >
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 theme-text font-black">
                             {$currencyStore}
                         </div>
                         <input
@@ -193,25 +191,25 @@
                             bind:value={targetMonthlyIncome}
                             on:input={handleMonthlyIncome}
                             min="0"
-                            class="w-full bg-black/20 border border-white/5 rounded-2xl pl-9 pr-4 py-3 text-lg font-black text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 focus:bg-white/5 transition-all shadow-inner"
+                            class="w-full bg-slate-50 dark:bg-slate-800 border-4 border-black pl-10 pr-4 py-4 text-xl font-black theme-text focus:outline-none focus:bg-white dark:focus:bg-slate-700 transition-all shadow-neo-sm"
                         />
                     </div>
+                    <p
+                        class="text-[10px] theme-text opacity-40 font-bold uppercase tracking-wider leading-tight"
+                    >
+                        Dinero que necesitarás cada mes.
+                    </p>
                 </div>
 
-                <!-- Target Total Corpus (Calculated via 4% rule) -->
-                <div class="group">
+                <!-- Target Total Corpus -->
+                <div class="space-y-3">
                     <label
                         for="targetTotalCorpus"
-                        class="block text-xs font-black text-amber-400/80 uppercase tracking-widest mb-1 group-focus-within:text-amber-400 transition-colors"
-                        >Objetivo Total (Regla 4%)</label
+                        class="block text-sm font-black uppercase tracking-widest text-emerald-500"
+                        >Objetivo Total</label
                     >
-                    <p class="text-[11px] text-amber-500/50 mb-3 font-medium leading-tight">
-                        Patrimonio que debes alcanzar.
-                    </p>
                     <div class="relative">
-                        <div
-                            class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-black"
-                        >
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 theme-text font-black">
                             {$currencyStore}
                         </div>
                         <input
@@ -220,140 +218,171 @@
                             bind:value={targetTotalCorpus}
                             on:input={handleTotalCorpus}
                             min="0"
-                            class="w-full bg-amber-500/5 border border-amber-500/20 rounded-2xl pl-9 pr-4 py-3 text-lg font-black text-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 focus:bg-amber-500/10 transition-all shadow-inner"
+                            class="w-full bg-emerald-500/5 dark:bg-emerald-500/10 border-4 border-emerald-500/50 px-10 py-4 text-xl font-black text-emerald-600 dark:text-emerald-400 focus:outline-none focus:bg-emerald-500/10 dark:focus:bg-emerald-500/20 transition-all shadow-neo-sm tabular-nums"
                         />
                     </div>
+                    <p
+                        class="text-[10px] theme-text opacity-40 font-bold uppercase tracking-wider leading-tight"
+                    >
+                        Patrimonio total (Regla del 4%).
+                    </p>
                 </div>
             </div>
 
             <!-- Expected Return Rate -->
-            <div class="group">
-                <label
-                    for="annualReturn"
-                    class="flex text-xs font-black text-slate-400 uppercase tracking-widest mb-3 justify-between group-focus-within:text-neat-accent transition-colors"
-                >
-                    <span>Rentabilidad Anual Esperada</span>
+            <div class="space-y-6">
+                <div class="flex justify-between items-end">
+                    <label
+                        for="annualReturn"
+                        class="block text-sm font-black uppercase tracking-widest theme-text opacity-60"
+                        >Rentabilidad Anual</label
+                    >
                     <span
-                        class="text-neat-accent bg-neat-accent/10 px-3 py-1 rounded-lg border border-neat-accent/20 font-black text-[10px] uppercase tracking-widest"
+                        class="bg-black dark:bg-slate-800 text-white dark:text-primary px-4 py-1 border-2 border-black font-black tabular-nums"
                         >{annualReturn}%</span
                     >
-                </label>
-                <div class="flex items-center gap-4 relative z-10">
-                    <input
-                        id="annualReturn"
-                        type="range"
-                        min="1"
-                        max="15"
-                        step="0.1"
-                        bind:value={annualReturn}
-                        class="flex-1 h-1.5 bg-black/60 border border-white/5 rounded-full appearance-none cursor-pointer accent-neat-accent"
-                    />
                 </div>
-                <p class="text-xs text-slate-500 mt-2">
-                    La media histórica del S&P 500 es ~7-10% (sin ajustar a inflación).
+                <input
+                    id="annualReturn"
+                    type="range"
+                    min="1"
+                    max="15"
+                    step="0.1"
+                    bind:value={annualReturn}
+                    class="w-full h-4 bg-slate-200 dark:bg-slate-800 border-2 border-black appearance-none cursor-pointer accent-primary"
+                />
+                <p class="text-xs theme-text opacity-50 font-bold lowercase italic">
+                    La media histórica del S&P 500 es ~7-10% (nominal).
                 </p>
             </div>
         </div>
 
-        <!-- Glass Card Results -->
-        <div
-            class="w-full lg:w-[380px] bg-black/40 border border-white/10 backdrop-blur-md rounded-2xl p-6 sm:p-8 text-white shadow-2xl flex flex-col relative overflow-hidden z-10"
-        >
+        <!-- Result Column -->
+        <div class="space-y-8">
             <div
-                class="absolute -right-20 -top-20 w-48 h-48 bg-neat-accent rounded-full blur-[60px] opacity-20 pointer-events-none"
-            ></div>
-            <div
-                class="absolute -left-20 -bottom-20 w-48 h-48 bg-emerald-500 rounded-full blur-[60px] opacity-20 pointer-events-none"
-            ></div>
+                class="neo-card bg-primary p-10 flex flex-col items-center text-center text-white space-y-8 relative overflow-hidden group"
+            >
+                <div
+                    class="absolute top-0 right-0 w-32 h-32 bg-white/10 -rotate-12 translate-x-8 -translate-y-8 pointer-events-none"
+                ></div>
 
-            <div class="space-y-8 relative z-10 flex-1 flex flex-col justify-center">
+                <div
+                    class="w-16 h-16 bg-white border-4 border-black flex items-center justify-center shadow-neo-sm transform -rotate-3 transition-transform group-hover:rotate-0"
+                >
+                    <Flame class="w-8 h-8 text-black" />
+                </div>
+
                 {#if isAlreadyRetired}
-                    <div class="text-center space-y-4">
-                        <div
-                            class="inline-flex w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 items-center justify-center border border-emerald-500/30 mb-2"
-                        >
-                            <Flame class="w-8 h-8" />
-                        </div>
-                        <h3 class="text-2xl font-black tracking-tight">¡Libertad Alcanzada!</h3>
-                        <p class="text-emerald-400 font-medium">
-                            Tus ahorros actuales ya superan tu objetivo de independencia financiera.
-                        </p>
+                    <div class="space-y-4">
+                        <h3 class="text-3xl font-black uppercase tracking-tighter">
+                            ¡ESTÁS RETIRADO!
+                        </h3>
+                        <p class="font-bold text-black/80">Tus ahorros superan tu objetivo.</p>
                     </div>
                 {:else if isNeverRetiring}
-                    <div class="text-center space-y-4">
-                        <div
-                            class="inline-flex w-16 h-16 rounded-full bg-red-500/20 text-red-400 items-center justify-center border border-red-500/30 mb-2"
-                        >
-                            <Target class="w-8 h-8" />
-                        </div>
-                        <h3 class="text-xl font-black tracking-tight text-slate-300">
-                            Objetivo Inalcanzable
+                    <div class="space-y-4">
+                        <h3 class="text-2xl font-black uppercase tracking-tighter">
+                            FUERA DE ALCANCE
                         </h3>
-                        <p class="text-red-400 font-medium text-sm">
-                            Con estas condiciones y sin aportaciones, el crecimiento no logrará
-                            alcanzar el objetivo en 100 años.
+                        <p class="font-bold text-black/80">
+                            Ajusta tus aportaciones o rentabilidad.
                         </p>
                     </div>
                 {:else}
-                    <div>
-                        <p
-                            class="text-slate-400 text-xs font-black tracking-widest uppercase mb-2 flex items-center gap-2"
-                        >
-                            <Calendar class="w-4 h-4 text-neat-accent" /> Tiempo Requerido
+                    <div class="space-y-2">
+                        <p class="text-xs font-black uppercase tracking-[0.2em] text-black/60">
+                            TIEMPO PARA EL RETIRO
                         </p>
                         <div
-                            class="text-5xl md:text-6xl font-black font-mono tracking-tighter text-white tabular-nums flex items-baseline drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]"
+                            class="text-7xl font-black tracking-tighter tabular-nums drop-shadow-[4px_4px_0_rgba(0,0,0,1)]"
                         >
-                            {yearsToRetire}<span class="text-2xl text-slate-500 ml-1">años</span>
+                            {yearsToRetire}<span
+                                class="text-2xl text-black/50 ml-1 italic leading-none">AÑOS</span
+                            >
                         </div>
                         {#if extraMonths > 0}
-                            <div
-                                class="text-neat-accent font-black text-xs uppercase tracking-widest mt-2 px-1"
-                            >
-                                y {extraMonths} meses
-                            </div>
+                            <p class="text-lg font-black uppercase tracking-widest text-black">
+                                Y {extraMonths} MESES
+                            </p>
                         {/if}
                     </div>
 
-                    <div class="h-px bg-white/10 w-full my-2"></div>
+                    <div class="w-full h-1 bg-black/20 rounded-full"></div>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
+                    <div class="w-full grid grid-cols-2 gap-4">
+                        <div class="text-left">
                             <p
-                                class="text-slate-400 text-xs font-black tracking-widest uppercase mb-1"
+                                class="text-[10px] font-black uppercase text-black/50 tracking-widest"
                             >
-                                Edad Retiro
+                                EDAD RETIRO
                             </p>
-                            <div
-                                class="text-3xl font-black font-mono text-neat-accent drop-shadow-[0_0_15px_rgba(0,229,255,0.3)] tabular-nums tracking-tighter"
-                            >
-                                {retirementAge}
-                            </div>
+                            <p class="text-4xl font-black tabular-nums">{retirementAge}</p>
                         </div>
                         <div class="text-right">
                             <p
-                                class="text-slate-400 text-xs font-black tracking-widest uppercase mb-1"
+                                class="text-[10px] font-black uppercase text-black/50 tracking-widest"
                             >
-                                Total Acumulado
+                                TOTAL FINAL
                             </p>
-                            <div
-                                class="text-xl font-black font-mono text-white tabular-nums drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]"
-                            >
+                            <p class="text-2xl font-black tabular-nums">
                                 {$currencyStore}{formatCurrency(finalCorpus)}
-                            </div>
+                            </p>
                         </div>
                     </div>
                 {/if}
             </div>
 
-            <div class="pt-6 border-t border-white/10 mt-6 relative z-10">
-                <p
-                    class="text-[10px] text-slate-500 uppercase tracking-wider text-center font-bold"
-                >
-                    La proyección asume rentabilidad final compuesta constante y no garantiza
-                    rendimientos futuros.
-                </p>
+            <div class="neo-card bg-white dark:bg-slate-900 p-8 space-y-6">
+                <div class="flex items-center gap-3">
+                    <Target class="w-5 h-5 text-primary" />
+                    <h3 class="text-sm font-black uppercase tracking-widest theme-text">
+                        ANÁLISIS FIRE
+                    </h3>
+                </div>
+                <div class="space-y-4">
+                    <p
+                        class="text-sm font-bold theme-text opacity-70 leading-relaxed uppercase italic"
+                    >
+                        La regla del 4% sugiere que si puedes vivir con el 4% de tu capital al año,
+                        tus ahorros durarán al menos 30 años.
+                    </p>
+                    <div
+                        class="p-4 bg-slate-50 dark:bg-slate-800 border-2 border-black border-dashed"
+                    >
+                        <p
+                            class="text-[10px] theme-text opacity-50 uppercase font-black leading-tight"
+                        >
+                            La proyección asume rentabilidad final compuesta constante y no
+                            garantiza rendimientos futuros.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </ProGate>
+
+<style>
+    input[type='range']::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 24px;
+        height: 24px;
+        background: white;
+        border: 4px solid black;
+        cursor: pointer;
+        box-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+    }
+    input[type='range']::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        background: white;
+        border: 4px solid black;
+        cursor: pointer;
+        box-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+    }
+    input[type='number']::-webkit-inner-spin-button,
+    input[type='number']::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+</style>

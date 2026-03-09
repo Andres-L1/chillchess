@@ -5,9 +5,9 @@
     import { currencyStore } from '$lib/stores/currencyStore';
 
     pageHeader.set({
-        title: 'Calculadora Propina',
-        description: 'Divide la cuenta y calcula propinas fácilmente.',
-        category: 'Finanzas',
+        title: 'CÁLCULO DE PROPINAS',
+        description: 'Distribución precisa y gestión de gratificaciones.',
+        category: 'FINANZAS',
     });
 
     let billAmount = 50;
@@ -29,33 +29,25 @@
 </svelte:head>
 
 <ProGate>
-    <div class="relative max-w-5xl mx-auto flex flex-col lg:flex-row gap-8 lg:gap-12">
-        <!-- Ambient Background Glows -->
-        <div
-            class="absolute top-0 right-0 w-[600px] h-[600px] bg-neat-accent/10 rounded-full blur-[120px] -z-10 mix-blend-screen pointer-events-none"
-        ></div>
-        <div
-            class="absolute bottom-[-200px] left-0 w-[500px] h-[500px] bg-slate-500/10 rounded-full blur-[120px] -z-10 mix-blend-screen pointer-events-none"
-        ></div>
-
+    <div class="relative max-w-5xl mx-auto flex flex-col lg:flex-row gap-8 lg:gap-12 py-10 px-4">
         <!-- Left Column: Inputs -->
         <div class="flex-1 space-y-8">
             <!-- Bill Amount Card -->
-            <div class="glass-card p-8 sm:p-10 space-y-8">
+            <div
+                class="bg-white dark:bg-slate-900 border-4 border-black p-8 sm:p-10 space-y-8 shadow-neo"
+            >
                 <h3
-                    class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-3"
+                    class="text-xs font-black text-black dark:text-white uppercase tracking-widest flex items-center gap-3"
                 >
-                    <div
-                        class="p-2.5 bg-neat-accent/10 text-neat-accent rounded-xl border border-neat-accent/20"
-                    >
+                    <div class="p-2 border-2 border-black bg-primary text-white">
                         <Receipt class="w-4 h-4" />
                     </div>
-                    Total de la Cuenta
+                    TOTAL DE LA CUENTA
                 </h3>
 
-                <div class="relative group">
+                <div class="relative">
                     <div
-                        class="absolute left-6 top-1/2 -translate-y-1/2 text-slate-500 font-black text-xl uppercase"
+                        class="absolute left-6 top-1/2 -translate-y-1/2 text-black dark:text-white font-black text-2xl"
                     >
                         {$currencyStore}
                     </div>
@@ -65,163 +57,186 @@
                         bind:value={billAmount}
                         min="0"
                         placeholder="0.00"
-                        class="w-full bg-black/20 border border-white/5 rounded-3xl pl-14 pr-6 py-6 text-4xl font-black text-white placeholder-slate-800 focus:outline-none focus:border-neat-accent/30 transition-all tabular-nums shadow-inner"
+                        class="w-full bg-slate-50 dark:bg-slate-800 border-4 border-black rounded-none pl-14 pr-6 py-6 text-4xl font-black text-black dark:text-white focus:outline-none focus:bg-white dark:focus:bg-slate-700 transition-all tabular-nums"
                     />
                 </div>
             </div>
 
             <!-- Tip Percentage Card -->
-            <div class="glass-card p-8 sm:p-10 space-y-8">
+            <div
+                class="bg-white dark:bg-slate-900 border-4 border-black p-8 sm:p-10 space-y-8 shadow-neo"
+            >
                 <div class="flex items-center justify-between">
                     <h3
-                        class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-3"
+                        class="text-xs font-black text-black dark:text-white uppercase tracking-widest flex items-center gap-3"
                     >
-                        <div
-                            class="p-2.5 bg-neat-accent/10 text-neat-accent rounded-xl border border-neat-accent/20"
-                        >
+                        <div class="p-2 border-2 border-black bg-black text-white">
                             <Percent class="w-4 h-4" />
                         </div>
-                        Propina Seleccionada
+                        PROPINA
                     </h3>
-                    <div
-                        class="px-4 py-2 bg-neat-accent/10 rounded-xl border border-neat-accent/20"
-                    >
-                        <span class="text-xl font-black text-neat-accent tabular-nums"
+                    <div class="px-4 py-2 bg-primary border-4 border-black shadow-neo-sm">
+                        <span class="text-xl font-black text-white tabular-nums"
                             >{tipPercentage}%</span
                         >
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {#each [10, 15, 20, 25] as pct}
                         <button
                             on:click={() => (tipPercentage = pct)}
-                            class="py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all duration-300 active:scale-95 {tipPercentage ===
+                            class="py-4 border-4 border-black font-black text-sm uppercase transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none {tipPercentage ===
                             pct
-                                ? 'bg-neat-accent text-black shadow-[0_0_20px_rgba(0,229,255,0.3)]'
-                                : 'bg-white/5 border border-white/5 text-slate-400 hover:bg-white/10 hover:text-white'}"
+                                ? 'bg-primary text-white shadow-neo-sm'
+                                : 'bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700 shadow-neo-sm'}"
                         >
                             {pct}%
                         </button>
                     {/each}
                 </div>
 
-                <div class="pt-4">
+                <div class="pt-4 relative h-8 flex items-center">
                     <input
                         id="tipPercentage-range"
                         type="range"
                         min="0"
                         max="50"
                         bind:value={tipPercentage}
-                        class="w-full h-1.5 bg-black/40 rounded-full appearance-none cursor-pointer accent-neat-accent"
+                        class="w-full h-4 bg-slate-200 dark:bg-slate-700 border-2 border-black appearance-none cursor-pointer accent-primary"
                     />
                 </div>
             </div>
 
             <!-- Split Card -->
-            <div class="glass-card p-8 sm:p-10 space-y-8">
+            <div
+                class="bg-white dark:bg-slate-900 border-4 border-black p-8 sm:p-10 space-y-8 shadow-neo"
+            >
                 <h3
-                    class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-3"
+                    class="text-xs font-black text-black dark:text-white uppercase tracking-widest flex items-center gap-3"
                 >
-                    <div
-                        class="p-2.5 bg-neat-accent/10 text-neat-accent rounded-xl border border-neat-accent/20"
-                    >
+                    <div class="p-2 border-2 border-black bg-primary text-white">
                         <Users class="w-4 h-4" />
                     </div>
-                    Dividir Cuenta
+                    DIVIDIR ENTRE
                 </h3>
 
                 <div class="flex items-center gap-4">
                     <button
                         on:click={() => (numPeople = Math.max(1, numPeople - 1))}
-                        class="w-16 h-16 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all active:scale-90"
+                        class="w-16 h-16 border-4 border-black bg-white dark:bg-slate-800 flex items-center justify-center text-black dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700 shadow-neo-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
                     >
-                        <div class="w-5 h-1 bg-current rounded-full"></div>
+                        <div class="w-6 h-1 bg-current"></div>
                     </button>
 
-                    <div class="flex-1 relative">
+                    <div class="flex-1">
                         <input
                             id="numPeople"
                             type="number"
                             bind:value={numPeople}
                             min="1"
-                            class="w-full bg-black/20 border border-white/5 rounded-2xl py-5 text-3xl font-black text-white focus:outline-none focus:border-neat-accent/30 transition-all text-center tabular-nums"
+                            class="w-full bg-slate-50 dark:bg-slate-800 border-4 border-black py-5 text-3xl font-black text-black dark:text-white focus:outline-none focus:bg-white dark:focus:bg-slate-700 transition-all text-center tabular-nums"
                         />
                     </div>
 
                     <button
                         on:click={() => numPeople++}
-                        class="w-16 h-16 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition-all active:scale-90 relative"
+                        class="w-16 h-16 border-4 border-black bg-white dark:bg-slate-800 flex items-center justify-center text-black dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700 shadow-neo-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none relative"
                     >
-                        <div class="absolute w-5 h-1 bg-current rounded-full"></div>
-                        <div class="absolute h-5 w-1 bg-current rounded-full"></div>
+                        <div class="absolute w-6 h-1 bg-current"></div>
+                        <div class="absolute h-6 w-1 bg-current"></div>
                     </button>
                 </div>
             </div>
         </div>
 
         <!-- Right Column: Result -->
-        <div class="w-full lg:w-[400px] lg:shrink-0">
+        <div class="w-full lg:w-[400px] lg:shrink-0 lg:pt-0 pt-8">
             <div
-                class="glass-card !bg-neat-accent p-10 flex flex-col items-center text-center text-black overflow-hidden relative group h-full justify-center"
+                class="bg-primary border-4 border-black p-10 flex flex-col items-center text-center text-white shadow-neo relative overflow-hidden group h-full justify-center"
             >
-                <!-- Decorative Circle -->
+                <!-- Decorative pattern -->
                 <div
-                    class="absolute -top-20 -right-20 w-64 h-64 bg-white/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"
+                    class="absolute top-0 left-0 w-24 h-24 bg-white/10 rotate-12 -translate-x-4 -translate-y-4 pointer-events-none"
                 ></div>
 
-                <div class="p-4 bg-black/10 rounded-[2rem] mb-8 relative z-10">
-                    <Calculator class="w-8 h-8" />
+                <div
+                    class="w-16 h-16 bg-white border-4 border-black flex items-center justify-center mb-10 shadow-neo-sm transform -rotate-3 group-hover:rotate-0 transition-transform"
+                >
+                    <Calculator class="w-8 h-8 text-black" />
                 </div>
 
-                <p
-                    class="text-[10px] font-black uppercase tracking-[0.4em] mb-4 relative z-10 opacity-70"
-                >
-                    Total Por Persona
+                <p class="text-xs font-black uppercase tracking-widest mb-4 text-black">
+                    TOTAL POR PERSONA
                 </p>
 
-                <div class="flex items-start justify-center relative z-10 mb-2">
-                    <span class="text-2xl font-black mt-2 mr-2">{$currencyStore}</span>
-                    <span class="text-8xl font-black tracking-tighter leading-none tabular-nums">
+                <div class="flex items-start justify-center mb-4">
+                    <span class="text-3xl font-black mt-3 mr-2 text-black">{$currencyStore}</span>
+                    <span
+                        class="text-[100px] font-black tracking-tighter leading-none tabular-nums drop-shadow-[4px_4px_0_rgba(0,0,0,1)]"
+                    >
                         {perPerson.toFixed(0)}
                     </span>
-                    <span class="text-2xl font-black mt-2 ml-1"
+                    <span class="text-3xl font-black mt-3 ml-1 text-black/60"
                         >.{perPerson.toFixed(2).split('.')[1]}</span
                     >
                 </div>
 
-                <div
-                    class="w-full grid grid-cols-2 gap-4 mt-12 pt-10 border-t border-black/10 relative z-10"
-                >
+                <div class="w-full grid grid-cols-2 gap-4 mt-12 pt-10 border-t-4 border-black/20">
                     <div class="space-y-1">
-                        <p
-                            class="text-[10px] font-black uppercase tracking-widest opacity-60 text-black/60"
-                        >
-                            Propina Total
+                        <p class="text-[10px] font-black uppercase tracking-widest text-black/60">
+                            PROPINA TOTAL
                         </p>
-                        <p class="text-2xl font-black tabular-nums">
+                        <p class="text-3xl font-black tabular-nums">
                             {$currencyStore}{tipAmount.toFixed(0)}
                         </p>
                     </div>
                     <div class="space-y-1">
-                        <p
-                            class="text-[10px] font-black uppercase tracking-widest opacity-60 text-black/60"
-                        >
-                            Cuenta Total
+                        <p class="text-[10px] font-black uppercase tracking-widest text-black/60">
+                            CUENTA TOTAL
                         </p>
-                        <p class="text-2xl font-black tabular-nums">
+                        <p class="text-3xl font-black tabular-nums">
                             {$currencyStore}{totalAmount.toFixed(0)}
                         </p>
                     </div>
                 </div>
 
-                <div class="mt-8 p-4 bg-black/5 rounded-2xl relative z-10 w-full">
-                    <p class="text-[10px] font-black uppercase tracking-widest opacity-50">
+                <div
+                    class="mt-10 p-6 bg-black text-white border-4 border-white shadow-neo-sm w-full"
+                >
+                    <p class="text-xs font-black uppercase tracking-widest mb-2 opacity-60">
                         Propina por persona
                     </p>
-                    <p class="text-lg font-black">{$currencyStore}{tipPerPerson.toFixed(2)}</p>
+                    <p class="text-2xl font-black">{$currencyStore}{tipPerPerson.toFixed(2)}</p>
                 </div>
             </div>
         </div>
     </div>
 </ProGate>
+
+<style>
+    input[type='range']::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 24px;
+        height: 24px;
+        background: white;
+        border: 4px solid black;
+        cursor: pointer;
+        box-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+    }
+
+    input[type='range']::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        background: white;
+        border: 4px solid black;
+        cursor: pointer;
+        box-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+    }
+
+    input[type='number']::-webkit-inner-spin-button,
+    input[type='number']::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+</style>

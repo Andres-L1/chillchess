@@ -59,7 +59,7 @@
     let searchQuery = '';
     let statusFilter: 'all' | 'pro' | 'free' | 'admin' = 'all';
     let feedFilter: 'all' | 'PRO_GRANTED' | 'USER_DELETED' = 'all';
-    let sortBy: string = 'email';
+    let sortBy: 'email' | 'status' | 'joined' = 'email';
     let copiedId: string | null = null;
     let unsubscribeUsers: () => void;
     let unsubscribeLogs: () => void;
@@ -93,13 +93,12 @@
             return matchesSearch && matchesFilter;
         })
         .sort((a, b) => {
-            const s = sortBy;
-            if (s === 'status') {
+            if (sortBy === 'status') {
                 if (a.isAdmin !== b.isAdmin) return a.isAdmin ? -1 : 1;
                 if (a.isPro !== b.isPro) return a.isPro ? -1 : 1;
                 return 0;
             }
-            if (s === 'joined') {
+            if (sortBy === 'joined') {
                 const ta = a.createdAt?.toMillis?.() || 0;
                 const tb = b.createdAt?.toMillis?.() || 0;
                 return tb - ta;
@@ -266,67 +265,65 @@
 </script>
 
 <svelte:head>
-    <title>CONTROL | Neo-Brutalist Admin</title>
+    <title>CONTROL | NeatPass Aesthetic</title>
 </svelte:head>
 
-<div class="min-h-screen text-slate-900 selection:bg-primary/30 font-sans pb-20">
-    <!-- MODAL -->
+<div class="min-h-screen bg-black text-white selection:bg-[#00D1FF]/30 font-sans">
+    <!-- MODAL (Glassmorphism Strict) -->
     {#if selectedUserForModal}
         <div class="fixed inset-0 z-[100] flex items-center justify-center p-6">
             <button
-                class="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                class="absolute inset-0 bg-black/80 backdrop-blur-xl"
                 on:click={() => (selectedUserForModal = null)}
             ></button>
             <div
-                class="relative bg-white border-4 border-black shadow-neo p-8 w-full max-w-xl animate-in zoom-in-95 duration-300"
+                class="relative glass-card !p-12 w-full max-w-xl animate-in zoom-in-95 duration-300"
             >
                 <div class="flex flex-col gap-6">
                     <div class="flex items-center justify-between">
-                        <div
-                            class="px-3 py-1 bg-slate-100 border-2 border-black font-black text-[10px] uppercase tracking-wider"
-                        >
+                        <div class="neat-badge bg-white/5 border border-white/10 text-white/40">
                             Detalles de Usuario
                         </div>
                         <button
                             on:click={() => (selectedUserForModal = null)}
-                            class="p-2 hover:bg-slate-100 border-2 border-transparent hover:border-black transition-all"
+                            class="text-white/20 hover:text-white transition-colors"
                         >
                             <X class="w-6 h-6" />
                         </button>
                     </div>
 
                     <div>
-                        <h2 class="text-3xl font-black tracking-tight mb-2">
+                        <h2 class="text-4xl font-black tracking-[-0.05em] leading-none mb-2">
                             {selectedUserForModal.email}
                         </h2>
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                            ID: {selectedUserForModal.id}
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">
+                            {selectedUserForModal.id}
                         </p>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="p-6 bg-slate-50 border-2 border-black shadow-neo-sm">
+                        <div class="glass-card !p-6 !rounded-3xl">
                             <p
-                                class="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1"
+                                class="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mb-1"
                             >
                                 Registrado
                             </p>
-                            <p class="text-sm font-black">
+                            <p class="text-lg font-black">
                                 {formatDate(selectedUserForModal.createdAt)}
                             </p>
                         </div>
-                        <div class="p-6 bg-slate-50 border-2 border-black shadow-neo-sm">
+                        <div class="glass-card !p-6 !rounded-3xl">
                             <p
-                                class="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1"
+                                class="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mb-1"
                             >
                                 Plan
                             </p>
                             <p
-                                class="text-sm font-black {selectedUserForModal.isPro
-                                    ? 'text-primary'
-                                    : 'text-slate-900'}"
+                                class="text-lg font-black italic {selectedUserForModal.isPro
+                                    ? 'text-[#00D1FF]'
+                                    : 'text-white'}"
                             >
-                                {selectedUserForModal.isPro ? 'PREMIUM PRO' : 'FREE USER'}
+                                {selectedUserForModal.isPro ? 'PRO SUBS' : 'FREE USER'}
                             </p>
                         </div>
                     </div>
@@ -334,15 +331,15 @@
                     <div class="flex gap-4 pt-4">
                         <button
                             on:click={() => toggleUserPro(selectedUserForModal)}
-                            class="flex-1 py-4 bg-primary text-white border-4 border-black font-black shadow-neo-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all uppercase tracking-wider text-sm"
+                            class="flex-1 neat-button-primary"
                         >
                             {selectedUserForModal.isPro ? 'REVOCAR PRO' : 'ACTIVAR PRO'}
                         </button>
                         <button
                             on:click={() => handleDeleteUser(selectedUserForModal)}
-                            class="px-6 bg-red-500 text-white border-4 border-black font-black shadow-neo-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all uppercase tracking-wider text-sm"
+                            class="px-8 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-500 rounded-full font-black text-[10px] tracking-widest uppercase italic"
                         >
-                            <Trash2 class="w-5 h-5 transition-transform group-hover:scale-110" />
+                            <Trash2 class="w-5 h-5" />
                         </button>
                     </div>
                 </div>
@@ -350,190 +347,158 @@
         </div>
     {/if}
 
-    <div class="max-w-[1400px] mx-auto space-y-16 py-8">
-        <!-- HEADER -->
-        <header class="flex flex-col md:flex-row items-start justify-between gap-8">
+    <main class="max-w-[1400px] mx-auto p-6 sm:p-12 lg:p-20 space-y-24">
+        <!-- HEADER (Minimalist Floating) -->
+        <header
+            class="flex flex-col md:flex-row items-baseline justify-between gap-8 animate-in fade-in slide-in-from-bottom-8 duration-700"
+        >
             <div>
-                <h1 class="text-6xl font-black tracking-tight uppercase leading-none">
-                    CONTROL<br /><span class="text-primary">CENTER.</span>
+                <h1 class="text-7xl font-black tracking-[-0.07em] uppercase leading-[0.85]">
+                    CONTROL<br /><span class="text-[#00D1FF] italic">CENTER.</span>
                 </h1>
-                <div
-                    class="mt-6 flex items-center gap-3 px-4 py-2 bg-white border-4 border-black shadow-neo-sm w-fit"
+                <p
+                    class="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 mt-6 flex items-center gap-3"
                 >
-                    <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                    <p class="text-[10px] font-black uppercase tracking-widest">LIVE SYNC ACTIVE</p>
-                </div>
+                    <span class="w-2 h-2 rounded-full bg-[#00D1FF] animate-pulse"></span>
+                    Sincronización en tiempo real
+                </p>
             </div>
-
-            <div class="flex flex-col items-end gap-2">
-                <div
-                    class="bg-white border-4 border-black px-6 py-3 shadow-neo-sm font-black text-sm"
-                >
-                    ADMIN: {$authStore.user?.email?.split('@')[0]}
-                </div>
-                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">
-                    {new Date().toLocaleDateString('es-ES', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                    })}
-                </div>
+            <div
+                class="neat-badge bg-[#00D1FF]/10 text-[#00D1FF] border border-[#00D1FF]/20 px-6 py-3"
+            >
+                Admin: {$authStore.user?.email?.split('@')[0]}
             </div>
         </header>
 
-        <!-- KPI GRID -->
+        <!-- KPI GRID (Massive) -->
         <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div
-                class="bg-white border-4 border-black p-8 shadow-neo hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all group"
-            >
+            <div class="glass-card !p-12 group hover:translate-y-[-10px] transition-transform">
                 <p
-                    class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 group-hover:text-primary transition-colors"
+                    class="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 mb-4 italic"
                 >
                     Total Usuarios
                 </p>
-                <div class="text-6xl font-black tracking-tight mb-4">
+                <div class="text-7xl font-black tracking-[-0.05em] leading-none mb-4 italic">
                     {totalUsers}
                 </div>
                 <div
-                    class="text-[10px] font-bold bg-slate-100 border-2 border-black px-3 py-1 w-fit uppercase"
+                    class="neat-badge bg-white/5 text-white/30 border border-white/10 group-hover:text-[#00D1FF] group-hover:border-[#00D1FF]/20 transition-colors"
                 >
-                    Platform Total
+                    Histórico
                 </div>
             </div>
 
-            <div
-                class="bg-white border-4 border-black p-8 shadow-neo hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all group"
-            >
+            <div class="glass-card !p-12 group hover:translate-y-[-10px] transition-transform">
                 <p
-                    class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 group-hover:text-primary transition-colors"
+                    class="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 mb-4 italic"
                 >
                     Pro Users
                 </p>
-                <div class="text-6xl font-black tracking-tight mb-4 text-primary">
+                <div
+                    class="text-7xl font-black tracking-[-0.05em] leading-none mb-4 italic text-[#00D1FF]"
+                >
                     {proUsers}
                 </div>
-                <div class="flex items-center gap-2 font-black text-[10px] uppercase">
-                    <TrendingUp class="w-4 h-4" />
-                    <span>{conversionRate}% Conv.</span>
+                <div class="flex items-center gap-2">
+                    <TrendingUp class="w-4 h-4 text-[#00D1FF]" />
+                    <span class="text-[10px] font-black uppercase tracking-widest text-[#00D1FF]"
+                        >{conversionRate}% Conv</span
+                    >
                 </div>
             </div>
 
-            <div
-                class="bg-white border-4 border-black p-8 shadow-neo hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all group"
-            >
+            <div class="glass-card !p-12 group hover:translate-y-[-10px] transition-transform">
                 <p
-                    class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 group-hover:text-primary transition-colors"
+                    class="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 mb-4 italic"
                 >
-                    MRR Est.
+                    Estimated MRR
                 </p>
-                <div class="text-6xl font-black tracking-tight mb-4">
+                <div class="text-7xl font-black tracking-[-0.05em] leading-none mb-4 italic">
                     {$currencyStore}{estimatedMRR}
                 </div>
                 <div
-                    class="text-[10px] font-bold bg-emerald-100 text-emerald-700 border-2 border-black px-3 py-1 w-fit uppercase"
+                    class="neat-badge bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
                 >
-                    Monthly Revenue
+                    Ingresos / Mes
                 </div>
             </div>
 
             <div
-                class="bg-white border-4 border-black p-8 shadow-neo hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all group relative overflow-hidden"
+                class="glass-card !p-12 relative overflow-hidden group hover:translate-y-[-10px] transition-transform"
             >
                 <p
-                    class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 group-hover:text-primary transition-colors"
+                    class="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 mb-4 italic"
                 >
                     New (7d)
                 </p>
-                <div class="text-6xl font-black tracking-tight mb-4">
+                <div class="text-7xl font-black tracking-[-0.05em] leading-none mb-4 italic">
                     +{newUsersThisWeek}
                 </div>
-                <div
-                    class="absolute bottom-0 left-0 right-0 h-4 border-t-4 border-black bg-slate-100"
-                >
+                <div class="absolute bottom-0 left-0 right-0 h-2 bg-[#00D1FF]/5">
                     <div
-                        class="h-full bg-primary transition-all duration-1000"
+                        class="h-full bg-[#00D1FF]/20"
                         style="width: {Math.min((newUsersThisWeek / totalUsers || 0) * 100, 100)}%;"
                     ></div>
                 </div>
             </div>
         </section>
 
-        <!-- SYSTEM SETTINGS -->
+        <!-- SYSTEM SETTINGS (Apple Style) -->
         <section class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <div class="bg-white border-4 border-black p-8 shadow-neo">
-                <div class="flex items-center justify-between mb-8">
+            <div class="glass-card !p-12">
+                <div class="flex items-center justify-between mb-10">
                     <div>
-                        <h3 class="text-2xl font-black tracking-tight uppercase mb-1">
+                        <h3 class="text-2xl font-black tracking-tight italic uppercase mb-1">
                             Mantenimiento
                         </h3>
-                        <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">
                             Estado Global
                         </p>
                     </div>
                     <button
                         on:click={() => updateGlobalSettings('maintenanceMode', !maintenanceMode)}
-                        class="w-20 h-10 border-4 border-black relative transition-all {maintenanceMode
-                            ? 'bg-primary'
-                            : 'bg-slate-200'}"
+                        class="w-16 h-8 rounded-full border border-white/10 relative transition-all {maintenanceMode
+                            ? 'bg-[#00D1FF]/20 border-[#00D1FF]/50'
+                            : 'bg-white/5'}"
                     >
                         <div
-                            class="absolute top-1 left-1 w-6 h-6 border-4 border-black bg-white transition-all {maintenanceMode
-                                ? 'translate-x-10'
-                                : 'translate-x-0'}"
+                            class="absolute top-1 left-1 w-6 h-6 rounded-full transition-all {maintenanceMode
+                                ? 'translate-x-[32px] bg-[#00D1FF]'
+                                : 'bg-white/20'}"
                         ></div>
                     </button>
                 </div>
-                <p
-                    class="text-sm text-slate-500 font-bold leading-relaxed border-l-4 border-primary pl-4"
-                >
+                <p class="text-sm text-white/40 leading-relaxed font-bold italic">
                     Restringe el acceso a la plataforma para todos los usuarios no administradores.
-                    Ideal para despliegues complejos o actualizaciones de base de datos.
+                    Ideal para despliegues complejos.
                 </p>
             </div>
 
-            <div class="bg-white border-4 border-black p-8 shadow-neo">
-                <div class="flex items-center justify-between mb-8">
-                    <div class="flex items-center gap-6">
-                        <div class="p-4 bg-primary text-white border-4 border-black shadow-neo-sm">
-                            <Bell class="w-6 h-6" />
-                        </div>
-                        <div>
-                            <h3 class="text-2xl font-black tracking-tight uppercase mb-1">
-                                Banner Global
-                            </h3>
-                            <p
-                                class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400"
-                            >
-                                Broadcast Message
-                            </p>
-                        </div>
+            <div class="glass-card !p-12">
+                <div class="flex items-center gap-6 mb-10">
+                    <div class="p-4 bg-[#00D1FF]/10 rounded-2xl border border-[#00D1FF]/20">
+                        <Bell class="w-6 h-6 text-[#00D1FF]" />
                     </div>
-                    <button
-                        on:click={() =>
-                            updateGlobalSettings('globalMessageActive', !globalMessageActive)}
-                        class="w-20 h-10 border-4 border-black relative transition-all {globalMessageActive
-                            ? 'bg-primary'
-                            : 'bg-slate-200'}"
-                    >
-                        <div
-                            class="absolute top-1 left-1 w-6 h-6 border-4 border-black bg-white transition-all {globalMessageActive
-                                ? 'translate-x-10'
-                                : 'translate-x-0'}"
-                        ></div>
-                    </button>
+                    <div>
+                        <h3 class="text-2xl font-black tracking-tight italic uppercase mb-1">
+                            Banner Global
+                        </h3>
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">
+                            Comunicación
+                        </p>
+                    </div>
                 </div>
                 <div class="flex gap-4">
                     <input
                         type="text"
                         bind:value={globalMessageText}
-                        class="flex-1 bg-slate-50 border-4 border-black px-6 py-4 font-black text-slate-900 placeholder-slate-300 focus:outline-none focus:bg-white transition-all text-xs tracking-widest uppercase"
-                        placeholder="MENSAJE DEL SISTEMA..."
+                        class="flex-1 bg-white/5 border border-white/10 rounded-2xl px-6 py-4 font-bold text-white placeholder-white/10 focus:outline-none focus:border-[#00D1FF]/30 transition-all uppercase text-xs tracking-widest"
+                        placeholder="TEXTO DEL AVISO..."
                     />
                     <button
                         on:click={() =>
                             updateGlobalSettings('globalMessageText', globalMessageText)}
-                        class="bg-black text-white px-8 py-4 font-black shadow-neo-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all text-xs uppercase"
+                        class="neat-button-primary !py-4 !px-8 !text-xs italic"
                     >
                         PUBLICAR
                     </button>
@@ -541,151 +506,140 @@
             </div>
         </section>
 
-        <!-- USER LISTING -->
-        <section class="space-y-8">
+        <!-- USER LISTING (Premium) -->
+        <section class="space-y-12 pb-24">
             <div class="flex flex-col md:flex-row items-baseline justify-between gap-6">
                 <div>
-                    <h2 class="text-5xl font-black tracking-tight uppercase leading-none">
+                    <h2
+                        class="text-5xl font-black tracking-[-0.06em] uppercase italic leading-none"
+                    >
                         Gestión
                     </h2>
                     <p
-                        class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mt-4"
+                        class="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 mt-4 italic"
                     >
                         Directorio Maestro de Usuarios
                     </p>
                 </div>
-                <div class="relative w-full md:w-96 group">
+                <div class="relative w-full md:w-96">
                     <input
                         type="text"
                         bind:value={searchQuery}
-                        class="w-full bg-white border-4 border-black px-8 py-4 font-black text-slate-900 placeholder-slate-300 focus:outline-none shadow-neo-sm focus:shadow-neo transition-all rounded-none"
-                        placeholder="BUSCAR USUARIO..."
+                        class="w-full bg-white/5 border border-white/10 rounded-full px-8 py-4 font-bold text-white placeholder-white/20 focus:outline-none focus:border-[#00D1FF]/30 transition-all"
+                        placeholder="Buscar por email o ID..."
                     />
                     <Search
-                        class="absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-black transition-colors"
+                        class="absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20"
                     />
                 </div>
             </div>
 
-            <div class="bg-white border-4 border-black shadow-neo overflow-hidden">
+            <div class="glass-card !p-0 !rounded-[3rem] overflow-hidden border-white/[0.03]">
                 <div
-                    class="hidden lg:grid grid-cols-12 gap-4 px-10 py-6 bg-slate-50 border-b-4 border-black"
+                    class="hidden lg:grid grid-cols-12 gap-4 px-12 py-8 bg-white/[0.02] border-b border-white/[0.05]"
                 >
                     <div
-                        class="col-span-1 text-[10px] font-black uppercase tracking-widest text-slate-400"
+                        class="col-span-1 text-[10px] font-black uppercase tracking-widest text-white/30 italic"
                     >
                         Avatar
                     </div>
                     <div
-                        class="col-span-4 text-[10px] font-black uppercase tracking-widest text-slate-400"
+                        class="col-span-5 text-[10px] font-black uppercase tracking-widest text-white/30 italic"
                     >
                         Identidad
                     </div>
                     <div
-                        class="col-span-4 text-[10px] font-black uppercase tracking-widest text-slate-400"
+                        class="col-span-3 text-[10px] font-black uppercase tracking-widest text-white/30 italic"
                     >
-                        Nivel de Acceso
+                        Nivel
                     </div>
                     <div
-                        class="col-span-3 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right"
+                        class="col-span-3 text-[10px] font-black uppercase tracking-widest text-white/30 italic"
                     >
-                        Fecha Registro
+                        Registrado
                     </div>
                 </div>
 
-                <div class="divide-y-4 divide-black">
+                <div class="divide-y divide-white/[0.03]">
                     {#each paginatedUsers as user (user.id)}
                         <button
                             on:click={() => (selectedUserForModal = user)}
-                            class="w-full grid lg:grid-cols-12 gap-4 px-10 py-8 items-center hover:bg-slate-50 transition-colors text-left group"
+                            class="w-full grid lg:grid-cols-12 gap-4 px-12 py-8 items-center hover:bg-white/[0.01] transition-colors text-left group"
                         >
                             <div class="lg:col-span-1 flex justify-center lg:justify-start">
                                 <div
-                                    class="w-12 h-12 bg-white border-4 border-black flex items-center justify-center font-black text-primary text-xl group-hover:shadow-neo-sm transition-all group-hover:-translate-x-1 group-hover:-translate-y-1"
+                                    class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center font-black text-[#00D1FF] italic text-xl group-hover:scale-110 transition-transform"
                                 >
                                     {user.email[0].toUpperCase()}
                                 </div>
                             </div>
-                            <div class="col-span-4">
+                            <div class="col-span-5">
                                 <p
-                                    class="text-xl font-black tracking-tight group-hover:text-primary transition-colors"
+                                    class="text-xl font-black tracking-tight group-hover:text-[#00D1FF] transition-colors"
                                 >
                                     {user.email}
                                 </p>
                                 <p
-                                    class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1"
+                                    class="text-[10px] font-black uppercase tracking-widest text-white/20"
                                 >
                                     {user.id}
                                 </p>
                             </div>
-                            <div class="col-span-4">
-                                <div class="flex items-center gap-2">
+                            <div class="col-span-3">
+                                <div class="flex items-center gap-3">
                                     {#if user.isAdmin}
-                                        <span
-                                            class="px-3 py-1 bg-red-100 text-red-600 border-2 border-black font-black text-[10px] uppercase"
+                                        <div
+                                            class="neat-badge bg-red-500/10 text-red-500 border border-red-500/20"
                                         >
-                                            PLATFORM ADMIN
-                                        </span>
+                                            System Admin
+                                        </div>
                                     {:else if user.isPro}
-                                        <span
-                                            class="px-3 py-1 bg-primary text-white border-2 border-black font-black text-[10px] uppercase"
+                                        <div
+                                            class="neat-badge bg-[#00D1FF]/10 text-[#00D1FF] border border-[#00D1FF]/20"
                                         >
-                                            PREMIUM PRO
-                                        </span>
+                                            Premium Pro
+                                        </div>
                                     {:else}
-                                        <span
-                                            class="px-3 py-1 bg-slate-100 text-slate-400 border-2 border-black font-black text-[10px] uppercase"
+                                        <div
+                                            class="neat-badge bg-white/5 text-white/30 border border-white/10"
                                         >
-                                            FREE USER
-                                        </span>
+                                            Standard Free
+                                        </div>
                                     {/if}
                                 </div>
                             </div>
-                            <div class="col-span-3 text-right">
-                                <p class="text-sm font-black italic text-slate-400">
-                                    {formatDate(user.createdAt)}
-                                </p>
+                            <div class="col-span-3 text-sm font-bold italic text-white/40">
+                                {formatDate(user.createdAt)}
                             </div>
                         </button>
                     {/each}
-
-                    {#if paginatedUsers.length === 0}
-                        <div class="p-20 text-center">
-                            <ShieldAlert class="w-16 h-16 text-slate-200 mx-auto mb-6" />
-                            <p class="font-black text-slate-400 uppercase tracking-widest">
-                                No se han encontrado usuarios
-                            </p>
-                        </div>
-                    {/if}
                 </div>
 
                 <!-- PAGINATION -->
                 <div
-                    class="px-10 py-8 bg-slate-50 border-t-4 border-black flex flex-col sm:flex-row items-center justify-between gap-6"
+                    class="px-12 py-10 bg-white/[0.01] border-t border-white/[0.05] flex items-center justify-between"
                 >
                     <p
-                        class="text-[10px] font-black uppercase tracking-widest text-slate-400 italic"
+                        class="text-[10px] font-black uppercase tracking-widest text-white/20 italic"
                     >
-                        Mostrando {paginatedUsers.length} de {filteredUsers.length} usuarios indexados
+                        Mostrando {paginatedUsers.length} de {filteredUsers.length} usuarios
                     </p>
                     <div class="flex gap-4">
                         <button
                             on:click={() => (currentPage = Math.max(1, currentPage - 1))}
                             disabled={currentPage === 1}
-                            class="px-6 py-3 bg-white border-4 border-black font-black text-xs uppercase shadow-neo-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all disabled:opacity-30 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-neo-sm"
+                            class="neat-button-secondary !py-3 !px-6 !text-xs disabled:opacity-20"
+                            >ANTERIOR</button
                         >
-                            ANTERIOR
-                        </button>
                         <button
                             on:click={() => (currentPage = Math.min(totalPages, currentPage + 1))}
                             disabled={currentPage === totalPages}
-                            class="px-6 py-3 bg-white border-4 border-black font-black text-xs uppercase shadow-neo-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all disabled:opacity-30 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-neo-sm"
+                            class="neat-button-secondary !py-3 !px-6 !text-xs disabled:opacity-20"
+                            >SIGUIENTE</button
                         >
-                            SIGUIENTE
-                        </button>
                     </div>
                 </div>
             </div>
         </section>
-    </div>
+    </main>
 </div>

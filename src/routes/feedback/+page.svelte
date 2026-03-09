@@ -14,6 +14,7 @@
     import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
     import { db } from '$lib/firebase';
     import { addToast } from '$lib/stores/toasts';
+    import ProGate from '$lib/components/ui/ProGate.svelte';
 
     // Configuración del Header
     onMount(() => {
@@ -76,58 +77,23 @@
     <title>Sugerencias y Bugs | ChillChess</title>
 </svelte:head>
 
-<div class="max-w-2xl mx-auto space-y-8">
-    {#if !$authStore.user?.isPro}
-        <div class="flex flex-col items-center justify-center py-20 text-center relative">
-            <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-                <div
-                    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-amber-500/10 rounded-full blur-[80px]"
-                ></div>
-            </div>
-
-            <div
-                class="relative z-10 p-5 rounded-3xl bg-amber-500/10 border border-amber-500/20 mb-6 shadow-inner drop-shadow-[0_0_15px_rgba(245,158,11,0.2)]"
-            >
-                <Crown class="w-12 h-12 text-amber-400" />
-                <div
-                    class="absolute -bottom-2 -right-2 bg-black/60 p-1.5 rounded-full border border-white/10"
-                >
-                    <LockKeyhole class="w-4 h-4 text-slate-400" />
-                </div>
-            </div>
-
-            <h2 class="text-2xl font-bold text-white mb-3">Acceso Exclusivo PRO</h2>
-            <p class="text-slate-400 max-w-md mx-auto mb-8 leading-relaxed">
-                El canal directo de feedback y sugerencias está reservado para miembros PRO.
-                Actualiza tu cuenta para influir directamente en el desarrollo de la plataforma.
-            </p>
-
-            <a
-                href="/pricing"
-                class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold uppercase tracking-wider text-sm transition-all shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 active:scale-95"
-            >
-                <Crown class="w-4 h-4" />
-                Hacerse PRO
-            </a>
-        </div>
-    {:else}
+<ProGate>
+    <div class="max-w-2xl mx-auto py-10">
         <!-- Formulario para usuarios PRO -->
         <div
-            class="bg-black/40 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-2xl p-6 md:p-8 relative overflow-hidden"
+            class="bg-white dark:bg-slate-900 border-4 border-black p-4 md:p-8 shadow-neo relative overflow-hidden"
         >
-            <div
-                class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"
-            ></div>
-
             <div class="flex items-center gap-4 mb-8">
-                <div class="p-3 bg-white/5 border border-white/10 rounded-2xl shadow-inner">
-                    <MessageSquare class="w-6 h-6 text-brand-400" />
+                <div class="p-3 bg-black text-white border-4 border-black shadow-neo-sm">
+                    <MessageSquare class="w-6 h-6" />
                 </div>
                 <div>
-                    <h2 class="text-xl font-bold text-white tracking-tight">
+                    <h2
+                        class="text-xl font-black text-black dark:text-white tracking-tight uppercase"
+                    >
                         Envíanos tu Feedback
                     </h2>
-                    <p class="text-sm text-slate-400 mt-1">
+                    <p class="text-xs text-slate-500 font-bold mt-1">
                         Tu opinión moldea el futuro de ChillChess.
                     </p>
                 </div>
@@ -136,38 +102,34 @@
             <form on:submit|preventDefault={handleSubmit} class="space-y-6">
                 <!-- Selector de Tipo -->
                 <div class="space-y-3">
-                    <p class="block text-sm font-semibold text-slate-300 ml-1">¿De qué se trata?</p>
-                    <div class="grid grid-cols-2 gap-3">
+                    <p
+                        class="block text-[10px] font-black text-black dark:text-white uppercase tracking-widest ml-1"
+                    >
+                        ¿De qué se trata?
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <button
                             type="button"
                             on:click={() => (feedbackType = 'suggestion')}
-                            class="flex flex-col items-center justify-center p-4 rounded-2xl border transition-all active:scale-[0.98] {feedbackType ===
+                            class="flex flex-col items-center justify-center p-4 border-4 border-black transition-all active:translate-x-0 active:translate-y-0 {feedbackType ===
                             'suggestion'
-                                ? 'bg-brand-500/10 border-brand-500/50 shadow-[0_0_15px_rgba(var(--color-brand-500),0.15)] text-brand-100'
-                                : 'bg-black/40 border-white/10 hover:bg-white/5 text-slate-400 hover:text-slate-200'}"
+                                ? 'bg-primary text-white shadow-none translate-x-[2px] translate-y-[2px]'
+                                : 'bg-white dark:bg-slate-800 text-black dark:text-white shadow-neo-sm -translate-x-[2px] -translate-y-[2px] hover:-translate-y-1 hover:translate-x-0 hover:shadow-neo'}"
                         >
-                            <Lightbulb
-                                class="w-6 h-6 mb-2 {feedbackType === 'suggestion'
-                                    ? 'text-brand-400'
-                                    : 'opacity-60'}"
-                            />
-                            <span class="font-medium text-sm">Sugerencia</span>
+                            <Lightbulb class="w-6 h-6 mb-2" />
+                            <span class="font-black text-xs uppercase">Sugerencia</span>
                         </button>
 
                         <button
                             type="button"
                             on:click={() => (feedbackType = 'bug')}
-                            class="flex flex-col items-center justify-center p-4 rounded-2xl border transition-all active:scale-[0.98] {feedbackType ===
+                            class="flex flex-col items-center justify-center p-4 border-4 border-black transition-all active:translate-x-0 active:translate-y-0 {feedbackType ===
                             'bug'
-                                ? 'bg-red-500/10 border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.15)] text-red-100'
-                                : 'bg-black/40 border-white/10 hover:bg-white/5 text-slate-400 hover:text-slate-200'}"
+                                ? 'bg-red-500 text-white shadow-none translate-x-[2px] translate-y-[2px]'
+                                : 'bg-white dark:bg-slate-800 text-black dark:text-white shadow-neo-sm -translate-x-[2px] -translate-y-[2px] hover:-translate-y-1 hover:translate-x-0 hover:shadow-neo'}"
                         >
-                            <Bug
-                                class="w-6 h-6 mb-2 {feedbackType === 'bug'
-                                    ? 'text-red-400'
-                                    : 'opacity-60'}"
-                            />
-                            <span class="font-medium text-sm">Reportar Bug</span>
+                            <Bug class="w-6 h-6 mb-2" />
+                            <span class="font-black text-xs uppercase">Reportar Bug</span>
                         </button>
                     </div>
                 </div>
@@ -176,10 +138,10 @@
                 <div class="space-y-3">
                     <label
                         for="feedbackMessage"
-                        class="block text-sm font-semibold text-slate-300 ml-1"
+                        class="block text-[10px] font-black text-black dark:text-white uppercase tracking-widest ml-1"
                     >
                         Tu Mensaje
-                        <span class="text-xs font-normal text-slate-500 ml-2"
+                        <span class="text-[8px] font-bold text-slate-500 ml-2 italic"
                             >(Detalla qué añadirías o dónde está el error)</span
                         >
                     </label>
@@ -188,9 +150,7 @@
                         bind:value={message}
                         rows="5"
                         placeholder="Ej: Me gustaría que añadieran una calculadora de..."
-                        class="w-full bg-black/40 border {feedbackType === 'bug'
-                            ? 'focus:border-red-500/50 focus:shadow-[0_0_15px_rgba(239,68,68,0.1)]'
-                            : 'focus:border-brand-500/50 focus:shadow-[0_0_15px_rgba(var(--color-brand-500),0.1)]'} border-white/10 rounded-2xl p-4 text-white placeholder-slate-600 focus:outline-none transition-all resize-none shadow-inner"
+                        class="w-full bg-slate-50 dark:bg-slate-800 border-4 border-black p-4 text-black dark:text-white placeholder-slate-500 focus:outline-none transition-all resize-none shadow-neo-sm focus:shadow-neo"
                     ></textarea>
                 </div>
 
@@ -199,11 +159,8 @@
                     <button
                         type="submit"
                         disabled={isSubmitting || !message.trim()}
-                        class="relative inline-flex items-center gap-2 px-8 py-3.5 bg-white text-black font-bold text-sm uppercase tracking-wider rounded-xl transition-all hover:bg-slate-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group overflow-hidden"
+                        class="group relative inline-flex items-center gap-2 px-8 py-4 bg-primary text-white border-4 border-black font-black text-xs uppercase tracking-widest shadow-neo hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all active:translate-x-0 active:translate-y-0 active:shadow-neo disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <div
-                            class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"
-                        ></div>
                         {#if isSubmitting}
                             <Loader2 class="w-4 h-4 animate-spin" />
                             <span>Enviando...</span>
@@ -217,5 +174,5 @@
                 </div>
             </form>
         </div>
-    {/if}
-</div>
+    </div>
+</ProGate>

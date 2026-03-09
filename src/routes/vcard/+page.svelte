@@ -142,288 +142,288 @@
 </svelte:head>
 
 <ProGate>
-    <div class="flex flex-col lg:flex-row gap-8 relative max-w-5xl mx-auto">
-        <!-- Ambient Background Glows -->
-        <div
-            class="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[120px] bg-neat-accent/10 -z-10 mix-blend-screen pointer-events-none"
-        ></div>
-        <div
-            class="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[400px] h-[400px] rounded-full blur-[100px] bg-purple-500/10 -z-10 mix-blend-screen pointer-events-none"
-        ></div>
-
-        <div class="flex-1 space-y-6">
-            <div class="glass-card p-6 sm:p-8 space-y-6 relative overflow-hidden">
+    <div
+        class="min-h-screen bg-background-light dark:bg-background-dark px-6 py-12 relative overflow-hidden"
+    >
+        <div class="max-w-7xl mx-auto">
+            <!-- Hero Heading -->
+            <div class="mb-16 text-center lg:text-left">
                 <div
-                    class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-neat-accent/30 to-transparent"
-                ></div>
-
-                <h3
-                    class="text-xs font-black text-white uppercase tracking-[0.3em] flex items-center gap-2 mb-6"
+                    class="inline-flex items-center gap-2 px-4 py-2 border-2 border-black bg-white dark:bg-slate-800 shadow-neo-sm mb-8"
                 >
-                    <User class="w-4 h-4 text-neat-accent" /> Datos Personales
-                </h3>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div
-                        class="bg-white/5 p-4 rounded-2xl border border-white/5 shadow-inner group"
+                    <span
+                        class="text-[10px] font-black uppercase tracking-[0.3em] text-black dark:text-white"
+                        >Identidad Digital</span
                     >
-                        <label
-                            for="vcName"
-                            class="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest"
-                            >Nombre Completo</label
-                        >
-                        <div class="relative">
-                            <div
-                                class="absolute -inset-0.5 bg-neat-accent/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition duration-300 pointer-events-none"
-                            ></div>
-                            <User
-                                class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 z-10"
-                            />
-                            <input
-                                id="vcName"
-                                type="text"
-                                bind:value={vcName}
-                                placeholder="Ej. Ana García"
-                                class="relative w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm font-bold text-white placeholder:text-slate-700 focus:outline-none focus:border-neat-accent/50 transition-all shadow-inner"
-                            />
-                        </div>
-                    </div>
-
-                    <div
-                        class="bg-white/5 p-4 rounded-2xl border border-white/5 shadow-inner group"
-                    >
-                        <label
-                            for="vcPhone"
-                            class="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest"
-                            >Teléfono</label
-                        >
-                        <div class="relative">
-                            <div
-                                class="absolute -inset-0.5 bg-neat-accent/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition duration-300 pointer-events-none"
-                            ></div>
-                            <Phone
-                                class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 z-10"
-                            />
-                            <input
-                                id="vcPhone"
-                                type="tel"
-                                bind:value={vcPhone}
-                                placeholder="+34 600 000 000"
-                                class="relative w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm font-bold text-white placeholder:text-slate-700 focus:outline-none focus:border-neat-accent/50 transition-all shadow-inner"
-                            />
-                        </div>
-                    </div>
                 </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div
-                        class="bg-white/5 p-4 rounded-2xl border border-white/5 shadow-inner group"
-                    >
-                        <label
-                            for="vcCompany"
-                            class="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest"
-                            >Empresa</label
-                        >
-                        <div class="relative">
-                            <div
-                                class="absolute -inset-0.5 bg-neat-accent/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition duration-300 pointer-events-none"
-                            ></div>
-                            <Building2
-                                class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 z-10"
-                            />
-                            <input
-                                id="vcCompany"
-                                type="text"
-                                bind:value={vcCompany}
-                                placeholder="Ej. TechCorp"
-                                class="relative w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm font-bold text-white placeholder:text-slate-700 focus:outline-none focus:border-neat-accent/50 transition-all shadow-inner"
-                            />
-                        </div>
-                    </div>
-
-                    <div
-                        class="bg-white/5 p-4 rounded-2xl border border-white/5 shadow-inner group"
-                    >
-                        <label
-                            for="vcTitle"
-                            class="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest"
-                            >Cargo / Puesto</label
-                        >
-                        <div class="relative">
-                            <div
-                                class="absolute -inset-0.5 bg-neat-accent/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition duration-300 pointer-events-none"
-                            ></div>
-                            <Briefcase
-                                class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 z-10"
-                            />
-                            <input
-                                id="vcTitle"
-                                type="text"
-                                bind:value={vcTitle}
-                                placeholder="Ej. Desarrollador Web"
-                                class="relative w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm font-bold text-white placeholder:text-slate-700 focus:outline-none focus:border-neat-accent/50 transition-all shadow-inner"
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white/5 p-4 rounded-2xl border border-white/5 shadow-inner group">
-                    <label
-                        for="vcEmail"
-                        class="block text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest"
-                        >Correo Electrónico</label
-                    >
-                    <div class="relative">
-                        <div
-                            class="absolute -inset-0.5 bg-neat-accent/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition duration-300 pointer-events-none"
-                        ></div>
-                        <Mail
-                            class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 z-10"
-                        />
-                        <input
-                            id="vcEmail"
-                            type="email"
-                            bind:value={vcEmail}
-                            placeholder="ana@ejemplo.com"
-                            class="relative w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm font-bold text-white placeholder:text-slate-700 focus:outline-none focus:border-neat-accent/50 transition-all shadow-inner"
-                        />
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="w-full lg:w-96 flex flex-col gap-6">
-            <!-- vCard Preview -->
-            <div
-                class="relative w-full aspect-[1.58/1] rounded-[2.5rem] overflow-hidden shadow-2xl p-6 sm:p-8 flex flex-col justify-between transition-all group border border-white/10"
-            >
-                <!-- Card Background -->
-                <div class="absolute inset-0 bg-gradient-to-br from-slate-900 line-slate-950"></div>
-                <div
-                    class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"
-                ></div>
-
-                <!-- Decorative Elements -->
-                <div
-                    class="absolute -right-16 -top-16 w-64 h-64 bg-neat-accent rounded-full blur-[80px] opacity-10 pointer-events-none group-hover:opacity-20 transition-opacity duration-700"
-                ></div>
-                <div
-                    class="absolute -left-16 -bottom-16 w-48 h-48 bg-purple-500 rounded-full blur-[60px] opacity-10 pointer-events-none group-hover:opacity-20 transition-opacity duration-700"
-                ></div>
-
-                <div class="relative z-10 flex justify-between items-start">
-                    <div
-                        class="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center backdrop-blur-md border border-white/10 shadow-lg"
-                    >
-                        <User class="w-7 h-7 text-white/90 drop-shadow-md" />
-                    </div>
-                    <div
-                        class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center backdrop-blur-sm border border-white/10"
-                    >
-                        <Contact class="w-5 h-5 text-neat-accent/50" />
-                    </div>
-                </div>
-
-                <div class="relative z-10 mt-auto">
-                    <h4
-                        class="font-black text-2xl tracking-tighter truncate text-white drop-shadow-md uppercase italic"
-                    >
-                        {vcName || 'Tu Nombre'}
-                    </h4>
-                    <p
-                        class="text-neat-accent text-[10px] font-black tracking-[0.2em] truncate mb-4 drop-shadow-sm flex items-center gap-1.5 opacity-90 uppercase"
-                    >
-                        {#if vcTitle}<Briefcase class="w-3 h-3" />{/if}
-                        {vcTitle || 'Tu Cargo'}
-                    </p>
-                    <div class="flex flex-col gap-2">
-                        <div
-                            class="flex items-center gap-2.5 text-[10px] text-slate-400 font-black uppercase tracking-widest"
-                        >
-                            <Building2 class="w-3 h-3 opacity-70 text-neat-accent" />
-                            <span class="truncate">{vcCompany || 'Empresa'}</span>
-                        </div>
-                        <div
-                            class="flex items-center gap-2.5 text-[10px] text-slate-400 font-black uppercase tracking-widest"
-                        >
-                            <Phone class="w-3 h-3 opacity-70 text-neat-accent" />
-                            <span class="truncate">{vcPhone || '+00 000 000 000'}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div
-                class="glass-card !bg-black/20 p-4 rounded-[2.5rem] shadow-xl relative overflow-hidden"
-            >
-                <div
-                    class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-neat-accent/20 to-transparent"
-                ></div>
-
-                <div class="grid grid-cols-2 gap-3 mb-3">
-                    <button
-                        on:click={downloadVCF}
-                        class="bg-white/5 hover:bg-white/10 active:scale-95 text-white font-black py-4 px-4 rounded-2xl transition-all shadow-inner border border-white/10 flex items-center justify-center gap-2 text-[10px] uppercase tracking-widest relative overflow-hidden group"
-                    >
-                        <Download class="w-4 h-4 text-neat-accent relative z-10" />
-                        <span class="relative z-10">VCF</span>
-                    </button>
-
-                    <button
-                        on:click={toggleQR}
-                        class="bg-white/5 hover:bg-white/10 active:scale-95 text-white font-black py-4 px-4 rounded-2xl transition-all shadow-inner border border-white/10 flex items-center justify-center gap-2 text-[10px] uppercase tracking-widest relative overflow-hidden group {qrVisible
-                            ? 'ring-2 ring-neat-accent/50 bg-white/10'
-                            : ''}"
-                    >
-                        <QrCode class="w-4 h-4 text-neat-accent relative z-10" />
-                        <span class="relative z-10">{qrVisible ? 'Ocultar' : 'QR'}</span>
-                    </button>
-                </div>
-
-                <button
-                    on:click={writeNFC}
-                    disabled={!nfcSupported || isWritingNfc}
-                    class="w-full relative overflow-hidden group bg-white hover:bg-slate-100 disabled:bg-slate-900 disabled:text-slate-700 disabled:border-white/5 active:scale-95 text-black font-black py-5 rounded-2xl transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] disabled:shadow-none flex items-center justify-center gap-3 text-xs tracking-widest uppercase border border-transparent disabled:cursor-not-allowed"
-                    class:animate-pulse={isWritingNfc}
+                <h1
+                    class="text-[clamp(3rem,8vw,8rem)] font-black tracking-tighter leading-[0.85] mb-8 text-black dark:text-white uppercase italic"
                 >
-                    <div
-                        class="relative z-10 flex items-center gap-2 uppercase italic tracking-tighter text-lg font-black"
-                    >
-                        {#if isWritingNfc}
-                            <Loader2 class="w-5 h-5 animate-spin" /> ACERCANDO...
-                        {:else}
-                            <Radio class="w-5 h-5" /> ESCRIBIR EN NFC
-                        {/if}
-                    </div>
-                </button>
+                    Tu identidad. <br />
+                    <span class="text-primary italic">En un código.</span>
+                </h1>
                 <p
-                    class="text-center text-[8px] font-black text-slate-600 mt-4 uppercase tracking-[0.3em]"
+                    class="text-xl md:text-2xl text-slate-600 dark:text-slate-400 font-bold max-w-xl leading-tight mx-auto lg:mx-0"
                 >
-                    {nfcStatusMsg}
+                    Genera tu tarjeta de contacto definitiva.<br />
+                    <span class="text-black dark:text-white">vCard, QR o NFC al instante.</span>
                 </p>
             </div>
 
-            <!-- QR Display -->
-            {#if qrVisible && qrDataUrl}
-                <div
-                    class="glass-card !bg-black/40 p-6 flex flex-col items-center relative overflow-hidden animate-in slide-in-from-top-4 duration-300 transition-all border-neat-accent/20"
-                >
+            <div class="flex flex-col lg:flex-row gap-8 items-stretch">
+                <!-- Form Area -->
+                <div class="flex-1">
                     <div
-                        class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-neat-accent/30 to-transparent"
-                    ></div>
-                    <p
-                        class="text-[10px] font-black text-neat-accent uppercase tracking-[0.3em] mb-6 flex items-center gap-2"
+                        class="bg-white dark:bg-slate-900 border-4 border-black p-8 md:p-12 shadow-neo space-y-10"
                     >
-                        <QrCode class="w-4 h-4" /> Escanea para guardar
-                    </p>
-                    <div
-                        class="bg-white p-4 rounded-3xl shadow-[0_0_50px_rgba(0,229,255,0.2)] border border-neat-accent/30 scale-105"
-                    >
-                        <img src={qrDataUrl} alt="QR Code" class="w-[180px] h-[180px]" />
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <!-- Input Groups -->
+                            <div class="space-y-3">
+                                <label
+                                    for="vcName"
+                                    class="text-xs font-black uppercase tracking-widest text-black dark:text-white block ml-1"
+                                    >Nombre Completo</label
+                                >
+                                <div class="relative group">
+                                    <input
+                                        id="vcName"
+                                        type="text"
+                                        bind:value={vcName}
+                                        placeholder="Ej. Ana García"
+                                        class="w-full bg-slate-50 dark:bg-slate-800 border-4 border-black px-6 py-4 text-lg font-black text-black dark:text-white placeholder:text-slate-400 focus:outline-none focus:bg-white dark:focus:bg-slate-700 transition-all shadow-neo-sm"
+                                    />
+                                    <User
+                                        class="absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 text-black dark:text-white"
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="space-y-3">
+                                <label
+                                    for="vcPhone"
+                                    class="text-xs font-black uppercase tracking-widest text-black dark:text-white block ml-1"
+                                    >Teléfono Móvil</label
+                                >
+                                <div class="relative group">
+                                    <input
+                                        id="vcPhone"
+                                        type="tel"
+                                        bind:value={vcPhone}
+                                        placeholder="+34 600 000 000"
+                                        class="w-full bg-slate-50 dark:bg-slate-800 border-4 border-black px-6 py-4 text-lg font-black text-black dark:text-white placeholder:text-slate-400 focus:outline-none focus:bg-white dark:focus:bg-slate-700 transition-all shadow-neo-sm"
+                                    />
+                                    <Phone
+                                        class="absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 text-black dark:text-white"
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="space-y-3">
+                                <label
+                                    for="vcCompany"
+                                    class="text-xs font-black uppercase tracking-widest text-black dark:text-white block ml-1"
+                                    >Empresa</label
+                                >
+                                <div class="relative group">
+                                    <input
+                                        id="vcCompany"
+                                        type="text"
+                                        bind:value={vcCompany}
+                                        placeholder="Ej. TechCorp"
+                                        class="w-full bg-slate-50 dark:bg-slate-800 border-4 border-black px-6 py-4 text-lg font-black text-black dark:text-white placeholder:text-slate-400 focus:outline-none focus:bg-white dark:focus:bg-slate-700 transition-all shadow-neo-sm"
+                                    />
+                                    <Building2
+                                        class="absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 text-black dark:text-white"
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="space-y-3">
+                                <label
+                                    for="vcTitle"
+                                    class="text-xs font-black uppercase tracking-widest text-black dark:text-white block ml-1"
+                                    >Cargo</label
+                                >
+                                <div class="relative group">
+                                    <input
+                                        id="vcTitle"
+                                        type="text"
+                                        bind:value={vcTitle}
+                                        placeholder="Ej. Senior Developer"
+                                        class="w-full bg-slate-50 dark:bg-slate-800 border-4 border-black px-6 py-4 text-lg font-black text-black dark:text-white placeholder:text-slate-400 focus:outline-none focus:bg-white dark:focus:bg-slate-700 transition-all shadow-neo-sm"
+                                    />
+                                    <Briefcase
+                                        class="absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 text-black dark:text-white"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <label
+                                for="vcEmail"
+                                class="text-xs font-black uppercase tracking-widest text-black dark:text-white block ml-1"
+                                >Email Profesional</label
+                            >
+                            <div class="relative group">
+                                <input
+                                    id="vcEmail"
+                                    type="email"
+                                    bind:value={vcEmail}
+                                    placeholder="ana@corporacion.com"
+                                    class="w-full bg-slate-50 dark:bg-slate-800 border-4 border-black px-6 py-4 text-lg font-black text-black dark:text-white placeholder:text-slate-400 focus:outline-none focus:bg-white dark:focus:bg-slate-700 transition-all shadow-neo-sm"
+                                />
+                                <Mail
+                                    class="absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 text-black dark:text-white"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="pt-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <button
+                                on:click={downloadVCF}
+                                class="flex items-center justify-center gap-3 px-8 py-5 bg-white dark:bg-slate-800 border-4 border-black text-black dark:text-white font-black uppercase tracking-widest hover:-translate-y-1 active:translate-x-1 active:translate-y-1 transition-all shadow-neo group"
+                            >
+                                <Download
+                                    class="w-5 h-5 text-primary group-hover:scale-110 transition-transform"
+                                />
+                                DESCARGAR VCF
+                            </button>
+                            <button
+                                on:click={toggleQR}
+                                class="flex items-center justify-center gap-3 px-8 py-5 border-4 border-black font-black uppercase tracking-widest hover:-translate-y-1 active:translate-x-1 active:translate-y-1 transition-all shadow-neo group {qrVisible
+                                    ? 'bg-primary text-white'
+                                    : 'bg-white dark:bg-slate-800 text-black dark:text-white'}"
+                            >
+                                <QrCode
+                                    class="w-5 h-5 {qrVisible
+                                        ? 'text-white'
+                                        : 'text-primary'} group-hover:rotate-12 transition-transform"
+                                />
+                                {qrVisible ? 'OCULTAR QR' : 'GENERAR QR'}
+                            </button>
+                        </div>
                     </div>
                 </div>
-            {/if}
+
+                <!-- Preview Area -->
+                <div class="w-full lg:w-96 flex flex-col gap-8">
+                    <!-- Physical Card Preview -->
+                    <div
+                        class="relative w-full aspect-[1.58/1] bg-black border-4 border-black p-8 flex flex-col justify-between overflow-hidden shadow-neo transition-all duration-300 hover:-translate-y-2 group"
+                    >
+                        <!-- Digital Pattern Background -->
+                        <div
+                            class="absolute inset-0 opacity-10 pointer-events-none overflow-hidden"
+                        >
+                            <div
+                                class="absolute inset-0"
+                                style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 24px 24px;"
+                            ></div>
+                        </div>
+
+                        <div class="relative z-10 flex justify-between items-start">
+                            <div
+                                class="w-12 h-12 bg-white text-black border-2 border-black flex items-center justify-center shadow-neo-sm"
+                            >
+                                <User class="w-6 h-6" />
+                            </div>
+                            <div
+                                class="text-[8px] font-black tracking-[0.5em] text-white/40 uppercase italic"
+                            >
+                                Digital ID
+                            </div>
+                        </div>
+
+                        <div class="relative z-10">
+                            <div
+                                class="text-3xl font-black tracking-tighter truncate uppercase italic text-white"
+                            >
+                                {vcName || 'Tu Nombre'}
+                            </div>
+                            <div
+                                class="text-[10px] font-black tracking-widest text-primary uppercase"
+                            >
+                                {vcTitle || 'Tu Cargo'}
+                            </div>
+                        </div>
+
+                        <div
+                            class="relative z-10 flex border-t-2 border-white/10 pt-6 mt-4 justify-between items-end"
+                        >
+                            <div class="space-y-1">
+                                <div
+                                    class="text-[8px] font-black text-white/50 uppercase tracking-widest"
+                                >
+                                    {vcCompany || 'Tu Empresa'}
+                                </div>
+                                <div
+                                    class="text-[8px] font-black text-white/50 uppercase tracking-widest"
+                                >
+                                    {vcPhone || '+34 000 000 000'}
+                                </div>
+                            </div>
+                            <div
+                                class="w-6 h-6 rounded-full border-2 border-primary flex items-center justify-center animate-pulse"
+                            >
+                                <div class="w-1.5 h-1.5 bg-primary rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NFC Action -->
+                    <div
+                        class="bg-white dark:bg-slate-900 border-4 border-black p-8 shadow-neo space-y-6"
+                    >
+                        <button
+                            on:click={writeNFC}
+                            disabled={!nfcSupported || isWritingNfc}
+                            class="w-full flex items-center justify-center gap-4 px-8 py-6 bg-black text-white dark:bg-white dark:text-black border-4 border-black font-black uppercase tracking-[0.2em] hover:-translate-y-1 active:translate-x-1 active:translate-y-1 transition-all shadow-neo disabled:opacity-50 disabled:cursor-not-allowed group"
+                        >
+                            {#if isWritingNfc}
+                                <Loader2 class="w-6 h-6 animate-spin text-primary" /> ESCRIBIENDO...
+                            {:else}
+                                <Radio
+                                    class="w-6 h-6 text-primary group-hover:scale-110 transition-transform"
+                                /> GRABAR EN NFC
+                            {/if}
+                        </button>
+
+                        <div class="flex items-center justify-center gap-3">
+                            <div
+                                class="w-2 h-2 rounded-full {nfcSupported
+                                    ? 'bg-primary'
+                                    : 'bg-red-500'} shadow-sm"
+                            ></div>
+                            <span
+                                class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest"
+                                >{nfcStatusMsg}</span
+                            >
+                        </div>
+                    </div>
+
+                    <!-- QR Visualization -->
+                    {#if qrVisible && qrDataUrl}
+                        <div
+                            class="bg-white border-4 border-black p-10 flex flex-col items-center gap-8 shadow-neo-lg animate-in zoom-in-95 duration-300"
+                        >
+                            <div class="bg-white p-6 border-4 border-black shadow-neo-sm">
+                                <img src={qrDataUrl} alt="QR Code" class="w-48 h-48 image-pixels" />
+                            </div>
+                            <span
+                                class="text-[10px] font-black text-black uppercase tracking-[0.4em] italic"
+                                >Escaneo Seguro</span
+                            >
+                        </div>
+                    {/if}
+                </div>
+            </div>
         </div>
     </div>
 </ProGate>
+
+<style>
+    .image-pixels {
+        image-rendering: pixelated;
+    }
+</style>

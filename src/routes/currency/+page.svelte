@@ -119,29 +119,26 @@
 </svelte:head>
 
 <ProGate>
-    <div class="max-w-3xl mx-auto space-y-8">
+    <div class="max-w-3xl mx-auto space-y-8 py-10 px-4">
         <!-- Main Converter Card -->
         <div class="relative space-y-8">
-            <!-- Ambient Background Glows -->
             <div
-                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[120px] bg-neat-accent/10 -z-10 mix-blend-screen pointer-events-none"
-            ></div>
-
-            <div class="glass-card p-8 sm:p-10 space-y-10">
+                class="bg-white dark:bg-slate-900 border-4 border-black p-8 sm:p-12 space-y-10 shadow-neo"
+            >
                 <!-- Amount -->
                 <div class="space-y-4">
                     <label
                         for="amount"
-                        class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1"
+                        class="block text-xs font-black text-black dark:text-white uppercase tracking-widest ml-1"
                         >Cantidad a convertir</label
                     >
-                    <div class="relative group">
+                    <div class="relative">
                         <input
                             id="amount"
                             type="number"
                             bind:value={amount}
                             min="0"
-                            class="w-full bg-black/20 border border-white/5 rounded-3xl px-6 py-6 text-4xl font-black text-white focus:outline-none focus:border-neat-accent/30 transition-all font-mono text-center placeholder:text-slate-800"
+                            class="w-full bg-slate-50 dark:bg-slate-800 border-4 border-black px-6 py-6 text-4xl font-black text-black dark:text-white focus:outline-none focus:bg-white dark:focus:bg-slate-700 transition-all font-mono text-center placeholder:text-slate-300 dark:placeholder:text-slate-600"
                         />
                     </div>
                 </div>
@@ -151,11 +148,9 @@
                     <!-- From -->
                     <div class="space-y-4">
                         <span
-                            class="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1"
+                            class="flex items-center gap-2 text-xs font-black text-black dark:text-white uppercase tracking-widest ml-1"
                         >
-                            <span
-                                class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
-                            ></span> Origen
+                            <span class="w-3 h-3 bg-emerald-500 border-2 border-black"></span> Origen
                         </span>
                         <div
                             class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3"
@@ -168,10 +163,10 @@
                                         fromCurrency = cur;
                                         fetchRates();
                                     }}
-                                    class="p-3 rounded-2xl border text-[10px] font-black transition-all duration-300 flex flex-col items-center gap-2 active:scale-95 {fromCurrency ===
+                                    class="p-3 border-2 border-black text-[10px] font-black transition-all flex flex-col items-center gap-2 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none {fromCurrency ===
                                     cur
-                                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                                        : 'bg-white/5 border-white/5 text-slate-500 hover:text-white hover:bg-white/10'}"
+                                        ? 'bg-emerald-500 text-white shadow-neo-sm'
+                                        : 'bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700'}"
                                 >
                                     <span class="text-2xl">{CURRENCY_FLAGS[cur] || ''}</span>
                                     <span class="tracking-tighter uppercase">{cur}</span>
@@ -184,7 +179,7 @@
                     <div class="flex justify-center relative z-10 -my-4 sm:-my-6">
                         <button
                             on:click={swapCurrencies}
-                            class="p-4 rounded-2xl bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all active:scale-90 shadow-2xl group backdrop-blur-xl"
+                            class="p-4 bg-white dark:bg-slate-800 border-4 border-black text-black dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-all active:scale-90 shadow-neo-sm group"
                             title="Intercambiar divisas"
                         >
                             <ArrowLeftRight
@@ -196,11 +191,9 @@
                     <!-- To -->
                     <div class="space-y-4">
                         <span
-                            class="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1"
+                            class="flex items-center gap-2 text-xs font-black text-black dark:text-white uppercase tracking-widest ml-1"
                         >
-                            <span
-                                class="w-1.5 h-1.5 rounded-full bg-neat-accent shadow-[0_0_8px_rgba(0,229,255,0.5)]"
-                            ></span> Destino
+                            <span class="w-3 h-3 bg-primary border-2 border-black"></span> Destino
                         </span>
                         <div
                             class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3"
@@ -210,10 +203,10 @@
                             {#each POPULAR_CURRENCIES as cur}
                                 <button
                                     on:click={() => (toCurrency = cur)}
-                                    class="p-3 rounded-2xl border text-[10px] font-black transition-all duration-300 flex flex-col items-center gap-2 active:scale-95 {toCurrency ===
+                                    class="p-3 border-2 border-black text-[10px] font-black transition-all flex flex-col items-center gap-2 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none {toCurrency ===
                                     cur
-                                        ? 'bg-neat-accent/10 border-neat-accent/30 text-neat-accent'
-                                        : 'bg-white/5 border-white/5 text-slate-500 hover:text-white hover:bg-white/10'}"
+                                        ? 'bg-primary text-white shadow-neo-sm'
+                                        : 'bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700'}"
                                 >
                                     <span class="text-2xl">{CURRENCY_FLAGS[cur] || ''}</span>
                                     <span class="tracking-tighter uppercase">{cur}</span>
@@ -225,40 +218,39 @@
             </div>
 
             <!-- Result Area -->
-            <div class="glass-card p-10 flex flex-col items-center text-center overflow-hidden">
-                <div
-                    class="absolute inset-0 bg-gradient-to-br from-neat-accent/5 to-indigo-500/5 pointer-events-none"
-                ></div>
-
+            <div
+                class="bg-primary border-4 border-black p-10 flex flex-col items-center text-center shadow-neo"
+            >
                 {#if loading}
-                    <div class="flex flex-col items-center justify-center py-6 relative z-10">
-                        <Loader2 class="w-10 h-10 animate-spin text-neat-accent mb-4" />
-                        <p
-                            class="text-[10px] font-black text-neat-accent uppercase tracking-[0.3em] animate-pulse"
-                        >
+                    <div
+                        class="flex flex-col items-center justify-center py-6 relative z-10 text-white"
+                    >
+                        <Loader2 class="w-10 h-10 animate-spin mb-4" />
+                        <p class="text-lg font-black uppercase tracking-widest animate-pulse">
                             Obteniendo Tasas...
                         </p>
                     </div>
                 {:else}
                     <div class="relative z-10 w-full space-y-8">
-                        <p class="text-slate-500 text-xs font-black uppercase tracking-[0.2em]">
+                        <p class="text-white/80 text-xs font-black uppercase tracking-widest">
                             Resultado de la conversión
                         </p>
 
                         <div class="flex flex-col gap-2">
                             <div
-                                class="text-5xl sm:text-7xl font-black text-white tracking-tighter tabular-nums drop-shadow-2xl"
+                                class="text-5xl sm:text-7xl font-black text-white tracking-tighter tabular-nums"
                             >
                                 {convertedAmount.toLocaleString('es-ES', {
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2,
                                 })}
                                 <span
-                                    class="text-neat-accent text-2xl sm:text-3xl ml-2 uppercase font-black"
-                                    >{toCurrency}</span
+                                    class="bg-white text-black px-2 ml-2 uppercase text-2xl sm:text-3xl border-2 border-black shadow-neo-sm"
                                 >
+                                    {toCurrency}
+                                </span>
                             </div>
-                            <p class="text-slate-400 text-sm font-medium">
+                            <p class="text-white font-bold uppercase tracking-tight">
                                 {amount}
                                 {fromCurrency} = {convertedAmount.toFixed(2)}
                                 {toCurrency}
@@ -266,26 +258,22 @@
                         </div>
 
                         <div
-                            class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t border-white/5"
+                            class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t-4 border-black/20"
                         >
                             <div
-                                class="bg-white/5 px-4 py-2 rounded-xl border border-white/5 flex items-center gap-3"
+                                class="bg-black text-white px-4 py-2 border-2 border-black flex items-center gap-3"
                             >
-                                <div
-                                    class="w-1.5 h-1.5 rounded-full bg-neat-accent animate-pulse"
-                                ></div>
-                                <span
-                                    class="text-[10px] font-black text-slate-300 uppercase tracking-widest"
-                                >
+                                <div class="w-2 h-2 bg-emerald-400"></div>
+                                <span class="text-[10px] font-black uppercase tracking-widest">
                                     1 {fromCurrency} = {rate.toFixed(4)}
                                     {toCurrency}
                                 </span>
                             </div>
                             <span
-                                class="text-[9px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-2"
+                                class="text-[9px] font-black text-white uppercase tracking-widest flex items-center gap-2 bg-black/20 px-3 py-1 border-2 border-black/40"
                             >
                                 <RefreshCw class="w-3 h-3" />
-                                Actualizado: {lastUpdated}
+                                ACTUALIZADO: {lastUpdated}
                             </span>
                         </div>
                     </div>
@@ -298,14 +286,14 @@
             <button
                 on:click={fetchRates}
                 disabled={loading}
-                class="flex items-center gap-3 text-[10px] font-black text-slate-500 hover:text-white transition-all uppercase tracking-widest group"
+                class="flex items-center gap-3 bg-white dark:bg-slate-800 border-2 border-black py-2 px-6 text-xs font-black text-black dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700 transition-all uppercase tracking-widest shadow-neo-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none group"
             >
                 <RefreshCw
                     class="w-4 h-4 transition-transform group-hover:rotate-180 duration-700 {loading
                         ? 'animate-spin'
                         : ''}"
                 />
-                Actualizar tasas en vivo
+                ACTUALIZAR TASAS EN VIVO
             </button>
         </div>
     </div>

@@ -11,20 +11,20 @@
         <div
             transition:fly={{ y: 20, duration: 300 }}
             class="
-                text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 pointer-events-auto
-                {toast.type === 'success' ? 'bg-green-600' : ''}
+                text-white px-6 py-4 border-2 border-black shadow-neo flex items-center gap-3 pointer-events-auto font-black uppercase tracking-tight
+                {toast.type === 'success' ? 'bg-emerald-500' : ''}
                 {toast.type === 'error' ? 'bg-red-600' : ''}
-                {toast.type === 'info' ? 'bg-brand-600' : ''}
+                {toast.type === 'info' ? 'bg-primary' : ''}
             "
         >
             {#if toast.type === 'success'}
-                <CheckCircle size={20} />
+                <CheckCircle size={20} class="text-white" />
             {:else if toast.type === 'error'}
-                <AlertCircle size={20} />
+                <AlertCircle size={20} class="text-white" />
             {:else}
-                <Info size={20} />
+                <Info size={20} class="text-white" />
             {/if}
-            <span class="text-sm font-medium">{toast.message}</span>
+            <span class="text-xs">{toast.message}</span>
         </div>
     {/each}
 </div>

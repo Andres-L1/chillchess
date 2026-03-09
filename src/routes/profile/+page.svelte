@@ -21,9 +21,9 @@
 
     onMount(() => {
         pageHeader.set({
-            title: 'Mi Perfil',
-            description: 'Gestiona tu cuenta, facturación y preferencias',
-            category: 'Ajustes',
+            title: 'GESTOR DE PERFIL',
+            description: 'Configuración de cuenta, suscripción y preferencias de usuario.',
+            category: 'SISTEMA',
         });
     });
 
@@ -53,9 +53,6 @@
             await updateProfile(auth.currentUser, {
                 displayName: newDisplayName,
             });
-            if ($authStore.user) {
-                $authStore.user.displayName = newDisplayName;
-            }
             addToast('Nombre actualizado correctamente', 'success');
         } catch (error) {
             console.error('Update name error:', error);
@@ -109,7 +106,7 @@
 <div class="space-y-8">
     <!-- User summary top card -->
     <div
-        class="glass-card p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6 relative overflow-hidden group"
+        class="bg-white dark:bg-slate-900 border-4 border-black p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6 relative overflow-hidden group shadow-neo"
     >
         <div
             class="absolute top-0 right-0 w-64 h-64 bg-neat-accent/10 rounded-full blur-3xl opacity-0 group-hover:opacity-50 -z-10 translate-x-1/2 -translate-y-1/2 transition-opacity duration-1000"
@@ -117,7 +114,7 @@
 
         <div class="relative shrink-0">
             <div
-                class="w-24 h-24 md:w-28 md:h-28 rounded-full bg-slate-900 border border-white/10 text-white flex items-center justify-center font-black text-3xl md:text-5xl shadow-2xl relative overflow-hidden"
+                class="w-24 h-24 md:w-28 md:h-28 rounded-none bg-slate-900 border-4 border-black text-white flex items-center justify-center font-black text-3xl md:text-5xl shadow-neo-sm relative overflow-hidden"
             >
                 <div
                     class="absolute inset-0 bg-gradient-to-br from-neat-accent/20 to-transparent opacity-50"
@@ -134,8 +131,10 @@
         </div>
 
         <div class="flex-1 text-center md:text-left">
-            <h2 class="text-2xl font-black text-white mb-1">
-                {$authStore.user?.displayName || 'Usuario de ChillChess'}
+            <h2
+                class="text-2xl font-black text-black dark:text-white mb-1 uppercase tracking-tighter italic"
+            >
+                {$authStore.user?.displayName || 'USUARIO DE CHILLCHESS'} /
             </h2>
             <div
                 class="flex items-center justify-center md:justify-start gap-2 text-slate-400 text-sm mb-4"
@@ -150,21 +149,21 @@
                         class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-400/10 text-amber-400 rounded-lg text-xs font-bold border border-amber-400/20"
                     >
                         <ShieldAlert class="w-3.5 h-3.5" />
-                        Acceso Root Admin
+                        ADMINISTRADOR DEL SISTEMA
                     </div>
                 {:else if $authStore.user?.isPro}
                     <div
                         class="inline-flex items-center gap-1.5 px-3 py-1 bg-neat-accent/10 text-neat-accent rounded-lg text-[10px] font-black uppercase tracking-wider border border-neat-accent/20"
                     >
                         <Crown class="w-3.5 h-3.5" />
-                        Suscripción Pro Activa
+                        SUSCRIPCIÓN PRO ACTIVA
                     </div>
                 {:else}
                     <div
                         class="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-700/50 text-slate-400 rounded-lg text-xs font-bold border border-slate-600/50"
                     >
                         <User class="w-3.5 h-3.5" />
-                        Cuenta Básica Gratis
+                        CUENTA BÁSICA
                     </div>
                 {/if}
             </div>
@@ -173,30 +172,32 @@
         <div class="shrink-0 w-full md:w-auto mt-4 md:mt-0">
             <button
                 on:click={handleLogout}
-                class="w-full md:w-auto px-6 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold rounded-xl transition-colors flex items-center justify-center gap-2 border border-red-500/20"
+                class="w-full md:w-auto px-6 py-4 bg-white dark:bg-slate-900 border-4 border-black hover:bg-black hover:text-white transition-colors flex items-center justify-center gap-2 shadow-neo-sm font-black uppercase text-xs tracking-[0.2em]"
             >
-                <LogOut class="w-5 h-5" />
-                Cerrar Sesión
+                <LogOut class="w-5 h-5 text-red-500" />
+                CERRAR SESIÓN /
             </button>
         </div>
     </div>
 
     <div class="grid lg:grid-cols-2 gap-8">
         <!-- Account Settings Form -->
-        <div class="glass-card p-6 md:p-8">
+        <div class="bg-white dark:bg-slate-900 border-4 border-black p-6 md:p-8 shadow-neo">
             <div class="flex items-center justify-between mb-10">
                 <h3
-                    class="text-xl font-black text-white flex items-center gap-3 uppercase tracking-tighter"
+                    class="text-xl font-black text-black dark:text-white flex items-center gap-3 uppercase tracking-tighter italic"
                 >
-                    <Settings class="w-6 h-6 text-neat-accent" />
-                    Datos Personales
+                    <Settings class="w-6 h-6 text-primary" />
+                    IDENTIDAD DE USUARIO /
                 </h3>
             </div>
 
             <div class="space-y-6">
                 <div>
-                    <label for="display-name" class="block text-sm font-bold text-slate-300 mb-2"
-                        >Nombre Público</label
+                    <label
+                        for="display-name"
+                        class="block text-[10px] font-black text-slate-500 mb-4 uppercase tracking-widest ml-1"
+                        >NOMBRE PÚBLICO</label
                     >
                     <div class="flex items-center gap-3">
                         <input
@@ -210,20 +211,22 @@
                             on:click={handleSaveName}
                             disabled={isUpdatingName ||
                                 newDisplayName === $authStore.user?.displayName}
-                            class="px-8 py-4 bg-neat-accent hover:bg-white text-black disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed font-black rounded-2xl transition-all h-[58px] whitespace-nowrap uppercase text-sm tracking-widest"
+                            class="px-8 py-4 bg-primary text-white border-4 border-black hover:bg-black transition-all h-[58px] whitespace-nowrap uppercase text-xs font-black tracking-widest shadow-neo-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
                         >
                             {#if isUpdatingName}
                                 <RefreshCw class="w-5 h-5 animate-spin mx-auto" />
                             {:else}
-                                Guardar
+                                ACTUALIZAR
                             {/if}
                         </button>
                     </div>
                 </div>
 
                 <div>
-                    <label for="email" class="block text-sm font-bold text-slate-300 mb-2"
-                        >Correo Electrónico</label
+                    <label
+                        for="email"
+                        class="block text-[10px] font-black text-slate-500 mb-4 uppercase tracking-widest ml-1"
+                        >DIRECCIÓN DE CORREO</label
                     >
                     <input
                         id="email"
@@ -232,8 +235,8 @@
                         disabled
                         class="w-full bg-slate-900/30 border border-slate-700/30 rounded-xl px-4 py-3 text-slate-500 font-medium cursor-not-allowed"
                     />
-                    <p class="text-xs text-slate-500 mt-2">
-                        No es posible cambiar tu correo directamente por motivos de seguridad.
+                    <p class="text-[10px] text-slate-500 mt-4 uppercase tracking-tight">
+                        EL CORREO ELECTRÓNICO NO PUEDE SER MODIFICADO DIRECTAMENTE.
                     </p>
                 </div>
             </div>
@@ -245,19 +248,21 @@
                 <h3
                     class="text-xl font-black text-white flex items-center gap-3 mb-10 uppercase tracking-tighter"
                 >
-                    <CreditCard class="w-6 h-6 text-emerald-400" />
-                    Facturación
+                    <CreditCard class="w-6 h-6 text-neat-accent" />
+                    ESTADO DE FACTURACIÓN
                 </h3>
 
                 {#if $authStore.user?.isAdmin}
                     <div
                         class="p-4 bg-amber-400/10 rounded-xl border border-amber-400/20 text-amber-300 mb-6"
                     >
-                        <h4 class="font-bold mb-1 flex items-center gap-2">
-                            <ShieldAlert class="w-4 h-4" /> Admin Bypass
+                        <h4
+                            class="font-black mb-1 flex items-center gap-2 uppercase text-xs tracking-wider"
+                        >
+                            <ShieldAlert class="w-4 h-4" /> ADMIN BYPASS
                         </h4>
-                        <p class="text-sm opacity-90">
-                            Tu cuenta tiene pase libre a todo el sistema. No necesitas pagar nada.
+                        <p class="text-[11px] font-bold opacity-70 tracking-tight">
+                            Tu cuenta tiene acceso sin restricciones a todo el sistema.
                         </p>
                     </div>
                 {:else if $authStore.user?.isPro}
@@ -265,21 +270,23 @@
                         class="p-5 bg-neat-accent/5 rounded-2xl border border-neat-accent/10 text-neat-accent mb-8"
                     >
                         <h4
-                            class="font-black mb-1 flex items-center gap-2 uppercase text-xs tracking-wider"
+                            class="font-black mb-2 flex items-center gap-2 uppercase text-xs tracking-wider"
                         >
-                            <Crown class="w-4 h-4 text-neat-accent" /> Plan Pro Activo
+                            <Crown class="w-4 h-4 text-neat-accent" /> SUSCRIPCIÓN PRO ACTIVA
                         </h4>
                         <p class="text-[11px] font-bold opacity-70 tracking-tight">
-                            Cuentas con acceso ilimitado a todas las herramientas de la suite.
+                            Acceso ilimitado a todas las herramientas de la suite creativa.
                         </p>
                     </div>
                 {:else}
                     <div
                         class="p-4 bg-slate-700/30 rounded-xl border border-slate-600/30 text-slate-400 mb-6"
                     >
-                        <h4 class="font-bold text-slate-300 mb-1">Sin Suscripción</h4>
-                        <p class="text-sm opacity-90">
-                            Actualmente no puedes acceder a la suite completa de herramientas.
+                        <h4 class="font-black text-slate-300 mb-2 uppercase text-xs tracking-wider">
+                            ESTADO: GRATUITO
+                        </h4>
+                        <p class="text-[11px] font-bold opacity-70 tracking-tight">
+                            Actualiza para desbloquear el potencial completo de la suite.
                         </p>
                     </div>
                 {/if}
@@ -291,7 +298,7 @@
                             class="flex-1 bg-neat-accent hover:bg-white text-black font-black py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-3 uppercase text-xs tracking-widest"
                         >
                             <Crown class="w-4 h-4" />
-                            Mejorar Plan a PRO
+                            ADQUIRIR PLAN PRO
                         </button>
                     {/if}
                     <button
@@ -299,7 +306,7 @@
                         class="flex-1 bg-slate-700/50 hover:bg-slate-700 border border-slate-600/50 text-slate-300 font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2"
                         title="Ir al portal del cliente en Stripe"
                     >
-                        Gestionar Pagos
+                        GESTIONAR PAGOS
                         <ExternalLink class="w-4 h-4 text-slate-500" />
                     </button>
                 </div>

@@ -29,61 +29,73 @@
     let searchQuery = '';
 
     const CATEGORY_ORDER = [
-        'Negocios',
-        'Productividad',
-        'Finanzas',
-        'Seguridad',
-        'Utilidades',
-        'Comunidad',
+        'TRABAJO',
+        'GESTIÓN',
+        'FINANZAS',
+        'SEGURIDAD',
+        'HERRAMIENTAS',
+        'SOPORTE',
     ];
 
     const tools = [
         {
             id: '/freelance',
-            category: 'Negocios',
-            name: 'Valor de mi Hora',
+            category: 'TRABAJO',
+            name: 'Tarifa Freelance',
             icon: Briefcase,
             pro: true,
         },
-        { id: '/vcard', category: 'Negocios', name: 'Tarjeta Contacto', icon: User, pro: true },
-        { id: '/invoice', category: 'Negocios', name: 'Facturas', icon: FileText, pro: true },
+        { id: '/vcard', category: 'TRABAJO', name: 'Tarjeta Virtual', icon: User, pro: true },
+        { id: '/invoice', category: 'TRABAJO', name: 'Facturación', icon: FileText, pro: true },
         {
             id: '/kanban',
-            category: 'Productividad',
+            category: 'GESTIÓN',
             name: 'Tablero Kanban',
             icon: LayoutList,
             pro: true,
         },
-        { id: '/pomodoro', category: 'Productividad', name: 'Pomodoro', icon: Timer, pro: true },
+        {
+            id: '/pomodoro',
+            category: 'GESTIÓN',
+            name: 'Reloj Pomodoro',
+            icon: Timer,
+            pro: true,
+        },
         {
             id: '/currency',
-            category: 'Finanzas',
-            name: 'Conversor Divisas',
+            category: 'FINANZAS',
+            name: 'Conversor de Moneda',
             icon: DollarSign,
             pro: true,
         },
-        { id: '/fire', category: 'Finanzas', name: 'Libertad Financiera', icon: Flame, pro: true },
-        { id: '/loan', category: 'Finanzas', name: 'Préstamos', icon: Landmark, pro: true },
-        { id: '/tip', category: 'Finanzas', name: 'Dividir Cuenta', icon: Users, pro: true },
+        { id: '/fire', category: 'FINANZAS', name: 'Calculadora FIRE', icon: Flame, pro: true },
+        {
+            id: '/loan',
+            category: 'FINANZAS',
+            name: 'Préstamos e Hipotecas',
+            icon: Landmark,
+            pro: true,
+        },
+        { id: '/tip', category: 'FINANZAS', name: 'Dividir Cuenta', icon: Users, pro: true },
         {
             id: '/password',
-            category: 'Seguridad',
-            name: 'Claves Seguras',
+            category: 'SEGURIDAD',
+            name: 'Generador Claves',
             icon: KeyRound,
             pro: true,
         },
-        { id: '/qr', category: 'Utilidades', name: 'Generador QR', icon: QrCode, pro: true },
+        { id: '/qr', category: 'HERRAMIENTAS', name: 'Códigos QR', icon: QrCode, pro: true },
         {
             id: '/palette',
-            category: 'Utilidades',
+            category: 'HERRAMIENTAS',
             name: 'Paletas de Color',
             icon: Palette,
             pro: true,
         },
         {
             id: '/feedback',
-            category: 'Comunidad',
-            name: 'Sugerencias y Bugs',
+            category: 'SOPORTE',
+            name: 'Ayuda y Soporte',
             icon: MessageSquare,
             pro: true,
         },
@@ -124,7 +136,6 @@
         if (!$mobileMenuOpen) return;
         const touchEndX = e.changedTouches[0].clientX;
         const swipeDistance = touchStartX - touchEndX;
-        // If swiped left by more than 40px, close sidebar
         if (swipeDistance > 40) {
             triggerHaptic();
             mobileMenuOpen.set(false);
@@ -153,25 +164,29 @@
 
 <!-- Sidebar Navigation -->
 <nav
-    class="fixed inset-y-0 left-0 z-50 w-80 bg-black/10 backdrop-blur-3xl shadow-2xl md:relative flex flex-col h-[100dvh] transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] md:translate-x-0 border-r border-white/5"
+    class="fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-900 md:relative flex flex-col h-[100dvh] transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] md:translate-x-0 border-r-4 border-black"
     class:-translate-x-full={!$mobileMenuOpen}
     class:translate-x-0={$mobileMenuOpen}
     on:touchstart={handleTouchStart}
     on:touchend={handleTouchEnd}
 >
     <!-- Header del Menú -->
-    <div class="p-6 border-b border-white/5 flex items-center justify-between">
-        <a href="/" class="flex items-center gap-3 group">
+    <div class="px-8 py-10 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-3 active:scale-95 transition-transform group">
             <div
-                class="bg-white/5 border border-white/10 text-white p-2.5 rounded-2xl shadow-sm group-hover:bg-white/10 transition-all active:scale-95"
+                class="w-10 h-10 bg-primary border-4 border-black shadow-neo-sm flex items-center justify-center group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
             >
-                <Blocks size={22} class="text-white" />
+                <Blocks class="text-white w-6 h-6" />
             </div>
-            <h1 class="text-xl font-bold text-white tracking-tighter">CHILLCHESS</h1>
+            <h1
+                class="text-xl font-black text-black dark:text-white tracking-tighter uppercase italic"
+            >
+                CHILL<span class="text-primary">CHESS</span>
+            </h1>
         </a>
         <button
             on:click={() => mobileMenuOpen.set(false)}
-            class="md:hidden p-2 text-slate-400 hover:text-white rounded-2xl hover:bg-white/5 transition-all flex items-center justify-center min-w-[44px] min-h-[44px]"
+            class="md:hidden p-2 text-black dark:text-white border-4 border-black bg-[#FFD54F] shadow-neo-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
             aria-label="Cerrar menú"
         >
             <X size={20} />
@@ -179,22 +194,21 @@
     </div>
 
     <!-- Buscador -->
-    <div class="px-6 pt-6 pb-2">
+    <div class="px-6 mb-8">
         <div class="relative group">
             <Search
-                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-white transition-colors"
+                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black dark:text-white pointer-events-none"
             />
             <input
                 type="text"
                 bind:value={searchQuery}
-                placeholder="Buscar..."
-                class="w-full bg-white/5 border border-white/5 rounded-2xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-white/20 focus:bg-white/10 transition-all text-slate-200 placeholder:text-slate-500 font-medium"
+                placeholder="BUSCAR..."
+                class="w-full bg-slate-50 dark:bg-slate-800 border-[6px] border-black rounded-none pl-11 pr-4 py-3 text-[10px] font-black tracking-[0.2em] focus:outline-none focus:ring-0 shadow-neo-sm focus:shadow-neo transition-all text-black dark:text-white placeholder:text-slate-500"
             />
             {#if searchQuery}
                 <button
                     on:click={() => (searchQuery = '')}
-                    class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
-                    aria-label="Borrar búsqueda"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-black dark:text-white hover:scale-110 transition-transform"
                 >
                     <XCircle class="w-4 h-4" />
                 </button>
@@ -203,75 +217,102 @@
     </div>
 
     <!-- Lista de Herramientas -->
-    <div class="px-4 pb-6 flex-1 overflow-y-auto custom-scrollbar">
+    <div class="px-4 pb-8 flex-1 overflow-y-auto custom-scrollbar space-y-8">
         {#if filteredTools.length === 0}
-            <div class="flex flex-col items-center justify-center py-10 text-slate-600">
-                <Search class="w-10 h-10 mb-3 opacity-30" />
-                <p class="text-sm font-bold tracking-tight">Sin resultados</p>
+            <div
+                class="flex flex-col items-center justify-center py-10 text-slate-400 border-4 border-dashed border-black/10 dark:border-white/10 m-2"
+            >
+                <Search class="w-10 h-10 mb-3 opacity-20" />
+                <p class="text-[10px] font-black uppercase tracking-widest text-center">
+                    Sin resultados
+                </p>
             </div>
         {:else}
             {#each groupedTools as group}
-                <div
-                    class="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] mt-8 mb-3 px-4 flex items-center gap-3"
-                >
-                    <span>{group.category}</span>
-                    <div class="h-px bg-white/5 flex-1"></div>
-                </div>
-                <div class="space-y-1">
-                    {#each group.items as tool}
-                        <a
-                            href={tool.id}
-                            on:click={handleNavigate}
-                            class="w-full flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-bold transition-all select-none group {$page
-                                .url.pathname === tool.id
-                                ? 'bg-white/10 text-white border border-white/10 shadow-lg'
-                                : 'text-slate-400 hover:bg-white/5 hover:text-slate-200 border border-transparent'}"
-                        >
-                            <div class="flex items-center gap-4 truncate">
-                                <svelte:component
-                                    this={tool.icon}
-                                    size={18}
-                                    class="shrink-0 transition-colors group-hover:text-white"
-                                />
-                                <span class="truncate">{tool.name}</span>
-                            </div>
-                            {#if tool.pro}
-                                <Crown size={12} class="text-neat-accent shrink-0 opacity-80" />
-                            {/if}
-                        </a>
-                    {/each}
+                <div class="space-y-3">
+                    <div
+                        class="text-[11px] font-black text-black dark:text-white tracking-[0.25em] px-4 flex items-center gap-2"
+                    >
+                        <span class="w-2 h-2 bg-primary border-2 border-black transform rotate-45"
+                        ></span>
+                        {group.category}
+                    </div>
+                    <div class="space-y-2">
+                        {#each group.items as tool}
+                            <a
+                                href={tool.id}
+                                on:click={handleNavigate}
+                                class="w-full flex items-center justify-between px-4 py-3 border-4 transition-all duration-200 group tracking-tighter {$page
+                                    .url.pathname === tool.id
+                                    ? 'bg-black text-white border-black shadow-neo translate-x-1 translate-y-1'
+                                    : 'bg-white dark:bg-slate-900 dark:text-white text-black border-black hover:bg-primary/10 hover:-translate-y-1 hover:-translate-x-0.5 shadow-neo-sm hover:shadow-neo'}"
+                            >
+                                <div class="flex items-center gap-4 truncate">
+                                    <svelte:component
+                                        this={tool.icon}
+                                        size={18}
+                                        class="shrink-0 {$page.url.pathname === tool.id
+                                            ? 'text-white'
+                                            : 'text-black dark:text-white'}"
+                                    />
+                                    <span class="truncate font-black text-[11px] uppercase"
+                                        >{tool.name}</span
+                                    >
+                                </div>
+                                {#if tool.pro}
+                                    <div
+                                        class="neo-sticker p-1 bg-white dark:bg-slate-800 rotate-3"
+                                    >
+                                        <Crown
+                                            size={12}
+                                            class="{$page.url.pathname === tool.id
+                                                ? 'text-primary'
+                                                : 'text-primary'} fill-current"
+                                        />
+                                    </div>
+                                {/if}
+                            </a>
+                        {/each}
+                    </div>
                 </div>
             {/each}
         {/if}
     </div>
 
     <!-- Footer del Menú -->
-    <div class="p-6 border-t border-white/5 bg-transparent safe-bottom space-y-5">
-        <!-- Currency selector (visible on mobile where header selector is hidden) -->
-        <div class="flex items-center justify-between sm:hidden px-2">
-            <span class="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]"
-                >Moneda</span
+    <div class="p-6 border-t-4 border-black bg-slate-50 dark:bg-slate-800 safe-bottom space-y-6">
+        <!-- Currency selector para movil -->
+        <div class="flex items-center justify-between sm:hidden">
+            <span
+                class="text-[10px] font-black text-black dark:text-white uppercase tracking-widest"
+                >DIVISA</span
             >
             <div class="flex gap-1">
                 {#each currencies as c}
                     <button
                         on:click={() => currencyStore.set(c)}
-                        class="w-10 h-10 rounded-xl font-bold text-sm transition-all active:scale-90 {$currencyStore ===
+                        class="w-9 h-9 border-4 border-black font-black text-xs transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-none {$currencyStore ===
                         c
-                            ? 'bg-white text-black shadow-lg'
-                            : 'text-slate-500 hover:text-white hover:bg-white/5 border border-transparent'}"
+                            ? 'bg-primary text-white shadow-none'
+                            : 'bg-white dark:bg-slate-700 text-black dark:text-white shadow-neo-sm hover:-translate-y-0.5'}"
                     >
                         {c}
                     </button>
                 {/each}
             </div>
         </div>
-        <div class="flex items-center justify-center flex-col gap-1">
-            <p class="text-[10px] font-black text-slate-700 uppercase tracking-[0.3em]">
-                CHILLCHESS PLATFORM
-            </p>
-            <p class="text-[9px] font-bold text-slate-800 uppercase tracking-widest">
-                VERSION {APP_VERSION}
+
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div
+                    class="w-2.5 h-2.5 rounded-none bg-green-500 border-2 border-black animate-pulse shadow-neo-sm"
+                ></div>
+                <span class="text-[9px] font-black text-black dark:text-white tracking-[0.2em]"
+                    >ONLINE</span
+                >
+            </div>
+            <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                V{APP_VERSION}
             </p>
         </div>
     </div>

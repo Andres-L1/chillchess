@@ -1,9 +1,6 @@
 // Stripe configuration
 import Stripe from 'stripe';
-// @ts-ignore
 import { env } from '$env/dynamic/private';
-// @ts-ignore
-import { env as publicEnv } from '$env/dynamic/public';
 
 // Lazy initialization - only create Stripe instance when needed
 let stripeInstance: Stripe | null = null;
@@ -30,8 +27,8 @@ export const stripe = {
 
 // Price IDs from Stripe Dashboard
 export const STRIPE_PRICE_IDS = {
-    pro_monthly: publicEnv.PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID || process.env.PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID || '',
-    pro_yearly: publicEnv.PUBLIC_STRIPE_PRO_YEARLY_PRICE_ID || process.env.PUBLIC_STRIPE_PRO_YEARLY_PRICE_ID || '',
+    pro_monthly: process.env.PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID || process.env.VITE_STRIPE_PRO_MONTHLY_PRICE_ID || '',
+    pro_yearly: process.env.PUBLIC_STRIPE_PRO_YEARLY_PRICE_ID || process.env.VITE_STRIPE_PRO_YEARLY_PRICE_ID || '',
 } as const;
 
 // Webhook secret for verifying Stripe events

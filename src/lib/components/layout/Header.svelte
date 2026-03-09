@@ -1,6 +1,17 @@
 <script lang="ts">
     import { pageHeader, mobileMenuOpen } from '$lib/stores/ui';
-    import { Menu, User, Settings, LogOut, ChevronDown, Crown } from 'lucide-svelte';
+    import { themeModeStore } from '$lib/stores/themeStore';
+    import {
+        Menu,
+        User,
+        Settings,
+        LogOut,
+        ChevronDown,
+        Crown,
+        Sun,
+        Moon,
+        QrCode,
+    } from 'lucide-svelte';
     import { authStore } from '$lib/stores/authStore';
     import { auth } from '$lib/firebase';
     import { signOut } from 'firebase/auth';
@@ -70,186 +81,189 @@
     })();
 </script>
 
-<header
-    class="bg-black/20 backdrop-blur-3xl border-b border-white/5 z-50 flex-shrink-0 flex items-center justify-between px-6 md:px-10 py-5 h-20 relative"
->
-    <div class="flex items-center gap-4 overflow-hidden">
-        <button
-            on:click={handleMenuClick}
-            class="md:hidden p-3 -ml-2 text-slate-400 hover:text-white rounded-2xl hover:bg-white/5 flex items-center justify-center min-w-[48px] min-h-[48px] active:scale-95 transition-all"
-            aria-label="Abrir menú"
-        >
-            <Menu class="w-6 h-6" />
-        </button>
+<header class="sticky top-0 left-0 right-0 z-30 px-2 md:px-8 py-2 md:py-4 pointer-events-none">
+    <div
+        class="max-w-7xl mx-auto flex items-center justify-between h-16 md:h-20 bg-white dark:bg-slate-900 border-2 md:border-4 border-black shadow-neo px-4 md:px-6 pointer-events-auto"
+    >
+        <!-- Left: Quick Links / Socials (NeatPass Style) -->
+        <div class="flex items-center gap-4">
+            <button
+                on:click={handleMenuClick}
+                class="md:hidden p-3 text-black dark:text-white border-2 border-black bg-white dark:bg-slate-800 shadow-neo-sm active:translate-x-0.5 active:translate-y-0.5 transition-all"
+                aria-label="Abrir menú"
+            >
+                <Menu class="w-5 h-5" />
+            </button>
 
-        <div class="flex-1 truncate">
-            <div class="flex items-center gap-3">
-                {#if $pageHeader.category}
-                    <span
-                        class="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-white/5 text-slate-400 border border-white/10 shrink-0"
-                    >
-                        {$pageHeader.category}
-                    </span>
-                {/if}
-                <h2 class="text-xl md:text-2xl font-bold text-white truncate tracking-tight">
+            <div class="hidden lg:flex items-center gap-2"></div>
+        </div>
+
+        <!-- Center: Title / Logo -->
+        <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 md:gap-3">
+            <h2
+                class="text-base md:text-xl font-black text-black dark:text-white tracking-tighter uppercase italic"
+            >
+                CHILL<span class="text-primary">CHESS</span>
+            </h2>
+            {#if $pageHeader.title && $pageHeader.title !== 'Dashboard'}
+                <div class="h-8 w-1.5 bg-black mx-1 hidden sm:block"></div>
+                <span
+                    class="text-xs font-black border-2 border-black bg-black text-white px-2 py-0.5 uppercase tracking-widest hidden sm:block"
+                >
                     {$pageHeader.title}
-                </h2>
-            </div>
-            {#if $pageHeader.description}
-                <p class="text-slate-500 text-xs mt-1 truncate hidden md:block font-medium">
-                    {$pageHeader.description}
-                </p>
+                </span>
             {/if}
         </div>
-    </div>
 
-    <!-- Currency Selector -->
-    <div class="relative ml-auto shrink-0 hidden sm:block">
-        <button
-            on:click|stopPropagation={toggleCurrencyDropdown}
-            class="flex items-center justify-center w-11 h-11 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-bold transition-all border border-white/10 active:scale-95"
-            title="Cambiar Moneda Global"
-        >
-            {$currencyStore}
-        </button>
-
-        {#if isCurrencyDropdownOpen}
-            <div
-                class="fixed inset-0 z-40"
-                on:click={closeCurrencyDropdown}
-                on:keydown={(e) => e.key === 'Escape' && closeCurrencyDropdown()}
-                role="button"
-                tabindex="0"
-                aria-label="Cerrar selector de moneda"
-            ></div>
-            <div
-                transition:slide={{ duration: 150, axis: 'y' }}
-                class="absolute right-0 top-full mt-2 w-16 bg-black/60 backdrop-blur-2xl rounded-xl shadow-2xl border border-white/10 z-50 overflow-hidden transform origin-top-right"
-            >
-                <div class="flex flex-col p-1 gap-1">
-                    {#each currencies as c}
-                        <button
-                            on:click={() => setCurrency(c)}
-                            class="w-full py-2 font-medium text-center rounded-lg transition-colors {$currencyStore ===
-                            c
-                                ? 'text-white bg-white/10 border border-white/5'
-                                : 'text-slate-400 hover:text-white hover:bg-white/5'}"
-                        >
-                            {c}
-                        </button>
-                    {/each}
-                </div>
-            </div>
-        {/if}
-    </div>
-
-    <!-- User Profile Dropdown -->
-    <div class="relative ml-4 shrink-0">
-        <button
-            on:click|stopPropagation={toggleDropdown}
-            class="flex items-center gap-2 md:gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors focus:outline-none focus:ring-1 focus:ring-white/20 min-h-[48px]"
-            aria-expanded={isDropdownOpen}
-            aria-label="Opciones de usuario"
-        >
-            <div class="relative">
-                <div
-                    class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/10 text-white border border-white/20 flex items-center justify-center font-bold text-sm md:text-base shadow-sm"
+        <!-- Right: Actions -->
+        <div class="flex items-center gap-3">
+            <!-- Currency -->
+            <div class="relative hidden sm:block">
+                <button
+                    on:click|stopPropagation={toggleCurrencyDropdown}
+                    class="flex items-center justify-center w-10 h-10 bg-white dark:bg-slate-800 border-2 border-black text-black dark:text-white font-black transition-all shadow-neo-sm hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+                    title="Cambiar Moneda Global"
                 >
-                    {initials}
-                </div>
-                {#if $authStore.user?.isAdmin || $authStore.user?.isPro}
+                    {$currencyStore}
+                </button>
+
+                {#if isCurrencyDropdownOpen}
                     <div
-                        class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-amber-400 border-2 border-[#0d1117] flex items-center justify-center text-amber-900 shadow-sm flex-shrink-0"
+                        class="fixed inset-0 z-40"
+                        on:click={closeCurrencyDropdown}
+                        on:keydown={(e) => e.key === 'Escape' && closeCurrencyDropdown()}
+                        role="button"
+                        tabindex="0"
+                        aria-label="Cerrar selector de moneda"
+                    ></div>
+                    <div
+                        transition:slide={{ duration: 150, axis: 'y' }}
+                        class="absolute right-0 top-full mt-3 w-16 bg-white dark:bg-slate-900 border-4 border-black z-50 overflow-hidden shadow-neo"
                     >
-                        <Crown class="w-2.5 h-2.5" />
+                        {#each currencies as c}
+                            <button
+                                on:click={() => setCurrency(c)}
+                                class="w-full py-3 text-xs font-black transition-colors border-b-2 border-black last:border-0 {$currencyStore ===
+                                c
+                                    ? 'bg-primary text-white'
+                                    : 'text-black dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700'}"
+                            >
+                                {c}
+                            </button>
+                        {/each}
                     </div>
                 {/if}
             </div>
 
-            <div class="hidden md:block text-left">
-                <p class="text-sm font-bold text-slate-200 truncate max-w-[120px]">
-                    {$authStore.user?.displayName || 'Usuario'}
-                </p>
-                <p class="text-[10px] font-medium text-slate-500 uppercase tracking-widest">
-                    {#if $authStore.user?.isAdmin}
-                        Admin
-                    {:else if $authStore.user?.isPro}
-                        Premium
-                    {:else}
-                        Básico
-                    {/if}
-                </p>
-            </div>
-            <ChevronDown
-                class="w-4 h-4 text-slate-500 hidden xl:block transition-transform {isDropdownOpen
-                    ? 'rotate-180'
-                    : ''}"
-            />
-        </button>
-
-        {#if isDropdownOpen}
-            <!-- Transparent backdrop for closing -->
-            <div
-                class="fixed inset-0 z-40"
-                on:click={closeDropdown}
-                on:keydown={(e) => e.key === 'Escape' && closeDropdown()}
-                role="button"
-                tabindex="0"
-                aria-label="Cerrar menú flotante"
-            ></div>
-
-            <div
-                transition:slide={{ duration: 200, axis: 'y' }}
-                class="absolute right-0 top-full mt-2 w-64 max-w-[calc(100vw-2rem)] bg-black/60 backdrop-blur-2xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-white/10 z-50 overflow-hidden transform origin-top-right"
+            <!-- Theme Toggle -->
+            <button
+                on:click={() => themeModeStore.toggle()}
+                class="flex items-center justify-center w-10 h-10 bg-white dark:bg-slate-800 border-2 border-black text-black dark:text-white transition-all shadow-neo-sm hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+                title="Cambiar Tema"
             >
-                <div class="px-5 py-4 border-b border-white/10 bg-white/5">
-                    <p class="text-sm font-medium text-white truncate mb-1">
-                        {$authStore.user?.displayName || 'Usuario'}
-                    </p>
-                    <p
-                        class="text-xs text-slate-400 truncate cursor-copy hover:text-white transition-colors"
-                        title="Tu correo"
-                    >
-                        {$authStore.user?.email}
-                    </p>
-                </div>
+                {#if $themeModeStore === 'light'}
+                    <Moon class="w-5 h-5" />
+                {:else}
+                    <Sun class="w-5 h-5" />
+                {/if}
+            </button>
 
-                <div class="p-2 flex flex-col gap-1">
-                    <button
-                        on:click={() => {
-                            closeDropdown();
-                            goto('/profile');
-                        }}
-                        class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white font-medium text-sm flex items-center gap-3 transition-colors"
+            <!-- Profile -->
+            <div class="relative">
+                <button
+                    on:click|stopPropagation={toggleDropdown}
+                    class="flex items-center gap-3 p-1.5 border-4 border-black bg-white dark:bg-slate-900 shadow-neo-sm hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all group"
+                    aria-expanded={isDropdownOpen}
+                    aria-label="Opciones de usuario"
+                >
+                    <div
+                        class="w-8 h-8 bg-black text-white border-2 border-black flex items-center justify-center font-black text-sm group-hover:bg-primary transition-colors"
                     >
-                        <User class="w-4 h-4" />
-                        Mi Perfil
-                    </button>
+                        {initials}
+                    </div>
+                    <ChevronDown
+                        class="w-4 h-4 mr-2 text-black dark:text-white transition-transform {isDropdownOpen
+                            ? 'rotate-180'
+                            : ''}"
+                    />
+                </button>
 
-                    {#if $authStore.user?.isAdmin}
-                        <button
-                            on:click={() => {
-                                closeDropdown();
-                                goto('/admin');
-                            }}
-                            class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-white/5 text-slate-300 hover:text-amber-300 font-medium text-sm flex items-center gap-3 transition-colors"
+                {#if isDropdownOpen}
+                    <div
+                        class="fixed inset-0 z-40"
+                        on:click={closeDropdown}
+                        on:keydown={(e) => e.key === 'Escape' && closeDropdown()}
+                        role="button"
+                        tabindex="0"
+                        aria-label="Cerrar menú flotante"
+                    ></div>
+                    <div
+                        transition:slide={{ duration: 200, axis: 'y' }}
+                        class="absolute right-0 top-full mt-4 w-64 bg-white dark:bg-slate-900 border-2 border-black z-50 overflow-hidden shadow-neo"
+                    >
+                        <div
+                            class="px-5 py-4 border-b-2 border-black bg-slate-50 dark:bg-slate-800"
                         >
-                            <Crown class="w-4 h-4 text-amber-400" />
-                            Panel Admin
-                        </button>
-                    {/if}
-                </div>
+                            <p
+                                class="text-xs font-black text-black dark:text-white truncate mb-0.5 uppercase tracking-tighter"
+                            >
+                                {$authStore.user?.displayName || 'Cuenta'}
+                            </p>
+                            <p
+                                class="text-[10px] text-slate-500 font-bold truncate cursor-copy hover:text-black dark:hover:text-white transition-colors"
+                                title="Tu correo"
+                            >
+                                {$authStore.user?.email}
+                            </p>
+                        </div>
 
-                <div class="p-2 border-t border-white/10 bg-transparent">
-                    <button
-                        on:click={handleLogout}
-                        class="w-full text-left px-3 py-2 rounded-xl text-red-400 hover:bg-red-500/10 hover:text-red-300 font-medium text-sm flex items-center gap-3 transition-colors"
-                    >
-                        <LogOut class="w-4 h-4" />
-                        Cerrar Sesión
-                    </button>
-                </div>
+                        <div class="p-2 space-y-1">
+                            <button
+                                on:click={() => {
+                                    closeDropdown();
+                                    goto('/profile');
+                                }}
+                                class="w-full text-left px-3 py-3 border-2 border-transparent hover:border-black hover:bg-slate-50 dark:hover:bg-slate-800 text-black dark:text-white font-black text-[10px] flex items-center gap-3 transition-all uppercase tracking-widest"
+                            >
+                                <User class="w-4 h-4 text-primary" />
+                                Perfil
+                            </button>
+                            {#if $authStore.user?.isAdmin}
+                                <button
+                                    on:click={() => {
+                                        closeDropdown();
+                                        goto('/admin');
+                                    }}
+                                    class="w-full text-left px-3 py-3 border-2 border-transparent hover:border-black hover:bg-primary/10 text-black dark:text-white font-black text-[10px] flex items-center gap-3 transition-all uppercase tracking-widest"
+                                >
+                                    <Crown class="w-4 h-4 text-primary" />
+                                    Panel Admin
+                                </button>
+                            {/if}
+                            <button
+                                on:click={() => {
+                                    closeDropdown();
+                                    goto('/dashboard/streamers');
+                                }}
+                                class="w-full text-left px-3 py-3 border-2 border-transparent hover:border-black hover:bg-slate-50 dark:hover:bg-slate-800 text-black dark:text-white font-black text-[10px] flex items-center gap-3 transition-all uppercase tracking-widest"
+                            >
+                                <QrCode class="w-4 h-4 text-primary" />
+                                Widgets Streamers
+                            </button>
+                        </div>
+
+                        <div class="p-2 border-t-2 border-black bg-red-50 dark:bg-red-900/10">
+                            <button
+                                on:click={handleLogout}
+                                class="w-full text-left px-3 py-3 border-2 border-transparent hover:border-black hover:bg-white dark:hover:bg-slate-800 text-red-600 font-black text-[10px] flex items-center gap-3 transition-all uppercase tracking-widest"
+                            >
+                                <LogOut class="w-4 h-4" />
+                                Cerrar Sesión
+                            </button>
+                        </div>
+                    </div>
+                {/if}
             </div>
-        {/if}
+        </div>
     </div>
 </header>

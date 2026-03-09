@@ -1,0 +1,97 @@
+﻿
+> chillchess@2.0.0 build
+> vite build
+
+[36mvite v5.4.21 [32mbuilding SSR bundle for production...[36m[39m
+transforming...
+node.exe : 17:25:19 [vite-plugin-svelte] C:/Users/to
+mih/.gemini/antigravity/ChillChess/ChillChess/src/ro
+utes/palette/+page.svelte:206:20 A11y: A form label 
+must be associated with a control.
+En línea: 1 Carácter: 1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: 
+(17:25:19     [vite-...with a control.:String) [], 
+RemoteExcep    tion
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+204:                 <!-- Color Input Box -->
+205:                 <div class="lg:w-1/3 flex 
+flex-col gap-4">
+206:                     <label
+                         ^
+207:                         class="text-[10px] 
+font-black text-slate-500 uppercase tracking-widest 
+ml-1"
+208:                         >Color de Origen</label
+17:25:19 [vite-plugin-svelte] C:/Users/tomih/.gemini
+/antigravity/ChillChess/ChillChess/src/routes/palett
+e/+page.svelte:235:20 A11y: A form label must be 
+associated with a control.
+233:                 <!-- Generated Palette Row -->
+234:                 <div class="flex-1 flex 
+flex-col gap-4">
+235:                     <label
+                         ^
+236:                         class="text-[10px] 
+font-black text-slate-500 uppercase tracking-widest 
+ml-1"
+237:                         >Paleta Generada</label
+17:25:19 [vite-plugin-svelte] C:/Users/tomih/.gemini
+/antigravity/ChillChess/ChillChess/src/routes/qr/+pa
+ge.svelte:388:40 A11y: A form label must be 
+associated with a control.
+386:                                 <div 
+class="space-y-4">
+387:                                     <div 
+class="flex items-center justify-between">
+388:                                         <label
+                                             ^
+389:                                             
+class="text-[10px] font-black text-slate-500 
+uppercase tracking-[0.2em]"
+390:                                             
+>Escala del Logo</label
+[32mÔ£ô[39m 145 modules transformed.
+[31mx[39m Build failed in 1.61s
+[31merror during build:
+[31m[vite:css] [postcss] C:/Users/tomih/.gemini/ant
+igravity/ChillChess/ChillChess/src/app.postcss:36:9:
+ The `to-neat-accent` class does not exist. If 
+`to-neat-accent` is a custom class, make sure it is 
+defined within a `@layer` directive.[31m
+file: [36mC:/Users/tomih/.gemini/antigravity/ChillC
+hess/ChillChess/src/app.postcss:36:8[31m
+    at Input.error (C:\Users\tomih\.gemini\antigravi
+ty\ChillChess\ChillChess\node_modules\postcss\lib\in
+put.js:135:16)
+    at AtRule.error (C:\Users\tomih\.gemini\antigrav
+ity\ChillChess\ChillChess\node_modules\postcss\lib\n
+ode.js:146:32)
+    at processApply (C:\Users\tomih\.gemini\antigrav
+ity\ChillChess\ChillChess\node_modules\tailwindcss\l
+ib\lib\expandApplyAtRules.js:380:29)
+    at C:\Users\tomih\.gemini\antigravity\ChillChess
+\ChillChess\node_modules\tailwindcss\lib\lib\expandA
+pplyAtRules.js:551:9
+    at C:\Users\tomih\.gemini\antigravity\ChillChess
+\ChillChess\node_modules\tailwindcss\lib\processTail
+windFeatures.js:55:50
+    at async plugins (C:\Users\tomih\.gemini\antigra
+vity\ChillChess\ChillChess\node_modules\tailwindcss\
+lib\plugin.js:38:17)
+    at async LazyResult.runAsync (C:\Users\tomih\.ge
+mini\antigravity\ChillChess\ChillChess\node_modules\
+postcss\lib\lazy-result.js:293:11)
+    at async compileCSS (file:///C:/Users/tomih/.gem
+ini/antigravity/ChillChess/ChillChess/node_modules/v
+ite/dist/node/chunks/dep-BK3b2jBa.js:36898:21)
+    at async Object.transform (file:///C:/Users/tomi
+h/.gemini/antigravity/ChillChess/ChillChess/node_mod
+ules/vite/dist/node/chunks/dep-BK3b2jBa.js:36171:11)
+    at async transform (file:///C:/Users/tomih/.gemi
+ni/antigravity/ChillChess/ChillChess/node_modules/ro
+llup/dist/es/shared/node-entry.js:21246:16)[39m

@@ -1,14 +1,15 @@
 <script lang="ts">
     import { pageHeader } from '$lib/stores/ui';
     import { onMount, onDestroy } from 'svelte';
+    import { addToast } from '$lib/stores/toasts';
     import { Play, Pause, RotateCcw, Coffee, Focus, Zap, Settings, X } from 'lucide-svelte';
     import ProGate from '$lib/components/ui/ProGate.svelte';
     import { browser } from '$app/environment';
 
     pageHeader.set({
-        title: 'Pomodoro Timer',
-        description: 'Enfócate con la técnica Pomodoro.',
-        category: 'Productividad',
+        title: 'TEMPORIZADOR POMODORO',
+        description: 'Optimización de ciclos de trabajo. Productividad sin concesiones.',
+        category: 'PRODUCTIVIDAD',
     });
 
     type Mode = 'focus' | 'short' | 'long';
@@ -143,6 +144,7 @@
         showSettings = false;
         persistState();
         reset();
+        addToast('AJUSTES GUARDADOS', 'success');
     }
 
     onDestroy(() => {
@@ -151,9 +153,9 @@
     });
 
     const modes = [
-        { id: 'focus' as Mode, label: 'Enfoque', icon: Focus, color: 'text-rose-400' },
-        { id: 'short' as Mode, label: 'Pausa', icon: Coffee, color: 'text-emerald-400' },
-        { id: 'long' as Mode, label: 'Descanso', icon: Zap, color: 'text-amber-400' },
+        { id: 'focus' as Mode, label: 'ENFOQUE', icon: Focus, color: 'text-rose-400' },
+        { id: 'short' as Mode, label: 'PAUSA', icon: Coffee, color: 'text-emerald-400' },
+        { id: 'long' as Mode, label: 'DESCANSO', icon: Zap, color: 'text-amber-400' },
     ];
 
     const modeColors: Record<Mode, string> = {
@@ -173,164 +175,139 @@
 
 <ProGate>
     <div class="relative max-w-lg mx-auto flex flex-col items-center gap-10 pb-16">
-        <!-- Ambient Background Glows -->
-        <div
-            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-[120px] -z-10 mix-blend-screen pointer-events-none transition-colors duration-1000 opacity-30"
-            style="background-color: {modeColors[currentMode]}"
-        ></div>
-
         <!-- Header section -->
-        <div class="text-center space-y-2">
+        <div class="text-center space-y-4">
             <h2
-                class="text-4xl sm:text-5xl font-black text-white tracking-tighter uppercase italic"
+                class="text-5xl sm:text-6xl font-black text-black dark:text-white tracking-tighter uppercase italic"
             >
-                Focus <span class="text-neat-accent">Elite</span>
+                TRABAJO <span
+                    class="bg-primary text-white px-4 border-4 border-black shadow-neo-sm transform -rotate-2 inline-block"
+                    >MAX</span
+                >
             </h2>
-            <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">
-                Domina tu tiempo, domina tu mente
+            <p class="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">
+                FLUJO DE CONCENTRACIÓN ABSOLUTA
             </p>
         </div>
 
         <!-- Mode Switcher -->
-        <div
-            class="glass-card !bg-black/20 !rounded-3xl p-2 shadow-2xl relative overflow-hidden w-full group"
-        >
-            <div class="flex relative z-10 gap-1">
-                {#each modes as mode}
+        <div class="bg-white dark:bg-slate-900 border-4 border-black p-2 shadow-neo-sm w-full">
+            <div class="flex gap-2 relative z-10">
+                {#each modes as m}
                     <button
-                        on:click={() => setMode(mode.id)}
-                        class="flex-1 flex items-center justify-center gap-3 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 relative overflow-hidden {currentMode ===
-                        mode.id
+                        on:click={() => setMode(m.id)}
+                        class="flex-1 flex items-center justify-center gap-3 py-5 text-[10px] font-black uppercase tracking-widest transition-all relative group {currentMode ===
+                        m.id
                             ? 'text-white'
-                            : 'text-slate-500 hover:text-white hover:bg-white/5'}"
+                            : 'text-slate-500 hover:text-black dark:hover:text-white'}"
                     >
-                        {#if currentMode === mode.id}
+                        {#if currentMode === m.id}
                             <div
-                                class="absolute inset-0 opacity-20"
-                                style="background-color: {modeColors[currentMode]}"
-                            ></div>
-                            <div
-                                class="absolute inset-0 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl"
+                                class="absolute inset-0 bg-primary border-2 border-black shadow-neo-sm"
                             ></div>
                         {/if}
                         <div class="relative z-10 flex items-center gap-2">
                             <svelte:component
-                                this={mode.icon}
-                                class="w-4 h-4 {currentMode === mode.id
-                                    ? mode.color
+                                this={m.icon}
+                                class="w-4 h-4 {currentMode === m.id
+                                    ? 'text-white'
                                     : 'opacity-50 group-hover:opacity-100 transition-opacity'}"
                             />
-                            <span class="hidden sm:inline">{mode.label}</span>
+                            <span class="hidden sm:inline">{m.label}</span>
                         </div>
                     </button>
                 {/each}
             </div>
         </div>
 
-        <!-- Timer Circle -->
+        <!-- Timer Circle/Square -->
         <div class="relative w-72 h-72 sm:w-96 sm:h-96 group">
-            <!-- Outer Glow -->
+            <!-- Main Neo Circle -->
             <div
-                class="absolute inset-x-[-20%] inset-y-[-20%] rounded-full blur-3xl opacity-20 transition-colors duration-1000"
-                style="background-color: {modeColors[currentMode]}"
-            ></div>
-
-            <!-- Main Glass Circle -->
-            <div
-                class="absolute inset-0 glass-card !bg-black/40 !rounded-full shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10"
-            ></div>
-
-            <!-- SVG Progress -->
-            <svg
-                class="absolute inset-0 w-full h-full -rotate-90 scale-[0.85]"
-                viewBox="0 0 200 200"
+                class="absolute inset-0 bg-white dark:bg-slate-900 rounded-full border-8 border-black shadow-neo overflow-hidden"
             >
-                <circle
-                    cx="100"
-                    cy="100"
-                    r="92"
-                    fill="none"
-                    stroke-width="2"
-                    class="text-white/5"
-                    stroke="currentColor"
-                />
-                <circle
-                    cx="100"
-                    cy="100"
-                    r="92"
-                    fill="none"
-                    stroke-width="8"
-                    stroke={modeColors[currentMode]}
-                    stroke-linecap="round"
-                    stroke-dasharray={2 * Math.PI * 92}
-                    stroke-dashoffset={2 * Math.PI * 92 * (1 - progress)}
-                    class="transition-all duration-1000 ease-linear"
-                    style="filter: drop-shadow(0 0 15px {modeColors[currentMode]}80)"
-                />
-            </svg>
+                <!-- SVG Progress -->
+                <svg
+                    class="absolute inset-0 w-full h-full -rotate-90 scale-[0.98]"
+                    viewBox="0 0 200 200"
+                >
+                    <circle
+                        cx="100"
+                        cy="100"
+                        r="94"
+                        fill="none"
+                        stroke-width="12"
+                        stroke="black"
+                        class="opacity-5"
+                    />
+                    <circle
+                        cx="100"
+                        cy="100"
+                        r="94"
+                        fill="none"
+                        stroke-width="12"
+                        stroke={modeColors[currentMode]}
+                        stroke-linecap="butt"
+                        stroke-dasharray={2 * Math.PI * 94}
+                        stroke-dashoffset={2 * Math.PI * 94 * (1 - progress)}
+                        class="transition-all duration-1000 ease-linear"
+                    />
+                </svg>
 
-            <!-- Inner Display -->
-            <div
-                class="absolute inset-12 flex flex-col items-center justify-center bg-black/60 backdrop-blur-2xl rounded-full border border-white/10 shadow-2xl"
-            >
-                <div class="relative flex flex-col items-center">
-                    <span
-                        class="text-7xl sm:text-8xl font-black font-mono text-white tracking-[-0.05em] tabular-nums drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]"
-                    >
-                        {minutes}<span class="text-white/30 animate-pulse">:</span>{seconds}
-                    </span>
-                    <div
-                        class="mt-4 px-6 py-2 rounded-full border border-white/5 bg-white/5 backdrop-blur-md shadow-xl"
-                    >
+                <!-- Inner Display -->
+                <div
+                    class="absolute inset-10 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800 rounded-full border-4 border-black shadow-inner"
+                >
+                    <div class="flex flex-col items-center">
                         <span
-                            class="text-[10px] uppercase font-black tracking-[0.4em]"
-                            style="color: {modeColors[currentMode]}"
+                            class="text-7xl sm:text-8xl font-black font-mono text-black dark:text-white tracking-[-0.05em] tabular-nums"
                         >
-                            {currentMode === 'focus'
-                                ? 'Fase de Enfoque'
-                                : currentMode === 'short'
-                                  ? 'Pausa Flash'
-                                  : 'Descanso Profundo'}
+                            {minutes}<span class="text-primary animate-pulse">:</span>{seconds}
                         </span>
+                        <div
+                            class="mt-6 px-4 py-1 border-2 border-black bg-white dark:bg-slate-900 shadow-neo-sm transform -rotate-1"
+                        >
+                            <span
+                                class="text-[10px] uppercase font-black tracking-[0.2em] text-black dark:text-white"
+                            >
+                                {currentMode === 'focus'
+                                    ? 'ENFOQUE'
+                                    : currentMode === 'short'
+                                      ? 'PAUSA'
+                                      : 'DESCANSO'}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Controls -->
-        <div class="flex items-center gap-6">
+        <div class="flex items-center gap-8">
             <button
                 on:click={reset}
-                class="w-16 h-16 flex items-center justify-center rounded-[1.5rem] bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-all hover:scale-110 active:scale-90 shadow-xl"
+                class="w-16 h-16 flex items-center justify-center bg-white dark:bg-slate-900 border-4 border-black text-black dark:text-white shadow-neo-sm hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all active:scale-90"
                 title="Reiniciar"
             >
                 <RotateCcw class="w-6 h-6" />
             </button>
             <button
                 on:click={toggleTimer}
-                class="h-20 px-14 sm:px-16 rounded-[2rem] font-black text-xl text-white transition-all duration-500 flex items-center gap-4 relative overflow-hidden group border border-white/20 active:scale-95 shadow-[0_20px_50px_rgba(0,0,0,0.3)] bg-black/40 hover:bg-black/60"
+                class="h-24 px-12 sm:px-16 bg-primary text-white border-4 border-black font-black text-2xl shadow-neo hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:translate-y-2 active:shadow-none transition-all flex items-center gap-4 relative overflow-hidden group"
             >
-                <!-- Dynamic Bg Overlay -->
-                <div
-                    class="absolute inset-0 opacity-20 transition-colors duration-1000"
-                    style="background-color: {modeColors[currentMode]}"
-                ></div>
-
-                <div
-                    class="relative z-10 flex items-center gap-4 uppercase tracking-tighter italic"
-                >
+                <div class="relative z-10 flex items-center gap-4 uppercase italic">
                     {#if isRunning}
-                        <Pause class="w-8 h-8 fill-white" /> Pausar
+                        <Pause class="w-8 h-8 fill-white" /> PAUSE
                     {:else}
                         <Play class="w-8 h-8 fill-white" />
-                        {timeLeft === DURATIONS[currentMode] ? 'Iniciar' : 'Continuar'}
+                        {timeLeft === DURATIONS[currentMode] ? 'START' : 'RESUME'}
                     {/if}
                 </div>
             </button>
             <button
                 on:click={() => (showSettings = !showSettings)}
-                class="w-16 h-16 flex items-center justify-center rounded-[1.5rem] bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-all hover:scale-110 active:scale-90 shadow-xl {showSettings
-                    ? '!bg-neat-accent/10 !text-neat-accent !border-neat-accent/30'
+                class="w-16 h-16 flex items-center justify-center bg-white dark:bg-slate-900 border-4 border-black text-black dark:text-white shadow-neo-sm hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all active:scale-90 {showSettings
+                    ? '!bg-primary !text-white'
                     : ''}"
                 title="Ajustes"
             >
@@ -341,34 +318,28 @@
         <!-- Settings Panel -->
         {#if showSettings}
             <div
-                class="w-full glass-card !bg-black/60 !backdrop-blur-[40px] !rounded-[3rem] border border-white/10 p-8 sm:p-10 shadow-2xl relative overflow-hidden animate-in slide-in-from-bottom-8 duration-500"
+                class="w-full bg-white dark:bg-slate-900 border-4 border-black p-8 sm:p-10 shadow-neo relative overflow-hidden animate-in fade-in zoom-in duration-300 transform -rotate-1"
             >
-                <div
-                    class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-neat-accent/50 to-transparent"
-                ></div>
-
-                <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center justify-between mb-10">
                     <h3
-                        class="text-sm font-black text-white uppercase tracking-[0.3em] flex items-center gap-3"
+                        class="text-xs font-black text-black dark:text-white uppercase tracking-[0.4em] flex items-center gap-3"
                     >
-                        <Settings class="w-5 h-5 text-neat-accent" /> Configuración
+                        <Settings class="w-5 h-5 text-primary" /> TIEMPOS
                     </h3>
                     <button
                         on:click={() => (showSettings = false)}
-                        class="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 text-slate-500 hover:text-white hover:bg-white/10 transition-all"
+                        class="w-10 h-10 flex items-center justify-center border-2 border-black bg-slate-100 dark:bg-slate-800 text-black dark:text-white hover:bg-black hover:text-white transition-all shadow-neo-sm"
                     >
                         <X class="w-5 h-5" />
                     </button>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-                    <div
-                        class="bg-white/5 p-6 rounded-[2rem] border border-white/5 shadow-inner group transition-all hover:border-white/10"
-                    >
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-10">
+                    <div class="space-y-4">
                         <label
                             for="focus-mins"
-                            class="text-[10px] font-black text-slate-500 block mb-4 uppercase tracking-[0.2em] text-center"
-                            >Enfoque</label
+                            class="text-[10px] font-black text-slate-500 block uppercase tracking-[0.2em]"
+                            >TRABAJO</label
                         >
                         <input
                             id="focus-mins"
@@ -376,17 +347,15 @@
                             bind:value={focusMins}
                             min="1"
                             max="90"
-                            class="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 text-2xl font-black text-rose-400 text-center focus:outline-none focus:border-rose-500 shadow-inner tabular-nums"
+                            class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-black px-4 py-5 text-2xl font-black text-black dark:text-white focus:outline-none focus:border-primary shadow-inner tabular-nums"
                         />
                     </div>
 
-                    <div
-                        class="bg-white/5 p-6 rounded-[2rem] border border-white/5 shadow-inner group transition-all hover:border-white/10"
-                    >
+                    <div class="space-y-4">
                         <label
                             for="short-mins"
-                            class="text-[10px] font-black text-slate-500 block mb-4 uppercase tracking-[0.2em] text-center"
-                            >Pausa</label
+                            class="text-[10px] font-black text-slate-500 block uppercase tracking-[0.2em]"
+                            >PAUSA</label
                         >
                         <input
                             id="short-mins"
@@ -394,17 +363,15 @@
                             bind:value={shortMins}
                             min="1"
                             max="30"
-                            class="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 text-2xl font-black text-emerald-400 text-center focus:outline-none focus:border-emerald-500 shadow-inner tabular-nums"
+                            class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-black px-4 py-5 text-2xl font-black text-black dark:text-white focus:outline-none focus:border-primary shadow-inner tabular-nums"
                         />
                     </div>
 
-                    <div
-                        class="bg-white/5 p-6 rounded-[2rem] border border-white/5 shadow-inner group transition-all hover:border-white/10"
-                    >
+                    <div class="space-y-4">
                         <label
                             for="long-mins"
-                            class="text-[10px] font-black text-slate-500 block mb-4 uppercase tracking-[0.2em] text-center"
-                            >Descanso</label
+                            class="text-[10px] font-black text-slate-500 block uppercase tracking-[0.2em]"
+                            >RECESO</label
                         >
                         <input
                             id="long-mins"
@@ -412,67 +379,60 @@
                             bind:value={longMins}
                             min="1"
                             max="60"
-                            class="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 text-2xl font-black text-amber-400 text-center focus:outline-none focus:border-amber-500 shadow-inner tabular-nums"
+                            class="w-full bg-slate-100 dark:bg-slate-800 border-2 border-black px-4 py-5 text-2xl font-black text-black dark:text-white focus:outline-none focus:border-primary shadow-inner tabular-nums"
                         />
                     </div>
                 </div>
 
-                <button on:click={applySettings} class="neat-button-primary w-full py-5">
-                    GUARDAR CONFIGURACIÓN
+                <button
+                    on:click={applySettings}
+                    class="w-full py-6 bg-black text-white border-2 border-black font-black uppercase tracking-widest shadow-neo-sm hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all active:scale-[0.98]"
+                >
+                    ACTUALIZAR CICLOS
                 </button>
             </div>
         {/if}
 
         <!-- Stats -->
         <div
-            class="glass-card !bg-black/20 !rounded-[2.5rem] p-8 sm:p-10 shadow-2xl w-full flex items-center justify-center gap-8 sm:gap-14 relative overflow-hidden"
+            class="bg-white dark:bg-slate-900 border-4 border-black p-8 sm:p-10 shadow-neo w-full flex items-center justify-center gap-10 sm:gap-14 relative transform rotate-1"
         >
-            <div
-                class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"
-            ></div>
-
-            <div class="text-center relative z-10">
+            <div class="text-center">
                 <p
-                    class="text-4xl sm:text-5xl font-black text-white font-mono tracking-tighter mb-1 tabular-nums"
+                    class="text-5xl font-black text-black dark:text-white font-mono tracking-tighter mb-1 tabular-nums"
                 >
                     {completedPomodoros}
                 </p>
-                <p
-                    class="text-[10px] font-black text-neat-accent uppercase tracking-widest opacity-60"
-                >
+                <p class="text-[10px] font-black text-primary uppercase tracking-widest italic">
                     Pomodoros
                 </p>
             </div>
 
-            <div class="w-px h-16 bg-white/10 relative z-10"></div>
+            <div class="w-1.5 h-16 bg-black/10 dark:bg-white/10"></div>
 
-            <div class="text-center relative z-10">
+            <div class="text-center">
                 <p
-                    class="text-4xl sm:text-5xl font-black text-white font-mono tracking-tighter mb-1 tabular-nums"
+                    class="text-5xl font-black text-black dark:text-white font-mono tracking-tighter mb-1 tabular-nums"
                 >
                     {completedPomodoros * focusMins}
                 </p>
-                <p
-                    class="text-[10px] font-black text-emerald-400 uppercase tracking-widest opacity-60"
-                >
+                <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest italic">
                     Minutos
                 </p>
             </div>
 
             {#if completedPomodoros > 0}
-                <div class="w-px h-16 bg-white/10 relative z-10"></div>
-                <div class="relative z-10">
-                    <button
-                        on:click={() => {
-                            completedPomodoros = 0;
-                            persistState();
-                        }}
-                        class="w-12 h-12 flex items-center justify-center rounded-2xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border border-red-500/20 transition-all active:scale-90"
-                        title="Limpiar estadísticas"
-                    >
-                        <RotateCcw class="w-5 h-5" />
-                    </button>
-                </div>
+                <div class="w-1.5 h-16 bg-black/10 dark:bg-white/10"></div>
+                <button
+                    on:click={() => {
+                        completedPomodoros = 0;
+                        persistState();
+                    }}
+                    class="w-14 h-14 flex items-center justify-center bg-red-500 text-white border-2 border-black shadow-neo-sm hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all active:scale-90"
+                    title="Limpiar estadísticas"
+                >
+                    <RotateCcw class="w-6 h-6" />
+                </button>
             {/if}
         </div>
     </div>

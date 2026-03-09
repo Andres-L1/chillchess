@@ -2,114 +2,73 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ========================================
-   NeatPass Inspired Design System
-   ======================================== */
-
-:root {
-    --neat-bg: #0B0E14;
-    --neat-card-bg: rgba(255, 255, 255, 0.05);
-    --neat-card-border: rgba(255, 255, 255, 0.1);
-    --neat-accent: #00E5FF; /* Vibrant Cyan from NeatPass */
-    --neat-text-primary: #FFFFFF;
-    --neat-text-secondary: #94A3B8;
-}
-
-/* ========================================
-   Typography
-   ======================================== */
 @layer base {
+    :root {
+        --bg: #f5f7f8;
+        --text: #000000;
+        --border: #000000;
+        --primary: #007bff;
+        --muted: #64748b;
+    }
+    
+    .dark {
+        --bg: #0f1923;
+        --text: #ffffff;
+        --border: #000000;
+        --primary: #007bff;
+        --muted: #94a3b8;
+    }
+
+    body {
+        @apply bg-background-light dark:bg-background-dark text-black dark:text-white font-sans antialiased;
+        min-height: 100dvh;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Typography */
     h1, h2, h3, h4, h5, h6 {
-        @apply tracking-tight font-bold;
+        @apply tracking-tighter font-black uppercase italic;
     }
 }
 
-/* ========================================
-   Utility Classes
-   ======================================== */
 @layer components {
-    .glass-card {
-        @apply bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2rem] shadow-2xl;
+    .neo-card {
+        @apply border-4 border-black bg-white dark:bg-slate-900 shadow-neo transition-all;
+    }
+    
+    .neo-card:hover {
+        @apply -translate-y-1 shadow-neo-hover;
     }
 
-    .hero-text-gradient {
-        @apply bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-neat-accent;
-        background-size: 200% auto;
+    .neo-button {
+        @apply px-6 py-3 border-4 border-black font-black uppercase tracking-widest shadow-neo transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-none bg-white text-black;
     }
 
-    .neat-button-primary {
-        @apply bg-white hover:bg-slate-100 text-black rounded-xl px-6 py-4 font-bold transition-all active:scale-95 flex items-center justify-center gap-2;
+    .neo-button-primary {
+        @apply neo-button bg-primary text-white;
     }
 
-    .neat-button-secondary {
-        @apply bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl px-6 py-4 font-bold transition-all active:scale-95 flex items-center justify-center gap-2 backdrop-blur-xl;
+    /* Helper classes */
+    .theme-bg { @apply bg-background-light dark:bg-background-dark; }
+    .theme-text { @apply text-black dark:text-white; }
+    .theme-border { @apply border-4 border-black; }
+    .theme-shadow { @apply shadow-neo; }
+}
+
+@layer utilities {
+    .shadow-neo {
+        box-shadow: 6px 6px 0px 0px rgba(0,0,0,1);
     }
-}
-
-/* ========================================
-   Global Touch & Responsive Utilities
-   ======================================== */
-
-/* Prevent double-tap zoom on interactive elements */
-button, a, input, select, textarea, [role="button"] {
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-}
-
-body {
-    background-color: var(--neat-bg);
-    color: var(--neat-text-secondary);
-    overscroll-behavior-y: none;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
-}
-
-input, textarea, [contenteditable="true"], .selectable-text {
-    -webkit-user-select: auto;
-    user-select: auto;
-    -webkit-touch-callout: default;
-}
-
-/* Minimum tap target for accessibility (44px) */
-@media (pointer: coarse) {
-    button, a, [role="button"] {
-        min-height: 44px;
+    .shadow-neo-sm {
+        box-shadow: 3px 3px 0px 0px rgba(0,0,0,1);
     }
-}
-
-.safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-
-@media screen and (max-width: 767px) {
-    input, select, textarea {
-        font-size: 16px !important;
+    .shadow-neo-hover {
+        box-shadow: 10px 10px 0px 0px rgba(0,0,0,1);
     }
-}
-
-/* ========================================
-   Scrollbar Styles
-   ======================================== */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
-
-@media (max-width: 767px) {
-    .hide-scrollbar-mobile::-webkit-scrollbar { display: none; }
-    .hide-scrollbar-mobile { -ms-overflow-style: none; scrollbar-width: none; }
-}
-
-/* ========================================
-   Animations
-   ======================================== */
-@keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
-    100% { transform: translateY(0px); }
-}
-
-.animate-float {
-    animation: float 6s ease-in-out infinite;
+    .shadow-neo-lg {
+        box-shadow: 12px 12px 0px 0px rgba(0,0,0,1);
+    }
+    .neo-sticker {
+        @apply bg-white dark:bg-slate-800 border-2 border-black shadow-neo-sm p-1 flex items-center justify-center;
+    }
 }

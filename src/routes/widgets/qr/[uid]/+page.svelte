@@ -1,0 +1,147 @@
+<script lang="ts">
+    import { page } from '$app/stores';
+    import { db } from '$lib/firebase';
+    import { doc, onSnapshot } from 'firebase/firestore';
+    import { onMount, tick } from 'svelte';
+    import QRCode from 'qrcode';
+    import { Loader2 } from 'lucide-svelte';
+    import { fade } from 'svelte/transition';
+
+    const { uid } = $page.params;
+
+    let qrSettings = {
+        targetUrl: '',
+        fgColor: '#000000',
+        bgColor: '#ffffff',
+        title: '',
+    };
+
+    let qrDataUrl = '';
+    let loading = true;
+    let error = false;
+
+    async function generateQR() {
+        if (!qrSettings.targetUrl) {
+            qrDataUrl = '';
+            return;
+        }
+        try {
+            const dataUrl = await QRCode.toDataURL(qrSettings.targetUrl, {
+                width: 512,
+                margin: 2,
+                color: {
+                    dark: qrSettings.fgColor,
+                    light: qrSettings.bgColor,
+                },
+                errorCorrectionLevel: 'H',
+            });
+            qrDataUrl = dataUrl;
+        } catch (e) {
+            console.error('Error generating QR:', e);
+        }
+    }
+
+    $: if (qrSettings.targetUrl || qrSettings.fgColor || qrSettings.bgColor) {
+        generateQR();
+    }
+
+    onMount(() => {
+        if (!uid) {
+            error = true;
+            loading = false;
+            return;
+        }
+
+        const settingsRef = doc(db, 'users', uid, 'streamerSettings', 'dynamic_qr');
+
+        const unsubscribe = onSnapshot(
+            settingsRef,
+            (docSnap) => {
+                if (docSnap.exists()) {
+                    qrSettings = { ...qrSettings, ...docSnap.data() };
+                } else {
+                    // Default settings if none exist
+                    qrSettings = {
+                        targetUrl: 'https://chillchess.pages.dev',
+                        fgColor: '#000000',
+                        bgColor: '#ffffff',
+                        title: 'CHILL CHESS',
+                    };
+                }
+                loading = false;
+            },
+            (err) => {
+                console.error('Firestore listener error:', err);
+                error = true;
+                loading = false;
+            }
+        );
+
+        return () => unsubscribe();
+    });
+</script>
+
+<svelte:head>
+    <title>QR Widget | ChillChess</title>
+</svelte:head>
+
+<div class="h-screen w-full flex items-center justify-center overflow-hidden bg-transparent">
+    {#if loading}
+        <div in:fade class="flex flex-col items-center gap-4">
+            <Loader2 class="w-12 h-12 text-black dark:text-white animate-spin" />
+            <p
+                class="font-black text-[10px] uppercase tracking-widest text-black dark:text-white bg-white/10 px-2 py-1"
+            >
+                Conectando...
+            </p>
+        </div>
+    {:else if error}
+        <div
+            in:fade
+            class="text-red-500 font-black text-xs uppercase text-center p-4 bg-white border-2 border-black"
+        >
+            Error: Widget no disponible
+        </div>
+    {:else if qrDataUrl}
+        <div in:fade={{ duration: 300 }} class="flex flex-col items-center gap-4 group">
+            {#if qrSettings.title}
+                <div
+                    class="bg-black text-white px-4 py-1.5 border-2 border-black shadow-neo-sm transform -rotate-1"
+                >
+                    <span class="text-xs font-black uppercase tracking-widest whitespace-nowrap">
+                        {qrSettings.title}
+                    </span>
+                </div>
+            {/if}
+
+            <div
+                class="relative bg-white p-4 border-4 border-black shadow-neo transform group-hover:-translate-x-1 group-hover:-translate-y-1 transition-transform"
+            >
+                <img
+                    src={qrDataUrl}
+                    alt="Dynamic QR"
+                    class="w-64 h-64 object-contain shadow-inner"
+                    style="image-rendering: pixelated;"
+                />
+            </div>
+
+            <!-- Subtle scan signal -->
+            <div class="flex items-center gap-1.5 opacity-50">
+                <div class="w-1 h-1 bg-black dark:bg-white rounded-full animate-ping"></div>
+                <span
+                    class="text-[8px] font-black uppercase tracking-[0.2em] text-black dark:text-white"
+                    >Live Sync Active</span
+                >
+            </div>
+        </div>
+    {/if}
+</div>
+
+<style>
+    :global(body) {
+        background-color: transparent !important;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+</style>

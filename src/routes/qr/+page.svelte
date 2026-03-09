@@ -18,9 +18,9 @@
     import ProGate from '$lib/components/ui/ProGate.svelte';
 
     pageHeader.set({
-        title: 'Generador QR',
-        description: 'Crea códigos QR para URLs, texto y credenciales WiFi.',
-        category: 'Utilidades',
+        title: 'GENERADOR DE CÓDIGOS QR',
+        description: 'Vínculos físicos y digitales. Diseñados con precisión quirúrgica.',
+        category: 'UTILIDADES',
     });
 
     type QRMode = 'url' | 'text' | 'wifi';
@@ -31,8 +31,8 @@
     let wifiSSID = '';
     let wifiPassword = '';
     let wifiEncryption: 'WPA' | 'WEP' | 'nopass' = 'WPA';
-    let fgColor = '#ffffff';
-    let bgColor = '#0f172a';
+    let fgColor = '#000000';
+    let bgColor = '#ffffff';
     let qrDataUrl = '';
 
     // Logo / custom image
@@ -191,41 +191,33 @@
 </svelte:head>
 
 <ProGate>
-    <div class="relative max-w-5xl mx-auto flex flex-col lg:flex-row gap-8">
-        <!-- Ambient Background Glows -->
-        <div
-            class="absolute top-0 left-0 w-[500px] h-[500px] bg-neat-accent/5 rounded-full blur-[120px] -z-10 mix-blend-screen pointer-events-none"
-        ></div>
-        <div
-            class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-[120px] -z-10 mix-blend-screen pointer-events-none"
-        ></div>
-
+    <div class="relative max-w-5xl mx-auto flex flex-col lg:flex-row gap-10">
         <!-- Left: Config -->
         <div class="flex-1 space-y-8">
             <!-- Mode Switcher -->
-            <div class="glass-card p-2">
-                <div class="flex gap-1.5">
+            <div class="bg-white dark:bg-slate-900 border-4 border-black p-2 shadow-neo-sm">
+                <div class="flex gap-2">
                     {#each modes as m}
                         <button
                             on:click={() => (mode = m.id)}
-                            class="flex-1 flex items-center justify-center gap-2 py-4 rounded-xl text-sm font-black transition-all duration-300 relative group {mode ===
+                            class="flex-1 flex items-center justify-center gap-3 py-5 text-sm font-black transition-all relative group {mode ===
                             m.id
                                 ? 'text-white'
-                                : 'text-slate-400 hover:text-white hover:bg-white/5'}"
+                                : 'text-slate-500 hover:text-black dark:hover:text-white'}"
                         >
                             {#if mode === m.id}
                                 <div
-                                    class="absolute inset-0 bg-neat-accent/10 border border-neat-accent/20 rounded-xl"
+                                    class="absolute inset-0 bg-primary border-2 border-black shadow-neo-sm"
                                 ></div>
                             {/if}
                             <div class="relative z-10 flex items-center gap-2">
                                 <svelte:component
                                     this={m.icon}
-                                    class="w-4 h-4 {mode === m.id
-                                        ? 'text-neat-accent'
+                                    class="w-5 h-5 {mode === m.id
+                                        ? 'text-white'
                                         : 'group-hover:scale-110 transition-transform'}"
                                 />
-                                <span class="uppercase tracking-tighter">{m.label}</span>
+                                <span class="uppercase tracking-widest">{m.label}</span>
                             </div>
                         </button>
                     {/each}
@@ -233,92 +225,99 @@
             </div>
 
             <!-- Input Fields -->
-            <div class="glass-card p-8">
-                <div class="space-y-6">
+            <div class="bg-white dark:bg-slate-900 border-4 border-black p-8 sm:p-10 shadow-neo">
+                <div class="space-y-8">
                     {#if mode === 'url'}
-                        <div class="space-y-3">
+                        <div class="space-y-4">
                             <label
                                 for="qr-url"
-                                class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1"
+                                class="flex items-center gap-3 text-xs font-black text-slate-500 uppercase tracking-[0.2em]"
                             >
-                                <Link class="w-3.5 h-3.5 text-neat-accent" />
-                                Dirección URL
+                                <Link class="w-4 h-4 text-primary" />
+                                ENLACE URL
                             </label>
                             <input
                                 id="qr-url"
                                 type="url"
                                 bind:value={urlInput}
                                 placeholder="https://tu-sitio.com"
-                                class="w-full bg-black/20 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-neat-accent/30 transition-all font-medium"
+                                class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-black px-6 py-5 text-black dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-primary transition-all font-black text-lg shadow-inner"
                             />
                         </div>
                     {:else if mode === 'text'}
-                        <div class="space-y-3">
+                        <div class="space-y-4">
                             <label
                                 for="qr-text"
-                                class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1"
+                                class="flex items-center gap-3 text-xs font-black text-slate-500 uppercase tracking-[0.2em]"
                             >
-                                <Type class="w-3.5 h-3.5 text-neat-accent" />
-                                Mensaje de Texto
+                                <Type class="w-4 h-4 text-primary" />
+                                CONTENIDO DE TEXTO
                             </label>
                             <textarea
                                 id="qr-text"
                                 bind:value={textInput}
                                 placeholder="Escribe tu texto aquí..."
-                                rows="4"
-                                class="w-full bg-black/20 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-neat-accent/30 transition-all font-medium resize-none"
+                                rows="5"
+                                class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-black px-6 py-5 text-black dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-primary transition-all font-black text-lg shadow-inner resize-none"
                             ></textarea>
                         </div>
                     {:else}
-                        <div class="space-y-6">
-                            <div class="space-y-3">
+                        <div class="space-y-8">
+                            <div class="space-y-4">
                                 <label
                                     for="wifi-ssid"
-                                    class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1"
+                                    class="flex items-center gap-3 text-xs font-black text-slate-500 uppercase tracking-[0.2em]"
                                 >
-                                    <Wifi class="w-3.5 h-3.5 text-neat-accent" />
-                                    Nombre de Red (SSID)
+                                    <Wifi class="w-4 h-4 text-primary" />
+                                    IDENTIFICADOR DE RED (SSID)
                                 </label>
                                 <input
                                     id="wifi-ssid"
                                     type="text"
                                     bind:value={wifiSSID}
                                     placeholder="Mi WiFi"
-                                    class="w-full bg-black/20 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-neat-accent/30 transition-all font-medium"
+                                    class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-black px-6 py-5 text-black dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-primary transition-all font-black text-lg shadow-inner"
                                 />
                             </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                <div class="space-y-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                                <div class="space-y-4">
                                     <label
                                         for="wifi-pass"
-                                        class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1"
-                                        >Contraseña</label
+                                        class="block text-xs font-black text-slate-500 uppercase tracking-[0.2em]"
+                                        >CONTRASEÑA</label
                                     >
                                     <input
                                         id="wifi-pass"
                                         type="text"
                                         bind:value={wifiPassword}
                                         placeholder="Contraseña WiFi"
-                                        class="w-full bg-black/20 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-neat-accent/30 transition-all font-medium"
+                                        class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-black px-6 py-5 text-black dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-primary transition-all font-black text-lg shadow-inner"
                                     />
                                 </div>
-                                <div class="space-y-3">
+                                <div class="space-y-4">
                                     <label
                                         for="wifi-enc"
-                                        class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1"
-                                        >Encriptación</label
+                                        class="block text-xs font-black text-slate-500 uppercase tracking-[0.2em]"
+                                        >ENCRIPTACIÓN</label
                                     >
-                                    <select
-                                        id="wifi-enc"
-                                        bind:value={wifiEncryption}
-                                        class="w-full bg-black/20 border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-neat-accent/30 transition-all font-medium cursor-pointer appearance-none"
-                                    >
-                                        <option value="WPA" class="bg-slate-900">WPA/WPA2</option>
-                                        <option value="WEP" class="bg-slate-900">WEP</option>
-                                        <option value="nopass" class="bg-slate-900"
-                                            >Sin contraseña</option
+                                    <div class="relative">
+                                        <select
+                                            id="wifi-enc"
+                                            bind:value={wifiEncryption}
+                                            class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-black px-6 py-5 text-black dark:text-white focus:outline-none focus:border-primary transition-all font-black text-lg shadow-inner appearance-none"
                                         >
-                                    </select>
+                                            <option value="WPA">WPA/WPA2</option>
+                                            <option value="WEP">WEP</option>
+                                            <option value="nopass">SIN SEGURIDAD</option>
+                                        </select>
+                                        <div
+                                            class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"
+                                        >
+                                            <div
+                                                class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-black dark:border-t-white"
+                                            ></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -326,49 +325,55 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <!-- Color Config -->
-                <div class="glass-card p-8 flex flex-col">
+                <div
+                    class="bg-white dark:bg-slate-900 border-4 border-black p-8 flex flex-col shadow-neo transform -rotate-1"
+                >
                     <h4
-                        class="text-xs font-black text-white uppercase tracking-[0.2em] mb-8 flex items-center gap-3"
+                        class="text-xs font-black text-black dark:text-white uppercase tracking-[0.2em] mb-10 flex items-center gap-3"
                     >
-                        <Palette class="w-4 h-4 text-neat-accent" />
-                        Personalizar Colores
+                        <Palette class="w-5 h-5 text-primary" />
+                        ESTÉTICA DEL CÓDIGO
                     </h4>
 
-                    <div class="grid grid-cols-2 gap-6 flex-1">
-                        <div class="space-y-3">
+                    <div class="grid grid-cols-2 gap-8 flex-1">
+                        <div class="space-y-4">
                             <label
                                 for="fg-color"
-                                class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1"
-                                >Color QR</label
+                                class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]"
+                                >PRIMARIO</label
                             >
-                            <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-4">
                                 <input
                                     id="fg-color"
                                     type="color"
                                     bind:value={fgColor}
-                                    class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 cursor-pointer overflow-hidden [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:border-none"
+                                    class="w-14 h-14 border-4 border-black cursor-pointer overflow-hidden [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:border-none shadow-neo-sm"
                                 />
-                                <span class="font-mono text-xs text-white uppercase">{fgColor}</span
+                                <span
+                                    class="font-black text-sm text-black dark:text-white uppercase tabular-nums"
+                                    >{fgColor}</span
                                 >
                             </div>
                         </div>
 
-                        <div class="space-y-3">
+                        <div class="space-y-4">
                             <label
                                 for="bg-color"
-                                class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1"
-                                >Fondo</label
+                                class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]"
+                                >FONDO</label
                             >
-                            <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-4">
                                 <input
                                     id="bg-color"
                                     type="color"
                                     bind:value={bgColor}
-                                    class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 cursor-pointer overflow-hidden [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:border-none"
+                                    class="w-14 h-14 border-4 border-black cursor-pointer overflow-hidden [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:border-none shadow-neo-sm"
                                 />
-                                <span class="font-mono text-xs text-white uppercase">{bgColor}</span
+                                <span
+                                    class="font-black text-sm text-black dark:text-white uppercase tabular-nums"
+                                    >{bgColor}</span
                                 >
                             </div>
                         </div>
@@ -376,23 +381,25 @@
                 </div>
 
                 <!-- Logo / Custom Image -->
-                <div class="glass-card p-8 flex flex-col">
+                <div
+                    class="bg-white dark:bg-slate-900 border-4 border-black p-8 flex flex-col shadow-neo transform rotate-1"
+                >
                     <h4
-                        class="text-xs font-black text-white uppercase tracking-[0.2em] mb-8 flex items-center gap-3"
+                        class="text-xs font-black text-black dark:text-white uppercase tracking-[0.2em] mb-10 flex items-center gap-3"
                     >
-                        <Image class="w-4 h-4 text-neat-accent" />
-                        Logo Central
+                        <Image class="w-5 h-5 text-primary" />
+                        IDENTIDAD VISUAL
                     </h4>
 
                     <div class="flex-1 flex flex-col justify-center">
                         {#if logoDataUrl}
-                            <div class="space-y-6">
+                            <div class="space-y-8">
                                 <div
-                                    class="flex items-center gap-5 bg-black/20 p-4 rounded-2xl border border-white/5"
+                                    class="flex items-center gap-6 bg-slate-50 dark:bg-slate-800 p-5 border-2 border-black shadow-neo-sm"
                                 >
                                     <div class="relative group">
                                         <div
-                                            class="w-16 h-16 bg-white/5 rounded-xl p-2 border border-white/10 flex items-center justify-center"
+                                            class="w-20 h-20 bg-white border-2 border-black p-3 flex items-center justify-center"
                                         >
                                             <img
                                                 src={logoDataUrl}
@@ -402,14 +409,14 @@
                                         </div>
                                         <button
                                             on:click={removeLogo}
-                                            class="absolute -top-2 -right-2 w-7 h-7 bg-red-500 rounded-full flex items-center justify-center text-white transition-all active:scale-90 border-2 border-slate-900"
+                                            class="absolute -top-3 -right-3 w-8 h-8 bg-red-500 text-white border-2 border-black flex items-center justify-center transition-all active:scale-90"
                                         >
-                                            <X class="w-4 h-4" />
+                                            <X class="w-5 h-5" />
                                         </button>
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <p
-                                            class="text-sm text-white font-black truncate tracking-tighter"
+                                            class="text-base text-black dark:text-white font-black truncate uppercase tracking-tighter"
                                         >
                                             {logoFile?.name}
                                         </p>
@@ -430,7 +437,7 @@
                                             class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]"
                                             >Escala del Logo</label
                                         >
-                                        <span class="text-xs font-black text-neat-accent"
+                                        <span class="text-sm font-black text-primary italic"
                                             >{logoSize}%</span
                                         >
                                     </div>
@@ -441,26 +448,27 @@
                                         max="35"
                                         step="1"
                                         bind:value={logoSize}
-                                        class="w-full h-1.5 bg-black/40 rounded-full appearance-none cursor-pointer accent-neat-accent"
+                                        class="w-full h-3 bg-slate-200 dark:bg-slate-700 border-2 border-black appearance-none cursor-pointer accent-primary"
                                     />
                                 </div>
                             </div>
                         {:else}
                             <label
                                 for="logo-upload"
-                                class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-white/10 rounded-3xl cursor-pointer hover:border-neat-accent/30 hover:bg-neat-accent/5 transition-all group bg-black/10"
+                                class="flex flex-col items-center justify-center w-full h-44 border-4 border-dashed border-black/20 dark:border-white/20 hover:border-primary/50 hover:bg-primary/5 transition-all group bg-slate-50 dark:bg-slate-800"
                             >
-                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <div class="flex flex-col items-center justify-center">
                                     <div
-                                        class="p-4 bg-neat-accent/10 rounded-2xl mb-4 group-hover:scale-110 transition-transform"
+                                        class="p-5 bg-white border-2 border-black shadow-neo-sm mb-5 group-hover:scale-110 transition-transform"
                                     >
-                                        <Upload class="w-6 h-6 text-neat-accent" />
+                                        <Upload class="w-8 h-8 text-primary" />
                                     </div>
                                     <span
-                                        class="text-xs font-black text-white uppercase tracking-widest"
+                                        class="text-sm font-black text-black dark:text-white uppercase tracking-widest"
                                         >Elegir Logo</span
                                     >
-                                    <span class="text-[10px] text-slate-500 mt-2"
+                                    <span
+                                        class="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-3 italic"
                                         >PNG o SVG (Max 1MB)</span
                                     >
                                 </div>
@@ -480,24 +488,21 @@
         </div>
 
         <!-- Right: Preview -->
-        <div class="w-full lg:w-96 flex flex-col gap-8 lg:shrink-0">
-            <div class="glass-card p-8 flex flex-col items-center sticky top-24">
+        <div class="w-full lg:w-96 flex flex-col gap-10 lg:shrink-0">
+            <div
+                class="bg-white dark:bg-slate-900 border-4 border-black p-10 flex flex-col items-center sticky top-24 shadow-neo"
+            >
                 <p
-                    class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-10 flex items-center gap-2"
+                    class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-12 flex items-center gap-3"
                 >
-                    <QrCode class="w-4 h-4 text-neat-accent" /> Vista Previa
+                    <QrCode class="w-5 h-5 text-primary" /> VISTA PREVIA
                 </p>
 
                 <div class="relative flex flex-col items-center w-full">
                     {#if qrDataUrl}
                         <div class="relative group">
-                            <!-- Glow effect -->
                             <div
-                                class="absolute -inset-8 bg-neat-accent/20 rounded-[3rem] blur-3xl opacity-0 group-hover:opacity-100 transition duration-700 pointer-events-none"
-                            ></div>
-
-                            <div
-                                class="relative bg-white p-6 rounded-[2.5rem] shadow-2xl overflow-hidden group-hover:scale-[1.05] transition-transform duration-500"
+                                class="relative bg-white p-8 border-4 border-black shadow-neo transform group-hover:-translate-x-1 group-hover:-translate-y-1 transition-transform"
                             >
                                 <img
                                     src={qrDataUrl}
@@ -510,46 +515,44 @@
 
                         {#if logoDataUrl}
                             <div
-                                class="flex items-center gap-3 mt-10 bg-neat-accent/10 border border-neat-accent/20 px-4 py-2 rounded-2xl"
+                                class="flex items-center gap-3 mt-12 bg-primary text-white border-2 border-black px-5 py-3 shadow-neo-sm transform -rotate-1"
                             >
-                                <div
-                                    class="w-2 h-2 rounded-full bg-neat-accent animate-pulse"
-                                ></div>
+                                <div class="w-2.5 h-2.5 bg-white animate-pulse"></div>
                                 <span
-                                    class="text-[10px] font-black text-neat-accent uppercase tracking-widest"
-                                    >Corrección Alta</span
+                                    class="text-[10px] font-black uppercase tracking-widest italic"
+                                    >Corrección Máxima Activada</span
                                 >
                             </div>
                         {/if}
                     {:else}
                         <div
-                            class="w-56 h-56 sm:w-64 sm:h-64 bg-black/20 rounded-[2.5rem] flex flex-col items-center justify-center border-2 border-dashed border-white/5 animate-pulse"
+                            class="w-56 h-56 sm:w-64 sm:h-64 bg-slate-100 dark:bg-slate-800 border-4 border-dashed border-black/20 flex flex-col items-center justify-center animate-pulse"
                         >
-                            <RotateCcw class="w-10 h-10 text-slate-700 mb-4" />
+                            <RotateCcw class="w-12 h-12 text-slate-400 mb-5" />
                             <span
-                                class="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]"
+                                class="text-[10px] font-black text-slate-500 uppercase tracking-widest"
                                 >Generando...</span
                             >
                         </div>
                     {/if}
                 </div>
 
-                <div class="w-full mt-12 space-y-4">
+                <div class="w-full mt-16 space-y-6">
                     <button
                         on:click={downloadQR}
                         disabled={!qrDataUrl}
-                        class="w-full relative overflow-hidden group neat-button-primary py-5 rounded-2xl flex items-center justify-center gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="w-full py-6 bg-primary text-white border-4 border-black flex items-center justify-center gap-4 shadow-neo hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:translate-y-2 active:shadow-none transition-all disabled:opacity-50"
                     >
-                        <Download class="w-5 h-5 group-hover:-translate-y-1 transition-transform" />
-                        <span class="text-sm font-black uppercase tracking-tighter"
+                        <Download class="w-6 h-6" />
+                        <span class="text-base font-black uppercase tracking-widest"
                             >Descargar QR</span
                         >
                     </button>
 
                     <p
-                        class="text-[9px] text-center text-slate-500 font-black uppercase tracking-[0.2em]"
+                        class="text-[10px] text-center text-slate-500 font-black uppercase tracking-widest italic"
                     >
-                        Format: PNG • High Resolution
+                        Formato: PNG • Alta Resolución
                     </p>
                 </div>
             </div>

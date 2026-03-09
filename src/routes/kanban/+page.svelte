@@ -23,9 +23,9 @@
     }
 
     pageHeader.set({
-        title: 'Tablero Kanban',
-        description: 'Organiza tus tareas visualmente con drag & drop.',
-        category: 'Productividad',
+        title: 'TABLERO KANBAN',
+        description: 'Gestión visual de tareas con precisión quirúrgica.',
+        category: 'PRODUCTIVIDAD',
     });
 
     let showAddModal = false;
@@ -47,9 +47,9 @@
     });
 
     const columns: { id: KanbanTask['status']; label: string; dot: string }[] = [
-        { id: 'todo', label: 'Pendiente', dot: 'bg-amber-400' },
-        { id: 'in-progress', label: 'En Progreso', dot: 'bg-blue-400' },
-        { id: 'done', label: 'Completado', dot: 'bg-emerald-400' },
+        { id: 'todo', label: 'POR HACER', dot: 'bg-amber-400' },
+        { id: 'in-progress', label: 'EN CURSO', dot: 'bg-neat-accent' },
+        { id: 'done', label: 'FINALIZADO', dot: 'bg-emerald-400' },
     ];
 
     function addTask() {
@@ -154,38 +154,28 @@
         {#each columns as col, colIdx}
             {@const colTasks = getTasksForColumn($kanbanStore, col.id)}
             <div
-                class="flex-1 glass-card !bg-black/20 !rounded-[2.5rem] p-6 lg:p-8 flex flex-col min-h-[300px] lg:min-h-[500px] relative overflow-hidden group/column"
+                class="flex-1 bg-white dark:bg-slate-900 border-4 border-black p-6 lg:p-8 flex flex-col min-h-[300px] lg:min-h-[500px] shadow-neo relative overflow-hidden group/column"
                 on:dragover|preventDefault
                 on:drop={() => handleDrop(col.id)}
                 role="list"
                 aria-label="Columna {col.label}"
             >
-                <!-- Subtle Column Glow -->
-                <div
-                    class="absolute inset-0 bg-white/[0.02] opacity-0 group-hover/column:opacity-100 transition-opacity duration-700 pointer-events-none"
-                ></div>
-
                 <!-- Column Header -->
                 <div class="flex items-center justify-between mb-8 relative z-10">
                     <div class="flex items-center gap-4">
-                        <div class="relative flex items-center justify-center">
-                            <div
-                                class="absolute inset-0 {col.dot === 'bg-emerald-400'
-                                    ? 'bg-neat-accent'
-                                    : col.dot} blur-lg opacity-40"
-                            ></div>
-                            <div
-                                class="w-3.5 h-3.5 rounded-full {col.dot === 'bg-emerald-400'
-                                    ? 'bg-neat-accent'
-                                    : col.dot} shadow-[0_0_15px_currentColor] relative z-10"
-                            ></div>
-                        </div>
+                        <div
+                            class="w-4 h-4 rounded-none border-2 border-black {col.id === 'done'
+                                ? 'bg-[#C5E1A5]'
+                                : col.id === 'todo'
+                                  ? 'bg-[#FFCC80]'
+                                  : 'bg-[#B39DDB]'} shadow-neo-sm"
+                        ></div>
                         <h3
-                            class="font-black text-xs sm:text-sm text-white uppercase tracking-[0.3em] flex items-center gap-2"
+                            class="font-black text-sm text-black dark:text-white uppercase tracking-[0.2em] flex items-center gap-2"
                         >
                             {col.label}
                             <span
-                                class="text-[10px] font-black text-slate-500 bg-white/5 border border-white/5 px-3 py-1 rounded-full backdrop-blur-3xl"
+                                class="text-[10px] font-black text-white bg-black border-2 border-black px-3 py-1"
                             >
                                 {colTasks.length}
                             </span>
@@ -196,9 +186,9 @@
                             newTaskColumn = col.id;
                             showAddModal = true;
                         }}
-                        class="p-2.5 text-slate-500 hover:text-white hover:bg-white/5 rounded-xl transition-all border border-transparent hover:border-white/5 active:scale-95 group"
+                        class="p-2.5 text-black dark:text-white bg-white dark:bg-slate-800 border-2 border-black shadow-neo-sm hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
                     >
-                        <Plus class="w-5 h-5 group-hover:scale-110 transition-transform" />
+                        <Plus class="w-5 h-5" />
                     </button>
                 </div>
 
@@ -209,17 +199,17 @@
                             animate:flip={{ duration: 250 }}
                             draggable={!isTouchDevice && editingTaskId !== task.id}
                             on:dragstart={() => handleDragStart(task.id, task.status)}
-                            class="glass-card !bg-white/5 !rounded-[1.8rem] p-6 {isTouchDevice
+                            class="bg-white dark:bg-slate-800 border-4 border-black p-6 {isTouchDevice
                                 ? ''
-                                : 'cursor-grab active:cursor-grabbing hover:-translate-y-1'} hover:bg-white/[0.08] hover:border-white/20 transition-all duration-500 group flex flex-col gap-4 relative overflow-hidden"
+                                : 'cursor-grab active:cursor-grabbing hover:-translate-y-1'} shadow-neo-sm hover:shadow-neo transition-all group flex flex-col gap-4 relative"
                             role="listitem"
                         >
                             <div class="flex items-start gap-4 relative z-10">
                                 {#if !isTouchDevice && editingTaskId !== task.id}
                                     <div
-                                        class="mt-1 opacity-20 group-hover:opacity-100 transition-opacity duration-300"
+                                        class="mt-1 text-black dark:text-white opacity-40 group-hover:opacity-100 transition-opacity"
                                     >
-                                        <GripVertical class="w-4 h-4 text-slate-500" />
+                                        <GripVertical class="w-4 h-4" />
                                     </div>
                                 {/if}
 
@@ -233,19 +223,19 @@
                                                 if (e.key === 'Enter') submitEdit();
                                                 if (e.key === 'Escape') cancelEdit();
                                             }}
-                                            class="flex-1 bg-black/40 backdrop-blur-3xl border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-neat-accent/50 transition-all"
+                                            class="flex-1 bg-slate-50 dark:bg-slate-700 border-2 border-black px-4 py-2.5 text-sm text-black dark:text-white font-black uppercase focus:outline-none focus:bg-white transition-all shadow-neo-sm"
                                             use:focusOnMount
                                         />
                                         <div class="flex items-center gap-1.5">
                                             <button
                                                 on:click={submitEdit}
-                                                class="bg-neat-accent text-black hover:bg-white rounded-xl p-2 transition-all shadow-lg shadow-neat-accent/20"
+                                                class="bg-primary text-white border-2 border-black p-2 transition-all shadow-neo-sm hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
                                             >
                                                 <Check class="w-4 h-4" />
                                             </button>
                                             <button
                                                 on:click={cancelEdit}
-                                                class="bg-white/5 text-slate-400 hover:text-white rounded-xl p-2 transition-all border border-white/5"
+                                                class="bg-white dark:bg-slate-700 text-black dark:text-white border-2 border-black p-2 transition-all shadow-neo-sm hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
                                             >
                                                 <X class="w-4 h-4" />
                                             </button>
@@ -253,22 +243,22 @@
                                     </div>
                                 {:else}
                                     <span
-                                        class="text-base text-white flex-1 font-bold leading-tight tracking-tight group-hover:text-neat-accent transition-colors"
-                                        >{task.title}</span
+                                        class="text-base text-black dark:text-white flex-1 font-black uppercase leading-tight tracking-tight group-hover:text-primary transition-colors italic"
+                                        >{task.title} /</span
                                     >
 
                                     <div
-                                        class="flex opacity-0 group-hover:opacity-100 transition-all duration-500 glass-card !rounded-xl !p-1 border-white/5 overflow-hidden"
+                                        class="flex opacity-0 group-hover:opacity-100 transition-all border-2 border-black bg-white dark:bg-slate-900 shadow-neo-sm"
                                     >
                                         <button
                                             on:click={() => startEdit(task)}
-                                            class="text-slate-500 hover:text-white hover:bg-white/5 p-2 rounded-lg transition-all"
+                                            class="p-2 text-black dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-r-2 border-black"
                                         >
                                             <Pencil class="w-4 h-4" />
                                         </button>
                                         <button
                                             on:click={() => deleteTaskWithUndo(task)}
-                                            class="text-slate-500 hover:text-red-500 hover:bg-red-500/10 p-2 rounded-lg transition-all"
+                                            class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                                         >
                                             <Trash2 class="w-4 h-4" />
                                         </button>
@@ -279,16 +269,16 @@
                             <!-- Mobile move buttons -->
                             {#if isTouchDevice && editingTaskId !== task.id}
                                 <div
-                                    class="flex items-center gap-3 pt-4 border-t border-white/5 relative z-10 w-full"
+                                    class="flex items-center gap-3 pt-4 border-t-2 border-black relative z-10 w-full"
                                 >
                                     <button
                                         on:click={() =>
                                             moveTaskDirection(task.id, task.status, 'left')}
                                         disabled={colIdx === 0}
-                                        class="flex-1 flex items-center justify-center gap-2 py-3 px-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all
+                                        class="flex-1 flex items-center justify-center gap-2 py-3 px-2 border-2 border-black text-[10px] font-black uppercase tracking-widest transition-all
                                         {colIdx === 0
-                                            ? 'text-slate-800 opacity-20'
-                                            : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 active:scale-95 border border-white/5'}"
+                                            ? 'bg-slate-100 text-slate-400 border-slate-300'
+                                            : 'bg-white text-black shadow-neo-sm hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none'}"
                                     >
                                         <ChevronLeft class="w-3.5 h-3.5" />
                                         <span>{colIdx > 0 ? columns[colIdx - 1].label : ''}</span>
@@ -298,10 +288,10 @@
                                         on:click={() =>
                                             moveTaskDirection(task.id, task.status, 'right')}
                                         disabled={colIdx === columns.length - 1}
-                                        class="flex-1 flex items-center justify-center gap-2 py-3 px-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all
+                                        class="flex-1 flex items-center justify-center gap-2 py-3 px-2 border-2 border-black text-[10px] font-black uppercase tracking-widest transition-all
                                         {colIdx === columns.length - 1
-                                            ? 'text-slate-800 opacity-20'
-                                            : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 active:scale-95 border border-white/5'}"
+                                            ? 'bg-slate-100 text-slate-400 border-slate-300'
+                                            : 'bg-white text-black shadow-neo-sm hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none'}"
                                     >
                                         <span
                                             >{colIdx < columns.length - 1
@@ -318,9 +308,9 @@
                     <!-- Empty State Placeholder -->
                     {#if colTasks.length === 0}
                         <div
-                            class="h-32 flex items-center justify-center border-2 border-dashed border-white/5 rounded-[2rem] text-slate-700 text-xs font-black uppercase tracking-[0.2em]"
+                            class="h-32 flex items-center justify-center border-4 border-dashed border-black/10 dark:border-white/10 text-black/20 dark:text-white/20 text-xs font-black uppercase tracking-[0.2em]"
                         >
-                            Drop tasks here
+                            SIN TAREAS
                         </div>
                     {/if}
                 </div>
@@ -331,24 +321,24 @@
     <!-- Undo snackbar -->
     {#if undoTask}
         <div
-            class="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-8 glass-card !rounded-2xl px-8 py-5 shadow-2xl border-white/10"
+            class="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-8 bg-white dark:bg-slate-900 border-4 border-black px-8 py-5 shadow-neo"
             transition:fly={{ y: 20, duration: 250 }}
         >
             <div class="flex items-center gap-4">
-                <div class="p-2.5 bg-red-500/10 text-red-500 rounded-xl border border-red-500/20">
+                <div class="p-2.5 bg-red-600 text-white border-2 border-black shadow-neo-sm">
                     <Trash2 class="w-5 h-5" />
                 </div>
-                <span class="text-sm text-white font-bold tracking-tight uppercase"
-                    >Task Deleted</span
+                <span class="text-sm text-black dark:text-white font-black uppercase tracking-tight"
+                    >ELIMINADA</span
                 >
             </div>
-            <div class="w-px h-8 bg-white/10"></div>
+            <div class="w-1 h-8 bg-black"></div>
             <button
                 on:click={undoDelete}
-                class="flex items-center gap-2 text-neat-accent hover:text-white font-black text-[10px] uppercase tracking-[0.2em] transition-all"
+                class="flex items-center gap-2 text-primary hover:scale-105 font-black text-[10px] uppercase tracking-[0.2em] transition-all"
             >
                 <Undo2 class="w-5 h-5" />
-                Undo
+                DESHACER
             </button>
         </div>
     {/if}
@@ -356,7 +346,7 @@
     <!-- Add Task Modal -->
     {#if showAddModal}
         <div
-            class="fixed inset-0 bg-black/80 backdrop-blur-2xl z-50 flex items-end sm:items-center justify-center p-6"
+            class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-6"
             transition:fade={{ duration: 200 }}
             on:click|self={() => (showAddModal = false)}
             role="button"
@@ -364,23 +354,18 @@
             on:keydown={(e) => e.key === 'Escape' && (showAddModal = false)}
         >
             <div
-                class="glass-card !bg-black/60 !rounded-[3rem] p-10 sm:p-12 w-full sm:max-w-lg shadow-2xl safe-bottom relative overflow-hidden"
-                transition:fly={{ y: 40, duration: 400, opacity: 0, easing: (t) => t * (2 - t) }}
+                class="bg-white dark:bg-slate-900 border-4 border-black p-10 sm:p-12 w-full sm:max-w-lg shadow-neo safe-bottom relative overflow-hidden"
+                transition:fly={{ y: 40, duration: 300 }}
             >
                 <div class="flex items-center justify-between mb-12 relative z-10">
-                    <div class="flex items-center gap-4">
-                        <div
-                            class="p-4 bg-white/5 text-white rounded-[1.5rem] border border-white/10 shadow-inner backdrop-blur-3xl"
-                        >
-                            <Plus class="w-6 h-6" />
-                        </div>
-                        <h3 class="text-3xl font-black text-white uppercase tracking-tighter">
-                            New Task
-                        </h3>
-                    </div>
+                    <h3
+                        class="text-3xl font-black text-black dark:text-white uppercase tracking-tighter italic"
+                    >
+                        NUEVA TAREA
+                    </h3>
                     <button
                         on:click={() => (showAddModal = false)}
-                        class="text-slate-500 hover:text-white hover:bg-white/5 p-3 rounded-2xl transition-all border border-transparent hover:border-white/5"
+                        class="text-black dark:text-white border-2 border-black p-2 bg-white dark:bg-slate-800 shadow-neo-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
                     >
                         <X class="w-6 h-6" />
                     </button>
@@ -390,16 +375,16 @@
                     <div class="space-y-4">
                         <label
                             for="task-title"
-                            class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-1"
+                            class="block text-[10px] font-black text-black dark:text-white uppercase tracking-[0.3em] ml-1"
                         >
-                            What needs to be done?
+                            ¿QUÉ TIENES PENDIENTE?
                         </label>
                         <input
                             id="task-title"
                             type="text"
                             bind:value={newTaskTitle}
-                            placeholder="Type something..."
-                            class="w-full bg-white/5 backdrop-blur-3xl border border-white/10 rounded-2xl px-6 py-5 text-lg text-white placeholder:text-slate-700 focus:outline-none focus:border-neat-accent/30 transition-all font-bold tracking-tight"
+                            placeholder="EJ: DISEÑAR LOGOTIPO..."
+                            class="w-full bg-slate-50 dark:bg-slate-800 border-4 border-black px-6 py-5 text-lg text-black dark:text-white placeholder:text-slate-400 focus:outline-none focus:bg-white transition-all font-black tracking-tight uppercase shadow-neo-sm focus:shadow-neo"
                             use:focusOnMount
                         />
                     </div>
@@ -407,22 +392,24 @@
                     <div class="space-y-4">
                         <label
                             for="task-column"
-                            class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-1"
+                            class="block text-[10px] font-black text-black dark:text-white uppercase tracking-[0.3em] ml-1"
                         >
-                            Current Status
+                            ESTADO ACTUAL
                         </label>
                         <div class="relative">
                             <select
                                 id="task-column"
                                 bind:value={newTaskColumn}
-                                class="w-full bg-white/5 backdrop-blur-3xl border border-white/10 rounded-2xl px-6 py-5 text-lg text-white focus:outline-none focus:border-neat-accent/30 appearance-none transition-all cursor-pointer font-bold tracking-tight"
+                                class="w-full bg-slate-50 dark:bg-slate-800 border-4 border-black px-6 py-5 text-lg text-black dark:text-white focus:outline-none appearance-none transition-all cursor-pointer font-black tracking-tight shadow-neo-sm active:shadow-none"
                             >
                                 {#each columns as col}
-                                    <option value={col.id} class="bg-[#0B0E14]">{col.label}</option>
+                                    <option value={col.id} class="bg-white dark:bg-slate-900"
+                                        >{col.label}</option
+                                    >
                                 {/each}
                             </select>
                             <div
-                                class="absolute inset-y-0 right-6 flex items-center pointer-events-none text-slate-600"
+                                class="absolute inset-y-0 right-6 flex items-center pointer-events-none text-black dark:text-white"
                             >
                                 <ChevronRight class="w-5 h-5 rotate-90" />
                             </div>
@@ -432,11 +419,9 @@
                     <button
                         type="submit"
                         disabled={!newTaskTitle.trim()}
-                        class="neat-button-primary w-full py-6 group"
+                        class="w-full py-6 bg-primary text-white border-4 border-black font-black uppercase tracking-widest text-lg shadow-neo hover:-translate-y-1 active:translate-x-1 active:translate-y-1 active:shadow-none transition-all disabled:opacity-50 disabled:translate-0 disabled:shadow-none"
                     >
-                        <span class="relative z-10 flex items-center justify-center gap-3">
-                            <Plus class="w-6 h-6" /> CREATE TASK
-                        </span>
+                        CREAR TAREA
                     </button>
                 </form>
             </div>

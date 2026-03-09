@@ -5,9 +5,10 @@
     import ProGate from '$lib/components/ui/ProGate.svelte';
 
     pageHeader.set({
-        title: 'Claves Seguras',
-        description: 'Genera contraseñas robustas con entropía máxima.',
-        category: 'Seguridad',
+        title: 'GENERADOR DE CLAVES SEGURAS',
+        description:
+            'Crea contraseñas imposibles de descifrar. Entropía máxima, seguridad absoluta.',
+        category: 'SEGURIDAD',
     });
 
     let length = 20;
@@ -95,99 +96,82 @@
 </svelte:head>
 
 <ProGate>
-    <div class="relative max-w-2xl mx-auto flex flex-col gap-8">
-        <!-- Ambient Background Glows -->
-        <div
-            class="absolute top-0 left-1/4 w-96 h-96 bg-neat-accent/10 rounded-full blur-[120px] -z-10 mix-blend-screen pointer-events-none"
-        ></div>
-        <div
-            class="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[120px] -z-10 mix-blend-screen pointer-events-none"
-        ></div>
-
+    <div class="relative max-w-2xl mx-auto flex flex-col gap-8 py-10 px-4">
         <!-- Main Container -->
-        <div class="glass-card p-8 sm:p-10 space-y-10 relative overflow-hidden">
+        <div
+            class="bg-white dark:bg-slate-900 border-4 border-black p-8 sm:p-12 space-y-10 shadow-neo relative"
+        >
             <!-- Password Display Section -->
             <div class="space-y-6">
                 <div class="flex items-center justify-between mb-2">
                     <h3
-                        class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-3"
+                        class="text-xs font-black text-black dark:text-white uppercase tracking-widest"
                     >
-                        <div
-                            class="p-2.5 bg-neat-accent/10 text-neat-accent rounded-xl border border-neat-accent/20"
-                        >
-                            <ShieldCheck class="w-4 h-4" />
-                        </div>
-                        Contraseña Generada
+                        CONTRASEÑA GENERADA
                     </h3>
                     <div class="flex items-center gap-2">
                         <span
-                            class="text-[10px] font-black {strengthColor} uppercase tracking-widest bg-black/40 px-3 py-1.5 rounded-lg border border-white/5"
+                            class="text-xs font-black text-white uppercase tracking-widest px-3 py-1.5 border-2 border-black {strengthBg}"
                         >
                             {strength}
                         </span>
                     </div>
                 </div>
 
-                <div class="relative group">
+                <div class="flex flex-col sm:flex-row items-stretch gap-4">
                     <div
-                        class="absolute -inset-1 bg-gradient-to-r from-neat-accent/20 to-transparent rounded-[2rem] blur-xl opacity-0 group-hover:opacity-100 transition duration-1000"
-                    ></div>
+                        class="flex-1 bg-slate-50 dark:bg-slate-800 border-4 border-black px-6 py-6 font-mono text-2xl text-black dark:text-white overflow-x-auto whitespace-nowrap select-all tracking-wider min-h-[80px] flex items-center"
+                    >
+                        {#if showPassword}
+                            {password || 'Generando...'}
+                        {:else}
+                            {'•'.repeat(password.length || 20)}
+                        {/if}
+                    </div>
 
-                    <div class="relative flex flex-col sm:flex-row items-stretch gap-4">
-                        <div
-                            class="flex-1 bg-black/40 border border-white/10 rounded-3xl px-6 py-6 font-mono text-2xl text-white overflow-x-auto whitespace-nowrap select-all shadow-inner tracking-wider min-h-[80px] flex items-center"
+                    <div class="flex sm:flex-col gap-3">
+                        <button
+                            on:click={copyPassword}
+                            class="flex-1 sm:flex-none p-5 bg-primary text-white border-4 border-black hover:bg-black transition-colors shadow-neo-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none flex items-center justify-center group"
+                            title="Copiar contraseña"
+                        >
+                            <Copy class="w-6 h-6 group-hover:rotate-6 transition-transform" />
+                        </button>
+
+                        <button
+                            on:click={() => (showPassword = !showPassword)}
+                            class="flex-1 sm:flex-none p-5 bg-white dark:bg-slate-800 border-4 border-black text-black dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shadow-neo-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none flex items-center justify-center group"
+                            title={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                         >
                             {#if showPassword}
-                                {password || 'Generando...'}
+                                <EyeOff class="w-6 h-6" />
                             {:else}
-                                {'•'.repeat(password.length || 20)}
+                                <Eye class="w-6 h-6" />
                             {/if}
-                        </div>
-
-                        <div class="flex sm:flex-col gap-3">
-                            <button
-                                on:click={copyPassword}
-                                class="flex-1 sm:flex-none p-5 rounded-2xl bg-neat-accent text-black hover:scale-105 transition-all active:scale-95 shadow-lg flex items-center justify-center group"
-                                title="Copiar contraseña"
-                            >
-                                <Copy class="w-6 h-6 group-hover:rotate-6 transition-transform" />
-                            </button>
-
-                            <button
-                                on:click={() => (showPassword = !showPassword)}
-                                class="flex-1 sm:flex-none p-5 rounded-2xl bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-all active:scale-95 flex items-center justify-center group"
-                                title={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                            >
-                                {#if showPassword}
-                                    <EyeOff class="w-6 h-6" />
-                                {:else}
-                                    <Eye class="w-6 h-6" />
-                                {/if}
-                            </button>
-                        </div>
+                        </button>
                     </div>
                 </div>
 
                 <!-- Strength Progress -->
                 <div class="space-y-3">
                     <div
-                        class="h-1.5 bg-black/40 rounded-full overflow-hidden border border-white/5"
+                        class="h-6 bg-slate-200 dark:bg-slate-800 border-4 border-black overflow-hidden"
                     >
                         <div
-                            class="h-full rounded-full transition-all duration-700 ease-out {strengthBg} shadow-[0_0_15px_rgba(0,229,255,0.2)]"
+                            class="h-full transition-all duration-700 ease-out {strengthBg} border-r-4 border-black"
                             style="width: {strengthPercent}%"
                         ></div>
                     </div>
                     <div
-                        class="flex justify-between text-[10px] font-black text-slate-500 uppercase tracking-widest"
+                        class="flex justify-between text-[10px] font-black text-black dark:text-white uppercase tracking-widest"
                     >
-                        <span>Seguridad: {strengthPercent.toFixed(0)}%</span>
-                        <span>{entropy} Bits de Entropía</span>
+                        <span>SEGURIDAD: {strengthPercent.toFixed(0)}%</span>
+                        <span>{entropy} BITS DE ENTROPÍA</span>
                     </div>
                 </div>
             </div>
 
-            <div class="h-px w-full bg-white/5"></div>
+            <div class="h-1 w-full bg-black"></div>
 
             <!-- Configuration Section -->
             <div class="space-y-10">
@@ -196,41 +180,45 @@
                     <div class="flex justify-between items-end">
                         <label for="pw-length" class="space-y-1">
                             <span
-                                class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]"
-                                >Longitud de Contraseña</span
+                                class="block text-sm font-black text-black dark:text-white uppercase"
+                                >LONGITUD DE LA CLAVE</span
                             >
-                            <span class="block text-xs text-slate-400 font-medium"
-                                >Recomendado: 16+ para máxima seguridad</span
+                            <span class="block text-xs text-slate-500 font-bold uppercase"
+                                >RECOMENDADO: 16+ CARACTERES</span
                             >
                         </label>
-                        <span class="text-3xl font-black text-neat-accent tabular-nums"
-                            >{length}</span
+                        <span
+                            class="bg-primary text-white px-4 py-1 text-2xl font-black tabular-nums border-4 border-black shadow-neo-sm"
                         >
+                            {length}
+                        </span>
                     </div>
-                    <input
-                        id="pw-length"
-                        type="range"
-                        min="8"
-                        max="64"
-                        bind:value={length}
-                        class="w-full h-1.5 bg-black/40 rounded-full appearance-none cursor-pointer accent-neat-accent"
-                    />
+                    <div class="relative h-8 flex items-center">
+                        <input
+                            id="pw-length"
+                            type="range"
+                            min="8"
+                            max="64"
+                            bind:value={length}
+                            class="w-full h-4 bg-slate-200 dark:bg-slate-700 border-2 border-black appearance-none cursor-pointer accent-primary"
+                        />
+                    </div>
                 </div>
 
                 <!-- Toggle Options -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {#each [{ label: 'Mayúsculas', value: uppercase, toggle: () => (uppercase = !uppercase), preview: 'ABCD', icon: 'Aa' }, { label: 'Minúsculas', value: lowercase, toggle: () => (lowercase = !lowercase), preview: 'abcd', icon: 'aa' }, { label: 'Números', value: numbers, toggle: () => (numbers = !numbers), preview: '1234', icon: '12' }, { label: 'Símbolos', value: symbols, toggle: () => (symbols = !symbols), preview: '!@#$', icon: '@#' }] as opt}
+                    {#each [{ label: 'MAYÚSCULAS', value: uppercase, toggle: () => (uppercase = !uppercase), preview: 'ABC', icon: 'AA' }, { label: 'MINÚSCULAS', value: lowercase, toggle: () => (lowercase = !lowercase), preview: 'abc', icon: 'aa' }, { label: 'NÚMEROS', value: numbers, toggle: () => (numbers = !numbers), preview: '123', icon: '12' }, { label: 'SÍMBOLOS', value: symbols, toggle: () => (symbols = !symbols), preview: '!@#', icon: '@#' }] as opt}
                         <button
                             on:click={opt.toggle}
-                            class="p-5 rounded-2xl border transition-all duration-300 flex items-center justify-between group {opt.value
-                                ? 'bg-neat-accent/10 border-neat-accent/30 text-white'
-                                : 'bg-white/5 border-white/5 text-slate-500 hover:bg-white/10 hover:border-white/10'}"
+                            class="p-5 border-4 border-black transition-all flex items-center justify-between group {opt.value
+                                ? 'bg-primary text-white shadow-neo-sm translate-x-[-2px] translate-y-[-2px]'
+                                : 'bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700'}"
                         >
                             <div class="flex items-center gap-4">
                                 <div
-                                    class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs {opt.value
-                                        ? 'bg-neat-accent text-black'
-                                        : 'bg-black/40 text-slate-500 group-hover:text-slate-300'}"
+                                    class="w-10 h-10 border-2 border-black flex items-center justify-center font-black text-xs {opt.value
+                                        ? 'bg-white text-black'
+                                        : 'bg-black text-white'}"
                                 >
                                     {opt.icon}
                                 </div>
@@ -238,30 +226,32 @@
                                     <p class="text-xs font-black uppercase tracking-widest">
                                         {opt.label}
                                     </p>
-                                    <p class="text-[10px] font-mono opacity-40 uppercase">
+                                    <p class="text-[10px] font-mono opacity-60 uppercase">
                                         {opt.preview}
                                     </p>
                                 </div>
                             </div>
 
                             <div
-                                class="w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all {opt.value
-                                    ? 'bg-neat-accent border-neat-accent text-black scale-110 shadow-[0_0_15px_rgba(0,229,255,0.2)]'
-                                    : 'border-white/10 text-transparent'}"
+                                class="w-6 h-6 border-2 border-black flex items-center justify-center {opt.value
+                                    ? 'bg-white text-black'
+                                    : 'bg-slate-200'}"
                             >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="4"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M5 13l4 4L19 7"
-                                    />
-                                </svg>
+                                {#if opt.value}
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="5"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M5 13l4 4L19 7"
+                                        />
+                                    </svg>
+                                {/if}
                             </div>
                         </button>
                     {/each}
@@ -271,36 +261,70 @@
                 <div class="pt-4">
                     <button
                         on:click={generate}
-                        class="w-full neat-button-primary py-5 group flex items-center justify-center gap-3 active:scale-95"
+                        class="w-full bg-black text-white py-5 flex items-center justify-center gap-3 border-4 border-black hover:bg-primary transition-colors shadow-neo active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
                     >
                         <RefreshCw
                             class="w-5 h-5 group-hover:rotate-180 transition-transform duration-700"
                         />
-                        <span class="tracking-[0.2em]">GENERAR NUEVA CLAVE</span>
+                        <span class="text-lg font-black uppercase tracking-widest"
+                            >GENERAR NUEVA CLAVE</span
+                        >
                     </button>
                 </div>
             </div>
         </div>
 
         <!-- Security Tip -->
-        <div class="glass-card p-6 border-neat-accent/20 bg-neat-accent/5">
+        <div class="bg-primary/10 border-4 border-black p-6 shadow-neo-sm">
             <div class="flex gap-4 items-start">
                 <div
-                    class="p-3 bg-neat-accent/10 text-neat-accent rounded-2xl border border-neat-accent/20"
+                    class="p-3 bg-white dark:bg-slate-900 border-2 border-black text-black dark:text-white"
                 >
                     <ShieldCheck class="w-5 h-5" />
                 </div>
                 <div>
-                    <h4 class="text-xs font-black text-white uppercase tracking-widest mb-1">
-                        Seguridad Local
+                    <h4
+                        class="text-xs font-black text-black dark:text-white uppercase tracking-widest mb-1"
+                    >
+                        PRIVACIDAD ABSOLUTA
                     </h4>
-                    <p class="text-[10px] text-slate-400 font-medium leading-relaxed">
-                        Tus contraseñas se generan localmente en tu navegador usando <span
-                            class="text-neat-accent">Criptografía Web</span
-                        >. Nada se envía a nuestros servidores, garantizando privacidad absoluta.
+                    <p
+                        class="text-[10px] text-black dark:text-white font-bold uppercase leading-relaxed"
+                    >
+                        TUS CLAVES SE GENERAN LOCALMENTE USANDO <span
+                            class="bg-primary text-white px-1">CRIPTOGRAFÍA WEB</span
+                        >. NADA SALE DE TU DISPOSITIVO.
                     </p>
                 </div>
             </div>
         </div>
     </div>
 </ProGate>
+
+<style>
+    input[type='range']::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 24px;
+        height: 24px;
+        background: white;
+        border: 4px solid black;
+        cursor: pointer;
+        box-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+    }
+
+    input[type='range']::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        background: white;
+        border: 4px solid black;
+        cursor: pointer;
+        box-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+    }
+
+    /* Track height for Firefox */
+    input[type='range']::-moz-range-track {
+        height: 1rem;
+        background: #e2e8f0;
+        border: 2px solid black;
+    }
+</style>

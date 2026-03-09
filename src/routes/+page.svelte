@@ -12,6 +12,6 @@
     }
 </script>
 
-<div class="h-screen w-full flex items-center justify-center bg-[#0B0E14]">
+<div class="h-screen w-full flex items-center justify-center bg-background-dark">
     <div class="animate-pulse text-slate-400">Redirigiendo...</div>
 </div>

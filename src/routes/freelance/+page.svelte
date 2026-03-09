@@ -17,16 +17,16 @@
     import { browser } from '$app/environment';
 
     pageHeader.set({
-        title: 'Valor de mi Hora',
-        description: 'Calcula automáticamente tu tarifa ideal como freelancer.',
-        category: 'Negocios',
+        title: 'TARIFA FREELANCE',
+        description: 'Calcula tu tasa horaria profesional con precisión absoluta.',
+        category: 'TRABAJO',
     });
 
     // ------ Reactive state ------
     const DEFAULT_EXPENSES = [
-        { label: 'Alquiler / Hipoteca', amount: 700 },
-        { label: 'Internet + Móvil', amount: 60 },
-        { label: 'Seguros', amount: 80 },
+        { label: 'ALQUILER / HIPOTECA', amount: 700 },
+        { label: 'INTERNET + MÓVIL', amount: 60 },
+        { label: 'SEGUROS', amount: 80 },
     ];
 
     let expenses: { label: string; amount: number }[] = DEFAULT_EXPENSES;
@@ -82,123 +82,142 @@
 </svelte:head>
 
 <ProGate>
-    <div class="relative max-w-6xl mx-auto flex flex-col lg:flex-row gap-8 lg:gap-12">
-        <!-- Ambient Background Glows -->
-        <div
-            class="absolute top-0 right-0 w-[600px] h-[600px] bg-neat-accent/10 rounded-full blur-[120px] -z-10 mix-blend-screen pointer-events-none"
-        ></div>
-        <div
-            class="absolute bottom-[-200px] left-0 w-[500px] h-[500px] bg-slate-500/10 rounded-full blur-[120px] -z-10 mix-blend-screen pointer-events-none"
-        ></div>
-
+    <div class="relative max-w-7xl mx-auto flex flex-col lg:flex-row gap-12 lg:gap-16 py-10 px-4">
         <!-- Left Column: Inputs -->
-        <div class="flex-1 space-y-8">
-            <!-- Monthly Expenses Card -->
-            <div class="glass-card p-8 sm:p-10 space-y-8">
-                <div class="flex items-center justify-between">
-                    <h3
-                        class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-3"
+        <div class="flex-1 space-y-12">
+            <!-- Header Section -->
+            <div class="space-y-4">
+                <h2
+                    class="text-6xl md:text-8xl font-black text-black dark:text-white tracking-tighter uppercase leading-none"
+                >
+                    CALCULA <br />
+                    <span
+                        class="bg-primary text-white px-4 border-4 border-black shadow-neo-sm inline-block transform -rotate-1"
+                        >TU TARIFA</span
                     >
-                        <div
-                            class="p-2.5 bg-neat-accent/10 text-neat-accent rounded-xl border border-neat-accent/20"
-                        >
-                            <DollarSign class="w-4 h-4" />
-                        </div>
-                        Gastos Mensuales Fijos
-                    </h3>
+                </h2>
+                <p
+                    class="text-black dark:text-slate-400 font-bold text-xl tracking-tighter uppercase max-w-xl"
+                >
+                    DEFINE TUS TARIFAS CON <span class="bg-primary text-white px-2 italic"
+                        >PRECISIÓN PROFESIONAL /</span
+                    > SIN ADIVINAR.
+                </p>
+            </div>
+
+            <!-- Monthly Expenses Card -->
+            <div
+                class="bg-white dark:bg-slate-900 border-4 border-black p-8 md:p-12 shadow-neo space-y-10"
+            >
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-3 h-10 bg-primary border-2 border-black"></div>
+                        <h3 class="text-lg font-black text-black uppercase tracking-tight">
+                            GASTOS FIJOS MENSUALES
+                        </h3>
+                    </div>
                     <button
                         on:click={addExpense}
-                        class="text-[10px] font-black text-white px-5 py-3 rounded-2xl bg-white/5 hover:bg-white/10 transition-all border border-white/5 active:scale-95 flex items-center gap-2 uppercase tracking-widest"
+                        class="bg-white dark:bg-slate-800 border-4 border-black px-6 py-3 text-xs font-black uppercase hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors shadow-neo-sm dark:shadow-none active:translate-x-[2px] active:translate-y-[2px] active:shadow-none flex items-center justify-center gap-2 dark:text-white"
                     >
-                        <Plus class="w-4 h-4" /> Añadir Gasto
+                        <Plus class="w-4 h-4" /> AÑADIR GASTO
                     </button>
                 </div>
 
-                <div class="space-y-4">
+                <div class="space-y-6">
                     {#each expenses as expense, i}
-                        <div class="flex items-center gap-3 group/row" transition:fade>
-                            <div class="flex-1 relative">
+                        <div
+                            class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 group/row"
+                            transition:fade
+                        >
+                            <div class="flex-1">
                                 <input
                                     type="text"
                                     bind:value={expense.label}
-                                    placeholder="Concepto (ej. Alquiler)"
-                                    class="w-full bg-black/20 border border-white/5 rounded-2xl px-5 py-4 text-sm font-bold text-white placeholder:text-slate-700 focus:outline-none focus:border-neat-accent/30 transition-all"
+                                    placeholder="CONCEPTO (EJ. ALQUILER)"
+                                    class="w-full bg-slate-50 dark:bg-slate-800 border-4 border-black px-6 py-4 text-sm font-black text-black dark:text-white placeholder:text-slate-400 focus:outline-none focus:bg-white dark:focus:bg-slate-700 transition-all uppercase tracking-tight"
                                 />
                             </div>
-                            <div class="relative w-32 sm:w-40">
-                                <span
-                                    class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-black uppercase"
-                                    >{$currencyStore}</span
+                            <div class="relative flex-1 sm:max-w-[200px]">
+                                <div
+                                    class="absolute left-4 top-1/2 -translate-y-1/2 text-black text-xs font-black uppercase pointer-events-none"
                                 >
+                                    {$currencyStore}
+                                </div>
                                 <input
                                     type="number"
                                     bind:value={expense.amount}
                                     min="0"
-                                    class="w-full bg-black/20 border border-white/5 rounded-2xl pl-10 pr-5 py-4 text-sm font-black text-white focus:outline-none focus:border-neat-accent/30 transition-all tabular-nums"
+                                    class="w-full bg-slate-50 dark:bg-slate-800 border-4 border-black pl-12 pr-6 py-4 text-lg font-black text-black dark:text-white focus:outline-none focus:bg-white dark:focus:bg-slate-700 transition-all tabular-nums"
                                 />
                             </div>
                             <button
                                 on:click={() => removeExpense(i)}
-                                class="w-12 h-12 flex items-center justify-center text-slate-500 hover:text-white bg-white/5 hover:bg-red-500/20 rounded-2xl border border-white/5 hover:border-red-500/30 transition-all active:scale-90 shadow-sm"
+                                class="aspect-square w-14 flex items-center justify-center bg-white dark:bg-slate-800 border-4 border-black hover:bg-red-500 hover:text-white transition-colors shadow-neo-sm dark:shadow-none active:translate-x-[2px] active:translate-y-[2px] active:shadow-none dark:text-white"
                             >
-                                <X class="w-5 h-5" />
+                                <X class="w-6 h-6" />
                             </button>
                         </div>
                     {/each}
                 </div>
 
-                <div class="pt-8 border-t border-white/5 flex justify-between items-center">
-                    <span class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]"
-                        >Total Gastos</span
+                <div
+                    class="pt-10 border-t-4 border-black flex flex-col sm:flex-row justify-between items-center gap-4"
+                >
+                    <span class="text-sm font-black text-slate-500 uppercase tracking-widest"
+                        >TOTAL GASTOS MENSUALES</span
                     >
                     <div
-                        class="text-3xl font-black text-white tracking-tighter tabular-nums drop-shadow-xl"
+                        class="text-5xl font-black text-black dark:text-white tracking-tighter tabular-nums drop-shadow-[2px_2px_0_rgba(255,62,0,0.3)]"
                     >
-                        {totalMonthlyExpenses.toLocaleString('es-ES')}
-                        <span class="text-neat-accent text-lg ml-1 uppercase">{$currencyStore}</span
-                        >
+                        <span class="text-primary mr-2">{$currencyStore} /</span
+                        >{totalMonthlyExpenses.toLocaleString('es-ES')}
                     </div>
                 </div>
             </div>
 
             <!-- Parameters Card -->
-            <div class="glass-card p-8 sm:p-10 space-y-10">
-                <h3
-                    class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-3"
-                >
-                    <div
-                        class="p-2.5 bg-neat-accent/10 text-neat-accent rounded-xl border border-neat-accent/20"
+            <div
+                class="bg-white dark:bg-slate-900 border-4 border-black p-8 md:p-12 shadow-neo space-y-14"
+            >
+                <div class="flex items-center gap-4">
+                    <div class="w-3 h-10 bg-black dark:bg-white border-2 border-black"></div>
+                    <h3
+                        class="text-lg font-black text-black dark:text-white uppercase tracking-tight"
                     >
-                        <BarChart3 class="w-4 h-4" />
-                    </div>
-                    Configuración de Parámetros
-                </h3>
+                        CONFIGURACIÓN DE PARÁMETROS
+                    </h3>
+                </div>
 
-                <div class="space-y-12">
+                <div class="space-y-16">
                     <!-- Profit Margin -->
                     <div class="space-y-6">
                         <div class="flex justify-between items-end">
                             <label for="profit-margin" class="space-y-1">
                                 <span
-                                    class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]"
-                                    >Margen de beneficio</span
+                                    class="block text-sm font-black text-black dark:text-white uppercase"
+                                    >BENEFICIO NETO</span
                                 >
-                                <span class="block text-xs text-slate-400 font-medium"
-                                    >Porcentaje extra para ahorros e inversión</span
+                                <span class="block text-xs text-slate-500 font-bold uppercase"
+                                    >PORCENTAJE DESTINADO A AHORRO E INVERSIÓN</span
                                 >
                             </label>
-                            <span class="text-2xl font-black text-neat-accent tabular-nums"
-                                >{profitMarginPercent}%</span
+                            <span
+                                class="bg-black dark:bg-white text-white dark:text-black px-4 py-1 text-2xl font-black tabular-nums border-2 border-black"
                             >
+                                {profitMarginPercent}%
+                            </span>
                         </div>
-                        <input
-                            id="profit-margin"
-                            type="range"
-                            min="0"
-                            max="100"
-                            bind:value={profitMarginPercent}
-                            class="w-full h-1.5 bg-black/40 rounded-full appearance-none cursor-pointer accent-neat-accent"
-                        />
+                        <div class="relative h-8 flex items-center">
+                            <input
+                                id="profit-margin"
+                                type="range"
+                                min="0"
+                                max="100"
+                                bind:value={profitMarginPercent}
+                                class="w-full h-4 bg-slate-200 dark:bg-slate-700 border-2 border-black appearance-none cursor-pointer accent-primary"
+                            />
+                        </div>
                     </div>
 
                     <!-- Hours per Week -->
@@ -206,25 +225,29 @@
                         <div class="flex justify-between items-end">
                             <label for="hours-week" class="space-y-1">
                                 <span
-                                    class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]"
-                                    >Horas Facturables</span
+                                    class="block text-sm font-black text-black dark:text-white uppercase"
+                                    >HORAS COBRABLES / SEMANA</span
                                 >
-                                <span class="block text-xs text-slate-400 font-medium"
-                                    >Horas reales que puedes cobrar por semana</span
+                                <span class="block text-xs text-slate-500 font-bold uppercase"
+                                    >TIEMPO REAL DEDICADO A PROYECTOS</span
                                 >
                             </label>
-                            <span class="text-2xl font-black text-neat-accent tabular-nums"
-                                >{hoursPerWeek}h</span
+                            <span
+                                class="bg-primary text-white px-4 py-1 text-2xl font-black tabular-nums border-2 border-black"
                             >
+                                {hoursPerWeek}H
+                            </span>
                         </div>
-                        <input
-                            id="hours-week"
-                            type="range"
-                            min="0"
-                            max="60"
-                            bind:value={hoursPerWeek}
-                            class="w-full h-1.5 bg-black/40 rounded-full appearance-none cursor-pointer accent-neat-accent"
-                        />
+                        <div class="relative h-8 flex items-center">
+                            <input
+                                id="hours-week"
+                                type="range"
+                                min="0"
+                                max="60"
+                                bind:value={hoursPerWeek}
+                                class="w-full h-4 bg-slate-200 dark:bg-slate-700 border-2 border-black appearance-none cursor-pointer accent-black dark:accent-white"
+                            />
+                        </div>
                     </div>
 
                     <!-- Vacation Weeks -->
@@ -232,84 +255,89 @@
                         <div class="flex justify-between items-end">
                             <label for="vacation-weeks" class="space-y-1">
                                 <span
-                                    class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]"
-                                    >Vacaciones</span
+                                    class="block text-sm font-black text-black dark:text-white uppercase"
+                                    >DESCANSO ANUAL</span
                                 >
-                                <span class="block text-xs text-slate-400 font-medium"
-                                    >Semanas de descanso al año (no cobradas)</span
+                                <span class="block text-xs text-slate-500 font-bold uppercase"
+                                    >SEMANAS DE VACACIONES NO PAGADAS</span
                                 >
                             </label>
-                            <span class="text-2xl font-black text-neat-accent tabular-nums"
-                                >{vacationWeeks} sem</span
+                            <span
+                                class="bg-white dark:bg-slate-900 text-black dark:text-white px-4 py-1 text-2xl font-black tabular-nums border-2 border-black"
                             >
+                                {vacationWeeks} SEM
+                            </span>
                         </div>
-                        <input
-                            id="vacation-weeks"
-                            type="range"
-                            min="0"
-                            max="12"
-                            bind:value={vacationWeeks}
-                            class="w-full h-1.5 bg-black/40 rounded-full appearance-none cursor-pointer accent-neat-accent"
-                        />
+                        <div class="relative h-8 flex items-center">
+                            <input
+                                id="vacation-weeks"
+                                type="range"
+                                min="0"
+                                max="12"
+                                bind:value={vacationWeeks}
+                                class="w-full h-4 bg-slate-200 dark:bg-slate-700 border-2 border-black appearance-none cursor-pointer accent-primary"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Right Column: Results -->
-        <div class="w-full lg:w-[400px] flex flex-col gap-8 lg:shrink-0">
+        <div class="w-full lg:w-[450px] flex flex-col gap-10 lg:shrink-0 lg:pt-32">
             <!-- Main Rate Card -->
             <div
-                class="glass-card !bg-neat-accent p-10 flex flex-col items-center text-center text-black overflow-hidden relative group"
+                class="bg-primary border-4 border-black p-12 flex flex-col items-center text-center text-white shadow-neo relative overflow-hidden group"
             >
-                <!-- Decorative Circle -->
+                <!-- Decorative pattern -->
                 <div
-                    class="absolute -top-20 -right-20 w-64 h-64 bg-white/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"
+                    class="absolute top-0 right-0 w-32 h-32 bg-white/10 -rotate-12 translate-x-8 -translate-y-8 pointer-events-none"
                 ></div>
 
-                <div class="p-4 bg-black/10 rounded-[2rem] mb-8 relative z-10">
-                    <Calculator class="w-8 h-8" />
+                <div
+                    class="w-16 h-16 bg-white dark:bg-slate-900 border-4 border-black flex items-center justify-center mb-8 shadow-neo-sm transform -rotate-3 group-hover:rotate-0 transition-transform"
+                >
+                    <Calculator class="w-8 h-8 text-black" />
+                </div>
+
+                <p class="text-xs font-black uppercase tracking-[0.3em] mb-4 text-black">
+                    TU TARIFA IDEAL
+                </p>
+
+                <div class="flex items-start justify-center mb-6">
+                    <span class="text-4xl font-black mt-4 mr-2 text-black">{$currencyStore}</span>
+                    <span
+                        class="text-[120px] font-black tracking-tighter leading-none text-white drop-shadow-[4px_4px_0_rgba(0,0,0,1)]"
+                    >
+                        {hourlyRate.toFixed(0)}
+                    </span>
+                    <div class="flex flex-col items-start mt-4 ml-1">
+                        <span class="text-3xl font-black text-black/60"
+                            >.{hourlyRate.toFixed(2).split('.')[1]}</span
+                        >
+                    </div>
                 </div>
 
                 <p
-                    class="text-[10px] font-black uppercase tracking-[0.4em] mb-4 relative z-10 opacity-70"
+                    class="bg-black text-white px-8 py-2 text-sm font-black uppercase tracking-widest shadow-neo-sm border-2 border-white"
                 >
-                    Tu Tarifa Ideal
+                    POR HORA
                 </p>
 
-                <div class="flex items-start justify-center relative z-10 mb-2">
-                    <span class="text-2xl font-black mt-2 mr-2">{$currencyStore}</span>
-                    <span class="text-8xl font-black tracking-tighter leading-none">
-                        {hourlyRate.toFixed(0)}
-                    </span>
-                    <span class="text-2xl font-black mt-2 ml-1"
-                        >.{hourlyRate.toFixed(2).split('.')[1]}</span
-                    >
-                </div>
-                <p class="text-sm font-black uppercase tracking-widest opacity-60 relative z-10">
-                    Por Hora
-                </p>
-
-                <div
-                    class="w-full grid grid-cols-2 gap-4 mt-12 pt-10 border-t border-black/10 relative z-10"
-                >
+                <div class="w-full grid grid-cols-2 gap-8 mt-12 pt-10 border-t-4 border-black/20">
                     <div class="space-y-1">
-                        <p
-                            class="text-[10px] font-black uppercase tracking-widest opacity-60 text-black/60"
-                        >
-                            Día (8h)
+                        <p class="text-xs font-black uppercase tracking-widest text-black/50">
+                            DÍA (8H)
                         </p>
-                        <p class="text-2xl font-black tabular-nums">
+                        <p class="text-3xl font-black tabular-nums tracking-tighter">
                             {$currencyStore}{dailyRate.toFixed(0)}
                         </p>
                     </div>
                     <div class="space-y-1">
-                        <p
-                            class="text-[10px] font-black uppercase tracking-widest opacity-60 text-black/60"
-                        >
-                            Semana
+                        <p class="text-xs font-black uppercase tracking-widest text-black/50">
+                            PROYECTO
                         </p>
-                        <p class="text-2xl font-black tabular-nums">
+                        <p class="text-3xl font-black tabular-nums tracking-tighter">
                             {$currencyStore}{projectRate.toFixed(0)}
                         </p>
                     </div>
@@ -317,60 +345,96 @@
             </div>
 
             <!-- Annual Summary -->
-            <div class="glass-card p-8 sm:p-10 space-y-8 relative overflow-hidden">
-                <div
-                    class="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none"
-                ></div>
+            <div
+                class="bg-white dark:bg-slate-900 border-4 border-black p-10 space-y-10 shadow-neo"
+            >
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-2 h-2 bg-black dark:bg-white border border-black dark:border-white"
+                    ></div>
+                    <h4
+                        class="text-sm font-black text-black dark:text-white uppercase tracking-widest"
+                    >
+                        RESUMEN ANUAL
+                    </h4>
+                </div>
 
-                <h4
-                    class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-3 relative z-10"
-                >
-                    Resumen Anual
-                </h4>
-
-                <div class="space-y-6 relative z-10">
+                <div class="space-y-8">
                     <div class="flex justify-between items-center">
-                        <div class="flex items-center gap-3 text-slate-300">
-                            <div class="w-1.5 h-1.5 rounded-full bg-slate-500"></div>
-                            <span class="text-xs font-bold uppercase tracking-widest">Gastos</span>
-                        </div>
-                        <span class="text-sm font-black text-white tabular-nums">
+                        <span class="text-xs font-black text-slate-500 uppercase"
+                            >GASTOS TOTALES</span
+                        >
+                        <span
+                            class="text-2xl font-black text-black dark:text-white tabular-nums tracking-tighter"
+                        >
                             {totalAnnualExpenses.toLocaleString('es-ES')}
                             {$currencyStore}
                         </span>
                     </div>
 
                     <div class="flex justify-between items-center">
-                        <div class="flex items-center gap-3 text-slate-300">
-                            <div class="w-1.5 h-1.5 rounded-full bg-neat-accent"></div>
-                            <span class="text-xs font-bold uppercase tracking-widest">Objetivo</span
-                            >
-                        </div>
-                        <span class="text-sm font-black text-neat-accent tabular-nums">
+                        <span class="text-xs font-black text-slate-500 uppercase"
+                            >OBJETIVO DE FACTURACIÓN</span
+                        >
+                        <span
+                            class="text-2xl font-black text-primary tabular-nums tracking-tighter"
+                        >
                             {annualTarget.toLocaleString('es-ES')}
                             {$currencyStore}
                         </span>
                     </div>
 
                     <div class="flex justify-between items-center">
-                        <div class="flex items-center gap-3 text-slate-300">
-                            <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
-                            <span class="text-xs font-bold uppercase tracking-widest">Horas</span>
-                        </div>
-                        <span class="text-sm font-black text-indigo-400 tabular-nums">
-                            {annualBillableHours}h
-                            <span class="text-[10px] text-slate-600 ml-1">COBRABLES</span>
+                        <span class="text-xs font-black text-slate-500 uppercase"
+                            >HORAS COBRABLES</span
+                        >
+                        <span
+                            class="text-2xl font-black text-black dark:text-white tabular-nums tracking-tighter"
+                        >
+                            {annualBillableHours} H
                         </span>
                     </div>
                 </div>
 
-                <div class="p-5 bg-white/5 rounded-2xl border border-white/5 relative z-10 mt-4">
-                    <p class="text-[10px] text-slate-500 font-medium leading-relaxed">
-                        Tarifa calculada para cubrir tus gastos fijos anuales ajustados con un
-                        margen de beneficio del {profitMarginPercent}%.
+                <div
+                    class="p-6 bg-slate-50 dark:bg-slate-800 border-4 border-black dark:border-white/20 border-dashed"
+                >
+                    <p
+                        class="text-xs text-black dark:text-white font-bold uppercase leading-relaxed"
+                    >
+                        TARIFA CALCULADA PARA CUBRIR GASTOS CON UN MARGEN DE BENEFICIO DEL <span
+                            class="bg-primary text-white px-1">{profitMarginPercent}%</span
+                        >.
                     </p>
                 </div>
             </div>
         </div>
     </div>
 </ProGate>
+
+<style>
+    input[type='range']::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 24px;
+        height: 24px;
+        background: white;
+        border: 4px solid black;
+        cursor: pointer;
+        box-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+    }
+
+    input[type='range']::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        background: white;
+        border: 4px solid black;
+        cursor: pointer;
+        box-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+    }
+
+    input[type='number']::-webkit-inner-spin-button,
+    input[type='number']::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+</style>

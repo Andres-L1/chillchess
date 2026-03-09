@@ -80,33 +80,67 @@ const themes: Record<ThemeColor, Record<string, string>> = {
     }
 }
 
-function createThemeStore() {
-    let initialTheme: ThemeColor = 'sky';
+export type ThemeMode = 'light' | 'dark';
+
+function createThemeModeStore() {
+    let initialMode: ThemeMode = 'dark';
 
     if (browser) {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored && themes[stored as ThemeColor]) {
-            initialTheme = stored as ThemeColor;
+        const stored = localStorage.getItem('chillchess_mode');
+        if (stored === 'light' || stored === 'dark') {
+            initialMode = stored as ThemeMode;
+        } else {
+            // Si no hay nada guardado, forzamos dark y lo guardamos
+            localStorage.setItem('chillchess_mode', 'dark');
         }
     }
 
-    const { subscribe, set, update } = writable<ThemeColor>(initialTheme);
+    const { subscribe, set, update } = writable<ThemeMode>(initialMode);
 
     return {
         subscribe,
-        setTheme: (theme: ThemeColor) => {
+        toggle: () => update(m => {
+            const next = m === 'light' ? 'dark' : 'light';
             if (browser) {
-                localStorage.setItem(STORAGE_KEY, theme);
+                localStorage.setItem('chillchess_mode', next);
+                document.documentElement.classList.toggle('dark', next === 'dark');
             }
-            set(theme);
+            return next;
+        }),
+        setMode: (mode: ThemeMode) => {
+            if (browser) {
+                localStorage.setItem('chillchess_mode', mode);
+                document.documentElement.classList.toggle('dark', mode === 'dark');
+            }
+            set(mode);
         }
     };
 }
 
+function createThemeStore() {
+    let initialColor: ThemeColor = 'sky';
+    if (browser) {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored && Object.keys(themes).includes(stored)) {
+            initialColor = stored as ThemeColor;
+        }
+    }
+    const { subscribe, set } = writable<ThemeColor>(initialColor);
+    return {
+        subscribe,
+        set: (color: ThemeColor) => {
+            if (browser) localStorage.setItem(STORAGE_KEY, color);
+            set(color);
+        }
+    };
+}
+
+export const themeModeStore = createThemeModeStore();
+
 export const themeColorStore = createThemeStore();
 
 export const themeVariables = derived(themeColorStore, ($themeColor) => {
-    const palette = themes[$themeColor] || themes.sky;
+    const palette = themes[$themeColor as ThemeColor] || themes.sky;
     let vars = '';
     for (const [key, value] of Object.entries(palette)) {
         vars += `--brand-${key}: ${value};\n`;

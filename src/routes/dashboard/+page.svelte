@@ -14,9 +14,9 @@
     import ProGate from '$lib/components/ui/ProGate.svelte';
 
     pageHeader.set({
-        title: 'Panel de Control',
-        description: 'Resumen de tus herramientas principales y estado de tus proyectos.',
-        category: 'Workspace',
+        title: 'PANEL DE CONTROL',
+        description: 'Gestiona tus herramientas y proyectos desde un solo lugar.',
+        category: 'SISTEMA',
     });
 
     $: pendingTasks = $kanbanStore.filter((t) => t.status === 'todo').length;
@@ -26,7 +26,7 @@
 
     // Greeting
     $: userName =
-        $authStore.user?.displayName || $authStore.user?.email?.split('@')[0] || 'Freelancer';
+        $authStore.user?.displayName || $authStore.user?.email?.split('@')[0] || 'Usuario';
 
     // Simple visual math for ring
     $: progressPercentage = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
@@ -37,30 +37,15 @@
 </svelte:head>
 
 <ProGate>
-    <!-- Background glows -->
-    <div class="absolute inset-0 z-[-1] overflow-hidden pointer-events-none">
-        <div
-            class="absolute top-0 left-1/4 w-[500px] h-[500px] bg-neat-accent/5 rounded-full blur-[120px] mix-blend-screen"
-        ></div>
-        <div
-            class="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[100px] mix-blend-screen"
-        ></div>
-    </div>
-
-    <div class="max-w-6xl mx-auto space-y-12">
+    <div class="max-w-7xl mx-auto space-y-16 py-10 md:py-16">
         <!-- Welcome Section -->
-        <div
-            class="glass-card p-10 md:p-12 flex flex-col md:flex-row items-center justify-between gap-10 overflow-hidden relative"
-        >
-            <div class="flex items-center gap-8 text-center md:text-left flex-col md:flex-row">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-12">
+            <div class="flex items-center gap-10 text-center md:text-left flex-col md:flex-row">
                 <div
-                    class="w-24 h-24 rounded-[2rem] bg-white/5 border border-white/10 p-1 shadow-2xl relative group"
+                    class="w-32 h-32 bg-white dark:bg-slate-800 border-4 border-black shadow-neo flex items-center justify-center p-1 transform rotate-3 hover:rotate-0 transition-transform"
                 >
                     <div
-                        class="absolute inset-0 bg-neat-accent/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"
-                    ></div>
-                    <div
-                        class="w-full h-full bg-[#0B0E14] rounded-[1.8rem] flex items-center justify-center relative z-10 overflow-hidden border border-white/5"
+                        class="w-full h-full bg-slate-200 dark:bg-slate-700 border-2 border-black flex items-center justify-center overflow-hidden"
                     >
                         {#if $authStore.user?.photoURL}
                             <img
@@ -69,91 +54,109 @@
                                 class="w-full h-full object-cover"
                             />
                         {:else}
-                            <User class="w-10 h-10 text-slate-500" />
+                            <User class="w-12 h-12 text-black dark:text-white" />
                         {/if}
                     </div>
                 </div>
                 <div>
                     <h2
-                        class="text-4xl md:text-6xl font-black text-white tracking-tighter leading-none mb-4 uppercase"
+                        class="text-5xl md:text-8xl font-black text-black dark:text-white tracking-tighter leading-none mb-4 uppercase italic"
+                        style="text-shadow: 4px 4px 0px rgba(0,123,255,0.3);"
                     >
-                        HELLO, <span class="hero-text-gradient">{userName}</span>
+                        HOLA, <span class="text-primary">{userName}</span>
                     </h2>
-                    <p class="text-slate-500 font-bold text-xl tracking-tight">
-                        Your workspace is ready. What are we building today?
+                    <p
+                        class="text-slate-600 dark:text-slate-400 font-black text-lg md:text-xl tracking-tighter uppercase max-w-2xl italic"
+                    >
+                        TU PANEL ESTÁ LISTO / <span class="text-black dark:text-white"
+                            >EFICIENCIA AL MÁXIMO.</span
+                        >
                     </p>
                 </div>
             </div>
 
-            <!-- Mini progress ring -->
+            <!-- Mini progress ring as a Neo-Brutalist Card -->
             {#if totalTasks > 0}
                 <div
-                    class="bg-white/5 border border-white/5 rounded-[2rem] p-8 flex items-center gap-6 backdrop-blur-3xl shadow-2xl"
+                    class="bg-white dark:bg-slate-900 border-4 border-black p-8 flex items-center gap-8 shadow-neo transform -rotate-1"
                 >
                     <div
-                        class="relative w-20 h-20 flex items-center justify-center text-xl font-black text-white"
+                        class="relative w-24 h-24 flex items-center justify-center text-2xl font-black text-black dark:text-white border-4 border-black rounded-full bg-slate-50 dark:bg-slate-800"
                     >
-                        <svg class="absolute inset-0 w-20 h-20 -rotate-90" viewBox="0 0 36 36">
+                        <svg
+                            class="absolute inset-0 w-full h-full -rotate-90 p-1"
+                            viewBox="0 0 36 36"
+                        >
                             <path
-                                class="text-white/5"
+                                class="text-slate-200 dark:text-slate-700"
                                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                                 fill="none"
                                 stroke="currentColor"
                                 stroke-width="3"
                             />
                             <path
-                                class="text-neat-accent"
+                                class="text-primary"
                                 stroke-dasharray="{progressPercentage}, 100"
                                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                                 fill="none"
                                 stroke="currentColor"
                                 stroke-width="3"
-                                stroke-linecap="round"
+                                stroke-linecap="square"
                             />
                         </svg>
-                        {progressPercentage}%
+                        <span class="relative z-10">{progressPercentage}%</span>
                     </div>
-                    <div class="space-y-1">
-                        <p class="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">
-                            PROGRESS
+                    <div>
+                        <p
+                            class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1"
+                        >
+                            PROGRESO TOTAL
                         </p>
-                        <p class="text-xl font-black text-white tracking-tight">
+                        <p class="text-3xl font-black text-black dark:text-white tracking-tighter">
                             {completedTasks} / {totalTasks}
-                            <span class="text-slate-500 text-sm">DONE</span>
+                        </p>
+                        <p
+                            class="text-[10px] font-black text-primary uppercase tracking-widest mt-1"
+                        >
+                            TAREAS COMPLETADAS
                         </p>
                     </div>
                 </div>
             {/if}
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
             <!-- Quick Actions -->
-            <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <a
                     href="/kanban"
-                    class="glass-card !rounded-[2.5rem] p-10 hover:bg-white/10 hover:border-white/20 transition-all duration-500 group flex flex-col justify-between min-h-[220px]"
+                    class="bg-[#E1F5FE] dark:bg-slate-900 border-4 border-black p-10 shadow-neo hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all group flex flex-col justify-between min-h-[260px]"
                 >
                     <div class="flex justify-between items-start">
                         <div
-                            class="w-14 h-14 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-500 group-hover:text-black transition-all duration-500"
+                            class="w-16 h-16 bg-[#B39DDB] border-4 border-black flex items-center justify-center shadow-neo-sm group-hover:-translate-x-1 group-hover:-translate-y-1 transition-transform"
                         >
-                            <LayoutList class="w-7 h-7" />
+                            <LayoutList class="w-8 h-8 text-black" />
                         </div>
-                        <ArrowRight
-                            class="w-6 h-6 text-slate-700 group-hover:text-white transition-all group-hover:translate-x-1"
-                        />
+                        <div
+                            class="w-12 h-12 border-2 border-black flex items-center justify-center bg-slate-50 dark:bg-slate-800"
+                        >
+                            <ArrowRight
+                                class="w-6 h-6 text-black dark:text-white group-hover:translate-x-1 transition-transform"
+                            />
+                        </div>
                     </div>
                     <div>
                         <h3
-                            class="text-2xl font-black text-white mb-2 uppercase tracking-tighter group-hover:text-indigo-400 transition-colors"
+                            class="text-3xl font-black text-black dark:text-white mb-2 uppercase tracking-tighter"
                         >
-                            Kanban Board
+                            TABLERO KANBAN
                         </h3>
-                        <p class="text-slate-500 font-bold tracking-tight">
+                        <p class="text-[11px] font-black tracking-widest text-slate-500 uppercase">
                             {#if pendingTasks === 0 && inProgressTasks === 0}
-                                No pending tasks.
+                                Sin tareas pendientes
                             {:else}
-                                {pendingTasks} pending, {inProgressTasks} in progress.
+                                {pendingTasks} pendientes · {inProgressTasks} en curso
                             {/if}
                         </p>
                     </div>
@@ -161,91 +164,102 @@
 
                 <a
                     href="/freelance"
-                    class="glass-card !rounded-[2.5rem] p-10 hover:bg-white/10 hover:border-white/20 transition-all duration-500 group flex flex-col justify-between min-h-[220px]"
+                    class="bg-[#F1F8E9] dark:bg-slate-900 border-4 border-black p-10 shadow-neo hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all group flex flex-col justify-between min-h-[260px]"
                 >
                     <div class="flex justify-between items-start">
                         <div
-                            class="w-14 h-14 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-neat-accent group-hover:bg-neat-accent group-hover:text-black transition-all duration-500"
+                            class="w-16 h-16 bg-primary border-4 border-black flex items-center justify-center shadow-neo-sm group-hover:-translate-x-1 group-hover:-translate-y-1 transition-transform"
                         >
-                            <Briefcase class="w-7 h-7" />
+                            <Briefcase class="w-8 h-8 text-white" />
                         </div>
-                        <ArrowRight
-                            class="w-6 h-6 text-slate-700 group-hover:text-white transition-all group-hover:translate-x-1"
-                        />
+                        <div
+                            class="w-12 h-12 border-2 border-black flex items-center justify-center bg-slate-50 dark:bg-slate-800"
+                        >
+                            <ArrowRight
+                                class="w-6 h-6 text-black dark:text-white group-hover:translate-x-1 transition-transform"
+                            />
+                        </div>
                     </div>
                     <div>
                         <h3
-                            class="text-2xl font-black text-white mb-2 uppercase tracking-tighter group-hover:text-neat-accent transition-colors"
+                            class="text-3xl font-black text-black dark:text-white mb-2 uppercase tracking-tighter"
                         >
-                            Hourly Rate
+                            TARIFA FREELANCE
                         </h3>
-                        <p class="text-slate-500 font-bold tracking-tight">
-                            Recalculate your freelance rates accurately.
+                        <p class="text-[11px] font-black tracking-widest text-slate-500 uppercase">
+                            OPTIMIZA TUS INGRESOS PROFESIONALES.
                         </p>
                     </div>
                 </a>
 
                 <a
                     href="/invoice"
-                    class="glass-card !rounded-[2.5rem] p-10 hover:bg-white/10 hover:border-white/20 transition-all duration-500 group flex flex-col justify-between min-h-[220px] sm:col-span-2 relative overflow-hidden"
+                    class="bg-primary dark:bg-blue-700 border-4 border-black p-10 shadow-neo hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all group flex flex-col justify-between min-h-[280px] sm:col-span-2 relative overflow-hidden"
                 >
                     <div
-                        class="absolute -top-12 -right-12 w-48 h-48 bg-emerald-500/5 rounded-full blur-[60px] group-hover:bg-emerald-500/10 transition-colors"
+                        class="absolute -top-12 -right-12 w-64 h-64 bg-black/10 rounded-full border-4 border-black/20"
                     ></div>
 
                     <div class="flex justify-between items-start relative z-10">
                         <div
-                            class="w-14 h-14 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500 group-hover:text-black transition-all duration-500"
+                            class="w-16 h-16 bg-white border-4 border-black flex items-center justify-center shadow-neo-sm group-hover:-translate-x-1 group-hover:-translate-y-1 transition-transform"
                         >
-                            <FileText class="w-7 h-7" />
+                            <FileText class="w-8 h-8 text-black" />
                         </div>
                         <div
-                            class="text-[10px] font-black tracking-[0.3em] uppercase px-4 py-2 bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20"
+                            class="text-[10px] font-black tracking-widest uppercase px-6 py-2 bg-black text-white border-2 border-black"
                         >
-                            MOST POPULAR
+                            MÁS UTILIZADO
                         </div>
                     </div>
-                    <div class="relative z-10">
+                    <div class="relative z-10 text-white">
                         <h3
-                            class="text-4xl font-black text-white mb-2 uppercase tracking-tighter group-hover:text-emerald-400 transition-colors leading-none"
+                            class="text-5xl md:text-7xl font-black mb-2 uppercase tracking-tighter leading-none italic"
                         >
-                            Invoice Generator
+                            FACTURAS PRO
                         </h3>
-                        <p class="text-slate-500 font-bold text-lg tracking-tight">
-                            Professional invoices in seconds.
+                        <p class="text-white/80 font-black text-xl tracking-tighter uppercase">
+                            PRESENTACIÓN IMPECABLE EN SEGUNDOS.
                         </p>
                     </div>
                 </a>
             </div>
 
             <!-- Right Sidebar / Activity -->
-            <div class="glass-card !rounded-[2.5rem] p-10 flex flex-col h-full min-h-[400px]">
-                <div class="flex items-center gap-3 mb-10">
-                    <div class="w-1.5 h-6 bg-neat-accent rounded-full"></div>
-                    <h3 class="text-sm font-black text-slate-500 uppercase tracking-[0.3em]">
-                        TASK STATUS
+            <div
+                class="bg-white dark:bg-slate-900 border-4 border-black p-10 flex flex-col h-full min-h-[450px] shadow-neo"
+            >
+                <div class="flex items-center gap-4 mb-12">
+                    <div class="w-3 h-8 bg-black dark:bg-white border-2 border-black"></div>
+                    <h3
+                        class="text-xs font-black text-black dark:text-white uppercase tracking-[0.3em]"
+                    >
+                        ESTADO DE TAREAS
                     </h3>
                 </div>
 
-                <div class="flex-1 flex flex-col gap-8">
-                    <div class="space-y-3">
+                <div class="flex-1 flex flex-col gap-10">
+                    <div class="space-y-4">
                         <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <CircleDashed class="w-5 h-5 text-amber-500" />
+                            <div class="flex items-center gap-4">
+                                <div class="neo-sticker bg-white dark:bg-slate-800 -rotate-2">
+                                    <CircleDashed class="w-6 h-6 text-amber-500" />
+                                </div>
                                 <span
-                                    class="text-sm font-black text-slate-400 uppercase tracking-widest"
-                                    >To Do</span
+                                    class="text-[10px] font-black text-slate-500 uppercase tracking-widest"
+                                    >POR HACER</span
                                 >
                             </div>
-                            <span class="text-xl font-black text-white tracking-tighter"
+                            <span
+                                class="text-3xl font-black text-black dark:text-white tracking-tighter"
                                 >{pendingTasks}</span
                             >
                         </div>
                         <div
-                            class="w-full bg-white/5 h-2.5 rounded-full overflow-hidden border border-white/5"
+                            class="w-full bg-slate-100 dark:bg-slate-800 border-[3px] border-black p-0"
                         >
                             <div
-                                class="bg-amber-500 h-full rounded-full"
+                                class="bg-amber-500 h-5 border-r-[3px] border-black transition-all duration-500"
                                 style="width: {totalTasks > 0
                                     ? (pendingTasks / totalTasks) * 100
                                     : 0}%"
@@ -253,26 +267,29 @@
                         </div>
                     </div>
 
-                    <div class="space-y-3">
+                    <div class="space-y-4">
                         <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div
-                                    class="w-5 h-5 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin"
-                                ></div>
+                            <div class="flex items-center gap-4">
+                                <div class="neo-sticker bg-white dark:bg-slate-800 rotate-2">
+                                    <div
+                                        class="w-6 h-6 border-[3px] border-black border-t-purple-500 rounded-full animate-spin"
+                                    ></div>
+                                </div>
                                 <span
-                                    class="text-sm font-black text-slate-400 uppercase tracking-widest"
-                                    >In Progress</span
+                                    class="text-[10px] font-black text-slate-500 uppercase tracking-widest"
+                                    >EN CURSO</span
                                 >
                             </div>
-                            <span class="text-xl font-black text-white tracking-tighter"
+                            <span
+                                class="text-3xl font-black text-black dark:text-white tracking-tighter"
                                 >{inProgressTasks}</span
                             >
                         </div>
                         <div
-                            class="w-full bg-white/5 h-2.5 rounded-full overflow-hidden border border-white/5"
+                            class="w-full bg-slate-100 dark:bg-slate-800 border-[3px] border-black p-0"
                         >
                             <div
-                                class="bg-indigo-500 h-full rounded-full"
+                                class="bg-purple-500 h-5 border-r-[3px] border-black transition-all duration-500"
                                 style="width: {totalTasks > 0
                                     ? (inProgressTasks / totalTasks) * 100
                                     : 0}%"
@@ -280,24 +297,27 @@
                         </div>
                     </div>
 
-                    <div class="space-y-3">
+                    <div class="space-y-4">
                         <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <CheckCircle2 class="w-5 h-5 text-neat-accent" />
+                            <div class="flex items-center gap-4">
+                                <div class="neo-sticker bg-white dark:bg-slate-800 -rotate-1">
+                                    <CheckCircle2 class="w-6 h-6 text-green-500" />
+                                </div>
                                 <span
-                                    class="text-sm font-black text-slate-400 uppercase tracking-widest"
-                                    >Completed</span
+                                    class="text-[10px] font-black text-slate-500 uppercase tracking-widest"
+                                    >COMPLETADAS</span
                                 >
                             </div>
-                            <span class="text-xl font-black text-white tracking-tighter"
+                            <span
+                                class="text-3xl font-black text-black dark:text-white tracking-tighter"
                                 >{completedTasks}</span
                             >
                         </div>
                         <div
-                            class="w-full bg-white/5 h-2.5 rounded-full overflow-hidden border border-white/5"
+                            class="w-full bg-slate-100 dark:bg-slate-800 border-[3px] border-black p-0"
                         >
                             <div
-                                class="bg-neat-accent h-full rounded-full shadow-[0_0_20px_rgba(0,229,255,0.3)]"
+                                class="bg-primary h-5 border-r-[3px] border-black transition-all duration-500"
                                 style="width: {progressPercentage}%"
                             ></div>
                         </div>
@@ -306,9 +326,9 @@
 
                 <a
                     href="/kanban"
-                    class="mt-12 w-full py-5 px-6 bg-white/5 hover:bg-white text-white hover:text-black text-xs font-black uppercase tracking-[0.2em] text-center rounded-2xl transition-all border border-white/10 shadow-xl active:scale-95"
+                    class="mt-12 w-full py-5 px-6 bg-black text-white text-xs font-black uppercase tracking-widest text-center border-2 border-black shadow-neo-sm hover:shadow-neo hover:-translate-y-1 active:translate-y-0 active:shadow-none transition-all"
                 >
-                    GO TO BOARD
+                    GESTIONAR PROYECTOS
                 </a>
             </div>
         </div>

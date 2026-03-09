@@ -60,157 +60,181 @@
 </svelte:head>
 
 <div
-    class="min-h-[100dvh] w-full bg-black flex flex-col items-center justify-center px-4 py-8 sm:px-6 relative overflow-x-hidden font-sans selection:bg-white/20"
+    class="min-h-[100dvh] w-full bg-black flex flex-col items-center justify-center px-4 py-12 sm:px-6 relative overflow-x-hidden font-sans selection:bg-neat-accent/30"
 >
     <!-- Back Button -->
-    <div class="absolute top-6 left-6 z-50">
+    <div class="absolute top-8 left-8 z-50">
         <button
             on:click={() => goto('/landing')}
-            class="flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 shadow-sm text-slate-300 hover:text-white px-4 py-2 rounded-xl transition-all font-medium hover:-translate-y-0.5"
+            class="group flex items-center gap-2.5 bg-white/5 backdrop-blur-3xl border border-white/10 text-slate-400 hover:text-white px-5 py-2.5 rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest hover:-translate-x-1 active:scale-95 shadow-inner"
         >
-            <ArrowLeft class="w-4 h-4" />
-            Volver
+            <ArrowLeft class="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            VOLVER
         </button>
     </div>
 
     <!-- Premium Background Effects -->
     <div class="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         <div
-            class="absolute top-0 -left-1/4 w-[150%] h-[500px] bg-gradient-to-b from-slate-800/20 via-black to-transparent blur-3xl opacity-50"
+            class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-gradient-to-b from-neat-accent/5 via-transparent to-transparent blur-3xl opacity-50"
         ></div>
         <div
-            class="absolute top-20 right-[5%] w-[400px] h-[400px] bg-slate-800/20 rounded-full blur-[120px] mix-blend-screen animate-pulse-slow"
-        ></div>
-        <div
-            class="absolute bottom-20 left-[10%] w-[500px] h-[500px] bg-white/5 rounded-full blur-[100px] mix-blend-screen"
+            class="absolute top-1/4 -right-1/4 w-[600px] h-[600px] bg-neat-accent/5 rounded-full blur-[120px] mix-blend-screen"
         ></div>
     </div>
 
-    <div class="w-full max-w-lg flex flex-col items-center z-10 relative">
+    <div class="w-full max-w-2xl flex flex-col items-center z-10 relative px-4">
         <!-- Header -->
-        <div class="text-center mb-6 sm:mb-8 mt-12 sm:mt-0">
+        <div class="text-center mb-24 mt-16 sm:mt-0">
             <h1
-                class="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400 tracking-tight leading-tight drop-shadow-sm mb-3 sm:mb-5"
+                class="text-[clamp(3.5rem,8vw,8rem)] font-black text-white tracking-tighter leading-[0.8] mb-12 uppercase italic"
             >
-                Desbloquea Todo tu Potencial
+                IMPULSA TU <br /><span class="text-white/40">PRODUCTIVIDAD.</span>
             </h1>
-            <p class="text-base sm:text-lg text-slate-400 font-medium leading-relaxed">
-                Accede a todas nuestras herramientas premium por solo 1€ al mes.
+            <p class="text-lg md:text-xl font-bold text-white/40 max-w-xl mx-auto leading-relaxed">
+                Accede a todas las herramientas premium <br />
+                <span class="text-white">SIN LÍMITES POR SOLO 1€ AL MES.</span>
             </p>
         </div>
 
         <!-- Pricing Card -->
-        <div class="w-full group relative">
+        <div class="w-full group relative max-w-xl">
+            <!-- Glow effect -->
             <div
-                class="absolute -inset-1 bg-white/10 rounded-[2rem] blur-2xl opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-500"
+                class="absolute -inset-10 bg-neat-accent/10 rounded-full blur-[100px] opacity-0 group-hover:opacity-100 transition duration-1000 pointer-events-none"
             ></div>
+
             <div
-                class="relative bg-black/40 backdrop-blur-3xl rounded-[2rem] shadow-2xl border border-white/10 overflow-hidden transform transition-all group-hover:border-white/20 p-6 md:p-8"
+                class="relative glass-card !p-12 md:!p-16 overflow-hidden transform transition-all"
             >
-                <div class="absolute top-6 right-6">
+                <div class="absolute top-12 right-12">
                     <span
-                        class="inline-flex items-center gap-1.5 bg-white/10 text-white border border-white/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-md shadow-sm"
+                        class="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] backdrop-blur-md"
                     >
-                        <Star class="w-3.5 h-3.5 text-white" />
-                        Premium
+                        <Star class="w-3.5 h-3.5 fill-neat-accent text-neat-accent" />
+                        PREMIUM
                     </span>
                 </div>
 
-                <div>
-                    <h3 class="text-2xl font-bold text-white mb-1.5">Plan Pro Mensual</h3>
-                    <p class="text-slate-400 text-sm mb-4 pb-4 border-b border-white/10">
-                        Todo lo que necesitas para tu día a día.
-                    </p>
-
-                    <div class="flex items-baseline mb-6">
-                        <span class="text-5xl font-light text-white tracking-tight">1€</span>
-                        <span class="text-xl text-slate-500 font-medium ml-2">/mes</span>
+                <div class="space-y-12">
+                    <div>
+                        <h3
+                            class="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] mb-6 italic"
+                        >
+                            Suscripción Mensual
+                        </h3>
+                        <div class="flex items-baseline gap-3">
+                            <span
+                                class="text-7xl md:text-8xl font-black text-white tracking-tighter italic"
+                                >1€</span
+                            >
+                            <span
+                                class="text-base font-black text-white/20 uppercase tracking-widest"
+                                >/ Mes</span
+                            >
+                        </div>
                     </div>
 
-                    <ul class="space-y-3 mb-6">
+                    <div class="h-px bg-white/5 w-full"></div>
+
+                    <ul class="space-y-6">
                         {#each features as feature}
-                            <li class="flex items-center gap-3 text-slate-300">
+                            <li class="flex items-center gap-4 text-white">
                                 <div
-                                    class="w-5 h-5 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0 border border-white/10"
+                                    class="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0 border border-white/10"
                                 >
-                                    <Check class="w-3 h-3 text-slate-300" />
+                                    <Check class="w-3.5 h-3.5 text-neat-accent" />
                                 </div>
-                                <span class="font-light text-sm">{feature}</span>
+                                <span
+                                    class="text-xs font-black uppercase tracking-widest text-white/60 group-hover:text-white transition-colors"
+                                    >{feature}</span
+                                >
                             </li>
                         {/each}
                     </ul>
 
-                    {#if $authStore.loading}
-                        <button
-                            disabled
-                            class="w-full bg-white/5 text-slate-500 font-bold py-4 rounded-xl flex justify-center border border-white/10"
-                        >
-                            <Loader2 class="w-6 h-6 animate-spin" />
-                        </button>
-                    {:else if !$authStore.user}
-                        <button
-                            on:click={() => goto('/landing')}
-                            class="w-full relative overflow-hidden bg-white hover:bg-slate-100 text-black rounded-xl py-4 px-6 flex items-center justify-center gap-3 font-medium transition-all disabled:opacity-70 focus:outline-none focus:ring-2 focus:ring-white/20 group/btn"
-                        >
-                            <span class="relative z-10 text-lg">Regístrate Primero</span>
-                            <ArrowRight
-                                class="w-5 h-5 relative z-10 opacity-0 -ml-5 group-hover/btn:opacity-100 group-hover/btn:ml-0 transition-all delay-75"
-                            />
-                        </button>
-                    {:else if $authStore.user.isAdmin}
-                        <div
-                            class="w-full text-center p-4 bg-white/5 border border-white/10 text-white rounded-xl font-medium backdrop-blur-sm"
-                        >
-                            ✓ Eres Administrador. Ya tienes acceso total.
-                        </div>
-                        <button
-                            on:click={() => goto('/dashboard')}
-                            class="w-full bg-white hover:bg-slate-100 text-black font-medium py-4 px-6 rounded-xl transition-all mt-4 text-center block"
-                        >
-                            Ir a mis Herramientas
-                        </button>
-                    {:else if $authStore.user.isPro}
-                        <div
-                            class="w-full text-center p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl font-medium flex justify-center items-center gap-2 backdrop-blur-sm shadow-inner"
-                        >
-                            <Check class="w-5 h-5" /> Tu suscripción está activa.
-                        </div>
-                        <button
-                            on:click={() => goto('/dashboard')}
-                            class="w-full bg-white hover:bg-slate-100 text-black font-medium py-4 px-6 rounded-xl transition-all mt-4 text-center block"
-                        >
-                            Ir a mis Herramientas
-                        </button>
-                    {:else}
-                        <button
-                            on:click={handleSubscribe}
-                            disabled={isCheckingOut}
-                            class="w-full relative overflow-hidden bg-white hover:bg-slate-100 text-black rounded-xl py-4 flex items-center justify-center gap-3 font-medium transition-all disabled:opacity-70 focus:outline-none focus:ring-2 focus:ring-white/20 group/btn"
-                        >
-                            <span class="relative z-10 text-lg">
-                                {#if isCheckingOut}
-                                    Procesando pago...
-                                {:else}
-                                    Suscribirse Ahora
-                                {/if}
-                            </span>
-                            {#if isCheckingOut}
-                                <Loader2 class="w-5 h-5 relative z-10 animate-spin" />
-                            {:else}
+                    <div class="pt-8">
+                        {#if $authStore.loading}
+                            <button disabled class="neat-button-secondary w-full opacity-50">
+                                <Loader2 class="w-6 h-6 animate-spin" />
+                            </button>
+                        {:else if !$authStore.user}
+                            <button
+                                on:click={() => goto('/landing')}
+                                class="neat-button-primary w-full"
+                            >
+                                <span>REGÍSTRATE PRIMERO</span>
                                 <ArrowRight
-                                    class="w-5 h-5 relative z-10 opacity-0 -ml-5 group-hover/btn:opacity-100 group-hover/btn:ml-0 transition-all delay-75"
+                                    class="w-5 h-5 transition-transform group-hover:translate-x-1"
                                 />
-                            {/if}
-                        </button>
-                    {/if}
+                            </button>
+                        {:else if $authStore.user.isAdmin}
+                            <div
+                                class="w-full text-center p-6 bg-white/5 border border-white/10 text-white rounded-3xl font-black text-[10px] uppercase tracking-widest mb-4"
+                            >
+                                ✓ CUENTA DE ADMINISTRADOR ACTIVA
+                            </div>
+                            <button
+                                on:click={() => goto('/dashboard')}
+                                class="neat-button-primary w-full"
+                            >
+                                IR A HERRAMIENTAS
+                            </button>
+                        {:else if $authStore.user.isPro}
+                            <div
+                                class="w-full text-center p-6 bg-neat-accent/10 border border-neat-accent/20 text-neat-accent rounded-3xl font-black text-[10px] uppercase tracking-widest flex justify-center items-center gap-3 backdrop-blur-sm mb-4"
+                            >
+                                <Check class="w-4 h-4" /> SUSCRIPCIÓN ACTIVA
+                            </div>
+                            <button
+                                on:click={() => goto('/dashboard')}
+                                class="neat-button-primary w-full"
+                            >
+                                VOLVER AL PANEL
+                            </button>
+                        {:else}
+                            <button
+                                on:click={handleSubscribe}
+                                disabled={isCheckingOut}
+                                class="neat-button-primary w-full shadow-[0_30px_60px_rgba(255,255,255,0.1)]"
+                            >
+                                <span>
+                                    {#if isCheckingOut}
+                                        PROCESANDO...
+                                    {:else}
+                                        SUSCRIBIRSE AHORA
+                                    {/if}
+                                </span>
+                                {#if isCheckingOut}
+                                    <Loader2 class="w-5 h-5 animate-spin" />
+                                {:else}
+                                    <ArrowRight class="w-5 h-5" />
+                                {/if}
+                            </button>
+                        {/if}
+                    </div>
                 </div>
             </div>
 
-            <p class="text-center text-slate-500 text-xs mt-6 opacity-80">
-                Pagos seguros y cifrados procesados por <span class="font-semibold text-slate-400"
-                    >Stripe</span
-                >. Cancela cuando quieras.
-            </p>
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-10 px-4">
+                <div class="flex items-center gap-4">
+                    <div class="flex -space-x-2">
+                        {#each [1, 2, 3] as i}
+                            <div
+                                class="w-6 h-6 rounded-full border-2 border-black bg-slate-800 flex items-center justify-center text-[8px] font-black text-white uppercase tracking-tighter"
+                            >
+                                U{i}
+                            </div>
+                        {/each}
+                    </div>
+                    <p class="text-[9px] font-black text-slate-600 uppercase tracking-widest">
+                        +5k usuarios ya son <span class="text-white">PRO</span>
+                    </p>
+                </div>
+                <p class="text-[9px] font-black text-slate-700 uppercase tracking-widest italic">
+                    Pagos cifrados vía <span class="text-slate-500 not-italic">stripe</span>
+                </p>
+            </div>
         </div>
     </div>
 </div>
