@@ -103,24 +103,29 @@
             Error: Widget no disponible
         </div>
     {:else if qrDataUrl}
-        <div in:fade={{ duration: 300 }} class="flex flex-col items-center gap-4 group">
+        <div
+            in:fade={{ duration: 300 }}
+            class="flex flex-col items-center gap-6 md:gap-8 group p-4 w-full"
+        >
             {#if qrSettings.title}
                 <div
-                    class="bg-black text-white px-6 py-2 border-4 border-black shadow-neo-sm transform -rotate-1"
+                    class="bg-black text-white px-10 py-4 border-[6px] border-black shadow-neo-sm transform -rotate-1"
                 >
-                    <span class="text-lg font-black uppercase tracking-widest whitespace-nowrap">
+                    <span
+                        class="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-[0.1em] whitespace-nowrap leading-none"
+                    >
                         {qrSettings.title}
                     </span>
                 </div>
             {/if}
 
             <div
-                class="relative bg-white p-6 border-[6px] border-black shadow-neo transform group-hover:-translate-x-1 group-hover:-translate-y-1 transition-transform overflow-hidden"
+                class="relative bg-white p-4 md:p-8 border-[8px] border-black shadow-neo transform group-hover:-translate-x-2 group-hover:-translate-y-2 transition-transform overflow-hidden"
             >
                 <img
                     src={qrDataUrl}
                     alt="Dynamic QR"
-                    class="w-72 h-72 object-contain relative z-10"
+                    class="w-[70vmin] h-[70vmin] max-w-full object-contain relative z-10"
                     style="image-rendering: auto;"
                 />
                 <!-- Ensure background is purely white for scanners -->
@@ -128,19 +133,19 @@
             </div>
 
             <!-- Neo-Brutalist Watermark -->
-            <div class="flex flex-col items-center gap-2 mt-2">
+            <div class="flex flex-col items-center gap-3 mt-4">
                 <div
-                    class="bg-primary border-2 border-black px-3 py-0.5 shadow-neo-sm transform rotate-1"
+                    class="bg-primary border-4 border-black px-6 py-1.5 shadow-neo-sm transform rotate-1"
                 >
-                    <span class="text-[10px] font-black uppercase tracking-tighter text-black">
+                    <span class="text-xl font-black uppercase tracking-tighter text-black">
                         chillchess.app
                     </span>
                 </div>
 
-                <div class="flex items-center gap-1.5 opacity-50">
-                    <div class="w-1.5 h-1.5 bg-black rounded-full animate-ping"></div>
-                    <span class="text-[7px] font-black uppercase tracking-[0.2em] text-black"
-                        >Live Sync</span
+                <div class="flex items-center gap-2 opacity-40">
+                    <div class="w-2 h-2 bg-black rounded-full animate-ping"></div>
+                    <span class="text-[10px] font-black uppercase tracking-[0.3em] text-black"
+                        >Live Sync Active</span
                     >
                 </div>
             </div>
