@@ -115,21 +115,22 @@
             {/if}
 
             <div
-                class="relative bg-white p-4 border-4 border-black shadow-neo transform group-hover:-translate-x-1 group-hover:-translate-y-1 transition-transform"
+                class="relative bg-white p-4 border-4 border-black shadow-neo transform group-hover:-translate-x-1 group-hover:-translate-y-1 transition-transform overflow-hidden"
             >
                 <img
                     src={qrDataUrl}
                     alt="Dynamic QR"
-                    class="w-64 h-64 object-contain shadow-inner"
-                    style="image-rendering: pixelated;"
+                    class="w-64 h-64 object-contain shadow-inner relative z-10"
+                    style="image-rendering: auto;"
                 />
+                <!-- Ensure background is purely white for scanners -->
+                <div class="absolute inset-0 bg-white -z-10"></div>
             </div>
 
             <!-- Subtle scan signal -->
-            <div class="flex items-center gap-1.5 opacity-50">
-                <div class="w-1 h-1 bg-black dark:bg-white rounded-full animate-ping"></div>
-                <span
-                    class="text-[8px] font-black uppercase tracking-[0.2em] text-black dark:text-white"
+            <div class="flex items-center gap-1.5 opacity-70">
+                <div class="w-1.5 h-1.5 bg-black rounded-full animate-ping"></div>
+                <span class="text-[8px] font-black uppercase tracking-[0.2em] text-black"
                     >Live Sync Active</span
                 >
             </div>

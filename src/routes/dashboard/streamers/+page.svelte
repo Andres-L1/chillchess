@@ -262,7 +262,7 @@
                                 <input
                                     readonly
                                     value={widgetUrl}
-                                    class="flex-1 bg-slate-100 p-2 text-[10px] font-mono border border-black/20 focus:outline-none truncate"
+                                    class="flex-1 bg-white text-black p-2 text-[10px] font-mono border-2 border-black focus:outline-none truncate"
                                 />
                                 <button
                                     on:click={copyToClipboard}
@@ -284,12 +284,14 @@
                                 <li>Copia la URL superior.</li>
                                 <li>
                                     En OBS, añade una fuente de <span
-                                        class="bg-white px-1 border border-black">Navegador</span
+                                        class="bg-white text-black px-1 border border-black font-black"
+                                        >Navegador</span
                                     >.
                                 </li>
                                 <li>
                                     Pega la URL y ajusta el tamaño a <span
-                                        class="bg-white px-1 border border-black">300x400</span
+                                        class="bg-white text-black px-1 border border-black font-black"
+                                        >300x400</span
                                     > (o similar).
                                 </li>
                                 <li>¡Listo! El QR se actualizará solo.</li>
