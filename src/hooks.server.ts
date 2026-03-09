@@ -36,8 +36,16 @@ export const handle: Handle = async ({ event, resolve }) => {
 
     const response = await resolve(event);
 
+    // Determine path for specific header overrides
+    const isWidget = event.url.pathname.startsWith('/widgets/');
+
     // SECURITY: Add security headers to all responses
-    response.headers.set('X-Frame-Options', 'DENY');
+    if (!isWidget) {
+        response.headers.set('X-Frame-Options', 'DENY');
+    } else {
+        // Explicitly allow framing for widgets (needed for OBS)
+        response.headers.delete('X-Frame-Options');
+    }
     response.headers.set('X-Content-Type-Options', 'nosniff');
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
     response.headers.set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
