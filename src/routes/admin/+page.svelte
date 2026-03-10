@@ -553,8 +553,8 @@
                 <!-- Settings Form -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 border-4 border-black p-6">
                     <div class="flex flex-col gap-2">
-                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-500">Tipo de Alerta</label>
-                        <select bind:value={globalMessageType} class="w-full bg-white border-4 border-black px-4 py-3 font-black text-slate-900 focus:outline-none focus:shadow-neo-sm transition-all text-xs uppercase cursor-pointer appearance-none">
+                        <label for="banner-type" class="text-[10px] font-black uppercase tracking-widest text-slate-500">Tipo de Alerta</label>
+                        <select id="banner-type" bind:value={globalMessageType} class="w-full bg-white border-4 border-black px-4 py-3 font-black text-slate-900 focus:outline-none focus:shadow-neo-sm transition-all text-xs uppercase cursor-pointer appearance-none">
                             <option value="info">Info (Azul)</option>
                             <option value="warning">Aviso (Amarillo)</option>
                             <option value="error">Crítico (Rojo)</option>
@@ -562,16 +562,16 @@
                         </select>
                     </div>
                     <div class="flex flex-col gap-2">
-                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-500">Mensaje Principal</label>
-                        <input type="text" bind:value={globalMessageText} class="w-full bg-white border-4 border-black px-4 py-3 font-black text-slate-900 placeholder-slate-300 focus:outline-none focus:shadow-neo-sm transition-all text-xs uppercase" placeholder="Ej: Mantenimiento programado..." />
+                        <label for="banner-text" class="text-[10px] font-black uppercase tracking-widest text-slate-500">Mensaje Principal</label>
+                        <input id="banner-text" type="text" bind:value={globalMessageText} class="w-full bg-white border-4 border-black px-4 py-3 font-black text-slate-900 placeholder-slate-300 focus:outline-none focus:shadow-neo-sm transition-all text-xs uppercase" placeholder="Ej: Mantenimiento programado..." />
                     </div>
                     <div class="flex flex-col gap-2">
-                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-500">Texto Botón (CTA)</label>
-                        <input type="text" bind:value={globalMessageCTA} class="w-full bg-white border-4 border-black px-4 py-3 font-black text-slate-900 placeholder-slate-300 focus:outline-none focus:shadow-neo-sm transition-all text-xs uppercase" placeholder="Opcional. Ej: Saber Más" />
+                        <label for="banner-cta" class="text-[10px] font-black uppercase tracking-widest text-slate-500">Texto Botón (CTA)</label>
+                        <input id="banner-cta" type="text" bind:value={globalMessageCTA} class="w-full bg-white border-4 border-black px-4 py-3 font-black text-slate-900 placeholder-slate-300 focus:outline-none focus:shadow-neo-sm transition-all text-xs uppercase" placeholder="Opcional. Ej: Saber Más" />
                     </div>
                     <div class="flex flex-col gap-2 relative">
-                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-500">Enlace (URL)</label>
-                        <input type="text" bind:value={globalMessageLink} class="w-full bg-white border-4 border-black px-4 py-3 pr-10 font-black text-slate-900 placeholder-slate-300 focus:outline-none focus:shadow-neo-sm transition-all text-xs" placeholder="https://" />
+                        <label for="banner-link" class="text-[10px] font-black uppercase tracking-widest text-slate-500">Enlace (URL)</label>
+                        <input id="banner-link" type="text" bind:value={globalMessageLink} class="w-full bg-white border-4 border-black px-4 py-3 pr-10 font-black text-slate-900 placeholder-slate-300 focus:outline-none focus:shadow-neo-sm transition-all text-xs" placeholder="https://" />
                         <ExternalLink class="w-4 h-4 text-slate-400 absolute right-4 top-9" />
                     </div>
                 </div>
