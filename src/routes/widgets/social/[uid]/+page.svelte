@@ -99,29 +99,29 @@
     >
         {#key currentIndex}
             <div 
-                in:fly={{ y: 20, duration: 400 }}
+                in:fly={{ x: -100, duration: 600 }}
                 out:fade={{ duration: 200 }}
-                class="flex items-center gap-6 p-6 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative min-w-[300px]"
+                class="flex items-center gap-6 p-8 border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] relative min-w-[350px]"
                 style="background-color: {settings.bgColor}; border-color: {settings.borderColor}; color: {settings.fontColor};"
             >
                 <!-- Platform Icon Box -->
                 <div 
-                    class="w-16 h-16 flex items-center justify-center border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex-shrink-0"
+                    class="w-20 h-20 flex items-center justify-center border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex-shrink-0"
                     style="background-color: {settings.accentColor};"
                 >
                     {#if platformInfo}
-                        <svelte:component this={platformInfo.icon} size={32} strokeWidth={3} />
+                        <svelte:component this={platformInfo.icon} size={40} strokeWidth={3} />
                     {:else}
-                        <Share2 size={32} strokeWidth={3} />
+                        <Share2 size={40} strokeWidth={3} />
                     {/if}
                 </div>
 
                 <!-- Text Content -->
                 <div class="flex flex-col">
-                    <span class="text-[10px] font-black uppercase tracking-[0.2em] opacity-50">
+                    <span class="text-xs font-black uppercase tracking-[0.2em] opacity-60">
                         {platformInfo?.label || 'SOCIAL'}
                     </span>
-                    <span class="text-3xl font-black uppercase tracking-tighter leading-none truncate max-w-[250px]">
+                    <span class="text-4xl font-black uppercase tracking-tighter leading-none truncate max-w-[300px] mt-1">
                         {currentItem?.handle || ''}
                     </span>
                 </div>

@@ -3,7 +3,7 @@
     import { page } from '$app/stores';
     import { doc, onSnapshot } from 'firebase/firestore';
     import { db } from '$lib/firebase';
-    import { fade } from 'svelte/transition';
+    import { fade, fly } from 'svelte/transition';
 
     const { uid } = $page.params;
 
@@ -88,29 +88,33 @@
         class="w-full h-full flex items-center justify-center p-8 bg-transparent overflow-hidden"
     >
         <div 
-            class="w-full max-w-xl p-10 border-8 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] relative"
+            in:fly={{ y: 50, duration: 600 }}
+            out:fade={{ duration: 200 }}
+            class="w-full max-w-xl p-12 border-[10px] border-black shadow-[16px_16px_0px_0px_rgba(0,0,0,1)] relative"
             style="background-color: {settings.bgColor}; border-color: {settings.borderColor};"
         >
             <!-- Title -->
-            <div class="absolute -top-10 -left-2 bg-black text-white px-6 py-2 font-black text-xl uppercase tracking-widest transform -rotate-1">
+            <div class="absolute -top-10 -left-4 bg-black text-white px-8 py-3 font-black text-2xl uppercase tracking-widest transform -rotate-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
                 {settings.title}
             </div>
 
             <!-- Time Display -->
-            <div class="flex items-baseline justify-center gap-4 py-8">
-                <span class="text-[120px] font-black leading-none tracking-tighter tabular-nums" style="color: {settings.borderColor};">
+            <div class="flex items-baseline justify-center gap-6 py-8">
+                <span class="text-[140px] font-black leading-none tracking-tighter tabular-nums" style="color: {settings.borderColor}; text-shadow: 4px 4px 0 #000;">
                     {minutes}
                 </span>
-                <span class="text-[80px] font-black leading-none opacity-30 animated-colon" style="color: {settings.borderColor};">:</span>
-                <span class="text-[120px] font-black leading-none tracking-tighter tabular-nums" style="color: {settings.borderColor};">
+                <span class="text-[90px] font-black leading-none opacity-30 animated-colon" style="color: {settings.borderColor};">
+                    :
+                </span>
+                <span class="text-[140px] font-black leading-none tracking-tighter tabular-nums" style="color: {settings.borderColor}; text-shadow: 4px 4px 0 #000;">
                     {seconds}
                 </span>
             </div>
 
             <!-- Progress Bar -->
-            <div class="h-10 w-full border-4 border-black bg-slate-100 dark:bg-slate-800 mt-4 overflow-hidden">
+            <div class="h-12 w-full border-[6px] border-black bg-slate-100 dark:bg-slate-800 mt-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
                 <div 
-                    class="h-full transition-all duration-1000 ease-linear border-r-4 border-black"
+                    class="h-full transition-all duration-1000 ease-linear border-r-[6px] border-black"
                     style="width: {progress}%; background-color: {settings.barColor};"
                 ></div>
             </div>
@@ -120,7 +124,7 @@
                     in:fade
                     class="absolute inset-0 flex items-center justify-center bg-black/5 z-20 pointer-events-none"
                 >
-                    <div class="bg-red-500 text-white border-4 border-black p-4 font-black text-2xl rotate-3 shadow-neo uppercase">
+                    <div class="bg-red-500 text-white border-8 border-black p-6 font-black text-4xl rotate-3 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] uppercase">
                         ¡TIEMPO AGOTADO!
                     </div>
                 </div>

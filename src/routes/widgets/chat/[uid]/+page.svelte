@@ -220,30 +220,31 @@
     <div bind:this={container} class="flex flex-col gap-4 overflow-y-auto scrollbar-hide pr-2">
         {#each messages as msg (msg.id)}
             <div
-                in:fly={{ x: -20, duration: 400 }}
-                out:fade={{ duration: 400 }}
-                class="flex flex-col border-[4px] border-black p-4 shadow-neo relative bg-white w-fit transition-all duration-300"
+                in:fly={{ y: 50, duration: 500, delay: 50 }}
+                out:fade={{ duration: 300 }}
+                class="flex flex-col border-[6px] border-black p-5 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative bg-white w-fit transition-all duration-300 mb-2"
                 style="
                     background-color: {settings.bgColor};
                     border-color: {settings.borderColor};
-                    box-shadow: 6px 6px 0px 0px {settings.shadowColor};
+                    box-shadow: 8px 8px 0px 0px {settings.shadowColor};
                     max-width: {settings.maxWidth || 400}px;
                 "
             >
-                <div class="flex items-center gap-2 mb-2">
+                <div class="flex items-center gap-2 mb-3">
                     <span
-                        class="px-2 py-0.5 border-2 border-black uppercase text-[10px] shadow-neo-sm"
+                        class="px-3 py-1 border-[3px] border-black uppercase text-xs shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transform -rotate-1 inline-block"
                         style="
                             background-color: {msg.color}; 
                             color: white; 
                             border-color: {settings.borderColor};
-                            font-weight: {settings.usernameWeight || 600};
+                            font-weight: {settings.usernameWeight || 800};
+                            text-shadow: 1px 1px 0 #000;
                         "
                     >
                         {msg.username}
                     </span>
 
-                    <span class="text-[8px] font-black opacity-30 ml-auto">
+                    <span class="text-[10px] font-black opacity-40 ml-auto bg-black/5 px-2 py-1 rounded">
                         {new Date(msg.timestamp).toLocaleTimeString([], {
                             hour: '2-digit',
                             minute: '2-digit',
@@ -300,9 +301,5 @@
 
     .shadow-neo {
         box-shadow: 6px 6px 0px 0px #000;
-    }
-
-    .shadow-neo-sm {
-        box-shadow: 2px 2px 0px 0px #000;
     }
 </style>

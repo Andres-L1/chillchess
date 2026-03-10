@@ -161,13 +161,13 @@
                             <h1
                                 class="text-5xl sm:text-6xl lg:text-8xl font-black leading-[0.9] tracking-tighter theme-text uppercase italic"
                             >
-                                Todas tus herramientas <span class="bg-sky-400 theme-shadow-sm px-2"
+                                Todas tus herramientas <span class="bg-sky-400 border-4 border-black px-3 py-1 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] inline-block mt-2 transform -rotate-2"
                                     >en un solo lugar.</span
                                 >
                             </h1>
-                            <p class="max-w-xl text-xl font-bold theme-text opacity-70">
+                            <p class="max-w-xl text-xl font-bold theme-text opacity-90 border-l-8 border-violet-400 pl-4 py-2 bg-white/50 dark:bg-black/50">
                                 Facturas, cronómetros, conversores y más. Herramientas potentes,
-                                diseño brutalista, solo 1€/mes por herramienta.
+                                diseño brutalista, <span class="bg-amber-300 text-black px-1 font-black">solo 1€/mes por todas las herramientas.</span>
                             </p>
                         </div>
                         <div class="flex flex-wrap gap-4">
@@ -365,13 +365,13 @@
                         </h2>
                     </div>
 
-                    <div class="space-y-4">
-                        {#each [{ q: '¿Cuánto cuesta?', a: '¡Solo 1€ al mes por herramienta! Chill Chess ofrece una experiencia premium a un precio simbólico para mantener el desarrollo constante de nuevas utilidades.' }, { q: '¿Dónde se guardan mis datos?', a: 'Tus datos se sincronizan de forma segura con tu cuenta de Google a través de Firebase, permitiéndote acceder a ellos desde cualquier dispositivo.' }, { q: '¿Necesito crear una cuenta?', a: 'Sí, es necesario registrarse con tu cuenta de Google para poder desbloquear las herramientas, sincronizar tus datos en la nube y guardar tus configuraciones permanentemente.' }, { q: '¿Habrá más herramientas?', a: '¡Constantemente! Añadimos nuevas utilidades basadas en las necesidades reales de los profesionales digitales.' }] as item, i}
+                    <div class="space-y-6">
+                        {#each [{ q: '¿Cuánto cuesta?', a: '¡Solo 1€ al mes por TODAS las herramientas! Chill Chess ofrece una experiencia premium a un precio radicalmente bajo para mantener el desarrollo constante de nuevas utilidades.' }, { q: '¿Dónde se guardan mis datos?', a: 'Tus datos se sincronizan de forma segura con tu cuenta de Google a través de Firebase, permitiéndote acceder a ellos desde cualquier dispositivo sin dolores de cabeza.' }, { q: '¿Necesito crear una cuenta?', a: 'Sí, es necesario registrarse rápidamente con tu cuenta de Google. Esto desbloquea las herramientas, sincroniza datos y guarda tus locas configuraciones.' }, { q: '¿Habrá más herramientas?', a: '¡Constantemente! Añadimos nuevas utilidades basadas en las necesidades reales y locas de los creadores de contenido.' }] as item, i}
                             <details
-                                class="group neo-card bg-white dark:bg-slate-900 overflow-hidden"
+                                class="group bg-white dark:bg-slate-900 overflow-hidden border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
                             >
                                 <summary
-                                    class="flex items-center justify-between p-6 cursor-pointer list-none"
+                                    class="flex items-center justify-between p-6 cursor-pointer list-none bg-zinc-50 dark:bg-slate-800 border-b-4 border-transparent group-open:border-black"
                                 >
                                     <div class="flex items-center gap-4">
                                         <span
@@ -398,36 +398,29 @@
                 <!-- CTA Section -->
                 <section class="relative">
                     <div
-                        class="neo-card bg-black p-12 sm:p-20 text-center space-y-8 overflow-hidden"
+                        class="bg-white dark:bg-slate-900 border-8 border-black p-12 sm:p-20 text-center space-y-8 shadow-[16px_16px_0px_0px_#38bdf8]"
                     >
-                        <div
-                            class="absolute top-0 right-0 w-64 h-64 bg-sky-400 blur-[120px] opacity-20 -z-10"
-                        ></div>
-                        <div
-                            class="absolute bottom-0 left-0 w-64 h-64 bg-violet-400 blur-[120px] opacity-20 -z-10"
-                        ></div>
-
                         <div class="space-y-4">
                             <h2
-                                class="text-4xl sm:text-6xl lg:text-7xl font-black text-white tracking-tighter uppercase italic leading-[0.9]"
+                                class="text-4xl sm:text-6xl lg:text-7xl font-black theme-text tracking-tighter uppercase italic leading-[0.9]"
                             >
                                 ¿Listo para subir de nivel?
                             </h2>
-                            <p class="text-xl font-bold text-zinc-400 max-w-2xl mx-auto">
+                            <p class="text-xl font-bold theme-text opacity-90 max-w-2xl mx-auto bg-amber-200 text-black px-4 py-2 border-4 border-black inline-block mt-4 transform rotate-1">
                                 Únete a miles de usuarios que ya disfrutan de la mejor suite de
                                 herramientas web.
                             </p>
                         </div>
 
-                        <div class="flex flex-col sm:flex-row justify-center gap-4">
+                        <div class="flex flex-col sm:flex-row justify-center gap-6 mt-8">
                             <button
-                                class="px-10 py-5 bg-sky-400 text-black font-black text-2xl border-4 border-black theme-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
+                                class="px-10 py-5 bg-sky-400 text-black font-black text-2xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
                                 on:click={handleGoogleLogin}
                             >
                                 ABRIR DASHBOARD
                             </button>
                             <button
-                                class="px-10 py-5 bg-white text-black font-black text-2xl border-4 border-black theme-shadow hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
+                                class="px-10 py-5 bg-rose-400 text-black font-black text-2xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
                                 on:click={handleGoogleLogin}
                             >
                                 ACCESO RÁPIDO
