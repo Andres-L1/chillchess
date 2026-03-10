@@ -1,5 +1,6 @@
 <script lang="ts">
     import { pageHeader } from '$lib/stores/ui';
+    import { page } from '$app/stores';
     import { addToast } from '$lib/stores/toasts';
     import { authStore } from '$lib/stores/authStore';
     import { db } from '$lib/firebase';
@@ -37,6 +38,16 @@
 
     // Widget Management
     let selectedWidgetId = 'dynamic_qr';
+
+    // Manejar el cambio de tab por URL
+    $: {
+        const tab = $page.url.searchParams.get('tab');
+        if (tab === 'chat') selectedWidgetId = 'chat_overlay';
+        else if (tab === 'social') selectedWidgetId = 'social_showcase';
+        else if (tab === 'countdown') selectedWidgetId = 'neo_countdown';
+        else if (tab === 'qr') selectedWidgetId = 'dynamic_qr';
+    }
+
     const widgets = [
         {
             id: 'dynamic_qr',

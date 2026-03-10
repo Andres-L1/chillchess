@@ -20,15 +20,21 @@
         Landmark,
         Palette,
         MessageSquare,
+        Share2,
+        LayoutDashboard,
+        Radio
     } from 'lucide-svelte';
     import { currencyStore, type CurrencyPrefix } from '$lib/stores/currencyStore';
     import { APP_VERSION } from '$lib/constants/version';
+    import { dashboardMode } from '$lib/stores/ui';
 
     const currencies: CurrencyPrefix[] = ['€', '$', '£'];
 
     let searchQuery = '';
 
     const CATEGORY_ORDER = [
+        'STREAMER HUB',
+        'WIDGETS OBS',
         'TRABAJO',
         'GESTIÓN',
         'FINANZAS',
@@ -37,69 +43,31 @@
         'SOPORTE',
     ];
 
-    const tools = [
-        {
-            id: '/freelance',
-            category: 'TRABAJO',
-            name: 'Tarifa Freelance',
-            icon: Briefcase,
-            pro: true,
-        },
+    const CORE_TOOLS = [
+        { id: '/freelance', category: 'TRABAJO', name: 'Tarifa Freelance', icon: Briefcase, pro: true },
         { id: '/vcard', category: 'TRABAJO', name: 'Tarjeta Virtual', icon: User, pro: true },
         { id: '/invoice', category: 'TRABAJO', name: 'Facturación', icon: FileText, pro: true },
-        {
-            id: '/kanban',
-            category: 'GESTIÓN',
-            name: 'Tablero Kanban',
-            icon: LayoutList,
-            pro: true,
-        },
-        {
-            id: '/pomodoro',
-            category: 'GESTIÓN',
-            name: 'Reloj Pomodoro',
-            icon: Timer,
-            pro: true,
-        },
-        {
-            id: '/currency',
-            category: 'FINANZAS',
-            name: 'Conversor de Moneda',
-            icon: DollarSign,
-            pro: true,
-        },
+        { id: '/kanban', category: 'GESTIÓN', name: 'Tablero Kanban', icon: LayoutList, pro: true },
+        { id: '/pomodoro', category: 'GESTIÓN', name: 'Reloj Pomodoro', icon: Timer, pro: true },
+        { id: '/currency', category: 'FINANZAS', name: 'Conversor de Moneda', icon: DollarSign, pro: true },
         { id: '/fire', category: 'FINANZAS', name: 'Calculadora FIRE', icon: Flame, pro: true },
-        {
-            id: '/loan',
-            category: 'FINANZAS',
-            name: 'Préstamos e Hipotecas',
-            icon: Landmark,
-            pro: true,
-        },
+        { id: '/loan', category: 'FINANZAS', name: 'Préstamos e Hipotecas', icon: Landmark, pro: true },
         { id: '/tip', category: 'FINANZAS', name: 'Dividir Cuenta', icon: Users, pro: true },
-        {
-            id: '/password',
-            category: 'SEGURIDAD',
-            name: 'Generador Claves',
-            icon: KeyRound,
-            pro: true,
-        },
+        { id: '/password', category: 'SEGURIDAD', name: 'Generador Claves', icon: KeyRound, pro: true },
         { id: '/qr', category: 'HERRAMIENTAS', name: 'Códigos QR', icon: QrCode, pro: true },
-        {
-            id: '/palette',
-            category: 'HERRAMIENTAS',
-            name: 'Paletas de Color',
-            icon: Palette,
-            pro: true,
-        },
-        {
-            id: '/feedback',
-            category: 'SOPORTE',
-            name: 'Ayuda y Soporte',
-            icon: MessageSquare,
-            pro: true,
-        },
+        { id: '/palette', category: 'HERRAMIENTAS', name: 'Paletas de Color', icon: Palette, pro: true },
+        { id: '/feedback', category: 'SOPORTE', name: 'Ayuda y Soporte', icon: MessageSquare, pro: true },
     ];
+
+    const STREAMER_TOOLS = [
+        { id: '/dashboard/streamers', category: 'STREAMER HUB', name: 'Panel Principal', icon: LayoutDashboard, pro: true },
+        { id: '/dashboard/streamers?tab=chat', category: 'WIDGETS OBS', name: 'Configurar Chat', icon: MessageSquare, pro: true },
+        { id: '/dashboard/streamers?tab=social', category: 'WIDGETS OBS', name: 'Redes Sociales', icon: Share2, pro: true },
+        { id: '/dashboard/streamers?tab=countdown', category: 'WIDGETS OBS', name: 'Cuenta Atrás', icon: Timer, pro: true },
+        { id: '/dashboard/streamers?tab=qr', category: 'WIDGETS OBS', name: 'QR Dinámico', icon: QrCode, pro: true },
+    ];
+
+    $: tools = $dashboardMode === 'tools' ? CORE_TOOLS : STREAMER_TOOLS;
 
     $: filteredTools = tools.filter(
         (t) =>
@@ -193,6 +161,30 @@
         </button>
     </div>
 
+    <!-- Selector de Modo (Neo-Brutal Switcher) -->
+    <div class="px-6 mb-6">
+        <div class="flex border-4 border-black shadow-neo-sm overflow-hidden bg-white dark:bg-slate-800">
+            <button 
+                on:click={() => dashboardMode.set('tools')}
+                class="flex-1 py-3 text-[10px] font-black uppercase tracking-widest transition-all
+                {$dashboardMode === 'tools' 
+                    ? 'bg-black text-white' 
+                    : 'bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-primary'} border-r-4 border-black"
+            >
+                MODO TOOLS
+            </button>
+            <button 
+                on:click={() => dashboardMode.set('streamer')}
+                class="flex-1 py-3 text-[10px] font-black uppercase tracking-widest transition-all
+                {$dashboardMode === 'streamer' 
+                    ? 'bg-primary text-white' 
+                    : 'bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-primary'}"
+            >
+                MODO STREAMER
+            </button>
+        </div>
+    </div>
+
     <!-- Buscador -->
     <div class="px-6 mb-8">
         <div class="relative group">
@@ -242,8 +234,7 @@
                             <a
                                 href={tool.id}
                                 on:click={handleNavigate}
-                                class="w-full flex items-center justify-between px-4 py-3 border-4 transition-all duration-200 group tracking-tighter {$page
-                                    .url.pathname === tool.id
+                                class="w-full flex items-center justify-between px-4 py-3 border-4 transition-all duration-200 group tracking-tighter {(tool.id.includes('?') ? ($page.url.pathname + $page.url.search).includes(tool.id) : $page.url.pathname === tool.id)
                                     ? 'bg-black text-white border-black shadow-neo translate-x-1 translate-y-1'
                                     : 'bg-white dark:bg-slate-900 dark:text-white text-black border-black hover:bg-primary/10 hover:-translate-y-1 hover:-translate-x-0.5 shadow-neo-sm hover:shadow-neo'}"
                             >
