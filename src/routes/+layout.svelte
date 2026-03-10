@@ -5,7 +5,7 @@
     import { mobileMenuOpen } from '$lib/stores/ui';
     import { goto } from '$app/navigation';
     import { authStore } from '$lib/stores/authStore';
-    import { Loader2, ShieldAlert, Info } from 'lucide-svelte';
+    import { Loader2, ShieldAlert, Info, X, ExternalLink } from 'lucide-svelte';
     import { onMount, onDestroy } from 'svelte';
     import { doc, onSnapshot } from 'firebase/firestore';
     import { db, auth } from '$lib/firebase';
@@ -22,8 +22,22 @@
 
     let globalSettings: any = null;
     let unsubscribeSettings: () => void;
+    let dismissedBannerText = '';
+
+    function dismissBanner() {
+        if (globalSettings?.globalMessageText) {
+            dismissedBannerText = globalSettings.globalMessageText;
+            try {
+                localStorage.setItem('dismissedBannerText', dismissedBannerText);
+            } catch(e) {}
+        }
+    }
 
     onMount(() => {
+        try {
+            dismissedBannerText = localStorage.getItem('dismissedBannerText') || '';
+        } catch(e) {}
+
         // Sincronizar clase dark con el store
         const unsubscribeTheme = themeModeStore.subscribe((mode) => {
             if (typeof document !== 'undefined') {
@@ -164,12 +178,23 @@
 {:else if ['/', '/landing', '/pricing', '/cookies'].includes($page.url.pathname)}
     {@const isLanding = $page.url.pathname === '/landing'}
     <div class="flex flex-col min-h-screen w-full bg-background-light dark:bg-background-dark">
-        {#if !isLanding && globalSettings?.globalMessageActive && globalSettings?.globalMessageText}
+        {#if !isLanding && globalSettings?.globalMessageActive && globalSettings?.globalMessageText && globalSettings.globalMessageText !== dismissedBannerText}
+            {@const bannerColor = globalSettings.globalMessageType === 'info' ? 'bg-blue-500 text-white border-blue-700' : globalSettings.globalMessageType === 'warning' ? 'bg-yellow-300 text-black border-yellow-500' : globalSettings.globalMessageType === 'error' ? 'bg-red-500 text-white border-red-700' : globalSettings.globalMessageType === 'success' ? 'bg-green-400 text-black border-green-600' : 'bg-blue-500 text-white border-blue-700'}
             <div
-                class="w-full bg-yellow-300 border-b-2 border-black px-4 py-2 flex items-center justify-center gap-3 text-center text-sm font-black uppercase tracking-widest text-black relative z-50 shadow-neo-sm"
+                class="w-full {bannerColor} border-b-4 px-4 py-2 sm:py-3 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-center shadow-neo-sm relative z-50 transition-all"
             >
-                <Info class="w-4 h-4 flex-shrink-0" />
-                <span>{globalSettings.globalMessageText}</span>
+                <span class="text-xs sm:text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                    <Info class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                    {globalSettings.globalMessageText}
+                </span>
+                {#if globalSettings.globalMessageCTA && globalSettings.globalMessageLink}
+                    <a href={globalSettings.globalMessageLink} target="_blank" rel="noopener noreferrer" class="px-4 py-1.5 bg-black text-white text-[10px] sm:text-xs font-black tracking-widest uppercase hover:bg-white hover:text-black border-2 border-transparent hover:border-black transition-colors rounded-none shadow-neo-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] flex items-center gap-2">
+                        {globalSettings.globalMessageCTA} <ExternalLink class="w-3 h-3" />
+                    </a>
+                {/if}
+                <button on:click={dismissBanner} class="absolute top-2 right-2 sm:top-1/2 sm:-translate-y-1/2 sm:right-4 p-1 rounded-sm text-current hover:bg-black/10 transition-colors">
+                    <X class="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
             </div>
         {/if}
         <div class="flex-1 w-full {isLanding ? '' : 'pt-28'}">
@@ -190,12 +215,23 @@
             <div
                 class="flex-1 flex flex-col min-w-0 overflow-hidden relative border-l-2 border-black"
             >
-                {#if globalSettings?.globalMessageActive && globalSettings?.globalMessageText}
+                {#if globalSettings?.globalMessageActive && globalSettings?.globalMessageText && globalSettings.globalMessageText !== dismissedBannerText}
+                    {@const bannerColor = globalSettings.globalMessageType === 'info' ? 'bg-blue-500 text-white border-blue-700' : globalSettings.globalMessageType === 'warning' ? 'bg-yellow-300 text-black border-yellow-500' : globalSettings.globalMessageType === 'error' ? 'bg-red-500 text-white border-red-700' : globalSettings.globalMessageType === 'success' ? 'bg-green-400 text-black border-green-600' : 'bg-blue-500 text-white border-blue-700'}
                     <div
-                        class="w-full bg-yellow-300 border-b-2 border-black px-6 py-2 flex items-center justify-center gap-3 text-center text-sm font-black uppercase tracking-widest text-black z-40 shadow-neo-sm"
+                        class="w-full {bannerColor} border-b-4 px-6 py-3 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-center shadow-neo-sm relative z-40 transition-all"
                     >
-                        <Info class="w-4 h-4 flex-shrink-0" />
-                        <span>{globalSettings.globalMessageText}</span>
+                        <span class="text-xs sm:text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                            <Info class="w-5 h-5 flex-shrink-0" />
+                            {globalSettings.globalMessageText}
+                        </span>
+                        {#if globalSettings.globalMessageCTA && globalSettings.globalMessageLink}
+                            <a href={globalSettings.globalMessageLink} target="_blank" rel="noopener noreferrer" class="px-4 py-1.5 bg-black text-white text-[10px] sm:text-xs font-black tracking-widest uppercase hover:bg-white hover:text-black border-2 border-transparent hover:border-black transition-colors rounded-none shadow-neo-sm hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] flex items-center gap-2">
+                                {globalSettings.globalMessageCTA} <ExternalLink class="w-3 h-3" />
+                            </a>
+                        {/if}
+                        <button on:click={dismissBanner} class="absolute top-2 right-4 sm:top-1/2 sm:-translate-y-1/2 p-1 rounded-sm text-current hover:bg-black/10 transition-colors">
+                            <X class="w-5 h-5" />
+                        </button>
                     </div>
                 {/if}
                 <Header />

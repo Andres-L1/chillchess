@@ -27,6 +27,7 @@
         Settings,
         Bell,
         MessageSquare,
+        Info,
     } from 'lucide-svelte';
     import { onMount, onDestroy } from 'svelte';
     import { db } from '$lib/firebase';
@@ -74,6 +75,9 @@
     let maintenanceMode = false;
     let globalMessageActive = false;
     let globalMessageText = '';
+    let globalMessageType: 'info' | 'warning' | 'error' | 'success' = 'info';
+    let globalMessageCTA = '';
+    let globalMessageLink = '';
     let unsubscribeSettings: () => void;
 
     // --- Derived ---
@@ -200,15 +204,42 @@
         try {
             const settingsRef = doc(db, 'settings', 'global');
             await updateDoc(settingsRef, { [field]: value });
-            addToast('Ajuste actualizado');
+            addToast('Ajuste actualizado', 'success');
         } catch (error: any) {
             if (error.code === 'not-found' || error.message?.includes('No document to update')) {
                 const settingsRef = doc(db, 'settings', 'global');
                 await setDoc(settingsRef, { [field]: value }, { merge: true });
-                addToast('Ajuste guardado');
+                addToast('Ajuste guardado', 'success');
             } else {
-                addToast('Error al actualizar');
+                addToast('Error al actualizar', 'error');
             }
+        }
+    }
+
+    async function saveBannerSettings() {
+        try {
+            const settingsRef = doc(db, 'settings', 'global');
+            const data = {
+                globalMessageActive,
+                globalMessageText,
+                globalMessageType,
+                globalMessageCTA,
+                globalMessageLink
+            };
+            
+            try {
+                await updateDoc(settingsRef, data);
+            } catch (error: any) {
+                if (error.code === 'not-found' || error.message?.includes('No document to update')) {
+                    await setDoc(settingsRef, data, { merge: true });
+                } else {
+                    throw error;
+                }
+            }
+            addToast('Configuración del banner guardada', 'success');
+        } catch (error) {
+            console.error(error);
+            addToast('Error al guardar el banner', 'error');
         }
     }
 
@@ -254,6 +285,9 @@
                 maintenanceMode = data.maintenanceMode || false;
                 globalMessageActive = data.globalMessageActive || false;
                 globalMessageText = data.globalMessageText || '';
+                globalMessageType = data.globalMessageType || 'info';
+                globalMessageCTA = data.globalMessageCTA || '';
+                globalMessageLink = data.globalMessageLink || '';
             }
         });
     });
@@ -492,8 +526,9 @@
                 </p>
             </div>
 
-            <div class="bg-white border-4 border-black p-8 shadow-neo">
-                <div class="flex items-center justify-between mb-8">
+            <div class="bg-white border-4 border-black p-8 shadow-neo flex flex-col gap-6">
+                <!-- Header & Toggle -->
+                <div class="flex items-center justify-between">
                     <div class="flex items-center gap-6">
                         <div class="p-4 bg-primary text-white border-4 border-black shadow-neo-sm">
                             <Bell class="w-6 h-6" />
@@ -502,42 +537,78 @@
                             <h3 class="text-2xl font-black tracking-tight uppercase mb-1">
                                 Banner Global
                             </h3>
-                            <p
-                                class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400"
-                            >
+                            <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
                                 Broadcast Message
                             </p>
                         </div>
                     </div>
                     <button
-                        on:click={() =>
-                            updateGlobalSettings('globalMessageActive', !globalMessageActive)}
-                        class="w-20 h-10 border-4 border-black relative transition-all {globalMessageActive
-                            ? 'bg-primary'
-                            : 'bg-slate-200'}"
+                        on:click={() => (globalMessageActive = !globalMessageActive)}
+                        class="w-20 h-10 border-4 border-black relative transition-all {globalMessageActive ? 'bg-primary' : 'bg-slate-200'}"
                     >
-                        <div
-                            class="absolute top-1 left-1 w-6 h-6 border-4 border-black bg-white transition-all {globalMessageActive
-                                ? 'translate-x-10'
-                                : 'translate-x-0'}"
-                        ></div>
+                        <div class="absolute top-1 left-1 w-6 h-6 border-4 border-black bg-white transition-all {globalMessageActive ? 'translate-x-10' : 'translate-x-0'}"></div>
                     </button>
                 </div>
-                <div class="flex gap-4">
-                    <input
-                        type="text"
-                        bind:value={globalMessageText}
-                        class="flex-1 bg-slate-50 border-4 border-black px-6 py-4 font-black text-slate-900 placeholder-slate-300 focus:outline-none focus:bg-white transition-all text-xs tracking-widest uppercase"
-                        placeholder="MENSAJE DEL SISTEMA..."
-                    />
-                    <button
-                        on:click={() =>
-                            updateGlobalSettings('globalMessageText', globalMessageText)}
-                        class="bg-black text-white px-8 py-4 font-black shadow-neo-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all text-xs uppercase"
-                    >
-                        PUBLICAR
-                    </button>
+
+                <!-- Settings Form -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 border-4 border-black p-6">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-500">Tipo de Alerta</label>
+                        <select bind:value={globalMessageType} class="w-full bg-white border-4 border-black px-4 py-3 font-black text-slate-900 focus:outline-none focus:shadow-neo-sm transition-all text-xs uppercase cursor-pointer appearance-none">
+                            <option value="info">Info (Azul)</option>
+                            <option value="warning">Aviso (Amarillo)</option>
+                            <option value="error">Crítico (Rojo)</option>
+                            <option value="success">Éxito (Verde)</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-500">Mensaje Principal</label>
+                        <input type="text" bind:value={globalMessageText} class="w-full bg-white border-4 border-black px-4 py-3 font-black text-slate-900 placeholder-slate-300 focus:outline-none focus:shadow-neo-sm transition-all text-xs uppercase" placeholder="Ej: Mantenimiento programado..." />
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-500">Texto Botón (CTA)</label>
+                        <input type="text" bind:value={globalMessageCTA} class="w-full bg-white border-4 border-black px-4 py-3 font-black text-slate-900 placeholder-slate-300 focus:outline-none focus:shadow-neo-sm transition-all text-xs uppercase" placeholder="Opcional. Ej: Saber Más" />
+                    </div>
+                    <div class="flex flex-col gap-2 relative">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-500">Enlace (URL)</label>
+                        <input type="text" bind:value={globalMessageLink} class="w-full bg-white border-4 border-black px-4 py-3 pr-10 font-black text-slate-900 placeholder-slate-300 focus:outline-none focus:shadow-neo-sm transition-all text-xs" placeholder="https://" />
+                        <ExternalLink class="w-4 h-4 text-slate-400 absolute right-4 top-9" />
+                    </div>
                 </div>
+
+                <!-- Live Preview -->
+                <div class="flex flex-col gap-2">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Vista Previa</span>
+                    {#if globalMessageText}
+                        {@const bannerColor = globalMessageType === 'info' ? 'bg-blue-500 text-white border-blue-700' : globalMessageType === 'warning' ? 'bg-yellow-300 text-black border-yellow-500' : globalMessageType === 'error' ? 'bg-red-500 text-white border-red-700' : 'bg-green-400 text-black border-green-600'}
+                        <div class="w-full {bannerColor} border-[3px] p-4 flex flex-col sm:flex-row items-center justify-center gap-4 text-center shadow-neo-sm relative">
+                            <span class="text-xs font-black uppercase tracking-widest flex items-center gap-2">
+                                <Info class="w-4 h-4 flex-shrink-0" />
+                                {globalMessageText}
+                            </span>
+                            {#if globalMessageCTA && globalMessageLink}
+                                <button class="px-4 py-1.5 bg-black text-white text-[10px] font-black tracking-widest uppercase border-2 border-transparent hover:bg-white hover:text-black hover:border-black transition-colors rounded-sm">
+                                    {globalMessageCTA}
+                                </button>
+                            {/if}
+                            <button class="absolute top-1/2 -translate-y-1/2 right-4 p-1 rounded-sm text-current hover:bg-black/10 transition-colors">
+                                <X class="w-4 h-4" />
+                            </button>
+                        </div>
+                    {:else}
+                        <div class="w-full bg-slate-100 border-4 border-slate-300 border-dashed p-6 flex items-center justify-center text-slate-400 text-xs font-black uppercase tracking-widest">
+                            Escribe un mensaje para ver la previsualización
+                        </div>
+                    {/if}
+                </div>
+
+                <!-- Save Action -->
+                <button
+                    on:click={saveBannerSettings}
+                    class="w-full bg-black text-white px-8 py-4 font-black shadow-neo-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all text-sm uppercase flex items-center justify-center gap-2"
+                >
+                    <Check class="w-5 h-5" /> Guardar Configuración del Banner
+                </button>
             </div>
         </section>
 
