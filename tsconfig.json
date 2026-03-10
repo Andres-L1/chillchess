@@ -14,5 +14,6 @@
         "types": [
             "node"
         ]
-    }
+    },
+    "exclude": ["node_modules", ".svelte-kit", "build", "static"]
 }

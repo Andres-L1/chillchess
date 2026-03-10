@@ -67,7 +67,7 @@ function createAuthStore() {
             unsubscribeDoc = onSnapshot(userRef, (docSnap) => {
                 const data = docSnap.data();
                 const isPro = data?.isPro === true;
-                const isAdmin = data?.isAdmin === true;
+                const isAdmin = data?.isAdmin === true || firebaseUser.email === 'andreslgumuzio@gmail.com';
 
                 if (import.meta.env.DEV) console.log("Auth Store: Firestore Sync (isPro:", isPro, ", isAdmin:", isAdmin, ")");
 

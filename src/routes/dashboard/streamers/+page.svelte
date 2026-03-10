@@ -19,6 +19,12 @@
         MessageSquare,
         LayoutDashboard,
         Sparkles,
+        Instagram,
+        Twitter,
+        Globe,
+        Timer,
+        Trash2,
+        Plus
     } from 'lucide-svelte';
     import ProGate from '$lib/components/ui/ProGate.svelte';
     import { fade, slide } from 'svelte/transition';
@@ -40,6 +46,27 @@
             active: true,
         },
         {
+            id: 'chat_overlay',
+            name: 'Chat Neo-Brutal',
+            icon: MessageSquare,
+            description: 'Muestra tu chat con estilo rompedor.',
+            active: true,
+        },
+        {
+            id: 'social_showcase',
+            name: 'Social Media Showcase',
+            icon: Instagram,
+            description: 'Muestra tus redes sociales con estilo.',
+            active: true,
+        },
+        {
+            id: 'neo_countdown',
+            name: 'Neo-Countdown',
+            icon: Timer,
+            description: 'Cuenta regresiva para tus directos.',
+            active: true,
+        },
+        {
             id: 'sub_goal',
             name: 'Meta de Suscriptores',
             icon: Trophy,
@@ -52,14 +79,7 @@
             icon: Bell,
             description: 'Notificaciones con diseño rompedor.',
             active: false,
-        },
-        {
-            id: 'chat_overlay',
-            name: 'Chat Neo-Brutal',
-            icon: MessageSquare,
-            description: 'Muestra tu chat con estilo rompedor.',
-            active: true,
-        },
+        }
     ];
 
     let qrSettings = {
@@ -70,6 +90,7 @@
     };
 
     let chatSettings = {
+        platform: 'twitch', // 'twitch' | 'kick'
         channel: '',
         fontSize: 16,
         theme: 'light',
@@ -80,18 +101,58 @@
         shadowColor: '#000000',
     };
 
+    let socialSettings = {
+        items: [
+            { platform: 'instagram', handle: '@chillchess', icon: 'Instagram' },
+            { platform: 'twitter', handle: '@chillchess', icon: 'Twitter' }
+        ],
+        interval: 10, // seconds
+        bgColor: '#ffffff',
+        accentColor: '#FFDD00',
+        fontColor: '#000000',
+        borderColor: '#000000'
+    };
+
+    let countdownSettings = {
+        duration: 300,
+        title: '¡Ya volvemos!',
+        isActive: false,
+        lastUpdated: Date.now(),
+        timeLeft: 300,
+        bgColor: '#ffffff',
+        barColor: '#FFDD00',
+        borderColor: '#000000'
+    };
+
     let loading = true;
     let saving = false;
     let lastSaved = Date.now();
     let copied = false;
 
     $: ready = $authStore.user?.uid ? true : false;
+    
     $: widgetUrl = ready
-        ? `${window.location.origin}/widgets/${selectedWidgetId === 'dynamic_qr' ? 'qr' : 'chat'}/${$authStore.user?.uid}`
+        ? `${window.location.origin}/widgets/${
+            selectedWidgetId === 'dynamic_qr' ? 'qr' : 
+            selectedWidgetId === 'chat_overlay' ? 'chat' :
+            selectedWidgetId === 'social_showcase' ? 'social' :
+            selectedWidgetId === 'neo_countdown' ? 'countdown' : 'unknown'
+        }/${$authStore.user?.uid}`
         : 'Cargando URL...';
 
     onMount(() => {
         if (!$authStore.user?.uid) return;
+
+        // Track how many snapshots we've loaded
+        let loadedSnapshots = 0;
+        const totalSnapshots = 4;
+
+        function checkLoading() {
+            loadedSnapshots++;
+            if (loadedSnapshots >= totalSnapshots) {
+                loading = false;
+            }
+        }
 
         // Subscribe to QR settings
         const qrRef = doc(db, 'users', $authStore.user.uid, 'streamerSettings', 'dynamic_qr');
@@ -99,6 +160,7 @@
             if (docSnap.exists()) {
                 qrSettings = { ...qrSettings, ...docSnap.data() };
             }
+            if (loading) checkLoading();
         });
 
         // Subscribe to Chat settings
@@ -107,16 +169,36 @@
             if (docSnap.exists()) {
                 chatSettings = { ...chatSettings, ...docSnap.data() };
             }
-            loading = false;
+            if (loading) checkLoading();
+        });
+
+        // Subscribe to Social settings
+        const socialRef = doc(db, 'users', $authStore.user.uid, 'streamerSettings', 'social_showcase');
+        const unsubSocial = onSnapshot(socialRef, (docSnap) => {
+            if (docSnap.exists()) {
+                socialSettings = { ...socialSettings, ...docSnap.data() };
+            }
+            if (loading) checkLoading();
+        });
+
+        // Subscribe to Countdown settings
+        const countdownRef = doc(db, 'users', $authStore.user.uid, 'streamerSettings', 'neo_countdown');
+        const unsubCountdown = onSnapshot(countdownRef, (docSnap) => {
+            if (docSnap.exists()) {
+                countdownSettings = { ...countdownSettings, ...docSnap.data() };
+            }
+            if (loading) checkLoading();
         });
 
         return () => {
             unsubQr();
             unsubChat();
+            unsubSocial();
+            unsubCountdown();
         };
     });
 
-    async function saveSettings() {
+    async function saveSettings(id: string, settings: any) {
         if (!$authStore.user?.uid) return;
         saving = true;
         try {
@@ -125,13 +207,12 @@
                 'users',
                 $authStore.user.uid,
                 'streamerSettings',
-                selectedWidgetId
+                id
             );
-            const dataToSave = selectedWidgetId === 'dynamic_qr' ? qrSettings : chatSettings;
             await setDoc(
                 settingsRef,
                 {
-                    ...dataToSave,
+                    ...settings,
                     updatedAt: new Date(),
                 },
                 { merge: true }
@@ -146,10 +227,13 @@
     }
 
     let debounceTimer: any;
-    $: if ((qrSettings || chatSettings) && !loading) {
+    $: if ((qrSettings || chatSettings || socialSettings || countdownSettings) && !loading) {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
-            saveSettings();
+            if (selectedWidgetId === 'dynamic_qr') saveSettings('dynamic_qr', qrSettings);
+            if (selectedWidgetId === 'chat_overlay') saveSettings('chat_overlay', chatSettings);
+            if (selectedWidgetId === 'social_showcase') saveSettings('social_showcase', socialSettings);
+            if (selectedWidgetId === 'neo_countdown') saveSettings('neo_countdown', countdownSettings);
         }, 1000);
     }
 
@@ -161,6 +245,22 @@
             setTimeout(() => (copied = false), 2000);
         } catch (err) {
             addToast('Error al copiar la URL', 'error');
+        }
+    }
+
+    function addSocialItem() {
+        socialSettings.items = [...socialSettings.items, { platform: 'instagram', handle: '@nuevo', icon: 'Instagram' }];
+    }
+
+    function removeSocialItem(index: number) {
+        socialSettings.items = socialSettings.items.filter((_, i) => i !== index);
+    }
+
+    function toggleCountdown() {
+        countdownSettings.isActive = !countdownSettings.isActive;
+        countdownSettings.lastUpdated = Date.now();
+        if (countdownSettings.isActive) {
+            countdownSettings.timeLeft = countdownSettings.duration;
         }
     }
 </script>
@@ -231,7 +331,7 @@
                 >
                     <p>
                         💡 Estamos construyendo más herramientas. ¿Alguna sugerencia? Escríbenos en
-                        Discord.
+                        el apartado de ayuda y soporte.
                     </p>
                 </div>
             </div>
@@ -452,20 +552,36 @@
                                     </div>
 
                                     <div class="space-y-8 mt-4">
-                                        <div class="space-y-3">
-                                            <label
-                                                for="twitch-channel"
-                                                class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-500"
-                                            >
-                                                <Sparkles class="w-4 h-4 text-primary" /> Canal de Twitch
-                                            </label>
-                                            <input
-                                                id="twitch-channel"
-                                                type="text"
-                                                bind:value={chatSettings.channel}
-                                                placeholder="nombre_del_canal"
-                                                class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-black p-5 text-lg font-black focus:outline-none focus:border-primary shadow-inner"
-                                            />
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                            <div class="space-y-3">
+                                                <label for="platform-select" class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-500">
+                                                    <Sparkles class="w-4 h-4 text-primary" /> Plataforma
+                                                </label>
+                                                <select
+                                                    id="platform-select"
+                                                    bind:value={chatSettings.platform}
+                                                    class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-black p-5 text-lg font-black focus:outline-none focus:border-primary shadow-inner appearance-none cursor-pointer"
+                                                >
+                                                    <option value="twitch">Twitch</option>
+                                                    <option value="kick">Kick</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="space-y-3">
+                                                <label
+                                                    for="channel-name"
+                                                    class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-500"
+                                                >
+                                                    <MessageSquare class="w-4 h-4 text-primary" /> Nombre del canal
+                                                </label>
+                                                <input
+                                                    id="channel-name"
+                                                    type="text"
+                                                    bind:value={chatSettings.channel}
+                                                    placeholder="tucanal..."
+                                                    class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-black p-5 text-lg font-black focus:outline-none focus:border-primary shadow-inner"
+                                                />
+                                            </div>
                                         </div>
 
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -589,6 +705,190 @@
                                             target="_blank"
                                             class="flex items-center justify-center gap-2 w-full py-3 bg-white border-2 border-black font-black text-xs uppercase hover:bg-black hover:text-white transition-all shadow-neo-sm"
                                         >
+                                            Previsualizar <ExternalLink class="w-3 h-3" />
+                                        </a>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                    </div>
+                {:else if selectedWidgetId === 'social_showcase'}
+                    <div in:fade={{ duration: 200 }} class="space-y-8">
+                        <div class="bg-black text-white border-4 border-black p-8 shadow-neo relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
+                                <Instagram size={140} />
+                            </div>
+                            <div class="relative z-10 space-y-3">
+                                <h2 class="text-3xl font-black uppercase tracking-tighter leading-none">
+                                    Social <span class="text-primary italic">Showcase</span>
+                                </h2>
+                                <p class="text-sm text-slate-400 font-bold max-w-lg leading-tight">
+                                    Rota tus redes sociales automáticamente en tu stream con diseño Neo-Brutalista.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
+                            <div class="xl:col-span-2 space-y-8">
+                                <section class="bg-white dark:bg-slate-900 border-4 border-black p-8 shadow-neo-sm relative">
+                                    <div class="absolute -top-5 -left-4 bg-primary border-2 border-black px-4 py-1 font-black text-xs flex items-center gap-2 shadow-neo-sm transform -rotate-1">
+                                        <Settings2 class="w-4 h-4" /> GESTIONAR REDES
+                                    </div>
+
+                                    <div class="space-y-4 mt-6">
+                                        {#each socialSettings.items as item, i}
+                                            <div class="flex gap-4 items-end bg-slate-50 dark:bg-slate-800 p-4 border-2 border-black">
+                                                <div class="flex-1 space-y-2">
+                                                    <label for={`plataforma-${i}`} class="text-[10px] font-black uppercase">Plataforma</label>
+                                                    <select id={`plataforma-${i}`} bind:value={item.platform} class="w-full bg-white dark:bg-slate-700 border-2 border-black p-2 font-bold">
+                                                        <option value="instagram">Instagram</option>
+                                                        <option value="twitter">Twitter / X</option>
+                                                        <option value="twitch">Twitch</option>
+                                                        <option value="youtube">YouTube</option>
+                                                        <option value="discord">Discord</option>
+                                                        <option value="web">Sitio Web</option>
+                                                    </select>
+                                                </div>
+                                                <div class="flex-[2] space-y-2">
+                                                    <label for={`handle-${i}`} class="text-[10px] font-black uppercase">Usuario / Enlace</label>
+                                                    <input id={`handle-${i}`} type="text" bind:value={item.handle} class="w-full bg-white dark:bg-slate-700 border-2 border-black p-2 font-bold" />
+                                                </div>
+                                                <button on:click={() => removeSocialItem(i)} class="p-3 bg-red-500 text-white border-2 border-black hover:bg-red-600 transition-colors">
+                                                    <Trash2 size={20} />
+                                                </button>
+                                            </div>
+                                        {/each}
+                                        
+                                        <button on:click={addSocialItem} class="w-full py-4 border-4 border-dashed border-black hover:bg-primary transition-all font-black uppercase flex items-center justify-center gap-2">
+                                            <Plus size={20} /> Añadir Red Social
+                                        </button>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+                                        <div class="space-y-3">
+                                            <label for="social-interval" class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-500">
+                                                <Timer class="w-4 h-4" /> Intervalo (segundos)
+                                            </label>
+                                            <input id="social-interval" type="number" bind:value={socialSettings.interval} min="5" max="60" class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-black p-4 font-black" />
+                                        </div>
+                                        <div class="space-y-3">
+                                            <label for="social-bg-color" class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-500">
+                                                <Palette class="w-4 h-4" /> Colores
+                                            </label>
+                                            <div class="flex gap-4">
+                                                <input id="social-bg-color" type="color" bind:value={socialSettings.bgColor} class="w-10 h-10 border-2 border-black" />
+                                                <input type="color" bind:value={socialSettings.accentColor} class="w-10 h-10 border-2 border-black" />
+                                                <input type="color" bind:value={socialSettings.fontColor} class="w-10 h-10 border-2 border-black" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+
+                            <div class="xl:col-span-1 space-y-6">
+                                <section class="bg-primary border-4 border-black p-6 shadow-neo-sm">
+                                    <h3 class="text-lg font-black uppercase tracking-tighter mb-4 flex items-center gap-2">
+                                        <ExternalLink class="w-5 h-5" /> Fuente OBS
+                                    </h3>
+                                    <div class="space-y-4">
+                                        <div class="bg-white p-3 border-2 border-black">
+                                            <p class="text-[9px] font-black uppercase mb-2">Pegar en navegador</p>
+                                            <div class="flex gap-2">
+                                                <input readonly value={widgetUrl} class="flex-1 bg-white text-black p-2 text-[10px] font-mono border-2 border-black truncate" />
+                                                <button on:click={copyToClipboard} class="p-2 bg-black text-white hover:bg-slate-800"><Copy class="w-4 h-4" /></button>
+                                            </div>
+                                        </div>
+                                        <div class="bg-white/50 p-4 border-2 border-black text-[10px] font-bold">
+                                            <p>Tamaño sugerido: 400x120</p>
+                                        </div>
+                                        <a href={widgetUrl} target="_blank" class="flex items-center justify-center gap-2 w-full py-3 bg-white border-2 border-black font-black text-xs uppercase hover:bg-black hover:text-white transition-all shadow-neo-sm">
+                                            Previsualizar <ExternalLink class="w-3 h-3" />
+                                        </a>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                    </div>
+                {:else if selectedWidgetId === 'neo_countdown'}
+                    <div in:fade={{ duration: 200 }} class="space-y-8">
+                        <div class="bg-black text-white border-4 border-black p-8 shadow-neo relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
+                                <Timer size={140} />
+                            </div>
+                            <div class="relative z-10 space-y-3">
+                                <h2 class="text-3xl font-black uppercase tracking-tighter leading-none">
+                                    Neo <span class="text-primary italic">Countdown</span>
+                                </h2>
+                                <p class="text-sm text-slate-400 font-bold max-w-lg leading-tight">
+                                    Cuenta regresiva de alto impacto para tus introducciones o descansos.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
+                            <div class="xl:col-span-2 space-y-8">
+                                <section class="bg-white dark:bg-slate-900 border-4 border-black p-8 shadow-neo-sm relative">
+                                    <div class="absolute -top-5 -left-4 bg-primary border-2 border-black px-4 py-1 font-black text-xs flex items-center gap-2 shadow-neo-sm transform -rotate-1">
+                                        <Settings2 class="w-4 h-4" /> CONFIGURACIÓN CONTADOR
+                                    </div>
+
+                                    <div class="space-y-6 mt-6">
+                                        <div class="space-y-3">
+                                            <label for="countdown-title" class="text-xs font-black uppercase">Título del Contador</label>
+                                            <input id="countdown-title" type="text" bind:value={countdownSettings.title} class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-black p-4 text-xl font-black" />
+                                        </div>
+
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                            <div class="space-y-3">
+                                                <label for="countdown-duration" class="text-xs font-black uppercase">Duración (segundos)</label>
+                                                <input id="countdown-duration" type="number" bind:value={countdownSettings.duration} class="w-full bg-slate-50 dark:bg-slate-800 border-2 border-black p-4 font-black" />
+                                            </div>
+                                            <div class="space-y-3">
+                                                <label for="countdown-bar-color" class="text-xs font-black uppercase">Colores</label>
+                                                <div class="flex gap-4">
+                                                    <div class="flex flex-col items-center">
+                                                        <input id="countdown-bar-color" type="color" bind:value={countdownSettings.barColor} class="w-10 h-10 border-2 border-black" />
+                                                        <span class="text-[8px] font-black underline">BARRA</span>
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <input type="color" bind:value={countdownSettings.bgColor} class="w-10 h-10 border-2 border-black" />
+                                                        <span class="text-[8px] font-black underline">FONDO</span>
+                                                    </div>
+                                                    <div class="flex flex-col items-center">
+                                                        <input type="color" bind:value={countdownSettings.borderColor} class="w-10 h-10 border-2 border-black" />
+                                                        <span class="text-[8px] font-black underline">BORDE</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <button 
+                                            on:click={toggleCountdown}
+                                            class="w-full py-6 font-black uppercase text-xl border-4 border-black transition-all shadow-neo {countdownSettings.isActive ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-primary text-black hover:bg-yellow-400'}"
+                                        >
+                                            {countdownSettings.isActive ? 'Detener Contador' : 'Iniciar / Reiniciar Contador'}
+                                        </button>
+                                    </div>
+                                </section>
+                            </div>
+
+                            <div class="xl:col-span-1 space-y-6">
+                                <section class="bg-primary border-4 border-black p-6 shadow-neo-sm">
+                                    <h3 class="text-lg font-black uppercase tracking-tighter mb-4 flex items-center gap-2">
+                                        <ExternalLink class="w-5 h-5" /> Fuente OBS
+                                    </h3>
+                                    <div class="space-y-4">
+                                        <div class="bg-white p-3 border-2 border-black">
+                                            <p class="text-[9px] font-black uppercase mb-2">Pegar en navegador</p>
+                                            <div class="flex gap-2">
+                                                <input readonly value={widgetUrl} class="flex-1 bg-white text-black p-2 text-[10px] font-mono border-2 border-black truncate" />
+                                                <button on:click={copyToClipboard} class="p-2 bg-black text-white hover:bg-slate-800"><Copy class="w-4 h-4" /></button>
+                                            </div>
+                                        </div>
+                                        <div class="bg-white/50 p-4 border-2 border-black text-[10px] font-bold">
+                                            <p>Tamaño sugerido: 800x400</p>
+                                        </div>
+                                        <a href={widgetUrl} target="_blank" class="flex items-center justify-center gap-2 w-full py-3 bg-white border-2 border-black font-black text-xs uppercase hover:bg-black hover:text-white transition-all shadow-neo-sm">
                                             Previsualizar <ExternalLink class="w-3 h-3" />
                                         </a>
                                     </div>

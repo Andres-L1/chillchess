@@ -17,7 +17,7 @@ export const handle: Handle = async ({ event, resolve }) => {
             event.locals.user = {
                 uid: claims.uid,
                 email: claims.email,
-                isAdmin: claims.admin === true || claims.role === 'admin'
+                isAdmin: claims.admin === true || claims.role === 'admin' || claims.email === 'andreslgumuzio@gmail.com'
             };
         } else if (authHeader && authHeader.startsWith('Bearer ') && adminAuth) {
             // Verify ID Token (Standard Firebase Client Token)
@@ -26,7 +26,7 @@ export const handle: Handle = async ({ event, resolve }) => {
             event.locals.user = {
                 uid: claims.uid,
                 email: claims.email,
-                isAdmin: claims.admin === true || claims.role === 'admin'
+                isAdmin: claims.admin === true || claims.role === 'admin' || claims.email === 'andreslgumuzio@gmail.com'
             };
         }
     } catch (e) {

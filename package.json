@@ -51,6 +51,7 @@
     "firebase-admin": "^12.0.0",
     "jspdf": "^4.2.0",
     "lucide-svelte": "^0.575.0",
+    "pusher-js": "^8.4.0",
     "qrcode": "^1.5.4",
     "stripe": "^20.1.0",
     "svelte-french-toast": "^1.2.0",

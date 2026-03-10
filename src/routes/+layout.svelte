@@ -218,27 +218,32 @@
         scroll-behavior: smooth;
     }
 
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 10px;
+    /* Global Neo-Brutalist Scrollbar */
+    :global(::-webkit-scrollbar) {
+        width: 14px;
+        height: 14px;
     }
 
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-left: 2px solid black;
+    :global(::-webkit-scrollbar-track) {
+        background: #fff;
+        border-left: 3px solid #000;
+        border-right: 3px solid #000;
     }
 
-    .custom-scrollbar::-webkit-scrollbar-thumb {
+    :global(::-webkit-scrollbar-thumb) {
+        background: var(--primary, #6366f1);
+        border: 3px solid #000;
+        box-shadow: inset -2px -2px 0px 0px rgba(0,0,0,0.2);
+    }
+
+    :global(::-webkit-scrollbar-thumb:hover) {
         background: #000;
-        border: 2px solid black;
+        cursor: pointer;
     }
 
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #333;
-    }
-
-    /* Support for Firefox */
-    .custom-scrollbar {
+    /* Firefox Support */
+    :global(html) {
         scrollbar-width: auto;
-        scrollbar-color: black #f1f1f1;
+        scrollbar-color: #000 #fff;
     }
 </style>

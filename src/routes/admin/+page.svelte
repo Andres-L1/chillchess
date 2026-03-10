@@ -603,7 +603,7 @@
                                 <div
                                     class="w-12 h-12 bg-white border-4 border-black flex items-center justify-center font-black text-primary text-xl group-hover:shadow-neo-sm transition-all group-hover:-translate-x-1 group-hover:-translate-y-1"
                                 >
-                                    {user.email[0].toUpperCase()}
+                                    {(user.email?.[0] ?? '?').toUpperCase()}
                                 </div>
                             </div>
                             <div class="col-span-4">

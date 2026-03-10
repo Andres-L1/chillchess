@@ -404,7 +404,7 @@
                         {#if extractedColors.length > 0}
                             <button
                                 on:click={() => {}}
-                                class="text-[10px] font-black text-neat-accent uppercase tracking-widest hover:underline"
+                                class="text-[10px] font-black text-primary uppercase tracking-widest hover:underline"
                             >
                                 DESCARGAR .ASE
                             </button>

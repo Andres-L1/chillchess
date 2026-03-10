@@ -81,7 +81,7 @@
                     </label>
                     <div class="relative group">
                         <div
-                            class="absolute inset-y-0 left-5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-neat-accent transition-colors"
+                            class="absolute inset-y-0 left-5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-primary transition-colors"
                         >
                             <Landmark class="w-5 h-5" />
                         </div>
@@ -110,7 +110,7 @@
                     </label>
                     <div class="relative group">
                         <div
-                            class="absolute inset-y-0 left-5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-neat-accent transition-colors"
+                            class="absolute inset-y-0 left-5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-primary transition-colors"
                         >
                             <Percent class="w-5 h-5" />
                         </div>
@@ -140,7 +140,7 @@
                     </label>
                     <div class="relative group">
                         <div
-                            class="absolute inset-y-0 left-5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-neat-accent transition-colors"
+                            class="absolute inset-y-0 left-5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-primary transition-colors"
                         >
                             <Calendar class="w-5 h-5" />
                         </div>
