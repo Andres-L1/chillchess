@@ -1,6 +1,7 @@
 <script lang="ts">
     import { pageHeader } from '$lib/stores/ui';
     import { page } from '$app/stores';
+    import { goto } from '$app/navigation';
     import { addToast } from '$lib/stores/toasts';
     import { authStore } from '$lib/stores/authStore';
     import { db } from '$lib/firebase';
@@ -19,15 +20,18 @@
         Bell,
         MessageSquare,
         LayoutDashboard,
+        MonitorUp,
         Sparkles,
         Instagram,
         Twitter,
         Globe,
         Timer,
         Trash2,
-        Plus
+        Plus,
+        Cat
     } from 'lucide-svelte';
     import ProGate from '$lib/components/ui/ProGate.svelte';
+    import StreamIntroEditor from '$lib/components/streamers/StreamIntroEditor.svelte';
     import { fade, slide } from 'svelte/transition';
 
     pageHeader.set({
@@ -45,10 +49,38 @@
         if (tab === 'chat') selectedWidgetId = 'chat_overlay';
         else if (tab === 'social') selectedWidgetId = 'social_showcase';
         else if (tab === 'countdown') selectedWidgetId = 'neo_countdown';
+        else if (tab === 'intro') selectedWidgetId = 'stream_intro';
         else if (tab === 'qr') selectedWidgetId = 'dynamic_qr';
+        else selectedWidgetId = 'hub';
+    }
+
+    function selectWidget(id: string) {
+        const tabMap: Record<string, string> = {
+            'dynamic_qr': 'qr',
+            'chat_overlay': 'chat',
+            'social_showcase': 'social',
+            'neo_countdown': 'countdown',
+            'stream_intro': 'intro',
+            'bongo_cat': 'bongo'
+        };
+        const tab = tabMap[id];
+        if (tab) {
+            const url = new URL($page.url);
+            url.searchParams.set('tab', tab);
+            goto(url.toString(), { replaceState: true });
+        } else {
+            selectedWidgetId = id;
+        }
     }
 
     const widgets = [
+        {
+            id: 'stream_intro',
+            name: 'Overlay Editor',
+            icon: MonitorUp,
+            description: 'Pizarrón Neo-Brutal para tu inicio de Stream.',
+            active: true,
+        },
         {
             id: 'dynamic_qr',
             name: 'Código QR Dinámico',
@@ -90,6 +122,14 @@
             icon: Bell,
             description: 'Notificaciones con diseño rompedor.',
             active: false,
+        },
+        {
+            id: 'bongo_cat',
+            name: 'Bongo Cat',
+            icon: Cat,
+            description: 'Tu mascota virtual interactiva para el escritorio.',
+            active: true,
+            adminOnly: true
         }
     ];
 
@@ -135,6 +175,8 @@
         borderColor: '#000000'
     };
 
+    let introSettings: any = undefined; // Will be set by component if left undefined or populated from Firebase
+
     let loading = true;
     let saving = false;
     let lastSaved = Date.now();
@@ -147,7 +189,8 @@
             selectedWidgetId === 'dynamic_qr' ? 'qr' : 
             selectedWidgetId === 'chat_overlay' ? 'chat' :
             selectedWidgetId === 'social_showcase' ? 'social' :
-            selectedWidgetId === 'neo_countdown' ? 'countdown' : 'unknown'
+            selectedWidgetId === 'neo_countdown' ? 'countdown' : 
+            selectedWidgetId === 'stream_intro' ? 'intro' : 'unknown'
         }/${$authStore.user?.uid}`
         : 'Cargando URL...';
 
@@ -201,11 +244,20 @@
             if (loading) checkLoading();
         });
 
+        // Subscribe to Intro settings
+        const introRef = doc(db, 'users', $authStore.user.uid, 'streamerSettings', 'stream_intro');
+        const unsubIntro = onSnapshot(introRef, (docSnap) => {
+            if (docSnap.exists()) {
+                introSettings = { ...introSettings, ...docSnap.data() };
+            }
+        });
+
         return () => {
             unsubQr();
             unsubChat();
             unsubSocial();
             unsubCountdown();
+            unsubIntro();
         };
     });
 
@@ -220,7 +272,7 @@
                 'streamerSettings',
                 id
             );
-            await setDoc(
+            const promise = setDoc(
                 settingsRef,
                 {
                     ...settings,
@@ -228,12 +280,27 @@
                 },
                 { merge: true }
             );
+            await promise;
             lastSaved = Date.now();
+            return promise; // Return the promise for cascading awaits
         } catch (error) {
             console.error('Error saving settings:', error);
             addToast('Error al guardar los ajustes', 'error');
+            throw error;
         } finally {
             saving = false;
+        }
+    }
+
+    async function triggerTestMessage(widgetId: string) {
+        if (!$authStore.user?.uid) return;
+        try {
+            const settingsRef = doc(db, 'users', $authStore.user.uid, 'streamerSettings', widgetId);
+            await setDoc(settingsRef, { testTrigger: Date.now() }, { merge: true });
+            addToast('Mensaje de prueba enviado', 'success');
+        } catch (error) {
+            console.error('Error sending test message:', error);
+            addToast('Error al enviar prueba', 'error');
         }
     }
 
@@ -283,73 +350,13 @@
 <ProGate>
     <div class="max-w-7xl mx-auto pb-20 px-4 md:px-0">
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-            <!-- Sidebar Selector -->
-            <div class="lg:col-span-1 space-y-6">
-                <div class="bg-black text-white border-4 border-black p-4 shadow-neo-sm">
-                    <h3
-                        class="flex items-center gap-2 font-black uppercase text-sm tracking-widest"
-                    >
-                        <LayoutDashboard class="w-4 h-4 text-primary" /> Tus Widgets
-                    </h3>
-                </div>
-
-                <nav
-                    class="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 scrollbar-hide"
-                >
-                    {#each widgets as widget}
-                        <button
-                            on:click={() => widget.active && (selectedWidgetId = widget.id)}
-                            class="flex-shrink-0 group relative flex items-center gap-3 p-4 border-4 border-black transition-all w-64 lg:w-full text-left
-                            {selectedWidgetId === widget.id
-                                ? 'bg-primary shadow-neo translate-x-1 translate-y-1'
-                                : 'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-neo-sm'}
-                            {!widget.active
-                                ? 'opacity-50 cursor-not-allowed grayscale'
-                                : 'cursor-pointer'}"
-                        >
-                            <div
-                                class="p-2 bg-black text-white group-hover:bg-primary group-hover:text-black transition-colors"
-                            >
-                                <svelte:component this={widget.icon} size={20} />
-                            </div>
-                            <div class="flex-1">
-                                <p class="font-black uppercase text-xs leading-none">
-                                    {widget.name}
-                                </p>
-                                {#if !widget.active}
-                                    <p class="text-[9px] font-bold text-slate-500 mt-1 italic">
-                                        PRÓXIMAMENTE
-                                    </p>
-                                {:else}
-                                    <p
-                                        class="text-[10px] font-medium text-slate-600 dark:text-slate-400 mt-1 line-clamp-1"
-                                    >
-                                        {widget.description}
-                                    </p>
-                                {/if}
-                            </div>
-                            {#if selectedWidgetId === widget.id}
-                                <div class="absolute right-4 top-1/2 -translate-y-1/2">
-                                    <Sparkles class="w-4 h-4 text-black animate-pulse" />
-                                </div>
-                            {/if}
-                        </button>
-                    {/each}
-                </nav>
-
-                <div
-                    class="bg-yellow-100 dark:bg-yellow-900/20 border-2 border-dashed border-black p-4 text-[10px] font-bold italic text-yellow-800 dark:text-yellow-200"
-                >
-                    <p>
-                        💡 Estamos construyendo más herramientas. ¿Alguna sugerencia? Escríbenos en
-                        el apartado de ayuda y soporte.
-                    </p>
-                </div>
-            </div>
-
             <!-- Main Content Area -->
-            <div class="lg:col-span-3 space-y-8">
-                {#if selectedWidgetId === 'dynamic_qr'}
+            <div class="lg:col-span-4 space-y-8">
+                {#if selectedWidgetId === 'stream_intro'}
+                    <div in:fade={{ duration: 200 }} class="space-y-8 h-full">
+                        <StreamIntroEditor bind:settings={introSettings} {saving} {widgetUrl} on:save={async (e) => {introSettings = e.detail; await saveSettings('stream_intro', introSettings);}} />
+                    </div>
+                {:else if selectedWidgetId === 'dynamic_qr'}
                     <div in:fade={{ duration: 200 }} class="space-y-8">
                         <!-- Header Card -->
                         <div
@@ -670,6 +677,13 @@
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <button 
+                                            on:click={() => triggerTestMessage('chat_overlay')}
+                                            class="w-full py-6 font-black uppercase text-xl border-4 border-black transition-all hover:translate-x-1 hover:translate-y-1 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-none bg-primary text-black hover:bg-yellow-400 mt-6"
+                                        >
+                                            Enviar Mensaje de Prueba
+                                        </button>
                                     </div>
                                 </section>
                             </div>
@@ -909,6 +923,125 @@
                             </div>
                         </div>
                     </div>
+                {:else if selectedWidgetId === 'bongo_cat' && $authStore.user?.isAdmin}
+                    <div in:fade={{ duration: 200 }} class="space-y-8">
+                        <div class="bg-black text-white border-4 border-black p-8 shadow-neo relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
+                                <Cat size={140} />
+                            </div>
+                            <div class="relative z-10 space-y-3">
+                                <h2 class="text-3xl font-black uppercase tracking-tighter leading-none">
+                                    Bongo <span class="text-primary italic">Cat</span>
+                                </h2>
+                                <p class="text-sm text-slate-400 font-bold max-w-lg leading-tight">
+                                    El clásico gatito de escritorio, rediseñado con pura estética Neo-Brutalista exclusiva para administradores.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
+                            <div class="xl:col-span-2 space-y-8">
+                                <section class="bg-white dark:bg-slate-900 border-4 border-black p-8 shadow-neo-sm relative">
+                                    <div class="absolute -top-5 -left-4 bg-[#FFDD00] border-2 border-black px-4 py-1 font-black text-xs flex items-center gap-2 shadow-neo-sm transform -rotate-1 text-black">
+                                        <Cat class="w-4 h-4" /> DESCARGA
+                                    </div>
+
+                                    <div class="space-y-6 mt-6">
+                                        <p class="font-bold">
+                                            Bongo Cat es una aplicación de escritorio que captura las pulsaciones de tu teclado y ratón. Hemos adaptado la interfaz para que encaje al 100% con ChillChess.
+                                        </p>
+                                        <div class="bg-black text-[#FFDD00] p-4 border-4 border-black font-mono text-sm">
+                                            <p class="font-black mb-2">A T E N C I Ó N:</p>
+                                            <ul class="list-disc pl-5 space-y-1">
+                                                <li>Esta aplicación está restringida a administradores.</li>
+                                                <li>No se transmite ninguna pulsación de teclado por internet. Todo es local.</li>
+                                            </ul>
+                                        </div>
+
+                                        <!-- 
+                                            NOTA: Aquí se descargará directamente el ejecutable que vamos a compilar y alojar en tu propia web.
+                                        -->
+                                        <a 
+                                            href="/downloads/BongoCat.exe"
+                                            download="BongoCat.exe"
+                                            target="_blank"
+                                            data-sveltekit-reload
+                                            class="inline-flex items-center justify-center gap-2 w-full py-6 font-black uppercase text-xl border-4 border-black transition-all hover:translate-x-1 hover:translate-y-1 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-none bg-[#FFDD00] text-black hover:bg-yellow-400 mt-6"
+                                        >
+                                            <ExternalLink class="w-6 h-6" /> Descargar Bongo Cat Neo (.exe)
+                                        </a>
+                                    </div>
+                                </section>
+                            </div>
+
+                            <div class="xl:col-span-1 space-y-6">
+                                <section class="bg-[#FFDD00] text-black border-4 border-black p-6 shadow-neo-sm">
+                                    <h3 class="text-lg font-black uppercase tracking-tighter mb-4 flex items-center gap-2">
+                                        <Info class="w-5 h-5" /> Instrucciones
+                                    </h3>
+                                    <div class="space-y-4">
+                                        <div class="bg-white p-4 border-4 border-black text-xs font-bold space-y-2">
+                                            <p>1. Descarga el código fuente (Próximamente ejecutable precompilado).</p>
+                                            <p>2. Abre OBS.</p>
+                                            <p>3. Agrega una Captura de Ventana y selecciona BongoCat.</p>
+                                            <p>4. Aplica filtro de 'Clave de color' para quitar el fondo rojo/verde.</p>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                    </div>
+                {:else if selectedWidgetId === 'hub'}
+                    <div in:fade={{ duration: 200 }} class="space-y-12">
+                        <!-- Hub Header -->
+                        <div class="relative bg-white dark:bg-slate-900 border-4 border-black p-10 md:p-16 shadow-neo overflow-hidden">
+                            <div class="absolute -top-10 -right-10 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
+                            <div class="relative z-10 max-w-2xl space-y-6">
+                                <div class="inline-flex items-center gap-2 bg-yellow-300 border-2 border-black px-4 py-1.5 font-black text-xs uppercase tracking-widest shadow-neo-sm transform -rotate-1">
+                                    <Sparkles class="w-4 h-4" /> Centro de Control Alpha
+                                </div>
+                                <h1 class="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-[0.9]">
+                                    STREAMER <span class="text-primary italic">HUB</span>
+                                </h1>
+                                <p class="text-xl font-bold text-slate-500 dark:text-slate-400 leading-tight">
+                                    Tus herramientas de streaming, reinventadas con diseño Neo-Brutalista. 
+                                    Potencia tu directo con widgets dinámicos únicos.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Hub Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                            {#each widgets as widget}
+                                {#if !widget.adminOnly || (widget.adminOnly && $authStore.user?.isAdmin)}
+                                <button 
+                                    on:click={() => selectWidget(widget.id)}
+                                    class="group relative bg-white dark:bg-slate-900 border-4 border-black p-8 text-left transition-all hover:-translate-y-2 hover:-translate-x-1 hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] dark:hover:shadow-[12px_12px_0px_0px_var(--primary)] {!widget.active ? 'opacity-50 grayscale cursor-not-allowed' : 'cursor-pointer shadow-neo'}"
+                                >
+                                    {#if widget.active}
+                                        <div class="absolute top-4 right-4 bg-green-400 border-2 border-black px-2 py-0.5 text-[8px] font-black uppercase">Activo</div>
+                                    {:else}
+                                        <div class="absolute top-4 right-4 bg-slate-300 border-2 border-black px-2 py-0.5 text-[8px] font-black uppercase">Próximamente</div>
+                                    {/if}
+
+                                    <div class="w-16 h-16 bg-slate-50 dark:bg-slate-800 border-4 border-black flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors shadow-neo-sm">
+                                        <svelte:component this={widget.icon} class="w-8 h-8" />
+                                    </div>
+
+                                    <h3 class="text-2xl font-black uppercase tracking-tighter mb-2 group-hover:text-primary transition-colors">{widget.name}</h3>
+                                    <p class="text-sm font-bold text-slate-500 dark:text-slate-400 leading-snug">{widget.description}</p>
+                                    
+                                    <div class="mt-6 pt-6 border-t-2 border-black/10 flex items-center justify-between">
+                                        <span class="text-[10px] font-black uppercase tracking-widest text-primary">Configurar Herramienta</span>
+                                        <div class="w-8 h-8 rounded-full border-2 border-black flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all">
+                                            <ExternalLink class="w-4 h-4" />
+                                        </div>
+                                    </div>
+                                </button>
+                                {/if}
+                            {/each}
+                        </div>
+                    </div>
                 {:else}
                     <div
                         in:fade={{ duration: 200 }}
@@ -917,6 +1050,12 @@
                         <Sparkles size={48} class="mb-4 text-primary" />
                         <h3 class="text-2xl font-black uppercase tracking-tighter">Próximamente</h3>
                         <p class="font-bold text-sm">Estamos horneando nuevos widgets.</p>
+                        <button 
+                            on:click={() => selectWidget('hub')}
+                            class="mt-6 px-4 py-2 bg-black text-white font-black uppercase text-xs border-2 border-black hover:bg-primary hover:text-black transition-colors"
+                        >
+                            Volver al Hub
+                        </button>
                     </div>
                 {/if}
             </div>
@@ -927,12 +1066,5 @@
 <style>
     :global(input[type='color']) {
         padding: 0;
-    }
-    .scrollbar-hide::-webkit-scrollbar {
-        display: none;
-    }
-    .scrollbar-hide {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
     }
 </style>

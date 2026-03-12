@@ -133,27 +133,14 @@
                 <div class="absolute inset-0 bg-white -z-10"></div>
             </div>
 
-            <!-- Neo-Brutalist Watermark -->
-            <div class="flex flex-col items-center gap-1.5 mt-1">
-                <div
-                    class="bg-primary border-2 border-black px-4 py-1 shadow-neo-sm transform rotate-1"
-                >
-                    <span
-                        class="font-black uppercase tracking-tighter text-black"
-                        style="font-size: clamp(10px, 3vmin, 20px);"
-                    >
-                        chillchess.app
-                    </span>
-                </div>
 
-                <div class="flex items-center gap-1.5 opacity-40">
+                <div class="flex items-center gap-1.5 opacity-40 mt-1">
                     <div class="w-1.5 h-1.5 bg-black rounded-full animate-ping"></div>
                     <span
                         class="font-black uppercase tracking-[0.2em] text-black"
                         style="font-size: clamp(7px, 1.5vmin, 12px);">Live Sync</span
                     >
                 </div>
-            </div>
         </div>
     {/if}
 </div>

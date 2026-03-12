@@ -11,6 +11,7 @@
         Sun,
         Moon,
         QrCode,
+        ScrollText,
     } from 'lucide-svelte';
     import { authStore } from '$lib/stores/authStore';
     import { auth } from '$lib/firebase';
@@ -81,9 +82,9 @@
     })();
 </script>
 
-<header class="sticky top-0 left-0 right-0 z-30 px-2 md:px-8 py-2 md:py-4 pointer-events-none">
+<header class="sticky top-0 z-30 pt-2 pb-0 px-4 md:px-8 md:py-4 transition-all">
     <div
-        class="max-w-7xl mx-auto flex items-center justify-between h-16 md:h-20 bg-white dark:bg-slate-900 border-2 md:border-4 border-black shadow-neo px-4 md:px-6 pointer-events-auto"
+        class="max-w-7xl mx-auto flex items-center justify-between h-14 md:h-20 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-2 md:border-4 border-black shadow-neo px-4 md:px-6"
     >
         <!-- Left: Quick Links / Socials (NeatPass Style) -->
         <div class="flex items-center gap-4">
@@ -228,6 +229,16 @@
                                 <User class="w-4 h-4 text-primary" />
                                 Perfil
                             </button>
+                            <button
+                                on:click={() => {
+                                    closeDropdown();
+                                    goto('/changelog');
+                                }}
+                                class="w-full text-left px-3 py-3 border-2 border-transparent hover:border-black hover:bg-slate-50 dark:hover:bg-slate-800 text-black dark:text-white font-black text-[10px] flex items-center gap-3 transition-all uppercase tracking-widest"
+                            >
+                                <ScrollText class="w-4 h-4 text-primary" />
+                                Notas del Parche
+                            </button>
                             {#if $authStore.user?.isAdmin}
                                 <button
                                     on:click={() => {
@@ -240,16 +251,6 @@
                                     Panel Admin
                                 </button>
                             {/if}
-                            <button
-                                on:click={() => {
-                                    closeDropdown();
-                                    goto('/dashboard/streamers');
-                                }}
-                                class="w-full text-left px-3 py-3 border-2 border-transparent hover:border-black hover:bg-slate-50 dark:hover:bg-slate-800 text-black dark:text-white font-black text-[10px] flex items-center gap-3 transition-all uppercase tracking-widest"
-                            >
-                                <QrCode class="w-4 h-4 text-primary" />
-                                Widgets Streamers
-                            </button>
                         </div>
 
                         <div class="p-2 border-t-2 border-black bg-red-50 dark:bg-red-900/10">

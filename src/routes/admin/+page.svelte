@@ -28,6 +28,7 @@
         Bell,
         MessageSquare,
         Info,
+        RefreshCw,
     } from 'lucide-svelte';
     import { onMount, onDestroy } from 'svelte';
     import { db } from '$lib/firebase';
@@ -64,7 +65,13 @@
     let copiedId: string | null = null;
     let unsubscribeUsers: () => void;
     let unsubscribeLogs: () => void;
+    let unsubscribeRecentFeedback: () => void;
+    let recentFeedback: any[] = [];
     let proPrice = 1;
+    let totalVisits = 0;
+    let dailyVisits: any[] = [];
+    let unsubscribeStats: () => void;
+    let unsubscribeDailyStats: () => void;
 
     // New State for Advanced Features
     let selectedUsers: Set<string> = new Set();
@@ -278,6 +285,11 @@
             activityFeed = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
         });
 
+        const feedbackQ = query(collection(db, 'feedback'), orderBy('createdAt', 'desc'), limit(5));
+        unsubscribeRecentFeedback = onSnapshot(feedbackQ, (snapshot) => {
+            recentFeedback = snapshot.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
+        });
+
         const settingsRef = doc(db, 'settings', 'global');
         unsubscribeSettings = onSnapshot(settingsRef, (snap) => {
             if (snap.exists()) {
@@ -290,12 +302,34 @@
                 globalMessageLink = data.globalMessageLink || '';
             }
         });
+
+        const statsRef = doc(db, 'stats', 'global');
+        unsubscribeStats = onSnapshot(statsRef, (snap) => {
+            if (snap.exists()) {
+                totalVisits = snap.data().totalVisits || 0;
+            }
+        });
+
+        const dailyStatsQ = query(
+            collection(db, 'stats'),
+            orderBy('timestamp', 'desc'),
+            limit(14)
+        );
+        unsubscribeDailyStats = onSnapshot(dailyStatsQ, (snap) => {
+            dailyVisits = snap.docs
+                .map(d => d.data())
+                .filter(d => d.date) // filter out the global doc if it's there
+                .reverse();
+        });
     });
 
     onDestroy(() => {
         if (unsubscribeUsers) unsubscribeUsers();
         if (unsubscribeLogs) unsubscribeLogs();
         if (unsubscribeSettings) unsubscribeSettings();
+        if (unsubscribeRecentFeedback) unsubscribeRecentFeedback();
+        if (unsubscribeStats) unsubscribeStats();
+        if (unsubscribeDailyStats) unsubscribeDailyStats();
     });
 </script>
 
@@ -472,6 +506,23 @@
             </div>
 
             <div
+                class="bg-white border-4 border-black p-8 shadow-neo hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all group"
+            >
+                <p
+                    class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 group-hover:text-primary transition-colors"
+                >
+                    Visitas Totales
+                </p>
+                <div class="text-6xl font-black tracking-tight mb-4">
+                    {totalVisits}
+                </div>
+                <div class="flex items-center gap-2 font-black text-[10px] uppercase">
+                    <ActivityIcon class="w-4 h-4 text-primary" />
+                    <span>Live Tracking</span>
+                </div>
+            </div>
+
+            <div
                 class="bg-white border-4 border-black p-8 shadow-neo hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all group relative overflow-hidden"
             >
                 <p
@@ -493,12 +544,24 @@
             </div>
         </section>
 
+        <!-- MARQUEE DE STATUS -->
+        <div class="bg-black py-4 overflow-hidden border-y-4 border-black -mx-8">
+            <div class="flex animate-marquee whitespace-nowrap">
+                {#each Array(10) as _}
+                    <span class="text-white font-black text-2xl mx-8 tracking-tighter uppercase italic">
+                        SYSTEM ONLINE // ABSOLUTE CONTROL // {totalUsers} USUARIOS // {proUsers} PRO // {totalVisits} VISITAS // 
+                    </span>
+                {/each}
+            </div>
+        </div>
+
         <!-- SYSTEM SETTINGS -->
         <section class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <div class="bg-white border-4 border-black p-8 shadow-neo">
-                <div class="flex items-center justify-between mb-8">
+            <div class="bg-white border-4 border-black p-8 shadow-neo flex flex-col gap-6">
+                <!-- Mantenimiento Action -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b-4 border-black pb-6">
                     <div>
-                        <h3 class="text-2xl font-black tracking-tight uppercase mb-1">
+                        <h3 class="text-2xl font-black tracking-tight uppercase mb-1 flex items-center gap-2">
                             Mantenimiento
                         </h3>
                         <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
@@ -507,23 +570,50 @@
                     </div>
                     <button
                         on:click={() => updateGlobalSettings('maintenanceMode', !maintenanceMode)}
-                        class="w-20 h-10 border-4 border-black relative transition-all {maintenanceMode
-                            ? 'bg-primary'
-                            : 'bg-slate-200'}"
+                        class="w-20 h-10 border-4 border-black relative transition-all flex-shrink-0 {maintenanceMode ? 'bg-primary' : 'bg-slate-200'}"
                     >
-                        <div
-                            class="absolute top-1 left-1 w-6 h-6 border-4 border-black bg-white transition-all {maintenanceMode
-                                ? 'translate-x-10'
-                                : 'translate-x-0'}"
-                        ></div>
+                        <div class="absolute top-1 left-1 w-6 h-6 border-4 border-black bg-white transition-all {maintenanceMode ? 'translate-x-10' : 'translate-x-0'}"></div>
                     </button>
+                    <p class="text-xs text-slate-500 font-bold leading-relaxed hidden xl:block w-1/2">
+                        Restringe el acceso a la plataforma para todos los usuarios no administradores. Ideal para despliegues complejos o actualizaciones de base de datos.
+                    </p>
                 </div>
-                <p
-                    class="text-sm text-slate-500 font-bold leading-relaxed border-l-4 border-primary pl-4"
-                >
-                    Restringe el acceso a la plataforma para todos los usuarios no administradores.
-                    Ideal para despliegues complejos o actualizaciones de base de datos.
-                </p>
+
+                <!-- Recent Feedback Inbox -->
+                <div class="flex flex-col gap-4 flex-grow">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-lg font-black tracking-tight uppercase flex items-center gap-2">
+                            <MessageSquare class="w-5 h-5 text-primary" />
+                            Bandeja de Reportes
+                        </h4>
+                        <a href="/admin/feedback" class="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-black hover:bg-primary px-2 py-1 border-2 border-transparent hover:border-black transition-all">
+                            Ver todo &rarr;
+                        </a>
+                    </div>
+                    
+                    <div class="space-y-3 overflow-y-auto pr-2 custom-scrollbar">
+                        {#if recentFeedback.length === 0}
+                            <div class="text-center p-8 border-4 border-black border-dashed bg-slate-50 text-slate-400 font-black uppercase tracking-widest text-xs">
+                                No hay reportes recientes
+                            </div>
+                        {:else}
+                            {#each recentFeedback as fb}
+                                <a href="/admin/feedback" class="block border-2 border-black p-3 hover:translate-x-[2px] hover:-translate-y-[2px] hover:shadow-neo-sm transition-all bg-white cursor-pointer {fb.status === 'resolved' ? 'opacity-60' : ''}">
+                                    <div class="flex items-center justify-between gap-2 mb-1">
+                                        <span class="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 border-2 border-black {fb.type === 'bug' ? 'bg-red-400 text-white' : fb.type === 'suggestion' ? 'bg-primary text-black' : 'bg-green-400 text-black'}">
+                                            {fb.type === 'bug' ? 'Bug' : fb.type === 'suggestion' ? 'Idea' : 'Otro'}
+                                        </span>
+                                        <span class="text-[10px] font-bold text-slate-400">
+                                            {formatDate(fb.createdAt)}
+                                        </span>
+                                    </div>
+                                    <p class="text-xs font-black truncate mb-1">{fb.message}</p>
+                                    <p class="text-[10px] font-bold text-slate-500 truncate">{fb.userEmail}</p>
+                                </a>
+                            {/each}
+                        {/if}
+                    </div>
+                </div>
             </div>
 
             <div class="bg-white border-4 border-black p-8 shadow-neo flex flex-col gap-6">
@@ -609,6 +699,79 @@
                 >
                     <Check class="w-5 h-5" /> Guardar Configuración del Banner
                 </button>
+            </div>
+        </section>
+
+        <!-- QUICK ACTIONS & WIDGET OVERVIEW -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 bg-white border-4 border-black p-8 shadow-neo flex flex-col gap-6">
+                <h3 class="text-2xl font-black tracking-tight uppercase flex items-center gap-2">
+                    <Zap class="w-6 h-6 text-primary" />
+                    Acciones Rápidas (Absolute Control)
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button class="flex items-center gap-4 p-4 border-4 border-black hover:bg-primary hover:text-white transition-all group">
+                        <div class="p-3 bg-slate-100 border-2 border-black group-hover:bg-white group-hover:text-black">
+                            <Download class="w-5 h-5" />
+                        </div>
+                        <div class="text-left">
+                            <p class="font-black uppercase text-xs">Exportar Usuarios</p>
+                            <p class="text-[10px] uppercase font-bold opacity-60">JSON/CSV Master List</p>
+                        </div>
+                    </button>
+                    <button class="flex items-center gap-4 p-4 border-4 border-black hover:bg-primary hover:text-white transition-all group">
+                        <div class="p-3 bg-slate-100 border-2 border-black group-hover:bg-white group-hover:text-black">
+                            <ShieldAlert class="w-5 h-5" />
+                        </div>
+                        <div class="text-left">
+                            <p class="font-black uppercase text-xs">Auditar Permisos</p>
+                            <p class="text-[10px] uppercase font-bold opacity-60">Check Firebase Rules</p>
+                        </div>
+                    </button>
+                    <button class="flex items-center gap-4 p-4 border-4 border-black hover:bg-yellow-300 transition-all group">
+                        <div class="p-3 bg-slate-100 border-2 border-black group-hover:bg-white">
+                            <RefreshCw class="w-5 h-5" />
+                        </div>
+                        <div class="text-left">
+                            <p class="font-black uppercase text-xs">Limpiar Caché Global</p>
+                            <p class="text-[10px] uppercase font-bold opacity-60">CDN/Edge Invalidation</p>
+                        </div>
+                    </button>
+                    <button class="flex items-center gap-4 p-4 border-4 border-black hover:bg-primary hover:text-white transition-all group">
+                        <div class="p-3 bg-slate-100 border-2 border-black group-hover:bg-white group-hover:text-black">
+                            <CreditCard class="w-5 h-5" />
+                        </div>
+                        <div class="text-left">
+                            <p class="font-black uppercase text-xs">Stripe Dashboard</p>
+                            <p class="text-[10px] uppercase font-bold opacity-60">Gestionar Pagos</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="bg-primary text-white border-4 border-black p-8 shadow-neo flex flex-col justify-between">
+                <div>
+                    <h3 class="text-2xl font-black tracking-tight uppercase mb-4">
+                        Estado Total
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between border-b-2 border-black/20 pb-2">
+                            <span class="text-xs font-black uppercase">Latencia DB</span>
+                            <span class="text-xs font-black uppercase">24ms</span>
+                        </div>
+                        <div class="flex items-center justify-between border-b-2 border-black/20 pb-2">
+                            <span class="text-xs font-black uppercase">Edge Nodes</span>
+                            <span class="text-xs font-black uppercase">12 Activos</span>
+                        </div>
+                        <div class="flex items-center justify-between border-b-2 border-black/20 pb-2">
+                            <span class="text-xs font-black uppercase">SSL Status</span>
+                            <span class="text-xs font-black uppercase">Válido</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 p-4 bg-white text-black border-4 border-black shadow-neo-sm font-black text-center text-xs uppercase italic">
+                    ChillChess.app Control Unit v2.1
+                </div>
             </div>
         </section>
 

@@ -22,6 +22,8 @@
         MessageSquare,
         Share2,
         LayoutDashboard,
+        ChevronDown,
+        Wrench,
         Radio
     } from 'lucide-svelte';
     import { currencyStore, type CurrencyPrefix } from '$lib/stores/currencyStore';
@@ -31,6 +33,14 @@
     const currencies: CurrencyPrefix[] = ['€', '$', '£'];
 
     let searchQuery = '';
+    let dropdownOpen = false;
+
+    const MODES = [
+        { id: 'tools', name: 'Herramientas', icon: Wrench, color: 'bg-black' },
+        { id: 'streamer', name: 'Streamer Hub', icon: Radio, color: 'bg-primary' }
+    ];
+
+    $: currentModeDetails = MODES.find(m => m.id === $dashboardMode) || MODES[0];
 
     const CATEGORY_ORDER = [
         'STREAMER HUB',
@@ -61,6 +71,7 @@
 
     const STREAMER_TOOLS = [
         { id: '/dashboard/streamers', category: 'STREAMER HUB', name: 'Panel Principal', icon: LayoutDashboard, pro: true },
+        { id: '/dashboard/streamers?tab=intro', category: 'WIDGETS OBS', name: 'Intro de Stream', icon: Radio, pro: true },
         { id: '/dashboard/streamers?tab=chat', category: 'WIDGETS OBS', name: 'Configurar Chat', icon: MessageSquare, pro: true },
         { id: '/dashboard/streamers?tab=social', category: 'WIDGETS OBS', name: 'Redes Sociales', icon: Share2, pro: true },
         { id: '/dashboard/streamers?tab=countdown', category: 'WIDGETS OBS', name: 'Cuenta Atrás', icon: Timer, pro: true },
@@ -125,6 +136,8 @@
     class:pointer-events-none={!$mobileMenuOpen}
     on:click={() => mobileMenuOpen.set(false)}
     on:keydown={(e) => e.key === 'Escape' && mobileMenuOpen.set(false)}
+    on:touchstart={handleTouchStart}
+    on:touchend={handleTouchEnd}
     role="button"
     tabindex="0"
     aria-label="Cerrar menú"
@@ -161,28 +174,56 @@
         </button>
     </div>
 
-    <!-- Selector de Modo (Neo-Brutal Switcher) -->
-    <div class="px-6 mb-6">
-        <div class="flex border-4 border-black shadow-neo-sm overflow-hidden bg-white dark:bg-slate-800">
+    <!-- Selector de Modo (Neo-Brutal Dropdown) -->
+    <div class="px-6 mb-6 relative">
+        {#if dropdownOpen}
             <button 
-                on:click={() => dashboardMode.set('tools')}
-                class="flex-1 py-3 text-[10px] font-black uppercase tracking-widest transition-all
-                {$dashboardMode === 'tools' 
-                    ? 'bg-black text-white' 
-                    : 'bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-primary'} border-r-4 border-black"
+                type="button"
+                class="fixed inset-0 z-40 w-full h-full cursor-default bg-transparent" 
+                on:click={() => dropdownOpen = false}
+            ></button>
+        {/if}
+        <button 
+            on:click={() => dropdownOpen = !dropdownOpen}
+            class="w-full flex items-center justify-between px-4 py-3 border-4 border-black shadow-neo-sm bg-white dark:bg-slate-800 transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-none relative z-50"
+        >
+            <div class="flex items-center gap-3">
+                <div class="p-1.5 {currentModeDetails.color} text-white border-2 border-black">
+                    <svelte:component this={currentModeDetails.icon} size={14} />
+                </div>
+                <span class="text-[10px] font-black uppercase tracking-widest text-black dark:text-white">
+                    {currentModeDetails.name}
+                </span>
+            </div>
+            <ChevronDown size={16} class="text-black dark:text-white transition-transform {dropdownOpen ? 'rotate-180' : ''}" />
+        </button>
+
+        {#if dropdownOpen}
+            <div 
+                class="absolute left-6 right-6 mt-2 bg-white dark:bg-slate-900 border-4 border-black shadow-neo z-50 overflow-hidden"
+                style="top: 100%"
             >
-                MODO TOOLS
-            </button>
-            <button 
-                on:click={() => dashboardMode.set('streamer')}
-                class="flex-1 py-3 text-[10px] font-black uppercase tracking-widest transition-all
-                {$dashboardMode === 'streamer' 
-                    ? 'bg-primary text-white' 
-                    : 'bg-white dark:bg-slate-800 text-black dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-primary'}"
-            >
-                MODO STREAMER
-            </button>
-        </div>
+                {#each MODES as mode}
+                    <button
+                        on:click={() => {
+                            dashboardMode.set(mode.id === 'tools' ? 'tools' : 'streamer');
+                            dropdownOpen = false;
+                        }}
+                        class="w-full flex items-center gap-3 px-4 py-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-b-4 border-black last:border-b-0 text-left"
+                    >
+                        <div class="p-1.5 {mode.id === $dashboardMode ? mode.color : 'bg-slate-200 dark:bg-slate-700'} text-white border-2 border-black">
+                            <svelte:component this={mode.icon} size={14} />
+                        </div>
+                        <span class="text-[10px] font-black uppercase tracking-widest {$dashboardMode === mode.id ? 'text-black dark:text-white' : 'text-slate-500'}">
+                            {mode.name}
+                        </span>
+                        {#if $dashboardMode === mode.id}
+                            <div class="ml-auto w-2 h-2 bg-primary border-2 border-black transform rotate-45"></div>
+                        {/if}
+                    </button>
+                {/each}
+            </div>
+        {/if}
     </div>
 
     <!-- Buscador -->

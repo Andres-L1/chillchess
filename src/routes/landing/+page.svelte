@@ -159,15 +159,15 @@
                                 La Navaja Suiza Digital
                             </div>
                             <h1
-                                class="text-5xl sm:text-6xl lg:text-8xl font-black leading-[0.9] tracking-tighter theme-text uppercase italic"
+                                class="text-5xl sm:text-6xl lg:text-7xl font-black leading-[0.9] tracking-tighter theme-text uppercase italic"
                             >
-                                Todas tus herramientas <span class="bg-sky-400 border-4 border-black px-3 py-1 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] inline-block mt-2 transform -rotate-2"
+                                Todas tus herramientas y widgets <span class="bg-sky-400 border-4 border-black px-3 py-1 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] inline-block mt-2 transform -rotate-2"
                                     >en un solo lugar.</span
                                 >
                             </h1>
                             <p class="max-w-xl text-xl font-bold theme-text opacity-90 border-l-8 border-violet-400 pl-4 py-2 bg-white/50 dark:bg-black/50">
-                                Facturas, cronómetros, conversores y más. Herramientas potentes,
-                                diseño brutalista, <span class="bg-amber-300 text-black px-1 font-black">solo 1€/mes por todas las herramientas.</span>
+                                Facturas, widgets para OBS, conversores y más. Herramientas potentes,
+                                diseño brutalista, <span class="bg-amber-300 text-black px-1 font-black">solo 1€/mes por el acceso total.</span>
                             </p>
                         </div>
                         <div class="flex flex-wrap gap-4">
@@ -192,7 +192,7 @@
                                 <div class="h-8 w-1 bg-black hidden sm:block"></div>
                                 <div class="flex items-center gap-2 text-sm font-black theme-text">
                                     <Layers class="w-5 h-5 text-sky-500" />
-                                    <span>15+ Herramientas</span>
+                                    <span>20+ Herramientas y Widgets</span>
                                 </div>
                             </div>
                         </div>
@@ -337,11 +337,10 @@
                             </div>
                             <div class="space-y-2">
                                 <h3 class="text-2xl font-black theme-text uppercase italic">
-                                    Todo en Uno
+                                    Todo para Creadores
                                 </h3>
                                 <p class="text-lg font-bold theme-text opacity-70">
-                                    Desde generadores de facturas hasta temporizadores Pomodoro. No
-                                    busques más aplicaciones sueltas.
+                                    Desde generadores de facturas hasta el nuevo Streamer Hub. Widgets para OBS y utilidades en un único lugar.
                                 </p>
                             </div>
                         </div>

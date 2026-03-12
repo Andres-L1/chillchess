@@ -12,6 +12,8 @@
         Loader2,
         Bug,
         Lightbulb,
+        HelpCircle,
+        Heart,
     } from 'lucide-svelte';
     import {
         collection,
@@ -47,7 +49,7 @@
     let feedbackItems: any[] = [];
     let loading = true;
     let unsubscribe: () => void;
-    let filterType: 'all' | 'unread' | 'bug' | 'suggestion' = 'unread';
+    let filterType: 'all' | 'unread' | 'bug' | 'idea' | 'question' | 'kudos' = 'unread';
 
     let isDataSubscribed = false;
     $: if (!$authStore.loading) {
@@ -87,7 +89,9 @@
         if (filterType === 'all') return true;
         if (filterType === 'unread') return item.status === 'unread';
         if (filterType === 'bug') return item.type === 'bug';
-        if (filterType === 'suggestion') return item.type === 'suggestion';
+        if (filterType === 'idea') return item.type === 'idea';
+        if (filterType === 'question') return item.type === 'question';
+        if (filterType === 'kudos') return item.type === 'kudos';
         return true;
     });
 
@@ -140,43 +144,53 @@
         <div class="flex items-center justify-between">
             <button
                 on:click={() => goto('/admin')}
-                class="flex items-center gap-2 text-sm font-medium text-slate-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 px-4 py-2 rounded-xl border border-white/5 active:scale-95"
+                class="flex items-center gap-2 text-sm font-black text-black hover:-translate-x-1 hover:-translate-y-1 transition-transform bg-white px-4 py-2 border-4 border-black shadow-neo-sm active:translate-x-0 active:translate-y-0 active:shadow-none uppercase tracking-widest"
             >
                 <ChevronLeft class="w-4 h-4" />
                 Volver a Admin
             </button>
-            <div class="flex items-center gap-2 p-1 bg-black/40 rounded-xl border border-white/5">
+            <div class="flex items-center gap-3 p-2 bg-slate-50 border-4 border-black overflow-x-auto custom-scrollbar shadow-neo-sm">
                 <button
                     on:click={() => (filterType = 'unread')}
-                    class="px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all {filterType ===
-                    'unread'
-                        ? 'bg-white text-black'
-                        : 'text-slate-400 hover:text-white hover:bg-white/5'}">No Leídos</button
-                >
+                    class="px-4 py-2 border-4 border-black text-xs font-black uppercase tracking-wider transition-all {filterType === 'unread'
+                        ? 'bg-black text-white shadow-none translate-x-[2px] translate-y-[2px]'
+                        : 'bg-white text-black hover:-translate-y-1 shadow-neo-sm'}">No Leídos</button>
+                
                 <button
                     on:click={() => (filterType = 'all')}
-                    class="px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all {filterType ===
-                    'all'
-                        ? 'bg-white text-black'
-                        : 'text-slate-400 hover:text-white hover:bg-white/5'}">Todos</button
-                >
-                <div class="w-px h-4 bg-white/10 mx-1"></div>
+                    class="px-4 py-2 border-4 border-black text-xs font-black uppercase tracking-wider transition-all {filterType === 'all'
+                        ? 'bg-black text-white shadow-none translate-x-[2px] translate-y-[2px]'
+                        : 'bg-white text-black hover:-translate-y-1 shadow-neo-sm'}">Todos</button>
+                
+                <div class="w-1 h-8 bg-black mx-1 shrink-0"></div>
+                
                 <button
                     on:click={() => (filterType = 'bug')}
-                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all {filterType ===
-                    'bug'
-                        ? 'bg-red-500/10 text-red-100 border border-red-500/20'
-                        : 'text-slate-400 hover:text-white hover:bg-white/5'}"
-                    ><Bug class="w-3 h-3" /> Bugs</button
-                >
+                    class="flex items-center gap-2 px-4 py-2 border-4 border-black text-xs font-black uppercase tracking-wider shrink-0 transition-all {filterType === 'bug'
+                        ? 'bg-red-500 text-white shadow-none translate-x-[2px] translate-y-[2px]'
+                        : 'bg-white text-black hover:-translate-y-1 shadow-neo-sm'}"
+                    ><Bug class="w-4 h-4" /> Bugs</button>
+                
                 <button
-                    on:click={() => (filterType = 'suggestion')}
-                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all {filterType ===
-                    'suggestion'
-                        ? 'bg-brand-500/10 text-brand-100 border border-brand-500/20'
-                        : 'text-slate-400 hover:text-white hover:bg-white/5'}"
-                    ><Lightbulb class="w-3 h-3" /> Sugerencias</button
-                >
+                    on:click={() => (filterType = 'idea')}
+                    class="flex items-center gap-2 px-4 py-2 border-4 border-black text-xs font-black uppercase tracking-wider shrink-0 transition-all {filterType === 'idea'
+                        ? 'bg-yellow-400 text-black shadow-none translate-x-[2px] translate-y-[2px]'
+                        : 'bg-white text-black hover:-translate-y-1 shadow-neo-sm'}"
+                    ><Lightbulb class="w-4 h-4" /> Ideas</button>
+                
+                <button
+                    on:click={() => (filterType = 'question')}
+                    class="flex items-center gap-2 px-4 py-2 border-4 border-black text-xs font-black uppercase tracking-wider shrink-0 transition-all {filterType === 'question'
+                        ? 'bg-blue-400 text-black shadow-none translate-x-[2px] translate-y-[2px]'
+                        : 'bg-white text-black hover:-translate-y-1 shadow-neo-sm'}"
+                    ><HelpCircle class="w-4 h-4" /> Dudas</button>
+                
+                <button
+                    on:click={() => (filterType = 'kudos')}
+                    class="flex items-center gap-2 px-4 py-2 border-4 border-black text-xs font-black uppercase tracking-wider shrink-0 transition-all {filterType === 'kudos'
+                        ? 'bg-green-400 text-black shadow-none translate-x-[2px] translate-y-[2px]'
+                        : 'bg-white text-black hover:-translate-y-1 shadow-neo-sm'}"
+                    ><Heart class="w-4 h-4" /> Apoyo</button>
             </div>
         </div>
 
@@ -187,82 +201,101 @@
             </div>
         {:else if filteredFeedback.length === 0}
             <div
-                class="bg-black/40 backdrop-blur-3xl border border-white/10 rounded-3xl p-16 text-center shadow-inner"
+                class="bg-white border-4 border-black p-16 text-center shadow-neo"
             >
                 <div
-                    class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/5 border border-white/10 mb-6 shadow-[0_0_15px_rgba(255,255,255,0.05)]"
+                    class="inline-flex items-center justify-center w-16 h-16 bg-slate-100 border-4 border-black mb-6 shadow-neo-sm transform -rotate-6"
                 >
-                    <MessageSquare class="w-8 h-8 text-slate-500" />
+                    <MessageSquare class="w-8 h-8 text-black" />
                 </div>
-                <h3 class="text-xl font-bold text-white mb-2 tracking-tight">Cero Reportes</h3>
-                <p class="text-slate-400">No hay elementos que coincidan con estos filtros.</p>
+                <h3 class="text-2xl font-black text-black mb-2 tracking-tight uppercase">CERO REPORTES</h3>
+                <p class="text-slate-600 font-bold">No hay elementos que coincidan con estos filtros.</p>
             </div>
         {:else}
             <div
-                class="bg-black/40 backdrop-blur-3xl border border-white/10 rounded-3xl shadow-2xl relative overflow-hidden"
+                class="bg-white border-4 border-black shadow-neo relative overflow-hidden"
             >
-                <div
-                    class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                ></div>
-
-                <div class="divide-y divide-white/5">
+                <div class="divide-y-4 divide-black">
                     {#each filteredFeedback as item (item.id)}
                         <div
-                            class="p-5 md:p-6 hover:bg-white/[0.02] transition-colors relative group"
+                            class="p-5 md:p-6 hover:bg-slate-50 transition-colors relative group"
                         >
-                            <!-- Indicador Read/Unread lateral -->
-                            {#if item.status === 'unread'}
-                                <div
-                                    class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500 shadow-[0_0_10px_rgba(var(--color-brand-500),0.8)]"
-                                ></div>
-                            {/if}
-
                             <div
-                                class="flex flex-col md:flex-row gap-4 md:items-start justify-between"
+                                class="flex flex-col md:flex-row gap-6 md:items-start justify-between"
                             >
                                 <div class="flex items-start gap-4">
                                     <!-- Icono -->
                                     <div class="shrink-0 mt-1">
                                         {#if item.type === 'bug'}
                                             <div
-                                                class="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center shadow-inner"
+                                                class="w-12 h-12 bg-red-500 border-4 border-black text-white flex items-center justify-center shadow-neo-sm hover:-translate-y-1 hover:-translate-x-1 transition-transform"
                                             >
-                                                <Bug class="w-5 h-5" />
+                                                <Bug class="w-6 h-6" />
+                                            </div>
+                                        {:else if item.type === 'idea'}
+                                            <div
+                                                class="w-12 h-12 bg-yellow-400 border-4 border-black text-black flex items-center justify-center shadow-neo-sm hover:-translate-y-1 hover:-translate-x-1 transition-transform"
+                                            >
+                                                <Lightbulb class="w-6 h-6" />
+                                            </div>
+                                        {:else if item.type === 'question'}
+                                            <div
+                                                class="w-12 h-12 bg-blue-400 border-4 border-black text-black flex items-center justify-center shadow-neo-sm hover:-translate-y-1 hover:-translate-x-1 transition-transform"
+                                            >
+                                                <HelpCircle class="w-6 h-6" />
+                                            </div>
+                                        {:else if item.type === 'kudos'}
+                                            <div
+                                                class="w-12 h-12 bg-green-400 border-4 border-black text-black flex items-center justify-center shadow-neo-sm hover:-translate-y-1 hover:-translate-x-1 transition-transform"
+                                            >
+                                                <Heart class="w-6 h-6" />
                                             </div>
                                         {:else}
                                             <div
-                                                class="w-10 h-10 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-400 flex items-center justify-center shadow-inner"
+                                                class="w-12 h-12 bg-primary border-4 border-black text-white flex items-center justify-center shadow-neo-sm hover:-translate-y-1 hover:-translate-x-1 transition-transform"
                                             >
-                                                <Lightbulb class="w-5 h-5" />
+                                                <MessageSquare class="w-6 h-6" />
                                             </div>
                                         {/if}
                                     </div>
 
                                     <!-- Contenido -->
                                     <div class="min-w-0">
-                                        <div class="flex items-center gap-2 mb-1">
+                                        <div class="flex items-center gap-2 mb-2 flex-wrap">
+                                            {#if item.status === 'unread'}
+                                            <span class="inline-block px-2 py-0.5 bg-black text-white text-[10px] font-black uppercase tracking-widest mr-2">
+                                                NUEVO
+                                            </span>
+                                            {/if}
                                             <span
-                                                class="text-sm font-bold text-white truncate max-w-[200px]"
+                                                class="text-lg font-black text-black truncate max-w-[200px]"
                                                 >{item.userName}</span
                                             >
                                             <span
-                                                class="text-xs text-slate-500 truncate"
+                                                class="text-xs text-slate-500 font-bold truncate"
                                                 title={item.userEmail}>({item.userEmail})</span
                                             >
                                             <span
-                                                class="px-2 py-0.5 rounded text-[9px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 uppercase tracking-widest"
+                                                class="px-2 py-0.5 text-[9px] font-black bg-primary text-white border-2 border-black uppercase tracking-widest shrink-0"
                                                 ><Crown
-                                                    class="w-2.5 h-2.5 inline align-text-bottom mr-0.5"
+                                                    class="w-3 h-3 inline align-text-bottom mr-1"
                                                 /> PRO</span
                                             >
+                                            {#if item.type === 'bug' && item.priority}
+                                                <span
+                                                    class="px-2 py-0.5 text-[9px] font-black uppercase tracking-widest shrink-0 border-2 border-black {item.priority === 'high' ? 'bg-red-500 text-white' : item.priority === 'medium' ? 'bg-yellow-400 text-black' : 'bg-blue-400 text-black'}"
+                                                >
+                                                    {item.priority === 'high' ? 'CRÍTICO' : item.priority === 'medium' ? 'PRIO MEDIA' : 'BAJA'}
+                                                </span>
+                                            {/if}
                                             <span
-                                                class="text-xs text-slate-600 ml-2 whitespace-nowrap"
+                                                class="text-[10px] uppercase font-black text-slate-400 ml-2 whitespace-nowrap"
                                                 >{getRelativeTime(item.createdAt)}</span
                                             >
                                         </div>
 
                                         <div
-                                            class="bg-black/30 border border-white/5 rounded-xl p-4 mt-3 text-sm text-slate-300 whitespace-pre-wrap leading-relaxed"
+                                            class="bg-slate-100 border-4 border-black p-4 mt-3 text-sm text-black font-medium whitespace-pre-wrap leading-relaxed shadow-neo-sm"
                                         >
                                             {item.message}
                                         </div>
@@ -271,28 +304,28 @@
 
                                 <!-- Acciones -->
                                 <div
-                                    class="flex items-center gap-2 pt-2 md:pt-0 shrink-0 self-end md:self-auto opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity"
+                                    class="flex items-center gap-3 pt-2 md:pt-0 shrink-0 self-end md:self-auto opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
                                     {#if item.status === 'unread'}
                                         <button
                                             on:click={() => markAsRead(item.id)}
-                                            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider bg-brand-500/10 text-brand-400 hover:bg-brand-500/20 transition-all border border-brand-500/20 active:scale-95"
+                                            class="flex items-center gap-2 px-3 py-2 bg-primary border-4 border-black text-white text-[11px] font-black uppercase tracking-wider shadow-neo-sm hover:-translate-y-1 hover:-translate-x-1 transition-transform active:translate-x-0 active:translate-y-0 active:shadow-none"
                                         >
-                                            <CheckCircle2 class="w-3.5 h-3.5" /> Marcar Leído
+                                            <CheckCircle2 class="w-4 h-4" /> Marcar Leído
                                         </button>
                                     {:else}
                                         <span
-                                            class="px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider bg-white/5 text-slate-500 border border-transparent"
+                                            class="px-3 py-2 bg-slate-200 border-4 border-black text-slate-500 text-[11px] font-black uppercase tracking-wider"
                                         >
                                             Leído
                                         </span>
                                     {/if}
                                     <button
                                         on:click={() => deleteFeedback(item.id)}
-                                        class="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors border border-transparent hover:border-red-500/20"
+                                        class="p-2 bg-red-500 border-4 border-black text-white shadow-neo-sm hover:-translate-y-1 hover:-translate-x-1 transition-transform active:translate-x-0 active:translate-y-0 active:shadow-none"
                                         title="Eliminar permanentemente"
                                     >
-                                        <Trash2 class="w-4 h-4" />
+                                        <Trash2 class="w-5 h-5" />
                                     </button>
                                 </div>
                             </div>

@@ -10,6 +10,7 @@
     import { doc, onSnapshot } from 'firebase/firestore';
     import { db, auth } from '$lib/firebase';
     import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+    import { trackVisit } from '$lib/utils/visitorTracker';
 
     async function handleAdminLogin() {
         const provider = new GoogleAuthProvider();
@@ -54,6 +55,9 @@
             }
         });
 
+        // Track visitor
+        trackVisit();
+
         return () => {
             unsubscribeTheme();
         };
@@ -63,7 +67,10 @@
         if (unsubscribeSettings) unsubscribeSettings();
     });
 
-    $: isMaintenance = globalSettings?.maintenanceMode && !$authStore.user?.isAdmin;
+    $: isMaintenance = globalSettings?.maintenanceMode && 
+                       !$authStore.user?.isAdmin && 
+                       !$page.url.pathname.startsWith('/widgets') &&
+                       !$page.url.pathname.startsWith('/dashboard/streamers');
     import Sidebar from '$lib/components/layout/Sidebar.svelte';
     import Header from '$lib/components/layout/Header.svelte';
     import Toast from '$lib/components/ui/Toast.svelte';
@@ -132,7 +139,7 @@
 
 {#if $authStore.loading}
     <div
-        class="h-screen w-full flex items-center justify-center bg-background-light dark:bg-background-dark"
+        class="min-h-[100dvh] w-full flex items-center justify-center bg-background-light dark:bg-background-dark"
     >
         <div class="flex flex-col items-center gap-6">
             <div
@@ -147,7 +154,7 @@
     </div>
 {:else if isMaintenance}
     <div
-        class="h-screen w-full flex flex-col items-center justify-center bg-background-light dark:bg-background-dark p-6"
+        class="min-h-[100dvh] w-full flex flex-col items-center justify-center bg-background-light dark:bg-background-dark px-4 py-6 md:p-6"
     >
         <div
             class="max-w-lg w-full bg-white dark:bg-slate-900 border-4 border-black p-10 shadow-neo text-center space-y-8"
@@ -177,7 +184,7 @@
     <Toast />
 {:else if ['/', '/landing', '/pricing', '/cookies'].includes($page.url.pathname)}
     {@const isLanding = $page.url.pathname === '/landing'}
-    <div class="flex flex-col min-h-screen w-full bg-background-light dark:bg-background-dark">
+    <div class="flex flex-col min-h-[100dvh] w-full bg-background-light dark:bg-background-dark">
         {#if !isLanding && globalSettings?.globalMessageActive && globalSettings?.globalMessageText && globalSettings.globalMessageText !== dismissedBannerText}
             {@const bannerColor = globalSettings.globalMessageType === 'info' ? 'bg-blue-500 text-white border-blue-700' : globalSettings.globalMessageType === 'warning' ? 'bg-yellow-300 text-black border-yellow-500' : globalSettings.globalMessageType === 'error' ? 'bg-red-500 text-white border-red-700' : globalSettings.globalMessageType === 'success' ? 'bg-green-400 text-black border-green-600' : 'bg-blue-500 text-white border-blue-700'}
             <div
@@ -206,10 +213,10 @@
     <slot />
 {:else}
     <div
-        class="flex h-screen w-full bg-background-light dark:bg-background-dark overflow-hidden text-black dark:text-white selection:bg-primary/30"
+        class="flex h-[100dvh] w-full bg-background-light dark:bg-background-dark overflow-hidden text-black dark:text-white selection:bg-primary/30"
     >
         <!-- Sidebar and Content -->
-        <div class="flex h-screen w-full relative z-10">
+        <div class="flex h-[100dvh] w-full relative z-10">
             <Sidebar />
 
             <div
@@ -237,7 +244,7 @@
                 <Header />
 
                 <main
-                    class="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar bg-background-light dark:bg-background-dark/50"
+                    class="flex-1 overflow-y-auto px-4 py-6 md:p-8 custom-scrollbar bg-background-light dark:bg-background-dark/50"
                 >
                     <div class="max-w-7xl mx-auto">
                         <slot />

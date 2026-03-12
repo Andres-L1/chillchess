@@ -85,7 +85,7 @@
 
 {#if !loading}
     <div 
-        class="w-full h-full flex items-center justify-center p-8 bg-transparent overflow-hidden"
+        class="w-full h-full flex items-center justify-center p-8 bg-transparent overflow-hidden relative"
     >
         <div 
             in:fly={{ y: 50, duration: 600 }}
@@ -129,6 +129,8 @@
                     </div>
                 </div>
             {/if}
+
+
         </div>
     </div>
 {/if}

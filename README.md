@@ -1,6 +1,6 @@
 # ChillChess ♟️
 
-**Música sin interrupciones para tus sesiones de concentración y streaming.**
+Música sin interrupciones para tus sesiones de concentración y streaming.
 
 🔗 **[chillchess.app](https://chillchess.app)**
 

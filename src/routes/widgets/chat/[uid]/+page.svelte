@@ -215,8 +215,10 @@
 </script>
 
 <div
-    class="h-screen w-screen bg-transparent overflow-hidden flex flex-col justify-end p-6 font-poppins"
+    class="h-screen w-screen bg-transparent overflow-hidden flex flex-col justify-end p-6 font-poppins relative"
 >
+
+
     <div bind:this={container} class="flex flex-col gap-4 overflow-y-auto scrollbar-hide pr-2">
         {#each messages as msg (msg.id)}
             <div
@@ -264,24 +266,6 @@
                 </p>
             </div>
         {/each}
-
-        {#if messages.length === 0}
-            <div
-                class="bg-primary border-4 border-black p-4 shadow-neo text-center animate-pulse"
-                style="border-color: {settings.borderColor}; box-shadow: 6px 6px 0px 0px {settings.shadowColor};"
-            >
-                <p class="font-black uppercase text-xs">Esperando mensajes...</p>
-                {#if !settings.channel}
-                    <p class="text-[10px] font-bold mt-1 text-black/60">
-                        Configura tu canal en el dashboard
-                    </p>
-                {:else}
-                    <p class="text-[10px] font-bold mt-1 text-black/60">
-                        Canal: {settings.channel}
-                    </p>
-                {/if}
-            </div>
-        {/if}
     </div>
 </div>
 
@@ -297,9 +281,5 @@
     .scrollbar-hide {
         -ms-overflow-style: none;
         scrollbar-width: none;
-    }
-
-    .shadow-neo {
-        box-shadow: 6px 6px 0px 0px #000;
     }
 </style>

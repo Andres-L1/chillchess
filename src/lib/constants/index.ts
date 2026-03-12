@@ -11,7 +11,7 @@
 
 export const APP_NAME = 'ChillChess';
 export const APP_DESCRIPTION = 'Tu navaja suiza digital para freelancers';
-export const APP_VERSION = '4.0.0';
+export const APP_VERSION = '0.9.3';
 export const APP_URL = 'https://chillchess.app';
 
 // ============================================================================

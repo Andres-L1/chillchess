@@ -5,67 +5,96 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.6.0] - 2026-01-03 "The Artist & Public Profile Update"
+## [0.9.3] - 2026-03-11 "Stream Intro Editor y Despliegue de Producción"
 
-Esta actualización transforma la experiencia pública de la plataforma, introduciendo perfiles de artista completamente dinámicos, personalizables y visualmente impactantes, además de reforzar la infraestructura de gestión de música.
+Corrección crítica del despliegue en producción y mejoras en la visualización de widgets para OBS.
 
-### 🌟 New Features
-- **Public Artist Profiles:** Páginas de artista públicas (`/artist/[id]`) totalmente rediseñadas con estética premium, banners inmersivos, y reproducción directa.
-- **Smart Profile Routing:** Sistema inteligente que prioriza perfiles verificados y slugs personalizados (`/artist/julyactv`) sobre IDs genéricos.
-- **Dynamic Player Integration:** Integración fluida entre la página del artista y el reproductor global (BottomPlayer), permitiendo "Reproducir Mix" o álbumes completos sin interrupciones.
-- **Mobile Player overhaul:** Rediseño completo de la experiencia móvil del reproductor, solucionando superposiciones con *Dynamic Island* y mejorando la ergonomía.
-- **Tracklist Toggle:** Nueva funcionalidad para ver/ocultar la lista completa de canciones en el perfil del artista.
-- **Streamer Friendly Mode:** Banner informativo claro para streamers sobre el uso seguro de la música (Copyright Free).
+### Herramientas Streamer
+- Stream Intro Editor: Nuevo panel completo para diseñar la pantalla de espera de tu stream (Countdown, Redes Sociales, Logo, Efectos visuales).
+- Widgets Independientes: Todos los widgets públicos ahora están 100% libres de marcas de agua para integrarse de forma limpia en OBS.
+- Protección Offline: Los widgets y el enlace del editor seguirán funcionando ininterrumpidamente incluso si la web principal se encuentra en Modo Mantenimiento.
+- Rotación de Plataformas: Nueva configuración para ajustar el tiempo exacto de transición entre tus perfiles sociales en el Overlay.
+- Logo en OBS: Solucionado problema de visibilidad del logo y sincronización del guardado al copiar la URL.
+- Legibilidad: Aumentado el tamaño del texto "COMENZAMOS EN" para mejor visibilidad en stream.
 
-### 🛠 Improvements
-- **Cloudflare R2 Integration:** Implementación híbrida inteligente: Archivos >50MB van automáticamente a R2, mientras que los pequeños se quedan en Firebase Storage.
-- **Profile Editor:** Mejoras en la lógica de guardado para evitar la creación de perfiles "fantasma" duplicados.
-- **Optimized Assets:** Carga diferida y optimización de imágenes en las tablas de canciones y grids de álbumes.
-- **Visual Polish:** Adopción de botones con gradientes "Glow" (Naranja/Rojo) y estilos glassmorphism refinados en toda la interfaz pública.
+### Correcciones
+- Despliegue: Sincronización global de versiones (v0.9.3) y limpieza de caché de build.
+- CSP: Políticas de seguridad relajadas para permitir la carga de imágenes externas en widgets.
 
-### 🐛 Bug Fixes
-- **Duplicate URLs:** Resuelto el problema que generaba múltiples rutas para un mismo artista.
-- **Album Cover Sync:** Corregido fallo donde las portadas no se pasaban correctamente al reproductor al usar "Reproducir Todo".
-- **Mobile Safe Areas:** Ajustado el padding superior en móviles para evitar cortes de contenido.
-- **TypeScript Errors:** Solucionados errores de tipado estricto en stores y componentes principales.
+## [0.9.2] - 2026-03-11 "Stream Intro Editor y Widgets Independientes"
 
----
+## [0.9.1] - 2026-03-10 "Experiencia Móvil y Feedback Neo-Brutalista"
 
-## [0.5.0] - 2025-12-31 "The Foundation Update"
+Mejora integral de la experiencia en dispositivos móviles y rediseño completo del sistema de feedback.
 
-Esta actualización marca un antes y un después en la arquitectura del proyecto, estableciendo las bases sólidas necesarias para escalar hacia la versión 1.0. Se ha priorizado la calidad del código, la estabilidad de las herramientas de administración y la experiencia de desarrollo.
+### Diseño y Estilo
+- Feedback Neo-Brutalista: Rediseño completo de las páginas de sugerencias (usuario y admin) con el nuevo estilo visual.
+- Responsive Perfecto: Ajustes globales de padding y alturas dinámicas (`100dvh`) para una experiencia de app nativa.
+- Menú Móvil: Mejoras en el gesto de deslizar para cerrar y posicionamiento de la barra superior con efecto cristal.
+- Tablas Adaptables: Scroll horizontal personalizado en tablas de datos para no romper el diseño en pantallas pequeñas.
 
-### 🚀 Added
-- **Centralized Logging System:** Nuevo logger robusto (`debug`, `info`, `warn`, `error`) con soporte para contexto y niveles, preparado para integración con Sentry.
-- **Shared Types Library:** Centralización de todas las interfaces TypeScript (`User`, `Proposal`, `BugReport`, etc.) en `src/lib/types` para eliminar duplicidad.
-- **Utility Belt:** Nuevas librerías de utilidades:
-  - `validators.ts`: Validación reutilizable para emails, URLs, archivos, etc.
-  - `formatters.ts`: Formateo consistente de fechas, números, duraciones y cadenas.
-  - `constants/index.ts`: Centralización de strings mágicos, límites y configuraciones.
-- **Testing Infrastructure:** Implementación completa de **Vitest** + **Testing Library**.
-- **Dev Tooling:** Configuración de **Husky** (hooks de git), **lint-staged**, **Commitlint** y **Prettier** para asegurar calidad de código automática.
-- **Performance Monitoring:** Sistema de tracking de **Web Vitals** (LCP, FID, CLS).
-- **Admin Mobile Drawer:** Nuevo menú lateral responsivo para el panel de administración, optimizado para móviles.
+### Herramientas
+- Nuevo Sistema de Feedback: Categorización de mensajes (Idea, Error, Duda, Kudos) y selector de prioridad para bugs.
+- Panel de Admin Sincronizado: Filtros actualizados y visualización de prioridades directamente en el gestor de reportes.
 
-### ♻️ Changed
-- **Admin Panel UI Refresh:** Rediseño completo de `src/routes/admin` adoptando estética **Glassmorphism** real (backdrop-blur, bordes traslúcidos) y mejorando la consistencia visual.
-- **Admin Stats Engine:** Refactorización de la carga de estadísticas usando `countFromServer` de Firestore para optimizar lecturas y rendimiento masivo.
-- **Codebase Refactor:** Actualización de múltiples componentes (`UsersTab`, `Bugs page`) para usar las nuevas utilidades y tipos compartidos.
-- **Netlify Deploy Fix:** Script `prepare` actualizado para ser tolerante a entornos de producción sin devDependencies.
+## [0.9.0] - 2026-03-10 "La Gran Evolución Neo-Brutalista"
 
-### 🐛 Fixed
-- **Admin Scroll Issues:** Eliminado el desplazamiento horizontal no deseado en dispositivos móviles.
-- **Accessibility (a11y):** Añadido soporte de teclado y roles ARIA a elementos interactivos clave en el panel de administración.
-- **Dropdowns Legacy:** Reemplazados selects nativos por menús flotantes personalizados en la página de Bugs.
-- **Vitest Config:** Resueltos conflictos de dependencias y configuración de mocks (`IntersectionObserver`) para los tests unitarios.
+Esta actualización completa la nueva identidad visual de la plataforma y estrena el Centro para Streamers. Todo está listo para el gran lanzamiento.
 
-### 📚 Documentation
-- **Architecture Guide:** Nueva guía exhaustiva `ARCHITECTURE.md` detallando la estructura y decisiones técnicas.
-- **Contribution Guide:** Nueva guía `CONTRIBUTING.md` para estandarizar el flujo de trabajo de nuevos desarrolladores.
+### Diseño y Estilo
+- Nueva Identidad Visual: Bordes marcados, colores vibrantes y sombras potentes en todas las herramientas.
+- Barras de Navegación: Diseño personalizado para el scroll en toda la web.
+- Selector de Modos: Cambia fácilmente entre herramientas personales y utilidades para streamers desde el menú lateral.
 
----
+### Herramientas Streamer
+- Panel Central: Nueva vista con tarjetas interactivas para gestionar todos tus widgets de un vistazo.
+- Configuración Mejorada: Ajustes más rápidos para el Chat, QR Dinámico, Redes Sociales y Cuenta Atrás.
+- Espacio Limpio: Eliminamos menús innecesarios para que te centres en configurar tus herramientas a pantalla completa.
 
-## [0.4.0] - 2025-12-25 "The Community Update"
-- Sistema completo de reporte de bugs (/bugs).
-- Sistema de votación de propuestas.
-- Integración inicial de Firebase Auth y Firestore Security Rules.
+### Seguridad y Control
+- Sistema de Avisos: Nuevo panel de noticias con colores inteligentes y vista previa para que no te pierdas nada importante.
+- Protección Total: Reforzamos la seguridad en los accesos compartidos y el panel de control.
+- Bongo Cat: Ahora los usuarios autorizados pueden descargar la versión de escritorio de ChillChess Bongo Cat directamente desde la plataforma.
+- Corrección de Datos: Mejoras en el sistema para evitar errores al mostrar perfiles de usuario.
+
+## [0.8.0] - 2026-02-15 "Productividad y Organización"
+
+Lanzamiento de las primeras herramientas de gestión interna con el nuevo estilo visual.
+
+### Herramientas
+- Gestión Visual: Tablero interactivo para organizar tareas y pendientes.
+- Facturación Rápida: Generador de facturas profesional con descarga inmediata.
+- Buzón de Ideas: Mejoras en el sistema para enviar sugerencias y reportar fallos de forma sencilla.
+
+## [0.6.0] - 2026-01-03 "Perfiles Públicos y Música"
+
+Esta versión se centró en cómo el mundo ve a los artistas, con perfiles dinámicos y un reproductor de música totalmente renovado.
+
+### Experiencia de Artista
+- Perfiles de Impacto: Páginas públicas diseñadas para destacar el talento con banners y listas de reproducción.
+- Reproductor Móvil: Rediseño total para que escuchar música en el móvil sea cómodo y fluido.
+- Enlaces Inteligentes: Acceso directo a perfiles verificados mediante nombres personalizados.
+- Modo Streamer: Aviso visual para creadores de contenido sobre el uso de música sin copyright.
+
+### Mejoras Visuales
+- Estilo Glassmorphism: Efectos de cristal y desenfoque elegantes en las secciones públicas.
+- Galería de Álbumes: Carga más rápida de imágenes y portadas para una navegación sin esperas.
+
+## [0.5.0] - 2025-12-31 "Cimientos y Estabilidad"
+
+Una actualización interna masiva para asegurar que la plataforma sea rápida, segura y esté lista para crecer.
+
+### Sistema Interno
+- Estabilidad Total: Reforzamos los pilares del código para evitar errores inesperados.
+- Velocidad de Carga: Optimizaciones para que la web responda al instante en cualquier dispositivo.
+- Panel de Control: Menú lateral adaptado para móviles, permitiendo gestionar la web desde cualquier lugar.
+- Calidad Garantizada: Implementamos sistemas automáticos que revisan que cada cambio funcione perfectamente.
+
+### Documentación
+- Guías de Uso: Nuevos manuales para entender cómo funciona la tecnología de la plataforma por dentro.
+
+## [0.4.0] - 2025-12-25 "Comunidad"
+
+- Sistema de reporte de fallos para mejorar juntos la plataforma.
+- Sistema de votación para que los usuarios elijan las próximas funciones.
+- Inicio de sesión seguro con protección de datos mejorada.

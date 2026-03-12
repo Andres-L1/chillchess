@@ -94,14 +94,14 @@
 
 {#if !loading && settings.items.length > 0}
     <div 
-        class="w-full h-full flex items-center justify-center p-4 overflow-hidden"
+        class="w-full h-full flex flex-col items-center justify-center p-4 overflow-hidden relative"
         style="background: transparent;"
     >
         {#key currentIndex}
             <div 
                 in:fly={{ x: -100, duration: 600 }}
                 out:fade={{ duration: 200 }}
-                class="flex items-center gap-6 p-8 border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] relative min-w-[350px]"
+                class="flex items-center gap-6 p-8 border-4 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] relative min-w-[350px] max-w-full"
                 style="background-color: {settings.bgColor}; border-color: {settings.borderColor}; color: {settings.fontColor};"
             >
                 <!-- Platform Icon Box -->
@@ -117,11 +117,11 @@
                 </div>
 
                 <!-- Text Content -->
-                <div class="flex flex-col">
+                <div class="flex flex-col min-w-0 flex-1">
                     <span class="text-xs font-black uppercase tracking-[0.2em] opacity-60">
                         {platformInfo?.label || 'SOCIAL'}
                     </span>
-                    <span class="text-4xl font-black uppercase tracking-tighter leading-none truncate max-w-[300px] mt-1">
+                    <span class="text-4xl font-black uppercase tracking-tighter leading-none truncate mt-1">
                         {currentItem?.handle || ''}
                     </span>
                 </div>
@@ -131,6 +131,8 @@
                     class="absolute -top-2 -right-2 w-4 h-4 border-2 border-black"
                     style="background-color: {settings.accentColor};"
                 ></div>
+
+
             </div>
         {/key}
     </div>
